@@ -231,6 +231,29 @@ const (
 	TokenWhitespace
 	TokenStringLiteral
 	TokenEOF
+
+	TokenIf
+	TokenElse
+	TokenElseIf
+	TokenFor
+	TokenForeach
+	TokenWhile
+	TokenDo
+	TokenSwitch
+	TokenCase
+	TokenDefault
+	TokenBreak
+	TokenContinue
+	TokenThrow
+	TokenTry
+	TokenCatch
+	TokenFinally
+	TokenEndIf
+	TokenEndFor
+	TokenEndForeach
+	TokenEndWhile
+	TokenEndSwitch
+
 	TokenUnknown
 )
 
@@ -629,6 +652,49 @@ func identifierToKind(word string) TokenKind {
 		return TokenReturn
 	case "new":
 		return TokenNew
+	case "if":
+		return TokenIf
+	case "else":
+		return TokenElse
+	case "elseif":
+		return TokenElseIf
+	case "for":
+		return TokenFor
+	case "foreach":
+		return TokenForeach
+	case "while":
+		return TokenWhile
+	case "do":
+		return TokenDo
+	case "switch":
+		return TokenSwitch
+	case "case":
+		return TokenCase
+	case "default":
+		return TokenDefault
+	case "break":
+		return TokenBreak
+	case "continue":
+		return TokenContinue
+	case "throw":
+		return TokenThrow
+	case "try":
+		return TokenTry
+	case "catch":
+		return TokenCatch
+	case "finally":
+		return TokenFinally
+	case "endif":
+		return TokenEndIf
+	case "endfor":
+		return TokenEndFor
+	case "endforeach":
+		return TokenEndForeach
+	case "endwhile":
+		return TokenEndWhile
+	case "endswitch":
+		return TokenEndSwitch
+
 	default:
 		return TokenIdentifier
 	}
@@ -1259,10 +1325,13 @@ func (p *structParser) parseClassBody() (methods []MethodDef, props []PropertyDe
 
 		case TokenVariable:
 			prop := PropertyDef{
-				Visibility: visibility, SetVisibility: setVisibility,
-				IsStatic: isStatic, IsReadonly: isReadonly,
-				DocComment: docComment, Line: p.peek().Line,
-				Name: p.peek().Value,
+				Visibility:    visibility,
+				SetVisibility: setVisibility,
+				IsStatic:      isStatic,
+				IsReadonly:    isReadonly,
+				DocComment:    docComment,
+				Line:          p.peek().Line,
+				Name:          p.peek().Value,
 			}
 			p.advance()
 			if p.peek().Kind == TokenEquals {

@@ -235,6 +235,12 @@ func (p *Provider) checkDeprecations(source string) []protocol.Diagnostic {
 	for i, line := range lines {
 		for _, dep := range patterns {
 			if col := strings.Index(line, dep[0]); col >= 0 {
+				if col > 0 {
+					cc := line[col-1]
+					if (cc >= 'a' && cc <= 'z') || (cc >= 'A' && cc <= 'Z') || (cc >= '0' && cc <= '9') || cc == '_' {
+						continue
+					}
+				}
 				diags = append(diags, protocol.Diagnostic{
 					Range:    protocol.Range{Start: protocol.Position{Line: i, Character: col}, End: protocol.Position{Line: i, Character: col + len(dep[0]) - 1}},
 					Severity: protocol.DiagnosticSeverityWarning, Source: "tusk-php", Message: dep[1], Code: "deprecated",
