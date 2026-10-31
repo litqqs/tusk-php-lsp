@@ -6,6 +6,7 @@ import (
 
 	"github.com/Tusk-PHP/lsp/internal/config"
 	"github.com/Tusk-PHP/lsp/internal/container"
+	"github.com/Tusk-PHP/lsp/internal/coverage"
 	"github.com/Tusk-PHP/lsp/internal/models"
 	"github.com/Tusk-PHP/lsp/internal/parser"
 	"github.com/Tusk-PHP/lsp/internal/phparray"
@@ -23,6 +24,7 @@ type Provider struct {
 	framework     string
 	arrayResolver *models.FrameworkArrayResolver
 	cfg           *config.Config
+	coverage      *coverage.Store
 	// GenericExprResolver resolves the type of a full expression preserving generics.
 	// E.g., "Category::query()->get()" → Collection<int, Category>.
 	// Set by the LSP server after initialization by wiring to the completion provider.
@@ -34,6 +36,11 @@ func NewProvider(index *symbols.Index, ca *container.ContainerAnalyzer, framewor
 	p.resolver.ChainResolver = p.resolveExpressionType
 	p.resolver.TypedChainResolver = p.resolveExpressionTypeTyped
 	return p
+}
+
+// SetCoverage wires the workspace's test coverage reports into hover cards.
+func (p *Provider) SetCoverage(store *coverage.Store) {
+	p.coverage = store
 }
 
 // SetTypedChainResolver wires the generic-aware chain resolver for variable
@@ -220,7 +227,14 @@ func (p *Provider) GetHover(uri, source string, pos protocol.Position) *protocol
 	if idx := strings.LastIndex(word, "\\"); idx >= 0 {
 		lookupName = word[idx+1:]
 	}
-	syms := p.index.LookupByName(lookupName)
+	// A bare word can't reach another class's members, so a method declaration
+	// here must never show a same-named method from elsewhere.
+	var syms []*symbols.Symbol
+	for _, s := range p.index.LookupByName(lookupName) {
+		if s.ParentFQN == "" || s.ParentFQN == ctx.EnclosingFQN {
+			syms = append(syms, s)
+		}
+	}
 	if len(syms) == 0 {
 		return nil
 	}
@@ -419,32 +433,17 @@ func (p *Provider) hoverVariable(lines []string, pos protocol.Position, file *pa
 				}
 			}
 		}
-		displayShort := typeDisplay
-		if !resolvedType.IsGeneric() && resolvedType.Shape == "" {
-			displayShort = shortName(typeName)
-		}
-		sb.WriteString(fmt.Sprintf("\n```php\n%s %s\n```\n", displayShort, varName))
+		sb.WriteString("\n" + phpFence(shortTypes(typeDisplay)+" "+varName))
 		p.appendContainerBinding(&sb, typeName)
 		return &protocol.Hover{Contents: protocol.MarkupContent{Kind: "markdown", Value: sb.String()}}
 	}
 
-	// Fallback: search all method params in file
-	for _, cls := range file.Classes {
-		for _, m := range cls.Methods {
-			for _, param := range m.Params {
-				if param.Name == varName {
-					t := param.Type.Name
-					if t == "" {
-						t = "mixed"
-					}
-					var sb strings.Builder
-					sb.WriteString(fmt.Sprintf("**%s**\n", varName))
-					sb.WriteString(fmt.Sprintf("\n```php\n%s %s\n```\n", t, varName))
-					p.appendContainerBinding(&sb, t)
-					return &protocol.Hover{Contents: protocol.MarkupContent{Kind: "markdown", Value: sb.String()}}
-				}
-			}
-		}
+	// A variable that exists but whose type can't be worked out.
+	if p.resolver.IsLocalVariable(varName, lines, pos) {
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("**%s**\n", varName))
+		sb.WriteString("\n" + phpFence("mixed "+varName))
+		return &protocol.Hover{Contents: protocol.MarkupContent{Kind: "markdown", Value: sb.String()}}
 	}
 	return nil
 }
@@ -455,16 +454,14 @@ func (p *Provider) formatHover(sym *symbols.Symbol) string {
 	// === 1. Header: bold FQN ===
 	sb.WriteString("**" + sym.FQN + "**\n")
 
-	// === 2. Summary (from docblock, shown right after header) ===
+	// === 2. Code block: PHP declaration ===
+	sb.WriteString("\n" + phpFence(p.formatHoverDeclaration(sym)))
+
+	// === 3. Summary (from docblock) ===
 	doc := p.getEffectiveDocBlock(sym)
 	if doc != nil && doc.Summary != "" {
 		sb.WriteString("\n" + doc.Summary + "\n")
 	}
-
-	// === 3. Code block: PHP declaration ===
-	sb.WriteString("\n```php\n")
-	sb.WriteString(p.formatHoverDeclaration(sym))
-	sb.WriteString("\n```\n")
 
 	// === 4. Context line (parent class, override info) ===
 	sb.WriteString(p.formatHoverContext(sym))
@@ -472,13 +469,16 @@ func (p *Provider) formatHover(sym *symbols.Symbol) string {
 	// === 5. Extended docblock details ===
 	sb.WriteString(p.formatDocBlockDetails(doc))
 
-	// === 6. Container binding ===
+	// === 6. Test coverage ===
+	sb.WriteString(p.formatCoverage(sym))
+
+	// === 7. Container binding ===
 	switch sym.Kind {
 	case symbols.KindInterface, symbols.KindClass:
 		p.appendContainerBinding(&sb, sym.FQN)
 	}
 
-	// === 7. PHP Manual link ===
+	// === 8. PHP Manual link ===
 	// Owner is the *declaring* class — that's how php.net documents methods,
 	// properties, and class constants. Inherited members link to the parent
 	// (e.g. ReflectionMethod::getParameters → reflectionfunctionabstract.*).
@@ -537,8 +537,7 @@ func (p *Provider) appendMethodOrigin(sb *strings.Builder, sym *symbols.Symbol) 
 			}
 		}
 	}
-	// Default: show defined in
-	sb.WriteString(fmt.Sprintf("\nDefined in `%s`\n", sym.ParentFQN))
+	// No origin to report: the header already names the declaring class.
 }
 
 // getEffectiveDocBlock returns the docblock for a symbol, falling back to parent/interface docs.

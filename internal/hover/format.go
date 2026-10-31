@@ -2,12 +2,33 @@ package hover
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Tusk-PHP/lsp/internal/parser"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 	"github.com/Tusk-PHP/lsp/internal/types"
 )
+
+// maxSignatureWidth is the longest signature kept on one line in a hover card.
+const maxSignatureWidth = 72
+
+// qualifiedName matches the namespace part of a qualified class name in a type.
+var qualifiedName = regexp.MustCompile(`\\?(?:[\p{L}_][\p{L}\p{N}_]*\\)+`)
+
+// phpFence wraps code in a PHP code block. Editors highlight the php language
+// with grammars that treat everything before an opening tag as plain text, so
+// the code block needs one to get colours.
+func phpFence(code string) string {
+	return "```php\n<?php\n" + code + "\n```\n"
+}
+
+// shortTypes removes namespaces from a rendered type, so signatures stay
+// readable: App\Models\User|null becomes User|null.
+func shortTypes(rendered string) string {
+	return qualifiedName.ReplaceAllString(rendered, "")
+}
 
 func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 	var sb strings.Builder
@@ -53,15 +74,11 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		if sym.IsStatic {
 			sb.WriteString(" static")
 		}
-		sb.WriteString(fmt.Sprintf(" function %s%s", sym.Name, fmtParams(sym.Params)))
-		if sym.ReturnType != "" {
-			sb.WriteString(": " + types.RenderTypeExpr(sym.ReturnType))
-		}
+		sb.WriteString(" function " + sym.Name)
+		sb.WriteString(fmtSignature(sb.Len(), sym.Params, sym.ReturnType))
 	case symbols.KindFunction:
-		sb.WriteString(fmt.Sprintf("function %s%s", sym.Name, fmtParams(sym.Params)))
-		if sym.ReturnType != "" {
-			sb.WriteString(": " + types.RenderTypeExpr(sym.ReturnType))
-		}
+		sb.WriteString("function " + sym.Name)
+		sb.WriteString(fmtSignature(sb.Len(), sym.Params, sym.ReturnType))
 	case symbols.KindProperty:
 		if sym.IsVirtual {
 			sb.WriteString("(magic) ")
@@ -74,7 +91,7 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		if t == "" {
 			t = "mixed"
 		} else {
-			t = types.RenderTypeExpr(t)
+			t = shortTypes(types.RenderTypeExpr(t))
 		}
 		sb.WriteString(vis)
 		// PHP 8.4 asymmetric visibility: e.g. public private(set) string $x
@@ -133,10 +150,6 @@ func (p *Provider) formatHoverContext(sym *symbols.Symbol) string {
 		if sym.ParentFQN != "" {
 			p.appendMethodOrigin(&sb, sym)
 		}
-	case symbols.KindProperty, symbols.KindConstant, symbols.KindEnumCase:
-		if sym.ParentFQN != "" {
-			sb.WriteString(fmt.Sprintf("\nDefined in `%s`\n", sym.ParentFQN))
-		}
 	case symbols.KindClass:
 		if impls := p.index.GetImplementors(sym.FQN); len(impls) > 0 {
 			sb.WriteString("\n**Implemented by:** ")
@@ -158,6 +171,52 @@ func (p *Provider) formatHoverContext(sym *symbols.Symbol) string {
 	}
 
 	return sb.String()
+}
+
+// formatCoverage renders a method or function's line coverage. It only reads
+// what's already loaded, and renders nothing when coverage is unknown: a missing
+// line must never read as untested code.
+func (p *Provider) formatCoverage(sym *symbols.Symbol) string {
+	if p.coverage == nil || (sym.Kind != symbols.KindMethod && sym.Kind != symbols.KindFunction) {
+		return ""
+	}
+	p.coverage.RefreshAsync()
+
+	m, stale := p.coverage.Method(symbols.URIToPath(sym.URI), sym.Name, sym.Range.Start.Line+1)
+	if m == nil {
+		return ""
+	}
+	line := "\nCoverage: " + coverageBar(m.Covered, m.Executable) + fmt.Sprintf(" · %d/%d lines", m.Covered, m.Executable)
+	if m.CRAP > 0 {
+		line += " · CRAP " + strconv.FormatFloat(m.CRAP, 'f', -1, 64)
+	}
+	if stale {
+		line += " (file changed since the report, may be out of date)"
+	}
+	return line + "\n"
+}
+
+// coverageBar draws coverage as a coloured dot, a bar and a percentage, using
+// only text because hover cards are markdown. The bar is inline code so it's
+// monospaced. Partial coverage never rounds to an empty or a full bar, or to 0%
+// or 100%. The colour bands are the defaults of PHPUnit's HTML report.
+func coverageBar(covered, total int) string {
+	const width = 10
+	filled := (covered*width + total/2) / total
+	percent := covered * 100 / total
+	if covered > 0 && covered < total {
+		filled = max(1, min(filled, width-1))
+		percent = max(1, min(percent, 99))
+	}
+
+	dot := "🟢"
+	switch {
+	case percent < 50:
+		dot = "🔴"
+	case percent < 90:
+		dot = "🟡"
+	}
+	return fmt.Sprintf("%s `%s%s` %d%%", dot, strings.Repeat("█", filled), strings.Repeat("░", width-filled), percent)
 }
 
 func (p *Provider) formatDocBlockDetails(doc *parser.DocBlock) string {
@@ -258,12 +317,28 @@ func joinShortNames(fqns []string) string {
 	return strings.Join(names, ", ")
 }
 
-func fmtParams(params []symbols.ParamInfo) string {
+// fmtSignature renders a parameter list and return type, moving parameters to
+// their own lines when the signature wouldn't fit on one. prefixLen is the width
+// of what comes before the opening parenthesis.
+func fmtSignature(prefixLen int, params []symbols.ParamInfo, returnType string) string {
+	parts := fmtParams(params)
+	ret := ""
+	if returnType != "" {
+		ret = ": " + shortTypes(types.RenderTypeExpr(returnType))
+	}
+	oneLine := "(" + strings.Join(parts, ", ") + ")" + ret
+	if len(parts) == 0 || prefixLen+len(oneLine) <= maxSignatureWidth {
+		return oneLine
+	}
+	return "(\n    " + strings.Join(parts, ",\n    ") + "\n)" + ret
+}
+
+func fmtParams(params []symbols.ParamInfo) []string {
 	var parts []string
 	for _, p := range params {
 		s := ""
 		if p.Type != "" {
-			s += types.RenderTypeExpr(p.Type) + " "
+			s += shortTypes(types.RenderTypeExpr(p.Type)) + " "
 		}
 		if p.IsVariadic {
 			s += "..."
@@ -277,5 +352,5 @@ func fmtParams(params []symbols.ParamInfo) string {
 		}
 		parts = append(parts, s)
 	}
-	return "(" + strings.Join(parts, ", ") + ")"
+	return parts
 }
