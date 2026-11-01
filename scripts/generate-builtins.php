@@ -252,8 +252,8 @@ function generatePhpStubs(array $functions, array $classLikes): string
     foreach ($namespaces as &$namespace) {
         $namespace['functions'] = $namespace['functions'] ?? [];
         $namespace['classLikes'] = $namespace['classLikes'] ?? [];
-        sort($namespace['functions'], SORT_STRING);
-        sort($namespace['classLikes'], SORT_STRING);
+        // sort($namespace['functions'], SORT_STRING);  // can not sort because documentation 
+        // sort($namespace['classLikes'], SORT_STRING); // can not sort because documentation
     }
     unset($namespace);
 
@@ -847,7 +847,8 @@ function qualifyTypeName(string $name): string
 function renderPhpValue(mixed $value): string
 {
     if (is_string($value)) {
-        return var_export($value, true);
+        return '"'.str_replace(['\\',"\n", "\r","\t","\v","\x00",'"'], ['\\\\',"\\n", "\\r","\\t","\\v","\\x00",'\"'], $value).'"';
+        //return var_export($value, true);
     }
 
     if (is_int($value) || is_bool($value) || $value === null) {
@@ -1295,15 +1296,16 @@ function getDocFromManual(string $function_name, ?string $local_manual_dir = nul
     // if(!is_dir($manual_dir)) {
     //     return $ret;
     // }
-    $doc_file = str_replace(['\\', '::', '_'], ['-', '.', '-'], strtolower($function_name)) . '.html';
+    $doc_file = str_replace(['\\', '::', '__construct','_'], ['-', '.','construct', '-'], strtolower($function_name)) . '.html';
     if (!is_file($manual_dir . '/' . $doc_file)) {
         return $ret;
     }
     $html_content = file_get_contents($manual_dir . '/' . $doc_file);
-    if (preg_match('~<span class="dc-title">(.+?)</span>~', $html_content, $title_matches)) {
+    if (preg_match('~<title>(.+?)</title>~s', $html_content, $title_matches)) {
         $ret = $title_matches[1];
-        if (preg_match('~<p class="verinfo">(.+?)</p>~', $html_content, $verinfo_matches)) {
-            $ret .=  $verinfo_matches[1];
+        if (preg_match('~<p class="verinfo">(\(PHP 8 &gt;=.+?)</p>~', $html_content, $verinfo_matches)) {
+
+            $ret .= ' '.str_replace('&gt;','>', $verinfo_matches[1]);
         }
     }
     return $ret;
