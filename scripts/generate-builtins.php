@@ -410,7 +410,7 @@ function splitName(string $name): array
 function renderFunctionStub(ReflectionFunction $function, string $shortName): string
 {
     $signature = '';
-    $doc = getDocFromManual('function.' . $function->getName(), null); //just send function name
+    $doc = getDocFromManual('function.' . $function->getName(), null); 
     if ($doc !== '') {
         $doc = "/**\n * " . $doc . "\n */\n";
         $signature .= $doc;
