@@ -1,12 +1,24 @@
 package checks
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"strings"
 
 	"github.com/Tusk-PHP/lsp/internal/parser"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
+)
+
+type BlockType uint8
+
+const (
+	BlockTypeNone BlockType = iota
+	BlockTypeComment
+	BlockTypeSingleQuote
+	BlockTypeDoubleQuote
+	BlockTypeHeredoc
+	BlockTypeNowdoc
 )
 
 // UnknownClassRule detects unresolved class-like references in a narrow set of
@@ -27,10 +39,11 @@ func (r *UnknownClassRule) Check(file *parser.FileNode, source string, index *sy
 	}
 	lines := strings.Split(source, "\n")
 	var findings []Finding
-	inBlockComment := false
+	inBlock := BlockTypeNone
+	hereDocIdentifier := []byte{}
 
 	for lineNum, raw := range lines {
-		line := maskPHPLine(raw, &inBlockComment)
+		line := maskPHPLine(raw, &inBlock, &hereDocIdentifier)
 		findings = append(findings, checkUnknownClassMatches(line, lineNum, file, index, unknownClassNewRe)...)
 		findings = append(findings, checkUnknownClassMatches(line, lineNum, file, index, unknownClassSingleRefRe)...)
 		findings = append(findings, checkUnknownStaticClassMatches(line, lineNum, file, index)...)
@@ -305,10 +318,11 @@ func (r *UnknownFunctionRule) Check(file *parser.FileNode, source string, index 
 	}
 	lines := strings.Split(source, "\n")
 	var findings []Finding
-	inBlockComment := false
+	inBlock := BlockTypeNone
+	hereDocIdentifier := []byte{}
 
 	for lineNum, raw := range lines {
-		line := maskPHPLine(raw, &inBlockComment)
+		line := maskPHPLine(raw, &inBlock, &hereDocIdentifier)
 		attrGroups := scanAttributeGroups(line)
 		for _, match := range unknownFunctionCallRe.FindAllStringSubmatchIndex(line, -1) {
 			start, end := match[2], match[3]
@@ -390,10 +404,11 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 	}
 	lines := strings.Split(source, "\n")
 	var findings []Finding
-	inBlockComment := false
+	inBlock := BlockTypeNone
+	hereDocIdentifier := []byte{}
 
 	for lineNum, raw := range lines {
-		line := maskPHPLine(raw, &inBlockComment)
+		line := maskPHPLine(raw, &inBlock, &hereDocIdentifier)
 		for _, match := range unknownMemberAccessRe.FindAllStringSubmatchIndex(line, -1) {
 			opStart := match[2]
 			nameStart, nameEnd := match[4], match[5]
@@ -451,60 +466,125 @@ func (r *UnknownMemberRule) resolveOwnerFQN(ownerExpr string, lineNum int, sourc
 	return fqn, true
 }
 
-func maskPHPLine(line string, inBlockComment *bool) string {
+func maskPHPLine(line string, inBlock *BlockType, hereDocIdentifier *[]byte) string {
 	if line == "" {
 		return line
 	}
 	buf := []byte(line)
-	inSingle := false
-	inDouble := false
-	escaped := false
+	// inSingle := false
+	// inDouble := false
+	// escaped := false
 
 	for i := 0; i < len(buf); i++ {
-		if *inBlockComment {
+		switch *inBlock {
+		case BlockTypeComment:
+			{
+				buf[i] = ' '
+				if i+1 < len(buf) && line[i] == '*' && line[i+1] == '/' {
+					buf[i+1] = ' '
+					*inBlock = BlockTypeNone
+					i++
+				}
+				continue
+			}
+		case BlockTypeSingleQuote:
+			{
+				if '\\' == line[i] && i+1 < len(buf) {
+					buf[i] = ' '
+					buf[i+1] = ' '
+					i++
+					continue
+				}
+				buf[i] = ' '
+				if i+1 < len(buf) && line[i+1] == '\'' {
+					buf[i+1] = ' '
+					*inBlock = BlockTypeNone
+					i++
+				}
+				continue
+			}
+		case BlockTypeDoubleQuote:
+			{
+				if '\\' == line[i] && i+1 < len(buf) {
+					buf[i] = ' '
+					buf[i+1] = ' '
+					i++
+					continue
+				}
+				buf[i] = ' '
+				if i+1 < len(buf) && line[i+1] == '"' {
+					buf[i+1] = ' '
+					*inBlock = BlockTypeNone
+					i++
+				}
+				continue
+			}
+		case BlockTypeHeredoc:
+			{
+				if 0 == bytes.Compare(*hereDocIdentifier, []byte(strings.TrimSpace(line))) {
+					*inBlock = BlockTypeNone
+				}
+				for j := i; j < len(buf); j++ {
+					buf[j] = ' '
+				}
+				break
+			}
+		case BlockTypeNowdoc:
+			{
+				if 0 == bytes.Compare(*hereDocIdentifier, []byte(strings.TrimSpace(line))) {
+					*inBlock = BlockTypeNone
+				}
+				for j := i; j < len(buf); j++ {
+					buf[j] = ' '
+				}
+				break
+			}
+
+		}
+		if *inBlock == BlockTypeComment {
 			buf[i] = ' '
 			if i+1 < len(buf) && line[i] == '*' && line[i+1] == '/' {
 				buf[i+1] = ' '
-				*inBlockComment = false
+				*inBlock = BlockTypeNone
 				i++
 			}
 			continue
 		}
-		if inSingle {
-			buf[i] = ' '
-			if escaped {
-				escaped = false
-				continue
-			}
-			if line[i] == '\\' {
-				escaped = true
-				continue
-			}
-			if line[i] == '\'' {
-				inSingle = false
-			}
-			continue
-		}
-		if inDouble {
-			buf[i] = ' '
-			if escaped {
-				escaped = false
-				continue
-			}
-			if line[i] == '\\' {
-				escaped = true
-				continue
-			}
-			if line[i] == '"' {
-				inDouble = false
-			}
-			continue
-		}
+		// if inSingle {
+		// 	buf[i] = ' '
+		// 	if escaped {
+		// 		escaped = false
+		// 		continue
+		// 	}
+		// 	if line[i] == '\\' {
+		// 		escaped = true
+		// 		continue
+		// 	}
+		// 	if line[i] == '\'' {
+		// 		inSingle = false
+		// 	}
+		// 	continue
+		// }
+		// if inDouble {
+		// 	buf[i] = ' '
+		// 	if escaped {
+		// 		escaped = false
+		// 		continue
+		// 	}
+		// 	if line[i] == '\\' {
+		// 		escaped = true
+		// 		continue
+		// 	}
+		// 	if line[i] == '"' {
+		// 		inDouble = false
+		// 	}
+		// 	continue
+		// }
 
 		if i+1 < len(buf) && line[i] == '/' && line[i+1] == '*' {
 			buf[i] = ' '
 			buf[i+1] = ' '
-			*inBlockComment = true
+			*inBlock = BlockTypeComment
 			i++
 			continue
 		}
@@ -530,13 +610,30 @@ func maskPHPLine(line string, inBlockComment *bool) string {
 		}
 		if line[i] == '\'' {
 			buf[i] = ' '
-			inSingle = true
+			*inBlock = BlockTypeSingleQuote
+			//inSingle = true
 			continue
 		}
 		if line[i] == '"' {
 			buf[i] = ' '
-			inDouble = true
+			*inBlock = BlockTypeDoubleQuote
+			//inDouble = true
 			continue
+		}
+		if line[i] == '<' && i+4 < len(buf) && line[i:i+3] == "<<<" {
+			*hereDocIdentifier = []byte(strings.TrimSpace(line[i+3:]))
+			if '\'' == (*hereDocIdentifier)[0] {
+				*inBlock = BlockTypeNowdoc
+				*hereDocIdentifier = bytes.Trim(*hereDocIdentifier, "'")
+			} else {
+				*inBlock = BlockTypeHeredoc
+			}
+			*hereDocIdentifier = append(*hereDocIdentifier, ';') // terminator is identifier followed by semicolon
+
+			for j := i; j < len(buf); j++ {
+				buf[j] = ' '
+			}
+			break
 		}
 	}
 
