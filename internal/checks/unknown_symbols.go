@@ -496,8 +496,7 @@ func maskPHPLine(line string, inBlock *BlockType, hereDocIdentifier *[]byte) str
 					continue
 				}
 				buf[i] = ' '
-				if i+1 < len(buf) && line[i+1] == '\'' {
-					buf[i+1] = ' '
+				if line[i] == '\'' {
 					*inBlock = BlockTypeNone
 					i++
 				}
@@ -512,8 +511,7 @@ func maskPHPLine(line string, inBlock *BlockType, hereDocIdentifier *[]byte) str
 					continue
 				}
 				buf[i] = ' '
-				if i+1 < len(buf) && line[i+1] == '"' {
-					buf[i+1] = ' '
+				if line[i] == '"' {
 					*inBlock = BlockTypeNone
 					i++
 				}
@@ -539,7 +537,6 @@ func maskPHPLine(line string, inBlock *BlockType, hereDocIdentifier *[]byte) str
 				}
 				break
 			}
-
 		}
 		if *inBlock == BlockTypeComment {
 			buf[i] = ' '
