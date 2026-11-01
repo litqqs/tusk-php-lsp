@@ -27,6 +27,7 @@ function main(array $argv): void
     }
 
     $options = parseOptions($argv);
+    getDocFromManual('_', $options['localPHPManual']); //just send localPHPManual
 
     if ($mode === 'availability') {
         $output = generateGoAvailability($options);
@@ -49,7 +50,7 @@ function usage(): string
     return <<<TXT
 Usage:
   php scripts/generate-builtins.php registry [--output=PATH]
-  php scripts/generate-builtins.php stubs [--output=PATH]
+  php scripts/generate-builtins.php stubs [--output=PATH] [--localPHPManual=PATH]
   php scripts/generate-builtins.php availability --stubs=PATH [--output=PATH]
 
 Modes:
@@ -64,17 +65,19 @@ Options:
   --stubs=PATH   Path to a local phpstorm-stubs checkout (required for availability mode).
   --output=PATH  Write to PATH instead of stdout (availability mode writes to
                  internal/symbols/builtin_availability_generated.go by default).
+  --localPHPManual=PATH  Use the local PHP manual at PATH instead of fetching from php.net.  
+
   -h, --help     Show this help.
 
 TXT;
 }
 
 /**
- * @return array{output:?string, stubs:?string}
+ * @return array{output:?string, stubs:?string, localPHPManual:?string}
  */
 function parseOptions(array $argv): array
 {
-    $options = ['output' => null, 'stubs' => null];
+    $options = ['output' => null, 'stubs' => null, 'localPHPManual' => null];
 
     foreach ($argv as $arg) {
         if (str_starts_with($arg, '--output=')) {
@@ -86,6 +89,19 @@ function parseOptions(array $argv): array
             $options['stubs'] = substr($arg, strlen('--stubs='));
             continue;
         }
+        if (str_starts_with(strtolower($arg), '--localphpmanual=')) {
+            $options['localPHPManual'] = substr($arg, strlen('--localPHPManual='));
+            if (!is_dir($options['localPHPManual'])) {
+                fwrite(STDERR, " --localPHPManual={$arg} is not a valid directory. 
+    Please download the php manual(Many HTML files) from https://www.php.net/download-docs.php.
+    Such as:
+    https://www.php.net/distributions/manual/php_manual_zh.tar.gz 
+    https://www.php.net/distributions/manual/php_manual_en.tar.gz \n\n");
+                exit(1);
+            }
+            continue;
+        }
+
 
         fwrite(STDERR, "Unknown option: {$arg}\n\n");
         fwrite(STDERR, usage());
@@ -300,15 +316,79 @@ function isDeclarableFunctionName(string $name): bool
 function isReservedKeyword(string $word): bool
 {
     static $keywords = [
-        '__halt_compiler', 'abstract', 'and', 'array', 'as', 'break', 'callable', 'case',
-        'catch', 'class', 'clone', 'const', 'continue', 'declare', 'default', 'die', 'do',
-        'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor', 'endforeach', 'endif',
-        'endswitch', 'endwhile', 'enum', 'eval', 'exit', 'extends', 'final', 'finally',
-        'fn', 'for', 'foreach', 'from', 'function', 'global', 'goto', 'if', 'implements',
-        'include', 'include_once', 'instanceof', 'insteadof', 'interface', 'isset', 'list',
-        'match', 'namespace', 'new', 'or', 'print', 'private', 'protected', 'public',
-        'readonly', 'require', 'require_once', 'return', 'self', 'static', 'switch', 'throw',
-        'trait', 'try', 'unset', 'use', 'var', 'while', 'xor', 'yield',
+        '__halt_compiler',
+        'abstract',
+        'and',
+        'array',
+        'as',
+        'break',
+        'callable',
+        'case',
+        'catch',
+        'class',
+        'clone',
+        'const',
+        'continue',
+        'declare',
+        'default',
+        'die',
+        'do',
+        'echo',
+        'else',
+        'elseif',
+        'empty',
+        'enddeclare',
+        'endfor',
+        'endforeach',
+        'endif',
+        'endswitch',
+        'endwhile',
+        'enum',
+        'eval',
+        'exit',
+        'extends',
+        'final',
+        'finally',
+        'fn',
+        'for',
+        'foreach',
+        'from',
+        'function',
+        'global',
+        'goto',
+        'if',
+        'implements',
+        'include',
+        'include_once',
+        'instanceof',
+        'insteadof',
+        'interface',
+        'isset',
+        'list',
+        'match',
+        'namespace',
+        'new',
+        'or',
+        'print',
+        'private',
+        'protected',
+        'public',
+        'readonly',
+        'require',
+        'require_once',
+        'return',
+        'self',
+        'static',
+        'switch',
+        'throw',
+        'trait',
+        'try',
+        'unset',
+        'use',
+        'var',
+        'while',
+        'xor',
+        'yield',
     ];
 
     return in_array($word, $keywords, true);
@@ -329,7 +409,13 @@ function splitName(string $name): array
 
 function renderFunctionStub(ReflectionFunction $function, string $shortName): string
 {
-    $signature = 'function ';
+    $signature = '';
+    $doc = getDocFromManual('function.' . $function->getName(), null); //just send function name
+    if ($doc !== '') {
+        $doc = "/**\n * " . $doc . "\n */\n";
+        $signature .= $doc;
+    }
+    $signature .= 'function ';
 
     if ($function->returnsReference()) {
         $signature .= '&';
@@ -353,6 +439,12 @@ function renderClassLikeStub(ReflectionClass $class, string $shortName): string
     }
 
     $headerParts = [];
+    $doc = getDocFromManual('class.' . $class->getName(), null); //just send class name
+    if ($doc !== '') {
+        $doc = "/**\n * " . $doc . "\n */\n";
+        $headerParts[] = $doc;
+    }
+
     if (!$class->isInterface() && !$class->isTrait()) {
         if ($class->isAbstract()) {
             $headerParts[] = 'abstract';
@@ -583,8 +675,14 @@ function renderMethods(ReflectionClass $class): array
     );
 
     $lines = [];
+    $class_name = $class->getName();
     foreach ($methods as $method) {
         $parts = [];
+        $doc = getDocFromManual($class_name . '::' . $method->getName(), null);
+        if ($doc !== '') {
+            $doc = "/**\n * " . $doc . "\n */\n";
+            $parts[] = $doc;
+        }
 
         if ($method->isPublic()) {
             $parts[] = 'public';
@@ -710,8 +808,23 @@ function formatNamedTypeName(string $name): string
 {
     $lower = strtolower($name);
     if (in_array($lower, [
-        'array', 'bool', 'callable', 'false', 'float', 'int', 'iterable', 'mixed',
-        'never', 'null', 'object', 'parent', 'self', 'static', 'string', 'true', 'void',
+        'array',
+        'bool',
+        'callable',
+        'false',
+        'float',
+        'int',
+        'iterable',
+        'mixed',
+        'never',
+        'null',
+        'object',
+        'parent',
+        'self',
+        'static',
+        'string',
+        'true',
+        'void',
     ], true)) {
         return $lower === 'false' || $lower === 'true' ? $lower : $name;
     }
@@ -788,19 +901,87 @@ function indentBlock(string $block): string
 function knownStubExtensions(): array
 {
     return [
-        'bcmath', 'bz2', 'calendar', 'com_dotnet', 'ctype', 'curl', 'date',
-        'dba', 'dom', 'enchant', 'fileinfo', 'filter', 'fpm', 'ftp', 'gd',
-        'gettext', 'gmp', 'hash', 'iconv', 'imagick', 'imap', 'intl', 'json',
-        'ldap', 'mbstring', 'mcrypt', 'memcache', 'memcached', 'mongodb',
-        'mysql', 'mysqli', 'mysqlnd', 'oauth', 'odbc', 'opcache', 'openssl',
-        'parallel', 'parle', 'pcntl', 'pcov', 'pcre', 'pdo', 'pgsql', 'phar',
-        'posix', 'pspell', 'random', 'rar', 'readline', 'recode', 'redis',
-        'reflection', 'session', 'shmop', 'simplexml', 'snmp', 'soap',
-        'sockets', 'sodium', 'solr', 'spl', 'sqlite3', 'ssh2', 'standard',
-        'sysvmsg', 'sysvsem', 'sysvshm', 'tidy', 'tokenizer', 'uopz', 'uuid',
-        'wddx', 'wikidiff2', 'xdebug', 'xsl', 'yaml', 'zip', 'zlib',
+        'bcmath',
+        'bz2',
+        'calendar',
+        'com_dotnet',
+        'ctype',
+        'curl',
+        'date',
+        'dba',
+        'dom',
+        'enchant',
+        'fileinfo',
+        'filter',
+        'fpm',
+        'ftp',
+        'gd',
+        'gettext',
+        'gmp',
+        'hash',
+        'iconv',
+        'imagick',
+        'imap',
+        'intl',
+        'json',
+        'ldap',
+        'mbstring',
+        'mcrypt',
+        'memcache',
+        'memcached',
+        'mongodb',
+        'mysql',
+        'mysqli',
+        'mysqlnd',
+        'oauth',
+        'odbc',
+        'opcache',
+        'openssl',
+        'parallel',
+        'parle',
+        'pcntl',
+        'pcov',
+        'pcre',
+        'pdo',
+        'pgsql',
+        'phar',
+        'posix',
+        'pspell',
+        'random',
+        'rar',
+        'readline',
+        'recode',
+        'redis',
+        'reflection',
+        'session',
+        'shmop',
+        'simplexml',
+        'snmp',
+        'soap',
+        'sockets',
+        'sodium',
+        'solr',
+        'spl',
+        'sqlite3',
+        'ssh2',
+        'standard',
+        'sysvmsg',
+        'sysvsem',
+        'sysvshm',
+        'tidy',
+        'tokenizer',
+        'uopz',
+        'uuid',
+        'wddx',
+        'wikidiff2',
+        'xdebug',
+        'xsl',
+        'yaml',
+        'zip',
+        'zlib',
         // Mixed-case directory names that phpstorm-stubs uses:
-        'Reflection', 'SPL',
+        'Reflection',
+        'SPL',
     ];
 }
 
@@ -1098,4 +1279,32 @@ function writeOutput(string $output, ?string $path): void
         fwrite(STDERR, "Failed to write output: {$path}\n");
         exit(1);
     }
+}
+
+
+function getDocFromManual(string $function_name, ?string $local_manual_dir = null): string
+{
+    static $manual_dir = null;
+    $ret = '';
+    if ($local_manual_dir !== null) {
+        $manual_dir = $local_manual_dir;
+    }
+    // if(empty($manual_dir) || empty($function_name)) {
+    //     return $ret;
+    // }
+    // if(!is_dir($manual_dir)) {
+    //     return $ret;
+    // }
+    $doc_file = str_replace(['\\', '::', '_'], ['-', '.', '-'], strtolower($function_name)) . '.html';
+    if (!is_file($manual_dir . '/' . $doc_file)) {
+        return $ret;
+    }
+    $html_content = file_get_contents($manual_dir . '/' . $doc_file);
+    if (preg_match('~<span class="dc-title">(.+?)</span>~', $html_content, $title_matches)) {
+        $ret = $title_matches[1];
+        if (preg_match('~<p class="verinfo">(.+?)</p>~', $html_content, $verinfo_matches)) {
+            $ret .=  $verinfo_matches[1];
+        }
+    }
+    return $ret;
 }
