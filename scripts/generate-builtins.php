@@ -410,7 +410,7 @@ function splitName(string $name): array
 function renderFunctionStub(ReflectionFunction $function, string $shortName): string
 {
     $signature = '';
-    $doc = getDocFromManual('function.' . $function->getName(), null); 
+    $doc = getDocFromManual('function.' . $function->getName(), null);
     if ($doc !== '') {
         $doc = "/**\n * " . $doc . "\n */\n";
         $signature .= $doc;
@@ -738,6 +738,17 @@ function renderParameterStub(ReflectionParameter $parameter): string
     $type = $parameter->getType();
     if ($type !== null) {
         $parts[] = formatPhpType($type);
+    } elseif(!$parameter->isVariadic()){
+        $paramType = ($parameter->isOptional())? '?':'';
+        $paramType.= match ($parameter->getName()) {
+            'context' => 'resource',
+            'count', 'index', 'offset','port' => 'int',
+            'percent' => 'float',
+            'matches','pair', 'pipes', 'values' => 'array',
+            'address', 'data' => 'string',
+            default => 'mixed'
+        };
+        $parts[]= $paramType;
     }
 
     $name = '';
@@ -847,7 +858,7 @@ function qualifyTypeName(string $name): string
 function renderPhpValue(mixed $value): string
 {
     if (is_string($value)) {
-        return '"'.str_replace(['\\',"\n", "\r","\t","\v","\x00",'"'], ['\\\\',"\\n", "\\r","\\t","\\v","\\x00",'\"'], $value).'"';
+        return '"' . str_replace(['\\', "\n", "\r", "\t", "\v", "\x00", '"'], ['\\\\', "\\n", "\\r", "\\t", "\\v", "\\x00", '\"'], $value) . '"';
         //return var_export($value, true);
     }
 
@@ -1296,7 +1307,7 @@ function getDocFromManual(string $function_name, ?string $local_manual_dir = nul
     // if(!is_dir($manual_dir)) {
     //     return $ret;
     // }
-    $doc_file = str_replace(['\\', '::', '__construct','_'], ['-', '.','construct', '-'], strtolower($function_name)) . '.html';
+    $doc_file = str_replace(['\\', '::', '__construct', '_'], ['-', '.', 'construct', '-'], strtolower($function_name)) . '.html';
     if (!is_file($manual_dir . '/' . $doc_file)) {
         return $ret;
     }
@@ -1305,7 +1316,7 @@ function getDocFromManual(string $function_name, ?string $local_manual_dir = nul
         $ret = $title_matches[1];
         if (preg_match('~<p class="verinfo">(\(PHP 8 &gt;=.+?)</p>~', $html_content, $verinfo_matches)) {
 
-            $ret .= ' '.str_replace('&gt;','>', $verinfo_matches[1]);
+            $ret .= ' ' . str_replace('&gt;', '>', $verinfo_matches[1]);
         }
     }
     return $ret;
