@@ -563,3 +563,56 @@ class Foo {
 		})
 	}
 }
+
+func TestHoverMethodSameName(t *testing.T) {
+	idx := symbols.NewIndex()
+	ca := container.NewContainerAnalyzer(idx, "/tmp", "none")
+	p := NewProvider(idx, ca, "none")
+
+	idx.IndexFile("file:///stubs.php", `<?php
+function file_get_contents(string $filename): string { return ''; }
+function debug(string $msg, int $code): void { }`)
+
+	// Hovering over standalone debug() in a controller method declaration
+	source := `<?php
+class UserController {
+    function debug(string $msg) { }
+	function file_get_contents(string $filename): string { 
+		$this->debug('test-msg'); 
+		return ''; 
+	}
+}
+`
+	idx.IndexFile("file:///controller.php", source)
+
+	pos := charPosOf(t, source, "debug", "debug(string $msg)")
+	hover := p.GetHover("file:///controller.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for debug(string $msg)")
+	}
+	val := hover.Contents.Value
+	// Should show the global function, not the class method
+	// The FQN for a global function is just the name, while a method would be Class::method
+	if !strings.Contains(val, "**UserController::debug**") {
+		t.Errorf("expected bold function name header, got:\n%s", val)
+	}
+	if strings.Contains(val, "**debug**") {
+		t.Errorf("should NOT show method hover for standalone debug(), got:\n%s", val)
+	}
+	//--
+	pos = charPosOf(t, source, "file_get_contents", "file_get_contents(string $filename)")
+	hover = p.GetHover("file:///controller.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for file_get_contents(string $filename)")
+	}
+	val = hover.Contents.Value
+	// Should show the global function, not the class method
+	// The FQN for a global function is just the name, while a method would be Class::method
+	if !strings.Contains(val, "**UserController::file_get_contents**") {
+		t.Errorf("expected bold function name header, got:\n%s", val)
+	}
+	if strings.Contains(val, "**file_get_contents**") {
+		t.Errorf("should NOT show method hover for standalone file_get_contents(), got:\n%s", val)
+	}
+
+}
