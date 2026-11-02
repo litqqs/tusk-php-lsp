@@ -466,14 +466,18 @@ func (r *UnknownMemberRule) resolveOwnerFQN(ownerExpr string, lineNum int, sourc
 	return fqn, true
 }
 
+func isWordByte(b byte) bool {
+	return (b >= 'a' && b <= 'z') ||
+		(b >= 'A' && b <= 'Z') ||
+		(b >= '0' && b <= '9') ||
+		b == '_'
+}
+
 func maskPHPLine(line string, inBlock *BlockType, hereDocIdentifier *[]byte) string {
 	if line == "" {
 		return line
 	}
 	buf := []byte(line)
-	// inSingle := false
-	// inDouble := false
-	// escaped := false
 
 	for i := 0; i < len(buf); i++ {
 		switch *inBlock {
@@ -510,6 +514,25 @@ func maskPHPLine(line string, inBlock *BlockType, hereDocIdentifier *[]byte) str
 					i++
 					continue
 				}
+				if '$' == line[i] {
+					i++
+					for i < len(buf) {
+						if !isWordByte(buf[i]) {
+							break
+						}
+						i++
+					}
+					continue
+				}
+				if '{' == line[i] && i+1 < len(buf) && '$' == line[i+1] {
+					for i < len(buf) {
+						if '}' == line[i] {
+							break
+						}
+						i++
+					}
+					continue
+				}
 				buf[i] = ' '
 				if line[i] == '"' {
 					*inBlock = BlockTypeNone
@@ -522,8 +545,27 @@ func maskPHPLine(line string, inBlock *BlockType, hereDocIdentifier *[]byte) str
 				if 0 == bytes.Compare(*hereDocIdentifier, []byte(strings.TrimSpace(line))) {
 					*inBlock = BlockTypeNone
 				}
-				for j := i; j < len(buf); j++ {
-					buf[j] = ' '
+				for ; i < len(buf); i++ {
+					if '$' == line[i] {
+						i++
+						for i < len(buf) {
+							if !isWordByte(buf[i]) {
+								break
+							}
+							i++
+						}
+						continue
+					}
+					if '{' == line[i] && i+1 < len(buf) && '$' == line[i+1] {
+						for i < len(buf) {
+							if '}' == line[i] {
+								break
+							}
+							i++
+						}
+						continue
+					}
+					buf[i] = ' '
 				}
 				break
 			}
@@ -547,36 +589,6 @@ func maskPHPLine(line string, inBlock *BlockType, hereDocIdentifier *[]byte) str
 			}
 			continue
 		}
-		// if inSingle {
-		// 	buf[i] = ' '
-		// 	if escaped {
-		// 		escaped = false
-		// 		continue
-		// 	}
-		// 	if line[i] == '\\' {
-		// 		escaped = true
-		// 		continue
-		// 	}
-		// 	if line[i] == '\'' {
-		// 		inSingle = false
-		// 	}
-		// 	continue
-		// }
-		// if inDouble {
-		// 	buf[i] = ' '
-		// 	if escaped {
-		// 		escaped = false
-		// 		continue
-		// 	}
-		// 	if line[i] == '\\' {
-		// 		escaped = true
-		// 		continue
-		// 	}
-		// 	if line[i] == '"' {
-		// 		inDouble = false
-		// 	}
-		// 	continue
-		// }
 
 		if i+1 < len(buf) && line[i] == '/' && line[i+1] == '*' {
 			buf[i] = ' '
