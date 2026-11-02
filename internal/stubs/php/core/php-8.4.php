@@ -8628,7 +8628,8 @@ function ucfirst(string $string): string {}
 /**
  * 将字符串中每个单词的首字母转换为大写
  */
-function ucwords(string $string, string $separators = " \t\r\n\v"): string {}
+function ucwords(string $string, string $separators = " \t\r\n
+\v"): string {}
 
 /**
  * 使用用户自定义的比较函数对数组中的键名进行排序

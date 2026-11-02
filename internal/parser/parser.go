@@ -1434,13 +1434,11 @@ func (p *structParser) parseClassBody() (methods []MethodDef, props []PropertyDe
 
 		case TokenVariable:
 			prop := PropertyDef{
-				Visibility:    visibility,
-				SetVisibility: setVisibility,
-				IsStatic:      isStatic,
-				IsReadonly:    isReadonly,
-				DocComment:    docComment,
-				Line:          p.peek().Line,
-				Name:          p.peek().Value,
+				Attributes: attributes,
+				Visibility: visibility, SetVisibility: setVisibility,
+				IsStatic: isStatic, IsReadonly: isReadonly,
+				DocComment: docComment, Line: p.peek().Line,
+				Name: p.peek().Value,
 			}
 			p.advance()
 			if p.peek().Kind == TokenEquals {
