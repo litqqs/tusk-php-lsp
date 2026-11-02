@@ -106,6 +106,18 @@ func (p *Provider) Analyze(uri, source string) []protocol.Diagnostic {
 			fs := (&checks.UnusedVariableRule{}).Check(file, source, p.index)
 			diags = append(diags, p.applyRuleSeverity("unused-variable", checks.SeverityHint, findingsToDiagnostics(fs))...)
 		}
+		if p.cfg.IsRuleEnabled("deprecated") {
+			fs := (&checks.DeprecatedUsageRule{TypeResolver: p.TypeResolver}).Check(file, source, p.index)
+			diags = append(diags, p.applyRuleSeverity("deprecated", checks.SeverityWarning, findingsToDiagnostics(fs))...)
+		}
+		if p.cfg.IsRuleEnabled("unused-result") {
+			fs := (&checks.UnusedResultRule{TypeResolver: p.TypeResolver}).Check(file, source, p.index)
+			diags = append(diags, p.applyRuleSeverity("unused-result", checks.SeverityWarning, findingsToDiagnostics(fs))...)
+		}
+		if p.cfg.IsRuleEnabled("invalid-override") {
+			fs := (&checks.InvalidOverrideRule{}).Check(file, source, p.index)
+			diags = append(diags, p.applyRuleSeverity("invalid-override", checks.SeverityError, findingsToDiagnostics(fs))...)
+		}
 		if p.cfg.IsRuleEnabled("argument-count-mismatch") {
 			fs := (&checks.ArgumentCountRule{}).Check(file, source, p.index)
 			diags = append(diags, p.applyRuleSeverity("argument-count-mismatch", checks.SeverityWarning, findingsToDiagnostics(fs))...)
@@ -125,7 +137,7 @@ func (p *Provider) Analyze(uri, source string) []protocol.Diagnostic {
 	// findings depend on cross-file symbol presence and produce false positives
 	// during the warm-up window.
 	if p.index != nil && !p.index.Ready() {
-		diags = filterOutCodes(diags, "unknown-class", "unknown-function", "unknown-member")
+		diags = filterOutCodes(diags, "unknown-class", "unknown-function", "unknown-member", "invalid-override")
 	}
 
 	return diags
@@ -235,12 +247,6 @@ func (p *Provider) checkDeprecations(source string) []protocol.Diagnostic {
 	for i, line := range lines {
 		for _, dep := range patterns {
 			if col := strings.Index(line, dep[0]); col >= 0 {
-				if col > 0 {
-					cc := line[col-1]
-					if (cc >= 'a' && cc <= 'z') || (cc >= 'A' && cc <= 'Z') || (cc >= '0' && cc <= '9') || cc == '_' {
-						continue
-					}
-				}
 				diags = append(diags, protocol.Diagnostic{
 					Range:    protocol.Range{Start: protocol.Position{Line: i, Character: col}, End: protocol.Position{Line: i, Character: col + len(dep[0]) - 1}},
 					Severity: protocol.DiagnosticSeverityWarning, Source: "tusk-php", Message: dep[1], Code: "deprecated",

@@ -182,10 +182,6 @@ func checkUndefinedVariables(source string, outArg func(string, int) bool) []Fin
 		if isDynamicVariableTarget(result.Tokens, tok) {
 			continue
 		}
-		// if result.Tokens[index+1].Kind == parser.TokenAssign && strings.HasPrefix(result.Tokens[index+1].Value, "=") {
-		// 	// This is an assignment, not a read.
-		// 	continue
-		// }
 		findings = append(findings, Finding{
 			StartLine: tok.Line,
 			StartCol:  tok.Column,
