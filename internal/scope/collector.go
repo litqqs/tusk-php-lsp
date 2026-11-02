@@ -166,13 +166,13 @@ func (c *Collector) collectResult(result *parser.ParseResult) *Document {
 			}
 		}
 
-		if tok.Kind == parser.TokenIdentifier && tok.Value == "foreach" {
+		if tok.Kind == parser.TokenForeach {
 			for idx, binding := range parseForeachBindings(result.Tokens, i, active[len(active)-1].scope, doc) {
 				declByToken[idx] = binding
 			}
 		}
 
-		if tok.Kind == parser.TokenIdentifier && tok.Value == "catch" {
+		if tok.Kind == parser.TokenCatch {
 			for idx, binding := range parseCatchBindings(result.Tokens, i, active[len(active)-1].scope, doc) {
 				declByToken[idx] = binding
 			}
