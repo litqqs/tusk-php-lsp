@@ -754,6 +754,8 @@ func extractCallee(tokens []parser.Token, openParen int) (callee string, kind ca
 	}
 
 	switch tokens[i].Kind {
+	case parser.TokenFunction: //function or method declaration: skip it and treat as a function call.
+		return "", calleeFunction, ""
 	case parser.TokenArrow: // ->
 		// Instance method call: collect the receiver expression to the left.
 		receiver = collectReceiverExpr(tokens, i-1)
