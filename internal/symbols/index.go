@@ -393,7 +393,7 @@ func (idx *Index) IndexFileWithSource(uri string, source string, src SymbolSourc
 			Attributes: indexAttributes(fn.Attributes, resolve),
 			DocComment: fn.DocComment, Range: symRange(fn.StartLine, fn.StartCol, len(fn.Name))}
 		for _, p := range fn.Params {
-			sym.Params = append(sym.Params, ParamInfo{Name: p.Name, Type: resolve(p.Type.Name), IsVariadic: p.IsVariadic, IsReference: p.IsReference})
+			sym.Params = append(sym.Params, ParamInfo{Name: p.Name, Type: resolve(p.Type.Name), DefaultValue: p.DefaultValue, IsVariadic: p.IsVariadic, IsReference: p.IsReference})
 		}
 		idx.addSymbolWithSource(uri, sym, src)
 	}

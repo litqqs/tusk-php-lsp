@@ -884,3 +884,39 @@ class K {
 		}
 	}
 }
+
+func TestChineseValuePosition(t *testing.T) {
+	source := `<?php
+function cnFunc(string $one, string $two, int $c):string {
+	return $one . $two . $c;
+}
+cnFunc('中文内容', '更多内容 more content', 3);
+
+`
+	p := setupProvider(t, "file:///test.php", source)
+	cfg := allCfg()
+
+	hints := p.GetInlayHints("file:///test.php", source, cfg)
+
+	line := lineOf(source, "中文内容")
+	lineHints := hintsOnLine(hints, line)
+
+	for _, h := range lineHints {
+		if h.Kind == protocol.InlayHintKindParameter && h.Label == "one:" {
+			if h.Position.Character != 7 {
+				t.Errorf("expected hint for first parameter at char 7, got: %d", h.Position.Character)
+			}
+		}
+		if h.Kind == protocol.InlayHintKindParameter && h.Label == "two:" {
+			if h.Position.Character != 15 {
+				t.Errorf("expected hint for second parameter at char 15, got: %d", h.Position.Character)
+			}
+		}
+		if h.Kind == protocol.InlayHintKindParameter && h.Label == "c:" {
+			if h.Position.Character != 36 {
+				t.Errorf("expected hint for third parameter at char 36, got: %d", h.Position.Character)
+			}
+		}
+	}
+
+}

@@ -512,7 +512,10 @@ func tokenize(source string) ([]Token, []ParseError) {
 					line++
 					col = 0
 				} else {
-					col++
+					//utf8 first byte
+					if source[offset] < 0x80 || source[offset] >= 0xC0 {
+						col++
+					}
 				}
 				offset++
 			}
@@ -532,7 +535,10 @@ func tokenize(source string) ([]Token, []ParseError) {
 			col++
 			for offset < len(source) && isIdentChar(rune(source[offset])) {
 				offset++
-				col++
+				//utf8 first byte
+				if source[offset] < 0x80 || source[offset] >= 0xC0 {
+					col++
+				}
 			}
 			tokens = append(tokens, Token{TokenVariable, source[start:offset], line, startCol, start})
 			continue
@@ -636,7 +642,11 @@ func tokenize(source string) ([]Token, []ParseError) {
 		}
 		tokens = append(tokens, Token{kind, string(ch), line, col, offset})
 		offset++
-		col++
+		//utf8 first byte
+		if ch < 0x80 || ch >= 0xC0 {
+			col++
+		}
+
 	}
 
 	tokens = append(tokens, Token{TokenEOF, "", line, col, offset})

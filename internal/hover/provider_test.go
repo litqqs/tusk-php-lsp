@@ -570,7 +570,11 @@ func TestHoverMethodSameName(t *testing.T) {
 	p := NewProvider(idx, ca, "none")
 
 	idx.IndexFile("file:///stubs.php", `<?php
-function file_get_contents(string $filename): string { return ''; }
+/**
+ * read file contents into a string
+ */
+function file_get_contents(string $filename, bool $use_include_path = false, $context = NULL, int $offset = 0, ?int $length = NULL): string|false {}
+
 function debug(string $msg, int $code): void { }`)
 
 	// Hovering over standalone debug() in a controller method declaration
@@ -579,6 +583,7 @@ class UserController {
     function debug(string $msg) { }
 	function file_get_contents(string $filename): string { 
 		$this->debug('test-msg'); 
+		file_get_contents('out');
 		return ''; 
 	}
 }
@@ -613,6 +618,15 @@ class UserController {
 	}
 	if strings.Contains(val, "**file_get_contents**") {
 		t.Errorf("should NOT show method hover for standalone file_get_contents(), got:\n%s", val)
+	}
+
+	pos = charPosOf(t, source, "file_get_contents", "file_get_contents('out')")
+	hover = p.GetHover("file:///controller.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for file_get_contents(string $filename,...)")
+	}
+	if !strings.Contains(val, "**file_get_contents**") {
+		t.Errorf("expected bold function name header, got:\n%s", val)
 	}
 
 }
