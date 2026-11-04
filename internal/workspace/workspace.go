@@ -31,12 +31,12 @@ type Bootstrapped struct {
 	Logger         *log.Logger
 	BuiltinProfile symbols.BuiltinProfile
 
-	Index          *symbols.Index
-	Container      *container.ContainerAnalyzer
-	RouteIndex     *frameworklaravel.RouteIndex
-	SymfonyRoutes  []frameworksymfony.Route
-	SchemaCache    *models.SchemaCache
-	Schema         *models.Schema
+	Index         *symbols.Index
+	Container     *container.ContainerAnalyzer
+	RouteIndex    *frameworklaravel.RouteIndex
+	SymfonyRoutes []frameworksymfony.Route
+	SchemaCache   *models.SchemaCache
+	Schema        *models.Schema
 }
 
 func New(opts Options) *Bootstrapped {
@@ -108,7 +108,9 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 
 	count := 0
 	var ideHelperFiles []string
-	_ = filepath.Walk(ws.RootPath, func(path string, info os.FileInfo, err error) error {
+	var fn filepath.WalkFunc
+	deep := 0
+	fn = func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -120,6 +122,29 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 			}
 			return nil
 		}
+		isLink := info.Mode()&os.ModeIrregular != 0
+		if !isLink {
+			if info.Mode()&os.ModeSymlink != 0 {
+				realInfo, err := os.Stat(path)
+				isLink = (err == nil && realInfo.IsDir())
+			}
+		}
+		if isLink { //Junction directory
+			if deep < 9 {
+				deep++
+				d, err := os.Open(path)
+				if err == nil {
+					names, _ := d.Readdirnames(-1)
+					d.Close()
+					for _, name := range names {
+						_ = filepath.Walk(filepath.Join(path, name), fn)
+					}
+				}
+				deep--
+			}
+			return nil
+		}
+
 		if !strings.HasSuffix(path, ".php") {
 			return nil
 		}
@@ -135,7 +160,8 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 			count++
 		}
 		return nil
-	})
+	}
+	_ = filepath.Walk(ws.RootPath, fn)
 
 	for _, path := range ideHelperFiles {
 		if content, err := os.ReadFile(path); err == nil {
