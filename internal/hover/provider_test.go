@@ -630,3 +630,50 @@ class UserController {
 	}
 
 }
+
+func TestReturnReferencesFunc(t *testing.T) {
+	idx := symbols.NewIndex()
+	ca := container.NewContainerAnalyzer(idx, "/tmp", "none")
+	p := NewProvider(idx, ca, "none")
+
+	source := `<?php
+/**
+ * read file contents into a string
+ */
+function &ReturnRef(string $s): string { 
+	return "aaa=".$s;
+}
+class testC {
+
+	function &returnRefInClass(string $s):string{
+		ReturnRef("xxx");
+	}
+	static function &staticRetRef(int $n):int
+	{
+		$r=3*$n;
+		return $r;
+	}
+}
+	testC::staticRetRef(4);
+	$o = new testC();
+	$o->returnRefInClass("sss");
+`
+	filename := "file:///index.php"
+	idx.IndexFile(filename, source)
+
+	tts := [][3]string{
+		{"ReturnRef", "ReturnRef(string $s)", "function &ReturnRef(string $s))"},
+		{"ReturnRef", "ReturnRef(\"xxx\")", "function &ReturnRef(string $s))"},
+		{"returnRefInClass", "returnRefInClass(string $s)", "method &returnRefInClass(string $s))"},
+		{"returnRefInClass", "returnRefInClass(\"sss\")", "method &returnRefInClass(string $s))"},
+		{"staticRetRef", "testC::staticRetRef(4)", "static call testC::staticRetRef(string $s))"},
+	}
+	for _, tt := range tts {
+		pos := charPosOf(t, source, tt[0], tt[1])
+		hover := p.GetHover(filename, source, pos)
+		if hover == nil {
+			t.Fatal("expected hover result for " + tt[2])
+		}
+	}
+
+}

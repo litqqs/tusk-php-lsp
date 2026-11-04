@@ -1239,6 +1239,11 @@ func (p *structParser) parseEnum(docComment string) {
 
 func (p *structParser) parseFunction(docComment string) {
 	p.advance()
+	//return reference
+	refToken := p.peek()
+	if refToken.Kind == TokenAmpersand {
+		p.advance()
+	}
 	fn := FunctionDef{DocComment: docComment, Attributes: p.takeAttributes()}
 	if t, ok := p.expect(TokenIdentifier); ok {
 		fn.Name = t.Value
@@ -1408,6 +1413,10 @@ func (p *structParser) parseClassBody() (methods []MethodDef, props []PropertyDe
 			traits = append(traits, traitNames...)
 		case TokenFunction:
 			p.advance()
+			tokenRef := p.peek()
+			if tokenRef.Kind == TokenAmpersand {
+				p.advance()
+			}
 			m := MethodDef{
 				Attributes: attributes,
 				Visibility: visibility, IsStatic: isStatic,
