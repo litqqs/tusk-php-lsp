@@ -722,3 +722,26 @@ function f(&$a, array &$b, ?array &$c, A&B &$d, A&B $e, int &...$f, $g) {}
 		}
 	}
 }
+func TestParseDefineConst(t *testing.T) {
+	source := `<?php
+define("AA","AAAAAAA");
+define('BB',"BBBBBB");
+
+`
+	result := New().Parse(source)
+	if result == nil {
+		t.Fatal("expected non-nil result")
+	}
+	if len(result.Constants) != 1 {
+		t.Fatalf("expected 2 const , got %d", len(result.Constants))
+	}
+	c := result.Constants[0]
+	if c.Name != "AA" {
+		t.Errorf("expected const 'AA', got %q", c.Name)
+	}
+	c = result.Constants[1]
+	if c.Name != "BB" {
+		t.Errorf("expected const 'BB' got %q", c.Name)
+	}
+
+}

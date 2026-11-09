@@ -2,7 +2,6 @@ package parser
 
 import (
 	"strings"
-	"unicode"
 )
 
 // PHPParser parses PHP source into a lightweight AST for LSP features.
@@ -306,14 +305,14 @@ func (pr *ParseResult) GetWordAtPosition(line, character int) string {
 		return ""
 	}
 	start := character
-	for start > 0 && isIdentChar(rune(ln[start-1])) {
+	for start > 0 && isIdentChar(ln[start-1]) {
 		start--
 	}
 	if start > 0 && ln[start-1] == '$' {
 		start--
 	}
 	end := character
-	for end < len(ln) && isIdentChar(rune(ln[end])) {
+	for end < len(ln) && isIdentChar(ln[end]) {
 		end++
 	}
 	return ln[start:end]
@@ -337,7 +336,7 @@ func (pr *ParseResult) GetContextAtPosition(line, character int) (contextType st
 	if pos >= 1 && pos < len(ln) && ln[pos-1] == '-' && ln[pos] == '>' {
 		rEnd := pos - 1
 		rStart := rEnd - 1
-		for rStart >= 0 && (isIdentChar(rune(ln[rStart])) || ln[rStart] == '$') {
+		for rStart >= 0 && (isIdentChar(ln[rStart]) || ln[rStart] == '$') {
 			rStart--
 		}
 		rStart++
@@ -349,7 +348,7 @@ func (pr *ParseResult) GetContextAtPosition(line, character int) (contextType st
 	if pos >= 1 && pos < len(ln) && ln[pos-1] == ':' && ln[pos] == ':' {
 		rEnd := pos - 1
 		rStart := rEnd - 1
-		for rStart >= 0 && (isIdentChar(rune(ln[rStart])) || ln[rStart] == '\\') {
+		for rStart >= 0 && (isIdentChar(ln[rStart]) || ln[rStart] == '\\') {
 			rStart--
 		}
 		rStart++
@@ -360,7 +359,7 @@ func (pr *ParseResult) GetContextAtPosition(line, character int) (contextType st
 
 	if pos >= 0 && pos < len(ln) && ln[pos] == '\\' {
 		rStart := pos - 1
-		for rStart >= 0 && (isIdentChar(rune(ln[rStart])) || ln[rStart] == '\\') {
+		for rStart >= 0 && (isIdentChar(ln[rStart]) || ln[rStart] == '\\') {
 			rStart--
 		}
 		rStart++
@@ -370,8 +369,9 @@ func (pr *ParseResult) GetContextAtPosition(line, character int) (contextType st
 	return "", ""
 }
 
-func isIdentChar(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_'
+func isIdentChar(r byte) bool {
+	//return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_'
+	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' || r >= 0x80
 }
 
 // --- Tokenizer ---
@@ -493,7 +493,9 @@ func tokenize(source string) ([]Token, []ParseError) {
 					line++
 					col = 0
 				} else {
-					col++
+					if source[offset] < 0x80 || source[offset] >= 0xC0 { //utf8 first byte
+						col++
+					}
 				}
 				offset++
 			}
@@ -520,7 +522,9 @@ func tokenize(source string) ([]Token, []ParseError) {
 					line++
 					col = 0
 				} else {
-					col++
+					if source[offset] < 0x80 || source[offset] >= 0xC0 { //utf8 first byte
+						col++
+					}
 				}
 				offset++
 			}
@@ -596,7 +600,10 @@ func tokenize(source string) ([]Token, []ParseError) {
 					line++
 					col = 0
 				} else {
-					col++
+					//utf8 first byte
+					if source[offset] < 0x80 || source[offset] >= 0xC0 {
+						col++
+					}
 				}
 				offset++
 			}
@@ -609,14 +616,17 @@ func tokenize(source string) ([]Token, []ParseError) {
 		}
 
 		// Variable $name
-		if ch == '$' && offset+1 < len(source) && isIdentChar(rune(source[offset+1])) {
+		if ch == '$' && offset+1 < len(source) && isIdentChar(source[offset+1]) {
 			start := offset
 			startCol := col
 			offset++
 			col++
-			for offset < len(source) && isIdentChar(rune(source[offset])) {
+			for offset < len(source) && isIdentChar(source[offset]) {
 				offset++
-				col++
+				//utf8 first byte
+				if source[offset] < 0x80 || source[offset] >= 0xC0 {
+					col++
+				}
 			}
 			tokens = append(tokens, Token{TokenVariable, source[start:offset], line, startCol, start})
 			continue
@@ -635,12 +645,14 @@ func tokenize(source string) ([]Token, []ParseError) {
 		}
 
 		// Identifiers and keywords
-		if isIdentChar(rune(ch)) {
+		if isIdentChar(ch) {
 			start := offset
 			startCol := col
-			for offset < len(source) && isIdentChar(rune(source[offset])) {
+			for offset < len(source) && isIdentChar(source[offset]) {
 				offset++
-				col++
+				if source[offset] < 0x80 || source[offset] >= 0xC0 { //utf8 first byte
+					col++
+				}
 			}
 			word := source[start:offset]
 			kind := identifierToKind(word)
@@ -720,7 +732,11 @@ func tokenize(source string) ([]Token, []ParseError) {
 		}
 		tokens = append(tokens, Token{kind, string(ch), line, col, offset})
 		offset++
-		col++
+		//utf8 first byte
+		if ch < 0x80 || ch >= 0xC0 {
+			col++
+		}
+
 	}
 
 	tokens = append(tokens, Token{TokenEOF, "", line, col, offset})
@@ -743,7 +759,7 @@ func heredocEnd(source string, start int) (int, bool) {
 		i++
 	}
 	labelStart := i
-	for i < len(source) && isIdentChar(rune(source[i])) {
+	for i < len(source) && isIdentChar(source[i]) {
 		i++
 	}
 	label := source[labelStart:i]
@@ -776,7 +792,7 @@ func heredocEnd(source string, start int) (int, bool) {
 		}
 		if strings.HasPrefix(source[j:lineEnd], label) {
 			after := j + len(label)
-			if after >= len(source) || !isIdentChar(rune(source[after])) {
+			if after >= len(source) || !isIdentChar(source[after]) {
 				return after, true
 			}
 		}
@@ -993,6 +1009,9 @@ func (p *structParser) parse() {
 		case TokenConst:
 			p.parseConst()
 		default:
+			if t.Kind == TokenIdentifier && t.Value == "define" {
+				p.parseDefineConst()
+			}
 			p.advance()
 		}
 		lastDocComment = ""
@@ -1087,7 +1106,7 @@ func tokensText(tokens []Token) string {
 	var b strings.Builder
 	prevWord := false
 	for _, t := range tokens {
-		isWord := t.Value != "" && (isIdentChar(rune(t.Value[0])) || t.Value[0] == '$' || t.Value[0] == '\'')
+		isWord := t.Value != "" && (isIdentChar(t.Value[0]) || t.Value[0] == '$' || t.Value[0] == '\'')
 		if prevWord && isWord {
 			b.WriteByte(' ')
 		}
@@ -1414,6 +1433,32 @@ func (p *structParser) parseConst() {
 	}
 	p.expect(TokenSemicolon)
 	p.result.Constants = append(p.result.Constants, c)
+}
+func (p *structParser) parseDefineConst() {
+	p.advance()
+	c := ConstantDef{Line: p.peek().Line}
+	if _, ok := p.expect(TokenOpenParen); ok {
+		//p.advance()
+		if t, ok := p.expect(TokenStringLiteral); ok {
+			c.Name = t.Value[1 : len(t.Value)-1]
+			c.Line = t.Line
+		}
+		//
+		if p.peek().Kind == TokenComma {
+			p.advance()
+			t := p.peek()
+			if t.Kind == TokenStringLiteral {
+				c.Value = t.Value[1 : len(t.Value)-1]
+			} else {
+				c.Value = t.Value
+			}
+
+		}
+	}
+	if c.Name != "" {
+		p.result.Constants = append(p.result.Constants, c)
+	}
+
 }
 
 func (p *structParser) parseClassBody() (methods []MethodDef, props []PropertyDef, consts []ConstantDef, traits []string) {

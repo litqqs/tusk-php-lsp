@@ -45,6 +45,9 @@ func checkArgumentCounts(file *parser.FileNode, source string, index *symbols.In
 		if isSkippedCallKeyword(name) {
 			continue
 		}
+		if tokens[i-1].Kind == parser.TokenFunction {
+			continue // skip function declarations
+		}
 
 		next := nextSignificantTokenIdx(tokens, i+1)
 		if next < 0 {

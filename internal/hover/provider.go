@@ -249,6 +249,12 @@ func (p *Provider) GetHover(uri, source string, pos protocol.Position) *protocol
 	// Rank candidates: prefer functions/classes/enums/interfaces over methods/properties,
 	// and prefer exact case matches over case-insensitive ones.
 	best := symbols.PickBestStandalone(syms, word)
+	for _, sym := range syms {
+		if sym.URI == uri && sym.Range.Start.Line == pos.Line && sym.Range.Start.Character <= pos.Character && sym.Range.End.Character >= pos.Character {
+			best = sym
+			break
+		}
+	}
 	if best == nil {
 		return nil
 	}

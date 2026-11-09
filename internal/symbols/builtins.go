@@ -290,48 +290,48 @@ func DefaultBuiltinProfile() BuiltinProfile {
 // available for a PHP version/extension profile.
 func (idx *Index) RegisterBuiltinsForProfile(profile BuiltinProfile) {
 	profile = normalizeBuiltinProfile(profile)
-	idx.registerBuiltinRegistry(profile)
+	// idx.registerBuiltinRegistry(profile) //use stubs instead of hand-coded registry
 	idx.RegisterBuiltinStubs(profile)
 }
 
-func (idx *Index) registerBuiltinRegistry(profile BuiltinProfile) {
-	idx.mu.Lock()
-	defer idx.mu.Unlock()
+// func (idx *Index) registerBuiltinRegistry(profile BuiltinProfile) {
+// 	idx.mu.Lock()
+// 	defer idx.mu.Unlock()
 
-	for _, fn := range builtinFunctions {
-		if !builtinAvailable(fn.Name, profile) {
-			continue
-		}
-		idx.addBuiltinFunctionLocked(fn.Name, fn.Params, fn.Ret, fn.Doc)
-	}
+// 	for _, fn := range builtinFunctions {
+// 		if !builtinAvailable(fn.Name, profile) {
+// 			continue
+// 		}
+// 		idx.addBuiltinFunctionLocked(fn.Name, fn.Params, fn.Ret, fn.Doc)
+// 	}
 
-	for _, name := range generatedBuiltinFunctionNames {
-		if idx.symbols[name] != nil {
-			continue
-		}
-		if !builtinAvailable(name, profile) {
-			continue
-		}
-		idx.addBuiltinFunctionLocked(name, nil, "mixed", "PHP built-in function")
-	}
+// 	for _, name := range generatedBuiltinFunctionNames {
+// 		if idx.symbols[name] != nil {
+// 			continue
+// 		}
+// 		if !builtinAvailable(name, profile) {
+// 			continue
+// 		}
+// 		idx.addBuiltinFunctionLocked(name, nil, "mixed", "PHP built-in function")
+// 	}
 
-	for _, cls := range builtinClasses {
-		if !builtinAvailable(cls.Name, profile) {
-			continue
-		}
-		idx.addBuiltinClassLikeLocked(cls.Name, cls.Doc)
-	}
+// 	for _, cls := range builtinClasses {
+// 		if !builtinAvailable(cls.Name, profile) {
+// 			continue
+// 		}
+// 		idx.addBuiltinClassLikeLocked(cls.Name, cls.Doc)
+// 	}
 
-	for _, name := range generatedBuiltinClassLikeNames {
-		if idx.symbols[name] != nil {
-			continue
-		}
-		if !builtinAvailable(name, profile) {
-			continue
-		}
-		idx.addBuiltinClassLikeLocked(name, "PHP built-in class-like symbol")
-	}
-}
+// 	for _, name := range generatedBuiltinClassLikeNames {
+// 		if idx.symbols[name] != nil {
+// 			continue
+// 		}
+// 		if !builtinAvailable(name, profile) {
+// 			continue
+// 		}
+// 		idx.addBuiltinClassLikeLocked(name, "PHP built-in class-like symbol")
+// 	}
+// }
 
 // RegisterBuiltinStubs indexes embedded PHP stub declarations as built-in
 // symbols. Stubs intentionally run after the generated registry so richer

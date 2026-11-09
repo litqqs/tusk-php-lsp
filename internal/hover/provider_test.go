@@ -563,3 +563,161 @@ class Foo {
 		})
 	}
 }
+
+func TestHoverMethodSameName(t *testing.T) {
+	idx := symbols.NewIndex()
+	ca := container.NewContainerAnalyzer(idx, "/tmp", "none")
+	p := NewProvider(idx, ca, "none")
+
+	idx.IndexFile("file:///stubs.php", `<?php
+/**
+ * read file contents into a string
+ */
+function file_get_contents(string $filename, bool $use_include_path = false, $context = NULL, int $offset = 0, ?int $length = NULL): string|false {}
+
+function debug(string $msg, int $code): void { }`)
+
+	// Hovering over standalone debug() in a controller method declaration
+	source := `<?php
+class UserController {
+    function debug中文(string $msg) { }
+	function file_get_contents(string $filename): string { 
+		$this->debug('test-msg'); 
+		file_get_contents('out');
+		return ''; 
+	}
+}
+`
+	idx.IndexFile("file:///controller.php", source)
+
+	pos := charPosOf(t, source, "debug中文", "debug中文")
+	hover := p.GetHover("file:///controller.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for debug(string $msg)")
+	}
+	val := hover.Contents.Value
+	// Should show the global function, not the class method
+	// The FQN for a global function is just the name, while a method would be Class::method
+	if !strings.Contains(val, "**UserController::debug**") {
+		t.Errorf("expected bold function name header, got:\n%s", val)
+	}
+	if strings.Contains(val, "**debug**") {
+		t.Errorf("should NOT show method hover for standalone debug(), got:\n%s", val)
+	}
+	//--
+	pos = charPosOf(t, source, "file_get_contents", "file_get_contents(string $filename)")
+	hover = p.GetHover("file:///controller.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for file_get_contents(string $filename)")
+	}
+	val = hover.Contents.Value
+	// Should show the global function, not the class method
+	// The FQN for a global function is just the name, while a method would be Class::method
+	if !strings.Contains(val, "**UserController::file_get_contents**") {
+		t.Errorf("expected bold function name header, got:\n%s", val)
+	}
+	if strings.Contains(val, "**file_get_contents**") {
+		t.Errorf("should NOT show method hover for standalone file_get_contents(), got:\n%s", val)
+	}
+
+	pos = charPosOf(t, source, "file_get_contents", "file_get_contents('out')")
+	hover = p.GetHover("file:///controller.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for file_get_contents(string $filename,...)")
+	}
+	if !strings.Contains(val, "**file_get_contents**") {
+		t.Errorf("expected bold function name header, got:\n%s", val)
+	}
+
+}
+
+func TestReturnReferencesFunc(t *testing.T) {
+	idx := symbols.NewIndex()
+	ca := container.NewContainerAnalyzer(idx, "/tmp", "none")
+	p := NewProvider(idx, ca, "none")
+
+	source := `<?php
+/**
+ * read file contents into a string
+ */
+function &ReturnRef(string $s): string { 
+	return "aaa=".$s;
+}
+class testC {
+
+	function &returnRefInClass(string $s):string{
+		ReturnRef("xxx");
+	}
+	static function &staticRetRef(int $n):int
+	{
+		$r=3*$n;
+		return $r;
+	}
+}
+	testC::staticRetRef(4);
+	$o = new testC();
+	$o->returnRefInClass("sss");
+`
+	filename := "file:///index.php"
+	idx.IndexFile(filename, source)
+
+	tts := [][3]string{
+		{"ReturnRef", "ReturnRef(string $s)", "function &ReturnRef(string $s))"},
+		{"ReturnRef", "ReturnRef(\"xxx\")", "function &ReturnRef(string $s))"},
+		{"returnRefInClass", "returnRefInClass(string $s)", "method &returnRefInClass(string $s))"},
+		{"returnRefInClass", "returnRefInClass(\"sss\")", "method &returnRefInClass(string $s))"},
+		{"staticRetRef", "testC::staticRetRef(4)", "static call testC::staticRetRef(string $s))"},
+	}
+	for _, tt := range tts {
+		pos := charPosOf(t, source, tt[0], tt[1])
+		hover := p.GetHover(filename, source, pos)
+		if hover == nil {
+			t.Fatal("expected hover result for " + tt[2])
+		}
+	}
+
+}
+
+func TestHoverAlias(t *testing.T) {
+	idx := symbols.NewIndex()
+	ca := container.NewContainerAnalyzer(idx, "/tmp", "none")
+	p := NewProvider(idx, ca, "none")
+
+	source := `<?php
+namespace Swow
+{
+    class SocketException extends \Swow\CallException { }
+}
+namespace Swow\WebSocket
+{
+	class WebSocket
+    {
+        public const DEFAULT_MASKING_KEY = '258E';
+        public static function mask(\Stringable|string $data, int $start = 0, int $length = -1, string $maskingKey = '', int $index = 0): string { }
+        public static function unmask(\Swow\Buffer $data, int $start = 0, int $length = -1, string $maskingKey = '', int $index = 0): void { }
+    }
+	class Opcode
+    {
+        public const PING = 9;
+        public const PONG = 10;
+        public static function getNameOf(int $opcode): int { }
+    }
+}
+`
+	idx.IndexFile("file://stubs.php", source)
+	source = `<?php
+use Swow\SocketException;
+use Swow\WebSocket\Opcode as WebSocketOpcode;
+
+echo  WebSocketOpcode::PONG ; 
+
+`
+	idx.IndexFile("file:///index.php", source)
+
+	pos := charPosOf(t, source, "WebSocketOpcode", "WebSocketOpcode::PONG ; ")
+	hover := p.GetHover("file:///index.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for Swow\\WebSocket\\Opcode::PONG")
+	}
+
+}
