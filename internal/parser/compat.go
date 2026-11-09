@@ -82,6 +82,9 @@ type ClassNode struct {
 	EndLine    int
 	StartCol   int
 	DocComment string
+	// TraitUseDoc holds the docblocks above the class's trait `use`
+	// statements, where @use gives a trait its type arguments.
+	TraitUseDoc string
 	// BodyLine and BodyCol are where an anonymous class's `{` is, set only
 	// for AnonymousClasses.
 	BodyLine, BodyCol int
@@ -111,6 +114,9 @@ type TraitNode struct {
 	StartLine  int
 	StartCol   int
 	DocComment string
+	// TraitUseDoc holds the docblocks above the trait's own trait `use`
+	// statements.
+	TraitUseDoc string
 }
 
 type EnumCaseNode struct {
@@ -207,6 +213,7 @@ type DocTemplate struct {
 	Name        string // e.g., "T", "TModel"
 	Bound       string // e.g., "SomeClass" (from "of SomeClass"), or "" if unbounded
 	ParsedBound *types.TypeExpr
+	Default     string // e.g., "string" (from "= string"), or "" without a default
 }
 
 type DocTypeAlias struct {
@@ -234,6 +241,41 @@ type DocBlock struct {
 	ImportedTypes []DocImportedTypeAlias
 	Deprecated    bool
 	DeprecatedMsg string
+
+	// Generic and narrowing tags. Prefixed forms (@phpstan-, @psalm-) win
+	// over the plain tag for the same parameter or class, as in PHPStan.
+	Extends     []string   // @extends / @template-extends: "Base<A, B>"
+	Implements  []string   // @implements / @template-implements
+	Uses        []string   // @use / @template-use
+	Mixins      []string   // @mixin
+	Vars        []DocParam // @var Type [$name]
+	ParamOuts   []DocParam // @param-out Type $name
+	ClosureThis []DocParam // @param-closure-this Type $name
+	Asserts     []DocAssert
+	SelfOut     string // @phpstan-self-out / @phpstan-this-out
+}
+
+// AssertKind says when a @phpstan-assert tag holds.
+type AssertKind int
+
+const (
+	AssertAlways  AssertKind = iota // @phpstan-assert: after the call returns
+	AssertIfTrue                    // @phpstan-assert-if-true: when the call returned true
+	AssertIfFalse                   // @phpstan-assert-if-false: when the call returned false
+)
+
+// DocAssert is a @phpstan-assert tag: `@phpstan-assert !Foo $value`.
+type DocAssert struct {
+	Kind AssertKind
+	Type string
+	// Target is the parameter it narrows ($value), or $this, or an access on
+	// either ($this->prop, $value->method()).
+	Target string
+	// Negated is set for !Type: the value is not of that type.
+	Negated bool
+	// Equality is set for =Type: the value is exactly that type, no narrowing
+	// by intersection.
+	Equality bool
 }
 
 func ParseFile(source string) (file *FileNode) {
@@ -267,6 +309,7 @@ func ParseDocBlock(raw string) *DocBlock {
 	trimmed = strings.TrimSuffix(trimmed, "*/")
 	lines := strings.Split(trimmed, "\n")
 	doc := &DocBlock{Tags: make(map[string][]string)}
+	var tagged []docTag
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -276,49 +319,16 @@ func ParseDocBlock(raw string) *DocBlock {
 			continue
 		}
 		if strings.HasPrefix(line, "@") {
-			parts := strings.SplitN(line[1:], " ", 2)
-			name := parts[0]
-			value := ""
-			if len(parts) == 2 {
-				value = strings.TrimSpace(parts[1])
-			}
+			name, value := splitDocTag(line[1:])
 			doc.Tags[name] = append(doc.Tags[name], value)
-
-			switch name {
-			case "param":
-				doc.Params = append(doc.Params, parseDocParam(value))
-			case "return":
-				doc.Return = parseDocReturn(value)
-			case "throws":
-				doc.Throws = append(doc.Throws, parseDocThrow(value))
-			case "deprecated":
-				doc.Deprecated = true
-				doc.DeprecatedMsg = value
-			case "property":
-				doc.Properties = append(doc.Properties, parseDocProperty(value, false, false))
-			case "property-read":
-				doc.Properties = append(doc.Properties, parseDocProperty(value, true, false))
-			case "property-write":
-				doc.Properties = append(doc.Properties, parseDocProperty(value, false, true))
-			case "method":
-				doc.Methods = append(doc.Methods, parseDocMethod(value))
-			case "template", "template-covariant", "template-contravariant":
-				doc.Templates = append(doc.Templates, parseDocTemplate(value))
-			case "phpstan-type", "psalm-type":
-				if alias := parseDocTypeAlias(value); alias.Name != "" {
-					doc.TypeAliases = append(doc.TypeAliases, alias)
-				}
-			case "phpstan-import-type", "psalm-import-type":
-				if alias := parseDocImportedTypeAlias(value); alias.Name != "" && alias.From != "" {
-					doc.ImportedTypes = append(doc.ImportedTypes, alias)
-				}
-			}
+			tagged = append(tagged, docTag{name: name, value: value})
 			continue
 		}
 		if doc.Summary == "" {
 			doc.Summary = line
 		}
 	}
+	applyDocTags(doc, tagged)
 
 	if doc.Summary == "" && len(doc.Tags) == 0 {
 		return nil
@@ -378,21 +388,6 @@ func parseDocThrow(value string) DocThrow {
 		th.Description = strings.TrimSpace(parts[1])
 	}
 	return th
-}
-
-// parseDocTemplate parses "@template TModel" or "@template TModel of SomeClass".
-func parseDocTemplate(value string) DocTemplate {
-	t := DocTemplate{}
-	parts := strings.Fields(value)
-	if len(parts) >= 1 {
-		t.Name = parts[0]
-	}
-	// Check for "of Bound" syntax: @template TModel of Model
-	if len(parts) >= 3 && parts[1] == "of" {
-		t.Bound = parts[2]
-		t.ParsedBound = parseDocTypeExprPtr(t.Bound)
-	}
-	return t
 }
 
 // parseDocProperty parses "@property Type $name Description" into structured DocProperty.
@@ -561,6 +556,7 @@ func toFileNode(result *ParseResult) *FileNode {
 			Name:       interfaceDef.Name,
 			FullName:   interfaceDef.FullName,
 			Extends:    append([]string(nil), interfaceDef.Extends...),
+			DocComment: interfaceDef.DocComment,
 			StartLine:  interfaceDef.Line,
 			StartCol:   startColumnForDeclaration(result, interfaceDef.Name, interfaceDef.Line, TokenInterface),
 		}
@@ -578,12 +574,14 @@ func toFileNode(result *ParseResult) *FileNode {
 
 	for _, traitDef := range result.Traits {
 		traitNode := TraitNode{
-			Attributes: traitDef.Attributes,
-			Name:       traitDef.Name,
-			FullName:   traitDef.FullName,
-			Traits:     append([]string(nil), traitDef.Traits...),
-			StartLine:  traitDef.Line,
-			StartCol:   startColumnForDeclaration(result, traitDef.Name, traitDef.Line, TokenTrait),
+			Attributes:  traitDef.Attributes,
+			Name:        traitDef.Name,
+			FullName:    traitDef.FullName,
+			Traits:      append([]string(nil), traitDef.Traits...),
+			TraitUseDoc: traitDef.TraitUseDoc,
+			DocComment:  traitDef.DocComment,
+			StartLine:   traitDef.Line,
+			StartCol:    startColumnForDeclaration(result, traitDef.Name, traitDef.Line, TokenTrait),
 		}
 		for _, propertyDef := range traitDef.Properties {
 			traitNode.Properties = append(traitNode.Properties, toPropertyNode(result, propertyDef))
@@ -760,21 +758,22 @@ func nameColumnOnLine(result *ParseResult, name string, line int) int {
 
 func toClassNode(result *ParseResult, classDef ClassDef) ClassNode {
 	classNode := ClassNode{
-		Attributes: classDef.Attributes,
-		Name:       classDef.Name,
-		FullName:   classDef.FullName,
-		Extends:    classDef.Extends,
-		Implements: append([]string(nil), classDef.Implements...),
-		Traits:     append([]string(nil), classDef.Traits...),
-		IsAbstract: classDef.IsAbstract,
-		IsFinal:    classDef.IsFinal,
-		IsReadonly: classDef.IsReadonly,
-		StartLine:  classDef.Line,
-		EndLine:    classDef.EndLine,
-		StartCol:   startColumnForDeclaration(result, classDef.Name, classDef.Line, TokenClass),
-		DocComment: classDef.DocComment,
-		BodyLine:   classDef.BodyLine,
-		BodyCol:    classDef.BodyCol,
+		Attributes:  classDef.Attributes,
+		Name:        classDef.Name,
+		FullName:    classDef.FullName,
+		Extends:     classDef.Extends,
+		Implements:  append([]string(nil), classDef.Implements...),
+		Traits:      append([]string(nil), classDef.Traits...),
+		IsAbstract:  classDef.IsAbstract,
+		IsFinal:     classDef.IsFinal,
+		IsReadonly:  classDef.IsReadonly,
+		StartLine:   classDef.Line,
+		EndLine:     classDef.EndLine,
+		StartCol:    startColumnForDeclaration(result, classDef.Name, classDef.Line, TokenClass),
+		DocComment:  classDef.DocComment,
+		TraitUseDoc: classDef.TraitUseDoc,
+		BodyLine:    classDef.BodyLine,
+		BodyCol:     classDef.BodyCol,
 	}
 	for _, propertyDef := range classDef.Properties {
 		classNode.Properties = append(classNode.Properties, toPropertyNode(result, propertyDef))

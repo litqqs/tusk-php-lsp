@@ -51,7 +51,14 @@ type Resolver struct {
 	// The last source's scopes, since one request asks about many variables.
 	scopeMu     sync.Mutex
 	scopeSource string
+	cachedLines []string
 	scopeDoc    *scope.Document
+	// closureMemos remembers what each closure of scopeDoc is passed to.
+	closureMemos   map[*scope.Scope]closureMemo
+	closureMemoDoc *scope.Document
+
+	// parsed caches docblocks and PHPDoc types by their text.
+	parsed parseCache
 }
 
 // NewResolver creates a resolver with the given symbol index.
@@ -270,82 +277,9 @@ func (r *Resolver) FindAccessedMember(classFQN, memberName string, call bool) *s
 // callerFQN is the class the method was called on (for late static binding:
 // Category::query() where query is on Model — callerFQN is Category).
 // typeContext carries generic params from the caller (e.g., Builder<Category>).
+// It's MemberTypeForCall without the call's arguments.
 func (r *Resolver) MemberTypeResolved(member *symbols.Symbol, file *parser.FileNode, callerFQN string, typeContext []ResolvedType) ResolvedType {
-	// 1. Check if the member's return type has generic syntax or needs
-	//    late static binding resolution.
-	rawType := r.rawMemberReturnType(member)
-	returnsNull := false
-	if rawType != "" && rawType != "void" && rawType != "mixed" {
-		staticFQN := callerFQN
-		if staticFQN == "" {
-			staticFQN = member.ParentFQN
-		}
-
-		// Handle union types: pick the best part (prefer generic over bare).
-		// E.g., "Builder<static>|Category" → use "Builder<static>".
-		// Track if null was in the union for nullable marking.
-		resolvedRaw := strings.TrimPrefix(rawType, "\\")
-		nullable := strings.HasPrefix(resolvedRaw, "?")
-		if nullable {
-			resolvedRaw = resolvedRaw[1:]
-		}
-		if strings.Contains(resolvedRaw, "|") {
-			if HasNullInUnion(resolvedRaw) {
-				nullable = true
-			}
-			resolvedRaw = PickBestUnionPart(resolvedRaw)
-		}
-		returnsNull = nullable
-
-		if resolvedRaw == "self" || resolvedRaw == "static" || resolvedRaw == "$this" {
-			return ResolvedType{FQN: staticFQN, Params: typeContext, Nullable: nullable}
-		}
-
-		resolvedRaw = strings.TrimPrefix(resolvedRaw, "\\")
-
-		// Build template substitution map from the parent class's @template tags
-		// and the typeContext. E.g., Builder has @template TModel and typeContext
-		// is [Category], so TModel → Category.
-		templateSubst := buildTemplateSubst(r.Index, member.ParentFQN, typeContext)
-
-		if strings.Contains(resolvedRaw, "<") || strings.HasSuffix(resolvedRaw, "[]") {
-			rt := ParseGenericType(resolvedRaw)
-			rt.FQN = resolveTypeParam(r, rt.FQN, staticFQN, templateSubst, file)
-			for i := range rt.Params {
-				rt.Params[i].FQN = resolveTypeParam(r, rt.Params[i].FQN, staticFQN, templateSubst, file)
-			}
-			rt.Nullable = rt.Nullable || nullable
-			return rt
-		}
-
-		// Even without <>, the return type might be a bare template param name
-		// (e.g., @return TModel|null → resolvedRaw is "TModel", nullable is true)
-		if sub, ok := templateSubst[resolvedRaw]; ok {
-			result := sub
-			result.Nullable = result.Nullable || nullable
-			return result
-		}
-	}
-
-	// 2. Try template resolution from the registry if we have context
-	if len(typeContext) > 0 && member.Kind == symbols.KindMethod {
-		if rt := ResolveTemplateReturn(member.ParentFQN, member.Name, typeContext); !rt.IsEmpty() {
-			rt.FQN = r.ResolveClassName(rt.FQN, file)
-			for i := range rt.Params {
-				if rt.Params[i].FQN != "" && rt.Params[i].FQN != "int" && rt.Params[i].FQN != "mixed" {
-					rt.Params[i].FQN = r.ResolveClassName(rt.Params[i].FQN, file)
-				}
-			}
-			return rt
-		}
-	}
-
-	// 3. Fall back to standard resolution (strips generics)
-	fqn := r.MemberType(member, file)
-	if fqn == "" {
-		return ResolvedType{}
-	}
-	return ResolvedType{FQN: fqn, Nullable: returnsNull}
+	return r.MemberTypeForCall(member, file, callerFQN, typeContext, nil)
 }
 
 // pickBestUnionPart selects the most informative part from a union type string.
@@ -498,8 +432,18 @@ func (r *Resolver) inferArgType(argStr string, lines []string, pos protocol.Posi
 }
 
 func (r *Resolver) resolveDocType(raw string, file *parser.FileNode) ResolvedType {
-	rt := ParseGenericType(raw)
-	return r.resolveResolvedType(rt, file)
+	return r.applyEnv(ParseGenericType(raw), typeEnv{file: file, fileFirst: true})
+}
+
+// resolveDocTypeIn resolves a PHPDoc type written in the file being edited,
+// inside class owner: names go through the file's imports, and self and
+// static stand for owner.
+func (r *Resolver) resolveDocTypeIn(raw, owner string, file *parser.FileNode) ResolvedType {
+	env := typeEnv{owner: owner, file: file}
+	if owner != "" {
+		env.static = ResolvedType{FQN: owner}
+	}
+	return r.applyEnv(ParseGenericType(raw), envWithFileFirst(env))
 }
 
 func (r *Resolver) resolveResolvedType(rt ResolvedType, file *parser.FileNode) ResolvedType {
@@ -695,60 +639,6 @@ func IndexOutsideBrackets(s string, ch byte) int {
 	return -1
 }
 
-// rawMemberReturnType extracts the raw return type string from a member
-// without any resolution or stripping. Used by MemberTypeResolved to check
-// for generic syntax before falling back to MemberType.
-// rawMemberReturnType extracts the raw return type string from a member
-// without any resolution or stripping. Used by MemberTypeResolved to check
-// for generic syntax before falling back to MemberType.
-// ReturnsCallingClass reports whether a method returns the class it was called
-// on: `static`, `$this`, or `self` (possibly nullable). For `$child->copy()`
-// declared in Base as `: self`, that's the object's own class at runtime, so
-// callers treat all three alike and use the class the method was called on.
-func (r *Resolver) ReturnsCallingClass(member *symbols.Symbol) bool {
-	if member == nil || member.Kind != symbols.KindMethod {
-		return false
-	}
-	t := strings.TrimPrefix(strings.TrimSpace(r.rawMemberReturnType(member)), "?")
-	if strings.Contains(t, "|") {
-		t = PickBestUnionPart(t)
-	}
-	switch strings.TrimPrefix(t, "?") {
-	case "static", "self", "$this":
-		return true
-	}
-	return false
-}
-
-func (r *Resolver) rawMemberReturnType(member *symbols.Symbol) string {
-	ownerFQN := ownerScopeFQN(member, protocol.Position{}, nil)
-	switch member.Kind {
-	case symbols.KindMethod:
-		nativeType := member.ReturnType
-		var docType string
-		if member.DocComment != "" {
-			if doc := parser.ParseDocBlock(member.DocComment); doc != nil {
-				docType = doc.Return.Type
-			}
-		}
-		// Prefer @return over non-specific native hints (object/mixed/array) so that
-		// element-typed PHPDoc like @return ReflectionMethod[] is not obscured by
-		// a bare "array" return type hint.
-		if nativeType != "" && nativeType != "object" && nativeType != "mixed" && nativeType != "array" {
-			return r.expandTypeAliases(nativeType, ownerFQN, nil)
-		}
-		if docType != "" {
-			return r.expandTypeAliases(docType, ownerFQN, nil)
-		}
-		if nativeType != "" {
-			return r.expandTypeAliases(nativeType, ownerFQN, nil)
-		}
-	case symbols.KindProperty:
-		return r.expandTypeAliases(member.Type, ownerFQN, nil)
-	}
-	return ""
-}
-
 // MemberType returns the resolved type of a member symbol (property type or method return type).
 // Falls back to @return/@var docblock annotations when no type hint is present.
 func (r *Resolver) MemberType(member *symbols.Symbol, file *parser.FileNode) string {
@@ -811,6 +701,16 @@ func (r *Resolver) MemberType(member *symbols.Symbol, file *parser.FileNode) str
 // Used by the typed chain resolver so that $categories = Category::query()->get()
 // results in $categories having type Collection<int, Category>.
 func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos protocol.Position, file *parser.FileNode) ResolvedType {
+	rt := r.resolveVariableTypeTypedBase(varName, lines, pos, file)
+	if varName == "$this" || file == nil {
+		return rt
+	}
+	// What asserting calls, @param-out and self-out since its last
+	// assignment say about it.
+	return r.narrowVariable(varName, rt, lines, pos, file)
+}
+
+func (r *Resolver) resolveVariableTypeTypedBase(varName string, lines []string, pos protocol.Position, file *parser.FileNode) ResolvedType {
 	exit, ok := r.enterResolution("typed|" + varName + "|" + strconv.Itoa(pos.Line) + ":" + strconv.Itoa(pos.Character))
 	if !ok {
 		return ResolvedType{}
@@ -821,8 +721,11 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 		return ResolvedType{}
 	}
 
-	// Special case: $this
+	// Special case: $this, unless a closure is bound to another object.
 	if varName == "$this" {
+		if bound := r.closureThisAt(lines, pos, file); !bound.IsEmpty() {
+			return bound
+		}
 		return ResolvedType{FQN: FindEnclosingClass(file, pos)}
 	}
 
@@ -875,6 +778,26 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 		if declaredType != "" {
 			return r.resolveDocType(declaredType, file)
 		}
+		// /** @var Collection<int, User> $users */ above the assignment.
+		if declared := varDocAbove(lines, i, varName); declared != "" {
+			owner := FindEnclosingClass(file, pos)
+			if rt := r.resolveDocTypeIn(r.expandTypeAliases(declared, owner, file), owner, file); !rt.IsEmpty() {
+				return rt
+			}
+		}
+		exprCtx := ExprContext{Lines: lines, Pos: pos, File: file}
+		// $received = yield $value: what the generator is sent, its TSend.
+		if _, ok := cutKeyword(strings.TrimSpace(rhs)+" ", "yield"); ok {
+			if gen := r.enclosingReturnType(lines, pos, file); gen.FQN == "Generator" && len(gen.Params) >= 3 {
+				return gen.Params[2]
+			}
+		}
+		// $class = Foo::class is a class-string<Foo>.
+		if trimmed := strings.TrimSuffix(strings.TrimSpace(rhs), ";"); classConstantRe.MatchString(trimmed) {
+			if rt := r.ExpressionType(trimmed, exprCtx); !rt.IsEmpty() {
+				return rt
+			}
+		}
 
 		// $var = [...$other] — keeps the elements of what it spreads.
 		if spread := spreadOnlyVariable(rhs); spread != "" && spread != varName {
@@ -899,13 +822,22 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 			if className == "" {
 				break
 			}
+			if strings.HasPrefix(className, "$") {
+				if rt := r.NewExpressionType(className, argStr, exprCtx); !rt.IsEmpty() {
+					return rt
+				}
+				break
+			}
 			classFQN, isKeyword := r.ClassKeywordFQN(className, pos, file)
 			if !isKeyword {
 				classFQN = r.ResolveClassName(className, file)
 			}
 
-			// Try to infer generic params from constructor argument
+			// Bind the class's templates from the constructor's arguments.
 			if argStr != "" {
+				if rt := r.NewExpressionType(className, argStr, exprCtx); rt.FQN == classFQN && len(rt.Params) > 0 {
+					return rt
+				}
 				argRT := r.inferArgType(argStr, lines, pos, file, i)
 				if !argRT.IsEmpty() && (argRT.IsGeneric() || argRT.Shape != "") {
 					if rt := r.inferConstructorGenerics(classFQN, argRT); !rt.IsEmpty() {
@@ -935,10 +867,32 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 		// $var = $other[index] — array element access
 		if bracketIdx := strings.Index(rhs, "["); bracketIdx > 0 && strings.HasPrefix(rhs, "$") {
 			arrayVar := strings.TrimSpace(rhs[:bracketIdx])
-			arrayType := r.ResolveVariableTypeTyped(arrayVar, lines, pos, file)
-			if arrayType.FQN == "array" && len(arrayType.Params) >= 2 {
-				// array<TKey, TValue>[index] → TValue
-				return arrayType.Params[1]
+			if steps, origin, ok := parseChain(strings.TrimSuffix(rhs, ";")); ok && origin.kind == '$' && len(steps) > 0 {
+				// $data['user'], $map[$key], $rows[0]['id'] and the like.
+				allOffsets := true
+				for _, st := range steps {
+					if st.op != "[" {
+						allOffsets = false
+					}
+				}
+				if allOffsets {
+					cur := r.ResolveVariableTypeTyped(origin.text, lines, pos, file)
+					for _, st := range steps {
+						cur = r.OffsetType(cur, st.offset)
+					}
+					if !cur.IsEmpty() {
+						return cur
+					}
+				}
+			}
+			// Only for a plain $other[index]: anything after the brackets, as in
+			// $rows[0]->last(), is a chain the typed resolver follows below.
+			if closeIdx := strings.LastIndexByte(rhs, ']'); closeIdx > bracketIdx && strings.TrimSpace(strings.TrimSuffix(rhs[closeIdx+1:], ";")) == "" {
+				arrayType := r.ResolveVariableTypeTyped(arrayVar, lines, pos, file)
+				if arrayType.FQN == "array" && len(arrayType.Params) >= 2 {
+					// array<TKey, TValue>[index] → TValue
+					return arrayType.Params[1]
+				}
 			}
 		}
 
@@ -949,8 +903,14 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 			}
 		}
 
-		// $var = funcName(...) — look up function return type in symbol index
+		// $var = funcName(...): the function's return type, with its templates
+		// bound from the arguments.
 		if funcName := extractFunctionCallName(rhs); funcName != "" && r.Index != nil {
+			if steps, origin, ok := parseChain(rhs); ok && len(steps) == 0 && origin.kind == 'f' {
+				if rt := r.FunctionCallType(origin.text, origin.args, exprCtx); !rt.IsEmpty() {
+					return rt
+				}
+			}
 			for _, sym := range r.Index.LookupByName(funcName) {
 				if sym.Kind == symbols.KindFunction && sym.ReturnType != "" {
 					return ResolvedType{FQN: sym.ReturnType}
@@ -961,11 +921,14 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 		// Use typed chain resolver if available. If a chain over several lines can't
 		// be followed to its end, what the first line gives is the best guess.
 		if r.TypedChainResolver != nil && (strings.Contains(rhs, "->") || strings.Contains(rhs, "::")) {
-			if rt := r.TypedChainResolver(rhs, strings.Join(lines, "\n"), pos, file); !rt.IsEmpty() {
+			if rt := r.TypedChainResolver(rhs, r.JoinLines(lines), pos, file); !rt.IsEmpty() {
 				return rt
 			}
-			if first := strings.TrimSuffix(firstLine, ";"); first != rhs {
-				if rt := r.TypedChainResolver(first, strings.Join(lines, "\n"), pos, file); !rt.IsEmpty() {
+			// Only when the text itself is cut short, as with unbalanced
+			// parentheses: a complete chain that can't be followed, say through
+			// a magic method, isn't what its first line is.
+			if first := strings.TrimSuffix(firstLine, ";"); first != rhs && strings.Count(rhs, "(") != strings.Count(rhs, ")") {
+				if rt := r.TypedChainResolver(first, r.JoinLines(lines), pos, file); !rt.IsEmpty() {
 					return rt
 				}
 			}
@@ -973,7 +936,7 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 
 		// Fall back to standard chain resolver
 		if r.ChainResolver != nil && (strings.Contains(rhs, "->") || strings.Contains(rhs, "::")) {
-			if t := r.ChainResolver(rhs, strings.Join(lines, "\n"), pos, file); t != "" {
+			if t := r.ChainResolver(rhs, r.JoinLines(lines), pos, file); t != "" {
 				return ResolvedType{FQN: t}
 			}
 		}
@@ -984,71 +947,6 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 	// Fall back to standard resolution
 	fqn := r.ResolveVariableType(varName, lines, pos, file)
 	return ResolvedType{FQN: fqn}
-}
-
-// resolveForeachValueType looks backward for a foreach loop that binds varPrefix
-// as its value variable and returns the element type of the iterable.
-// Handles both "foreach ($x as $v)" and "foreach ($x as $k => $v)".
-func (r *Resolver) resolveForeachValueType(varPrefix string, lines []string, pos protocol.Position, file *parser.FileNode, firstLine int) ResolvedType {
-	source := strings.Join(lines, "\n")
-	for i := pos.Line; i >= firstLine && i >= pos.Line-200; i-- {
-		if i >= len(lines) {
-			continue
-		}
-		line := strings.TrimSpace(lines[i])
-		if !strings.Contains(line, "foreach") || !strings.Contains(line, "as") {
-			continue
-		}
-		// Check that varPrefix appears after "as" in the line
-		asIdx := strings.Index(line, " as ")
-		if asIdx < 0 {
-			continue
-		}
-		afterAs := line[asIdx+4:]
-		// For "as $k => $v", check last variable matches; for "as $v", check directly
-		arrowIdx := strings.Index(afterAs, "=>")
-		var valueVarSection string
-		if arrowIdx >= 0 {
-			valueVarSection = strings.TrimSpace(afterAs[arrowIdx+2:])
-		} else {
-			valueVarSection = strings.TrimSpace(afterAs)
-		}
-		// Strip closing paren/brace/semicolon
-		valueVarSection = strings.TrimRight(valueVarSection, ") {;\t ")
-		if valueVarSection != varPrefix {
-			continue
-		}
-		// Extract the iterable expression: between "foreach (" and " as "
-		foreachIdx := strings.Index(line, "foreach")
-		openParen := strings.IndexByte(line[foreachIdx:], '(')
-		if openParen < 0 {
-			continue
-		}
-		openParen += foreachIdx
-		iterableExpr := strings.TrimSpace(line[openParen+1 : foreachIdx+strings.Index(line[foreachIdx:], " as ")])
-		if iterableExpr == "" {
-			continue
-		}
-
-		var iterableType ResolvedType
-		hasChain := strings.Contains(iterableExpr, "->") || strings.Contains(iterableExpr, "::")
-		if r.TypedChainResolver != nil && hasChain {
-			iterableType = r.TypedChainResolver(iterableExpr, source, pos, file)
-		} else if r.ChainResolver != nil && hasChain {
-			if t := r.ChainResolver(iterableExpr, source, pos, file); t != "" {
-				iterableType = ResolvedType{FQN: t}
-			}
-		} else if strings.HasPrefix(iterableExpr, "$") {
-			iterableType = r.ResolveVariableTypeTyped(iterableExpr, lines, pos, file)
-		} else if funcName := extractFunctionCallName(iterableExpr); funcName != "" && r.Index != nil {
-			iterableType = r.resolveFunctionCallReturnType(funcName, file)
-		}
-		if iterableType.IsEmpty() {
-			continue
-		}
-		return arrayElementType(iterableType)
-	}
-	return ResolvedType{}
 }
 
 // resolveFunctionCallReturnType resolves the return type of a named function,
@@ -1216,7 +1114,7 @@ func (r *Resolver) ResolveVariableType(varName string, lines []string, pos proto
 		}
 		// $var = ClassName::method() or $var = $foo->bar()->baz()
 		if r.ChainResolver != nil && (strings.Contains(rhs, "->") || strings.Contains(rhs, "::")) {
-			if t := r.ChainResolver(rhs, strings.Join(lines, "\n"), pos, file); t != "" {
+			if t := r.ChainResolver(rhs, r.JoinLines(lines), pos, file); t != "" {
 				return t
 			}
 			break
