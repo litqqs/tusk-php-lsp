@@ -279,6 +279,54 @@ function run() {
 	}
 }
 
+func TestStaticPropertyAfterNewIsNotAVariable(t *testing.T) {
+	source := `<?php
+class C {
+    function make($q, $k) {
+        $builder = $q;
+        $a = new static::$builder($builder);
+        $b = new self::$map[$k]();
+        $c = new \Foo\Bar::$builder;
+        $d = new ($this->factory)::$builder();
+        $e = new static::$builder::$builder();
+        $f = new static
+            :: $builder($q);
+        return [$a, $b, $c, $d, $e, $f];
+    }
+}
+`
+	doc := Collect(source)
+
+	builder := doc.BindingAt(protocol.Position{Line: 3, Character: 9})
+	if builder == nil {
+		t.Fatal("expected a binding for the local $builder")
+	}
+	// Its declaration and the constructor argument on line 4, nothing after `::`.
+	if got := doc.Occurrences(builder); len(got) != 2 || got[1].Start != (protocol.Position{Line: 4, Character: 34}) {
+		t.Fatalf("local $builder occurrences = %+v", got)
+	}
+	if got := len(doc.Properties); got != 7 {
+		t.Fatalf("want 7 static properties, got %d: %+v", got, doc.Properties)
+	}
+}
+
+func TestDynamicStaticCallOutsideNewReadsTheVariable(t *testing.T) {
+	source := `<?php
+function run($m) {
+    Foo::$m();
+    return new Foo()::$m();
+}
+`
+	doc := Collect(source)
+	m := doc.BindingAt(protocol.Position{Line: 1, Character: 14})
+	if m == nil {
+		t.Fatal("expected a binding for $m")
+	}
+	if got := len(doc.Occurrences(m)); got != 3 {
+		t.Fatalf("want 3 occurrences of $m, got %d", got)
+	}
+}
+
 func TestCollectVariableAssignments(t *testing.T) {
 	source := `<?php
 function run($name, $flag) {
@@ -333,8 +381,8 @@ function f(A $x, bool $c, array $list) {
 	if x == nil {
 		t.Fatal("parameter $x not found")
 	}
-	if len(x.Rebinds) != 4 {
-		t.Fatalf("got %d rebinds, want 4 (??= keeps the value)", len(x.Rebinds))
+	if len(x.Rebinds) != 5 || !x.Rebinds[4].Conditional {
+		t.Fatalf("got %d rebinds, want 5, the ??= one conditional (it may keep the value)", len(x.Rebinds))
 	}
 	at := func(line, char int) protocol.Position { return protocol.Position{Line: line, Character: char} }
 	tests := []struct {
@@ -361,5 +409,33 @@ function f(A $x, bool $c, array $list) {
 	}
 	if r := x.LatestRebindBefore(at(2, 0)); r != nil {
 		t.Errorf("before any write: got a rebind at %v", r.At)
+	}
+}
+
+// Functions, methods and closures that return by reference bind their
+// parameters like any other.
+func TestReturnByReferenceBindsParameters(t *testing.T) {
+	src := `<?php
+class C {
+    public function &get($name) { return $name; }
+}
+function &f($a) { return $a; }
+$g = function &($b) use ($c) { return $b; };
+$h = fn &($d) => $d;
+`
+	doc := Collect(src)
+	for _, tc := range []struct {
+		name string
+		kind BindingKind
+	}{{"$name", BindingParameter}, {"$a", BindingParameter}, {"$b", BindingParameter}, {"$c", BindingClosureUse}, {"$d", BindingParameter}} {
+		found := false
+		for _, b := range doc.Bindings {
+			if b.Name == tc.name && b.Kind == tc.kind && b.Scope.Kind != ScopeFile {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("%s: no %s binding", tc.name, tc.kind)
+		}
 	}
 }

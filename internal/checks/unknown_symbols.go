@@ -30,11 +30,13 @@ func (r *UnknownClassRule) Check(file *parser.FileNode, source string, index *sy
 	var findings []Finding
 	mask := newMaskState(source)
 
+	prevLine := ""
 	for lineNum, raw := range lines {
 		line := maskPHPLine(raw, &mask)
 		findings = append(findings, checkUnknownClassMatches(line, lineNum, file, index, unknownClassNewRe)...)
 		findings = append(findings, checkUnknownClassMatches(line, lineNum, file, index, unknownClassSingleRefRe)...)
-		findings = append(findings, checkUnknownStaticClassMatches(line, lineNum, file, index)...)
+		findings = append(findings, checkUnknownStaticClassMatches(line, prevLine, lineNum, file, index)...)
+		prevLine = line
 		findings = append(findings, checkUnknownCatchClasses(line, lineNum, file, index)...)
 		findings = append(findings, checkUnknownImplementsClasses(line, lineNum, file, index)...)
 		findings = append(findings, checkUnknownAttributeClasses(line, lineNum, file, index)...)
@@ -85,11 +87,18 @@ func isKeywordAt(line string, i int) bool {
 	return true
 }
 
-func checkUnknownStaticClassMatches(line string, lineNum int, file *parser.FileNode, index *symbols.Index) []Finding {
+// checkUnknownStaticClassMatches reports the class in `Foo::bar()`. prevLine is
+// the masked line before, for a `->` that ends it.
+func checkUnknownStaticClassMatches(line, prevLine string, lineNum int, file *parser.FileNode, index *symbols.Index) []Finding {
 	var findings []Finding
 	for _, match := range unknownClassStaticRe.FindAllStringSubmatchIndex(line, -1) {
 		start, end := match[4], match[5]
 		name := line[start:end]
+		// In `$this->type::tryFrom($v)` the name before `::` is a property
+		// holding the class, not a class.
+		if followsObjectOperator(line, prevLine, start) {
+			continue
+		}
 		if classLikeExists(name, lineNum, file, index) {
 			continue
 		}
@@ -104,6 +113,17 @@ func checkUnknownStaticClassMatches(line string, lineNum int, file *parser.FileN
 		})
 	}
 	return findings
+}
+
+// followsObjectOperator reports whether line[i] is preceded by `->` or `?->`,
+// with optional whitespace, which can also close prevLine when line[i] starts
+// its line.
+func followsObjectOperator(line, prevLine string, i int) bool {
+	before := strings.TrimRight(line[:i], " \t\r")
+	if before == "" {
+		before = strings.TrimRight(prevLine, " \t\r")
+	}
+	return strings.HasSuffix(before, "->")
 }
 
 func checkUnknownCatchClasses(line string, lineNum int, file *parser.FileNode, index *symbols.Index) []Finding {
@@ -493,9 +513,11 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 	mask := newMaskState(source)
 	hierarchies := map[string]*memberHierarchy{}
 	instanceofLines := linesWithInstanceof(lines)
+	guards := memberGuards{file: file}
 
 	for lineNum, raw := range lines {
 		line := maskPHPLine(raw, &mask)
+		guards.add(line, raw, lineNum)
 		for _, match := range unknownMemberAccessRe.FindAllStringSubmatchIndex(line, -1) {
 			opStart, opEnd := match[2], match[3]
 			nameStart, nameEnd := match[4], match[5]
@@ -511,6 +533,12 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 			if ownerExpr == "" || strings.Count(ownerExpr, ")") > strings.Count(ownerExpr, "(") {
 				continue
 			}
+			isCall := isCallAfter(line, nameEnd)
+			// method_exists(), property_exists() and is_callable() are how code
+			// asks whether an object has a member before using it.
+			if guards.covers(ownerExpr, member, isCall, isStatic, lineNum, opStart) {
+				continue
+			}
 
 			owners := r.resolveOwners(ownerExpr, lineNum, source, file, index)
 			if len(owners) == 0 {
@@ -520,8 +548,8 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 			if !ok {
 				continue
 			}
-			owners = append(owners, narrowed...)
-			access := memberAccess{name: member, isStatic: isStatic, isCall: isCallAfter(line, nameEnd)}
+			owners = appendNewOwners(owners, narrowed)
+			access := memberAccess{name: member, isStatic: isStatic, isCall: isCall}
 			if !access.isCall && !isStatic {
 				// isset(), unset(), empty() and ?? are how code asks whether a
 				// property is there; and a class with #[AllowDynamicProperties]
@@ -599,6 +627,21 @@ func instanceofOwners(ownerExpr string, lines []string, instanceofLines []int, l
 		}
 	}
 	return owners, true
+}
+
+// appendNewOwners adds the owners not already listed, keeping first-seen order,
+// so a class tested more than once is named once.
+func appendNewOwners(owners, more []string) []string {
+next:
+	for _, owner := range more {
+		for _, seen := range owners {
+			if seen == owner {
+				continue next
+			}
+		}
+		owners = append(owners, owner)
+	}
+	return owners
 }
 
 // linesWithInstanceof lists the lines that test something with instanceof,

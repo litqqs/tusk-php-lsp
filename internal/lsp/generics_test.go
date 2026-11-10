@@ -478,6 +478,60 @@ class Router {
 	public function group(\Closure $routes): void {}
 }
 function run(Router $r): void { $r->group(function () { $this-><|> }); }`},
+	{name: "callables/first-class callable syntax makes a Closure", completion: []string{"bindTo", "call"}, src: `
+/** @template T */
+class Box {
+	/** @param T $value */
+	public function __construct($value) {}
+	/** @return T */
+	public function get() { return null; }
+}
+function run(): void {
+	$b = new Box(new Person());
+	$f = $b->get(...);
+	$f-><|>
+}`},
+	{name: "callables/first-class callable syntax keeps the signature", hover: []string{"Closure(): Person $f"}, src: `
+/** @template T */
+class Box {
+	/** @param T $value */
+	public function __construct($value) {}
+	/** @return T */
+	public function get() { return null; }
+}
+function run(): void { $b = new Box(new Person()); $f = $b->get(...); echo $<|>f; }`},
+	{name: "callables/calling a first-class callable gives what the callee returns", completion: []string{"name"}, src: `
+/** @template T */
+class Box {
+	/** @param T $value */
+	public function __construct($value) {}
+	/** @return T */
+	public function get() { return null; }
+}
+function run(): void { $b = new Box(new Person()); $f = $b->get(...); $r = $f(); $r-><|> }`},
+	{name: "callables/Closure::call on a first-class callable", completion: []string{"name"}, src: `
+class Maker { public function make(int $n): Person { return new Person(); } }
+function run(Maker $m, Logger $l): void { $m->make(...)->call($l)-><|> }`},
+	{name: "callables/a function's first-class callable", hover: []string{"Closure(string): int $len"}, src: `
+function run(): void { $len = strlen(...); echo $<|>len; }`},
+	{name: "callables/Closure members on a first-class callable aren't unknown", noDiag: []string{"unknown-member"}, src: `
+class Maker {
+	public function make(int $n): Person { return new Person(); }
+	public static function build(): Person { return new Person(); }
+	public function run(): void {
+		$a = $this->make(...);
+		$a->bindTo(null);
+		$b = static::build(...);
+		$b->bindTo(null);
+		$c = Maker::build(...);
+		$c->bindTo(null);
+		$d = strlen(...);
+		$d->bindTo(null);
+	}
+}`},
+	{name: "callables/a spread argument is still a call", completion: []string{"name"}, src: `
+class Maker { public function make(int ...$n): Person { return new Person(); } }
+function run(Maker $m, array $args): void { $m->make(...$args)-><|> }`},
 }
 
 func TestGenericsCallables(t *testing.T) {
@@ -727,6 +781,80 @@ class Customer {
 		}
 		echo $this->label ?? '';
 	}
+}`},
+	{name: "field run/a variable assigned in several branches has each one's members", completion: []string{"info", "name"}, src: `
+function run(bool $c): void {
+	if ($c) {
+		$x = new Logger();
+	} else {
+		$x = new Person();
+	}
+	$x-><|>
+}`},
+	{name: "field run/a variable assigned in several branches shows each one's type", hover: []string{"Logger|Person $x"}, src: `
+function run(bool $c): void {
+	$x = new Logger();
+	if ($c) {
+		$x = new Person();
+	}
+	echo $<|>x->level;
+}`},
+	{name: "field run/a member of any branch's value is no unknown member", clean: true, src: `
+function run(bool $c, int $n): void {
+	if ($c) { $a = new Person(); } else { $a = new Logger(); }
+	$a->name();
+	switch ($n) {
+		case 1:
+			$b = new Person();
+			break;
+		default:
+			$b = new Logger();
+	}
+	$b->name();
+	$d = new Person();
+	if ($c) { $d = new Logger(); }
+	$d->name();
+	$e = new Person();
+	while ($c) { $e = new Logger(); }
+	$e->name();
+}`},
+	{name: "field run/a member no branch's value has is still reported", diag: []string{"unknown-member"}, src: `
+function run(bool $c): void {
+	$d = new Person();
+	if ($c) { $d = new Logger(); }
+	$d->nope();
+}`},
+	{name: "field run/a read before a write that reads the variable in a loop", completion: []string{"where", "get"}, src: `
+class Query { public function where(string $c): static { return $this; } public function get(): array { return []; } }
+function run(Query $p, array $xs): void {
+	foreach ($xs as $x) {
+		$p-><|>get();
+		$p = $p->where('x');
+	}
+}`},
+	{name: "field run/a write that keeps its class in a loop stays typed", diag: []string{"unknown-member"}, src: `
+class Query { public function where(string $c): static { return $this; } }
+function run(array $xs, bool $c): void {
+	$q = new Query();
+	foreach ($xs as $x) { $q = $q->where('a'); }
+	if ($c) {
+		$q = $q->where('b');
+	}
+	$q->nope();
+}`},
+	{name: "field run/??= may keep the value it had", clean: true, src: `
+function run(): void {
+	$q = new Person();
+	$q ??= new Logger();
+	$q->name();
+}`},
+	{name: "field run/a write that changes its class in a loop is unknown", clean: true, src: `
+class Leaf {}
+class Node { public function next(): Leaf { return new Leaf(); } }
+function run(array $xs): void {
+	$n = new Node();
+	foreach ($xs as $x) { $n = $n->next(); }
+	$n->nope();
 }`},
 	{name: "field run/AllowDynamicProperties", clean: true, src: `
 #[\AllowDynamicProperties]
