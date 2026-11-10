@@ -43,7 +43,7 @@ func shortenFQNs(s string) string {
 	for i := 0; i < len(s); i++ {
 		c := s[i]
 		isRun := c == '\\' || c == '_' ||
-			(c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+			(c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c >= 0x80
 		if isRun {
 			if runStart < 0 {
 				runStart = i

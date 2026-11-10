@@ -52,7 +52,7 @@ func buildRecursionResolver(t *testing.T, idx *symbols.Index, lines []string, fi
 			varName := expr
 			for i := 1; i < len(expr); i++ {
 				c := expr[i]
-				if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+				if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c >= 0x80) {
 					varName = expr[:i]
 					break
 				}
@@ -74,7 +74,7 @@ func buildRecursionResolver(t *testing.T, idx *symbols.Index, lines []string, fi
 			varName := expr
 			for i := 1; i < len(expr); i++ {
 				c := expr[i]
-				if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+				if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c >= 0x80) {
 					varName = expr[:i]
 					break
 				}

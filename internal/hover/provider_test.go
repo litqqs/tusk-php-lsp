@@ -721,3 +721,26 @@ echo  WebSocketOpcode::PONG ;
 	}
 
 }
+
+func TestHoverChineseFunc(t *testing.T) {
+	idx := symbols.NewIndex()
+	ca := container.NewContainerAnalyzer(idx, "/tmp", "none")
+	p := NewProvider(idx, ca, "none")
+
+	source := `<?php
+function cnFunc中文(string $one, string $two, int $c): string
+{
+    return $one . $two . $c;
+}
+
+cnFunc中文("中文内容", "更多内容 more content", 3);
+`
+	idx.IndexFile("file:///index.php", source)
+
+	pos := charPosOf(t, source, "cnFunc中文", "cnFunc中文(\"中文内容\"")
+	hover := p.GetHover("file:///index.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for cnFunc中文")
+	}
+
+}

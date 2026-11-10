@@ -1005,7 +1005,7 @@ func keywordOrTarget(target string) string {
 }
 
 func isWordByte(b byte) bool {
-	return b == '_' || (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9')
+	return b == '_' || (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9') || b >= 0x80
 }
 
 // chainOriginClassName resolves target, which starts at line[start], as a
@@ -1424,7 +1424,7 @@ func extractClassBefore(prefix, op string) string {
 	before := strings.TrimSpace(prefix[:idx])
 	for i := len(before) - 1; i >= 0; i-- {
 		ch := before[i]
-		if !(ch >= 'a' && ch <= 'z') && !(ch >= 'A' && ch <= 'Z') && !(ch >= '0' && ch <= '9') && ch != '_' && ch != '\\' {
+		if !(ch >= 'a' && ch <= 'z') && !(ch >= 'A' && ch <= 'Z') && !(ch >= '0' && ch <= '9') && ch != '_' && ch != '\\' && ch < 0x80 {
 			return before[i+1:]
 		}
 	}

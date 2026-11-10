@@ -471,7 +471,7 @@ func hasKeywordSuffix(s, kw string) bool {
 		return true
 	}
 	c := s[len(s)-len(kw)-1]
-	return !(c == '_' || c == '$' || c == '\\' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+	return !(c == '_' || c == '$' || c == '\\' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) || c >= 0x80
 }
 
 // UnknownMemberRule detects unresolved method/property/constant accesses when

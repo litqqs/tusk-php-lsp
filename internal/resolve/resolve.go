@@ -488,7 +488,7 @@ func extractLeadingVariable(expr string) string {
 	end := 1
 	for end < len(expr) {
 		c := expr[end]
-		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c >= 0x80) {
 			break
 		}
 		end++
@@ -514,13 +514,13 @@ func extractFunctionCallName(expr string) string {
 		return ""
 	}
 	c := expr[start]
-	if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
+	if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c >= 0x80) {
 		return ""
 	}
 	end := start
 	for end < len(expr) {
 		ch := expr[end]
-		if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '\\' {
+		if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '\\' || c >= 0x80 {
 			end++
 			continue
 		}
@@ -1251,7 +1251,7 @@ func BuildFQN(namespace, name string) string {
 // IsWordChar returns true if the byte is a valid PHP identifier character
 // (letters, digits, underscore, backslash).
 func IsWordChar(ch byte) bool {
-	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '\\'
+	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '\\' || ch >= 0x80
 }
 
 // JoinChainLines joins the current line with preceding continuation lines

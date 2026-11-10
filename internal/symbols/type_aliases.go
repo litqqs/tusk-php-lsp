@@ -181,5 +181,6 @@ func isAliasTokenChar(ch byte) bool {
 	return ch == '\\' || ch == '_' || ch == '$' ||
 		(ch >= 'a' && ch <= 'z') ||
 		(ch >= 'A' && ch <= 'Z') ||
-		(ch >= '0' && ch <= '9')
+		(ch >= '0' && ch <= '9') ||
+		ch >= 0x80
 }
