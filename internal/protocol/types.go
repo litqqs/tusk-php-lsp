@@ -127,6 +127,14 @@ type CompletionItem struct {
 	FilterText          string             `json:"filterText,omitempty"`
 	Deprecated          bool               `json:"deprecated,omitempty"`
 	AdditionalTextEdits []TextEdit         `json:"additionalTextEdits,omitempty"`
+	// Data is kept by the client and sent back with completionItem/resolve.
+	Data *CompletionItemData `json:"data,omitempty"`
+}
+
+// CompletionItemData says what a completion item stands for, so its
+// details can be filled in when the client asks to resolve it.
+type CompletionItemData struct {
+	Symbol string `json:"symbol"`
 }
 
 // Hover represents the result of a hover request.
@@ -249,11 +257,16 @@ type InitializeParams struct {
 	RootURI               string                 `json:"rootUri"`
 	RootPath              string                 `json:"rootPath"`
 	InitializationOptions *InitializationOptions `json:"initializationOptions,omitempty"`
-	Capabilities struct {
+	Capabilities          struct {
 		TextDocument struct {
 			Completion struct {
 				CompletionItem struct {
 					SnippetSupport bool `json:"snippetSupport"`
+					// ResolveSupport lists the item properties the client
+					// fills in later through completionItem/resolve.
+					ResolveSupport struct {
+						Properties []string `json:"properties"`
+					} `json:"resolveSupport"`
 				} `json:"completionItem"`
 			} `json:"completion"`
 		} `json:"textDocument"`
@@ -267,27 +280,27 @@ type InitializeParams struct {
 
 // InitializationOptions sent by the client during initialization.
 type InitializationOptions struct {
-	PHPVersion         string                   `json:"phpVersion,omitempty"`
-	Extensions         []string                 `json:"extensions,omitempty"`
-	Framework          string                   `json:"framework,omitempty"`
-	ContainerAware     *bool                    `json:"containerAware,omitempty"`
-	DiagnosticsEnabled *bool                    `json:"diagnosticsEnabled,omitempty"`
-	PHPStanEnabled     *bool                    `json:"phpstanEnabled,omitempty"`
-	PHPStanPath        string                   `json:"phpstanPath,omitempty"`
-	PHPStanLevel       string                   `json:"phpstanLevel,omitempty"`
-	PHPStanConfig      string                   `json:"phpstanConfig,omitempty"`
-	CoverageReportPath string                   `json:"coverageReportPath,omitempty"`
-	PintEnabled        *bool                    `json:"pintEnabled,omitempty"`
-	PintPath           string                   `json:"pintPath,omitempty"`
-	PintConfig         string                   `json:"pintConfig,omitempty"`
-	DatabaseEnabled              *bool                    `json:"databaseEnabled,omitempty"`
-	MaxIndexFiles                *int                     `json:"maxIndexFiles,omitempty"`
-	ExcludePaths                 []string                 `json:"excludePaths,omitempty"`
-	InlayHints                   *InlayHintsClientOptions `json:"inlayHints,omitempty"`
-	PHPManualLocale              string                   `json:"phpManualLocale,omitempty"`
-	PHPManualOpenOnDefinition    *bool                    `json:"phpManualOpenOnDefinition,omitempty"`
-	Composer                     *ComposerClientOptions        `json:"composer,omitempty"`
-	Introspection                *IntrospectionClientOptions   `json:"introspection,omitempty"`
+	PHPVersion                string                      `json:"phpVersion,omitempty"`
+	Extensions                []string                    `json:"extensions,omitempty"`
+	Framework                 string                      `json:"framework,omitempty"`
+	ContainerAware            *bool                       `json:"containerAware,omitempty"`
+	DiagnosticsEnabled        *bool                       `json:"diagnosticsEnabled,omitempty"`
+	PHPStanEnabled            *bool                       `json:"phpstanEnabled,omitempty"`
+	PHPStanPath               string                      `json:"phpstanPath,omitempty"`
+	PHPStanLevel              string                      `json:"phpstanLevel,omitempty"`
+	PHPStanConfig             string                      `json:"phpstanConfig,omitempty"`
+	CoverageReportPath        string                      `json:"coverageReportPath,omitempty"`
+	PintEnabled               *bool                       `json:"pintEnabled,omitempty"`
+	PintPath                  string                      `json:"pintPath,omitempty"`
+	PintConfig                string                      `json:"pintConfig,omitempty"`
+	DatabaseEnabled           *bool                       `json:"databaseEnabled,omitempty"`
+	MaxIndexFiles             *int                        `json:"maxIndexFiles,omitempty"`
+	ExcludePaths              []string                    `json:"excludePaths,omitempty"`
+	InlayHints                *InlayHintsClientOptions    `json:"inlayHints,omitempty"`
+	PHPManualLocale           string                      `json:"phpManualLocale,omitempty"`
+	PHPManualOpenOnDefinition *bool                       `json:"phpManualOpenOnDefinition,omitempty"`
+	Composer                  *ComposerClientOptions      `json:"composer,omitempty"`
+	Introspection             *IntrospectionClientOptions `json:"introspection,omitempty"`
 	// ClientCommands lists the tuskPhpLsp.* commands the client handles itself
 	// (e.g. by copying the result to the clipboard). Code actions that depend on
 	// that are only offered for commands listed here.
@@ -431,26 +444,26 @@ type SemanticTokensParams struct {
 
 // ServerCapabilities declares server capabilities.
 type ServerCapabilities struct {
-	TextDocumentSync           TextDocumentSyncOptions `json:"textDocumentSync"`
-	CompletionProvider         *CompletionOptions      `json:"completionProvider,omitempty"`
-	HoverProvider              bool                    `json:"hoverProvider"`
-	DefinitionProvider         bool                    `json:"definitionProvider"`
-	TypeDefinitionProvider     bool                    `json:"typeDefinitionProvider"`
-	ImplementationProvider     bool                    `json:"implementationProvider"`
-	ReferencesProvider         bool                    `json:"referencesProvider"`
-	DocumentSymbolProvider     bool                    `json:"documentSymbolProvider"`
-	DocumentHighlightProvider  bool                    `json:"documentHighlightProvider"`
-	FoldingRangeProvider       bool                    `json:"foldingRangeProvider"`
-	WorkspaceSymbolProvider    bool                    `json:"workspaceSymbolProvider"`
-	DiagnosticProvider         *DiagnosticOptions      `json:"diagnosticProvider,omitempty"`
-	SignatureHelpProvider      *SignatureHelpOptions   `json:"signatureHelpProvider,omitempty"`
-	DocumentFormattingProvider bool                    `json:"documentFormattingProvider"`
-	RenameProvider             *RenameOptions          `json:"renameProvider,omitempty"`
-	CodeActionProvider         *CodeActionOptions      `json:"codeActionProvider,omitempty"`
-	ExecuteCommandProvider     *ExecuteCommandOptions  `json:"executeCommandProvider,omitempty"`
-	InlayHintProvider          *InlayHintOptions       `json:"inlayHintProvider,omitempty"`
-	SelectionRangeProvider     bool                    `json:"selectionRangeProvider,omitempty"`
-	SemanticTokensProvider     *SemanticTokensOptions  `json:"semanticTokensProvider,omitempty"`
+	TextDocumentSync           TextDocumentSyncOptions   `json:"textDocumentSync"`
+	CompletionProvider         *CompletionOptions        `json:"completionProvider,omitempty"`
+	HoverProvider              bool                      `json:"hoverProvider"`
+	DefinitionProvider         bool                      `json:"definitionProvider"`
+	TypeDefinitionProvider     bool                      `json:"typeDefinitionProvider"`
+	ImplementationProvider     bool                      `json:"implementationProvider"`
+	ReferencesProvider         bool                      `json:"referencesProvider"`
+	DocumentSymbolProvider     bool                      `json:"documentSymbolProvider"`
+	DocumentHighlightProvider  bool                      `json:"documentHighlightProvider"`
+	FoldingRangeProvider       bool                      `json:"foldingRangeProvider"`
+	WorkspaceSymbolProvider    bool                      `json:"workspaceSymbolProvider"`
+	DiagnosticProvider         *DiagnosticOptions        `json:"diagnosticProvider,omitempty"`
+	SignatureHelpProvider      *SignatureHelpOptions     `json:"signatureHelpProvider,omitempty"`
+	DocumentFormattingProvider bool                      `json:"documentFormattingProvider"`
+	RenameProvider             *RenameOptions            `json:"renameProvider,omitempty"`
+	CodeActionProvider         *CodeActionOptions        `json:"codeActionProvider,omitempty"`
+	ExecuteCommandProvider     *ExecuteCommandOptions    `json:"executeCommandProvider,omitempty"`
+	InlayHintProvider          *InlayHintOptions         `json:"inlayHintProvider,omitempty"`
+	SelectionRangeProvider     bool                      `json:"selectionRangeProvider,omitempty"`
+	SemanticTokensProvider     *SemanticTokensOptions    `json:"semanticTokensProvider,omitempty"`
 	Experimental               *ExperimentalCapabilities `json:"experimental,omitempty"`
 }
 

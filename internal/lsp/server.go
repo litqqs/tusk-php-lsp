@@ -64,14 +64,20 @@ type Server struct {
 	schemaCache   *models.SchemaCache
 	docMu         sync.RWMutex
 	documents     map[string]string
-	rootPath      string
-	framework     string
-	reader        *bufio.Reader
-	writer        io.Writer
-	logger        *log.Logger
-	shutdown      bool
-	strict        bool      // when true, recovered panics are re-raised after logging
-	exitFunc      func(int) // called by the "exit" notification handler; defaults to os.Exit
+	// writeMu keeps frames whole on the output stream (see writeMessage).
+	writeMu sync.Mutex
+	// publishMu orders diagnostics publishes (see publishDiagnostics).
+	publishMu sync.Mutex
+	// docIndex orders background indexing of open documents.
+	docIndex  docIndexQueue
+	rootPath  string
+	framework string
+	reader    *bufio.Reader
+	writer    io.Writer
+	logger    *log.Logger
+	shutdown  bool
+	strict    bool      // when true, recovered panics are re-raised after logging
+	exitFunc  func(int) // called by the "exit" notification handler; defaults to os.Exit
 
 	builtinPHPVersion string
 	builtinPHPSource  string // "composer" | "local" | "fallback"
@@ -262,15 +268,6 @@ func (s *Server) sendServerRequest(method string, params interface{}) {
 	}{JSONRPC: "2.0", ID: id, Method: method, Params: params})
 }
 
-func (s *Server) writeMessage(msg interface{}) {
-	body, err := json.Marshal(msg)
-	if err != nil {
-		s.logger.Printf("Marshal error: %v", err)
-		return
-	}
-	fmt.Fprintf(s.writer, "Content-Length: %d\r\n\r\n%s", len(body), body)
-}
-
 func (s *Server) handleMessage(msg *jsonRPCMessage) {
 	// Responses to server-initiated requests (e.g. window/showDocument) are
 	// fire-and-forget; we drop them silently.
@@ -300,6 +297,8 @@ func (s *Server) handleMessage(msg *jsonRPCMessage) {
 		s.handleDidSave(msg)
 	case "textDocument/completion":
 		s.handleCompletion(msg)
+	case "completionItem/resolve":
+		s.handleCompletionResolve(msg)
 	case "textDocument/hover":
 		s.handleHover(msg)
 	case "textDocument/definition":
@@ -398,6 +397,18 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 	viewResolver := frameworklaravel.NewViews(s.rootPath)
 	translationResolver := frameworklaravel.NewTranslationResolver(s.rootPath)
 	s.completion = completion.NewProvider(s.index, s.container, s.framework)
+	// Clients that resolve documentation and detail later get member items
+	// without them, which keeps long member lists cheap to send.
+	lazyDoc, lazyDetail := false, false
+	for _, prop := range params.Capabilities.TextDocument.Completion.CompletionItem.ResolveSupport.Properties {
+		switch prop {
+		case "documentation":
+			lazyDoc = true
+		case "detail":
+			lazyDetail = true
+		}
+	}
+	s.completion.SetLazyResolve(lazyDoc, lazyDetail)
 	s.completion.SetArrayResolver(arrayResolver)
 	if s.routeIndex != nil {
 		s.completion.SetLaravelRouteIndex(s.routeIndex)
@@ -461,7 +472,7 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 				Change:    1, // Full
 				Save:      &protocol.SaveOptions{IncludeText: false},
 			},
-			CompletionProvider:        &protocol.CompletionOptions{TriggerCharacters: []string{".", ">", ":", "$", "\\", "|", "#", "[", "(", "'", "\""}, ResolveProvider: false},
+			CompletionProvider:        &protocol.CompletionOptions{TriggerCharacters: []string{".", ">", ":", "$", "\\", "|", "#", "[", "(", "'", "\""}, ResolveProvider: true},
 			HoverProvider:             true,
 			DefinitionProvider:        true,
 			TypeDefinitionProvider:    true,
@@ -612,20 +623,6 @@ func isPHPDocument(uri string) bool {
 	return workspace.IsPHPSource(uri)
 }
 
-// indexDocumentMaybeAsync indexes source synchronously for small documents
-// (line count <= largeDocThreshold) so that ordinary editor interactions
-// remain deterministic. For large documents the indexing is offloaded to a
-// background goroutine via goSafe so the JSON-RPC message loop is not stalled.
-func (s *Server) indexDocumentMaybeAsync(uri, source string) {
-	if strings.Count(source, "\n") > largeDocThreshold {
-		s.goSafe("indexFileByURI:"+uri, func() {
-			s.indexFileByURI(uri, source)
-		})
-	} else {
-		s.indexFileByURI(uri, source)
-	}
-}
-
 func (s *Server) handleDidClose(msg *jsonRPCMessage) {
 	var params protocol.DidCloseTextDocumentParams
 	if json.Unmarshal(msg.Params, &params) != nil {
@@ -648,7 +645,7 @@ func (s *Server) handleDidSave(msg *jsonRPCMessage) {
 		s.documents[uri] = *params.Text
 		s.docMu.Unlock()
 		if isPHPDocument(uri) {
-			s.indexFileByURI(uri, *params.Text)
+			s.indexDocumentMaybeAsync(uri, *params.Text)
 		}
 	}
 	if !isPHPDocument(uri) {
@@ -678,6 +675,17 @@ func (s *Server) handleCompletion(msg *jsonRPCMessage) {
 	}
 	source := s.getDocument(params.TextDocument.URI)
 	s.sendResponse(msg.ID, s.completion.GetCompletions(params.TextDocument.URI, source, params.Position))
+}
+
+// handleCompletionResolve fills in the documentation and detail of a member
+// item that were left out of the completion list.
+func (s *Server) handleCompletionResolve(msg *jsonRPCMessage) {
+	var item protocol.CompletionItem
+	if json.Unmarshal(msg.Params, &item) != nil {
+		s.sendError(msg.ID, -32602, "Invalid params")
+		return
+	}
+	s.sendResponse(msg.ID, s.completion.ResolveCompletionItem(item))
 }
 
 func (s *Server) handleHover(msg *jsonRPCMessage) {
@@ -1056,14 +1064,6 @@ func (s *Server) getDocument(uri string) string {
 	source := s.documents[uri]
 	s.docMu.RUnlock()
 	return source
-}
-
-func (s *Server) publishDiagnostics(uri, source string) {
-	diagnostics := s.diag.Analyze(uri, source)
-	if diagnostics == nil {
-		diagnostics = []protocol.Diagnostic{}
-	}
-	s.sendNotification("textDocument/publishDiagnostics", map[string]interface{}{"uri": uri, "diagnostics": diagnostics})
 }
 
 // republishOpenDocuments re-runs diagnostics for every open document.

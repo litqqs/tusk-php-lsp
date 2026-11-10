@@ -11,13 +11,16 @@ import (
 // DeprecatedUsageRule flags uses of what's marked with PHP 8.4's #[\Deprecated].
 type DeprecatedUsageRule struct {
 	TypeResolver func(expr string, source string, line int, file *parser.FileNode) string
+	// Uses, when set, shares the attribute uses found in a file with the
+	// other rules run over it.
+	Uses *MemberUseCache
 }
 
 func (r *DeprecatedUsageRule) Code() string { return "deprecated" }
 
 func (r *DeprecatedUsageRule) Check(file *parser.FileNode, source string, index *symbols.Index) []Finding {
 	var findings []Finding
-	for _, use := range memberUses(file, source, index, r.TypeResolver) {
+	for _, use := range r.Uses.get(file, source, index, r.TypeResolver) {
 		attr := use.symbol.Attribute("Deprecated")
 		if attr == nil {
 			continue
@@ -35,13 +38,16 @@ func (r *DeprecatedUsageRule) Check(file *parser.FileNode, source string, index 
 // whose result is thrown away. A `(void)` cast is the way to do that on purpose.
 type UnusedResultRule struct {
 	TypeResolver func(expr string, source string, line int, file *parser.FileNode) string
+	// Uses, when set, shares the attribute uses found in a file with the
+	// other rules run over it.
+	Uses *MemberUseCache
 }
 
 func (r *UnusedResultRule) Code() string { return "unused-result" }
 
 func (r *UnusedResultRule) Check(file *parser.FileNode, source string, index *symbols.Index) []Finding {
 	var findings []Finding
-	for _, use := range memberUses(file, source, index, r.TypeResolver) {
+	for _, use := range r.Uses.get(file, source, index, r.TypeResolver) {
 		attr := use.symbol.Attribute("NoDiscard")
 		if attr == nil || !use.isCall || !use.isStatement {
 			continue
@@ -134,6 +140,29 @@ type memberUse struct {
 	isStatement bool // nothing takes its result
 }
 
+// MemberUseCache holds the attribute uses found in one file, so the rules
+// that read them (deprecated, unused-result) find them once. A nil cache
+// finds them every time.
+type MemberUseCache struct {
+	// Shared, when set, shares the file's parse with the other rules.
+	Shared *Shared
+	source string
+	file   *parser.FileNode
+	uses   []memberUse
+	done   bool
+}
+
+func (c *MemberUseCache) get(file *parser.FileNode, source string, index *symbols.Index, typeResolver func(string, string, int, *parser.FileNode) string) []memberUse {
+	if c == nil {
+		return memberUses(file, source, index, typeResolver, nil)
+	}
+	if !c.done || c.source != source || c.file != file {
+		c.source, c.file, c.done = source, file, true
+		c.uses = memberUses(file, source, index, typeResolver, c.Shared)
+	}
+	return c.uses
+}
+
 func (u memberUse) finding(code, message string, tags []Tag) Finding {
 	return Finding{
 		StartLine: u.token.Line,
@@ -147,7 +176,7 @@ func (u memberUse) finding(code, message string, tags []Tag) Finding {
 	}
 }
 
-func memberUses(file *parser.FileNode, source string, index *symbols.Index, typeResolver func(string, string, int, *parser.FileNode) string) []memberUse {
+func memberUses(file *parser.FileNode, source string, index *symbols.Index, typeResolver func(string, string, int, *parser.FileNode) string, shared *Shared) []memberUse {
 	if file == nil || index == nil {
 		return nil
 	}
@@ -155,7 +184,7 @@ func memberUses(file *parser.FileNode, source string, index *symbols.Index, type
 	if !index.HasAttributedSymbols() {
 		return nil
 	}
-	result := parser.New().Parse(source)
+	result := shared.parse(source)
 	if result == nil {
 		return nil
 	}
