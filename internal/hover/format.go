@@ -30,6 +30,13 @@ func shortTypes(rendered string) string {
 	return qualifiedName.ReplaceAllString(rendered, "")
 }
 
+func (p *Provider) showChildren(symParent *symbols.Symbol, sb *strings.Builder) {
+	sb.WriteString("{")
+	for _, sym := range symParent.Children {
+		_, _ = sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(sym), "\n", "\n    ") + ";")
+	}
+	sb.WriteString("\n}\n")
+}
 func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 	var sb strings.Builder
 
@@ -51,23 +58,14 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		if len(sym.Implements) > 0 {
 			sb.WriteString(" implements " + joinShortNames(sym.Implements))
 		}
-		sb.WriteString("{")
-		for _, child := range sym.Children {
-			sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(child), "\n", "\n    "))
-		}
-		sb.WriteString("\n}\n")
+		p.showChildren(sym, &sb)
 
 	case symbols.KindInterface:
 		sb.WriteString("interface " + sym.Name)
 		if len(sym.Implements) > 0 {
 			sb.WriteString(" extends " + joinShortNames(sym.Implements))
 		}
-
-		sb.WriteString("{")
-		for _, child := range sym.Children {
-			sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(child), "\n", "\n    "))
-		}
-		sb.WriteString("\n}\n")
+		p.showChildren(sym, &sb)
 
 	case symbols.KindMethod:
 		if sym.IsVirtual {
@@ -138,12 +136,7 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		if len(sym.Implements) > 0 {
 			sb.WriteString(" implements " + joinShortNames(sym.Implements))
 		}
-
-		sb.WriteString("{")
-		for _, child := range sym.Children {
-			sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(child), "\n", "\n    "))
-		}
-		sb.WriteString("\n}\n")
+		p.showChildren(sym, &sb)
 
 	case symbols.KindEnumCase:
 		sb.WriteString("case " + sym.Name)
@@ -161,11 +154,7 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		}
 	case symbols.KindTrait:
 		sb.WriteString("trait " + sym.Name)
-		sb.WriteString("{")
-		for _, child := range sym.Children {
-			sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(child), "\n", "\n    "))
-		}
-		sb.WriteString("\n}\n")
+		p.showChildren(sym, &sb)
 	}
 
 	return formatAttributes(sym.Attributes) + sb.String()

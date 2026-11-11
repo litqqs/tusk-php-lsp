@@ -707,8 +707,9 @@ namespace Swow\WebSocket
 	idx.IndexFile("file://stubs.php", source)
 	source = `<?php
 use Swow\SocketException;
+use Swow\WebSocket\WebSocket;
 use Swow\WebSocket\Opcode as WebSocketOpcode;
-
+echo WebSocket::mask("a",1,5);
 echo  WebSocketOpcode::PONG ; 
 
 `
@@ -716,6 +717,11 @@ echo  WebSocketOpcode::PONG ;
 
 	pos := charPosOf(t, source, "WebSocketOpcode", "WebSocketOpcode::PONG ; ")
 	hover := p.GetHover("file:///index.php", source, pos)
+	if hover == nil {
+		t.Fatal("expected hover result for Swow\\WebSocket\\Opcode::PONG")
+	}
+	pos = charPosOf(t, source, "WebSocket", "WebSocket::mask(\"a\",1,5)")
+	hover = p.GetHover("file:///index.php", source, pos)
 	if hover == nil {
 		t.Fatal("expected hover result for Swow\\WebSocket\\Opcode::PONG")
 	}
