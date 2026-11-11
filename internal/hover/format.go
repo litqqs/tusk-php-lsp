@@ -51,11 +51,24 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		if len(sym.Implements) > 0 {
 			sb.WriteString(" implements " + joinShortNames(sym.Implements))
 		}
+		sb.WriteString("{")
+		for _, child := range sym.Children {
+			sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(child), "\n", "\n    "))
+		}
+		sb.WriteString("\n}\n")
+
 	case symbols.KindInterface:
 		sb.WriteString("interface " + sym.Name)
 		if len(sym.Implements) > 0 {
 			sb.WriteString(" extends " + joinShortNames(sym.Implements))
 		}
+
+		sb.WriteString("{")
+		for _, child := range sym.Children {
+			sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(child), "\n", "\n    "))
+		}
+		sb.WriteString("\n}\n")
+
 	case symbols.KindMethod:
 		if sym.IsVirtual {
 			sb.WriteString("(magic) ")
@@ -125,6 +138,13 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		if len(sym.Implements) > 0 {
 			sb.WriteString(" implements " + joinShortNames(sym.Implements))
 		}
+
+		sb.WriteString("{")
+		for _, child := range sym.Children {
+			sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(child), "\n", "\n    "))
+		}
+		sb.WriteString("\n}\n")
+
 	case symbols.KindEnumCase:
 		sb.WriteString("case " + sym.Name)
 		if sym.Value != "" {
@@ -141,6 +161,11 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		}
 	case symbols.KindTrait:
 		sb.WriteString("trait " + sym.Name)
+		sb.WriteString("{")
+		for _, child := range sym.Children {
+			sb.WriteString("\n    " + strings.ReplaceAll(p.formatHoverDeclaration(child), "\n", "\n    "))
+		}
+		sb.WriteString("\n}\n")
 	}
 
 	return formatAttributes(sym.Attributes) + sb.String()
