@@ -1295,6 +1295,9 @@ func buildFQN(namespace, name string) string {
 	if namespace == "" {
 		return name
 	}
+	if strings.Contains(name, "\\") {
+		return name
+	}
 	return namespace + "\\" + name
 }
 
