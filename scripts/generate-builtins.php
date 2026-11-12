@@ -292,6 +292,27 @@ function generatePhpStubs(array $functions, array $classLikes): string
         array_pop($lines);
     }
 
+    $consts = get_defined_constants(true);
+    $ns_consts=[];
+    foreach($consts as $group=>$v){
+        if ('user'==$group) continue;
+        foreach ($v as $name=>$value){
+            $i=strrpos($name,'\\');
+            if(false===$i){
+                $lines[]="const $name = ".var_export($value, true).";";
+            }else{
+                $ns_consts[substr($name,0, $i)][substr($name,$i+1)]=$value;
+            }
+        }
+    }
+    foreach($ns_consts as $ns=>$v){
+        $lines[]="namespace $ns {"; 
+            foreach($v as $name=>$value){
+                $lines[]="\tconst $name = ".var_export($value, true).";";
+            }
+        $lines[]='}';
+    }
+
     $lines[] = '';
 
     return implode("\n", $lines);

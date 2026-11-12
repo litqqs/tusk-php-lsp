@@ -2,6 +2,7 @@ package completion
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -1416,8 +1417,30 @@ func (p *Provider) completeGlobal(prefix, source string, rk nameRanker, file *pa
 				item.AdditionalTextEdits = buildAutoImportEdit(sym.FQN, source, file)
 				items = append(items, item)
 			}
+		case symbols.KindConstant:
+			item := protocol.CompletionItem{Label: sym.Name, Kind: symKind(sym.Kind), Detail: sym.Value, SortText: rk.key(sym, sym.Name)}
+			item.InsertText = sym.Name
+			item.InsertTextFormat = 2
+			items = append(items, item)
 		}
 	}
+	slices.SortFunc(items, func(a, b protocol.CompletionItem) int {
+		switch {
+		case a.Label > b.Label:
+			return 1
+		case a.Label < b.Label:
+			return -1
+		case a.Detail > b.Detail:
+			return 1
+		case a.Detail < b.Detail:
+			return -1
+		default:
+			return 0
+		}
+	})
+	items = slices.CompactFunc(items, func(a, b protocol.CompletionItem) bool {
+		return a.Label == b.Label && a.Kind == b.Kind
+	})
 	return items
 }
 
