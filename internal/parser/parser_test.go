@@ -745,3 +745,22 @@ define('BB',"BBBBBB");
 	}
 
 }
+
+func TestParseNamespaceBlock(t *testing.T) {
+	// Valid code should always return a non-nil FileNode
+	source := `<?php
+namespace AA{
+	function aa(){}
+}
+namespace BB{
+	function bb(){}
+}
+`
+	file := ParseFile(source)
+	if file == nil {
+		t.Fatal("expected non-nil FileNode")
+	}
+	if file.Namespace != "" {
+		t.Errorf("expected namespace '', got %q", file.Namespace)
+	}
+}

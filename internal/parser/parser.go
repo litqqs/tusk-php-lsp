@@ -886,7 +886,8 @@ type structParser struct {
 	enumCases  *[]EnumCase    // where the enum body being parsed collects its cases
 	// traitUseDocs collects the docblocks above trait `use` statements in the
 	// class body being parsed, where @use gives the trait's type arguments.
-	traitUseDocs []string
+	traitUseDocs      []string
+	isGlobalNamespace bool
 }
 
 // parseClassBodyWithTraitDocs parses a class-like body and also returns the
@@ -1040,6 +1041,9 @@ func (p *structParser) parse() {
 			p.advance()
 		}
 	}
+	if !p.isGlobalNamespace {
+		p.result.Namespace = ""
+	}
 }
 
 // parseAttributeGroup reads a PHP 8 `#[A, B(1, 'x')]` group.
@@ -1156,7 +1160,9 @@ func (p *structParser) parseNamespace() {
 		}
 	}
 	p.result.Namespace = strings.Join(parts, "\\")
-	p.expect(TokenSemicolon)
+	//p.expect(TokenSemicolon)
+	_, p.isGlobalNamespace = p.expect(TokenSemicolon)
+
 }
 
 func (p *structParser) parseUse() {

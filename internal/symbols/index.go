@@ -236,7 +236,7 @@ func (idx *Index) IndexIDEHelperFile(uri string, source string) {
 	}
 
 	for _, c := range file.Classes {
-		fqn := buildFQN(ns, c.Name)
+		fqn := buildFQN(ns, c.FullName)
 		existing := idx.symbols[fqn]
 		if existing != nil {
 			// Class already exists — only inject virtual members from this file's docblock
@@ -366,7 +366,7 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 		classes = append(append(make([]parser.ClassNode, 0, len(file.Classes)+len(file.AnonymousClasses)), file.Classes...), file.AnonymousClasses...)
 	}
 	for _, c := range classes {
-		fqn := buildFQN(ns, c.Name)
+		fqn := buildFQN(ns, c.FullName)
 		if c.Name == parser.AnonymousClassName {
 			fqn = c.FullName
 		}
@@ -404,7 +404,7 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 	}
 
 	for _, iface := range file.Interfaces {
-		fqn := buildFQN(ns, iface.Name)
+		fqn := buildFQN(ns, iface.FullName)
 		var resolvedParents []string
 		for _, parent := range iface.Extends {
 			resolvedParents = append(resolvedParents, resolve(parent))
@@ -424,7 +424,7 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 	}
 
 	for _, tr := range file.Traits {
-		fqn := buildFQN(ns, tr.Name)
+		fqn := buildFQN(ns, tr.FullName)
 		sym := &Symbol{Name: tr.Name, FQN: fqn, Kind: KindTrait, URI: uri, DocComment: qualifyDocTypes(tr.DocComment, file.Uses),
 			Range: symRange(tr.StartLine, tr.StartCol, len(tr.Name))}
 		idx.addSymbolWithSource(uri, sym, src)
@@ -439,7 +439,7 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 	}
 
 	for _, en := range file.Enums {
-		fqn := buildFQN(ns, en.Name)
+		fqn := buildFQN(ns, en.FullName)
 		var resolvedEnumImpls []string
 		for _, impl := range en.Implements {
 			resolvedEnumImpls = append(resolvedEnumImpls, resolve(impl))
@@ -471,7 +471,7 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 	idx.indexConstants(uri, nil, ns, file.Constants, src, resolve)
 
 	for _, fn := range file.Functions {
-		fqn := buildFQN(ns, fn.Name)
+		fqn := buildFQN(ns, fn.FullName)
 		sym := &Symbol{Name: fn.Name, FQN: fqn, Kind: KindFunction, URI: uri, ReturnType: resolve(fn.ReturnType.Name),
 			Attributes: indexAttributes(fn.Attributes, resolve),
 			DocComment: qualifyDocTypes(fn.DocComment, file.Uses), Range: symRange(fn.StartLine, fn.StartCol, len(fn.Name))}
