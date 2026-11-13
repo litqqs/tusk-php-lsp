@@ -497,7 +497,7 @@ func hasKeywordSuffix(s, kw string) bool {
 // UnknownMemberRule detects unresolved method/property/constant accesses when
 // the receiver type can be resolved reliably.
 type UnknownMemberRule struct {
-	TypeResolver func(expr string, source string, line int, file *parser.FileNode) string
+	TypeResolver func(expr string, source string, line, col int, file *parser.FileNode) string
 }
 
 func (r *UnknownMemberRule) Code() string { return "unknown-member" }
@@ -540,7 +540,7 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 				continue
 			}
 
-			owners := r.resolveOwners(ownerExpr, lineNum, source, file, index)
+			owners := r.resolveOwners(ownerExpr, lineNum, backwardExprStart(line, opStart), source, file, index)
 			if len(owners) == 0 {
 				continue
 			}
@@ -585,7 +585,7 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 
 // resolveOwners returns every class-like a member may be accessed on. It returns
 // nothing when any part of the type isn't known, since the member could be there.
-func (r *UnknownMemberRule) resolveOwners(ownerExpr string, lineNum int, source string, file *parser.FileNode, index *symbols.Index) []string {
+func (r *UnknownMemberRule) resolveOwners(ownerExpr string, lineNum, col int, source string, file *parser.FileNode, index *symbols.Index) []string {
 	if !strings.HasPrefix(ownerExpr, "$") && !strings.HasSuffix(ownerExpr, ")") && !strings.HasSuffix(ownerExpr, "]") {
 		fqn, ok := resolveClassLikeName(ownerExpr, lineNum, file)
 		if ok && fqn != "" {
@@ -595,15 +595,17 @@ func (r *UnknownMemberRule) resolveOwners(ownerExpr string, lineNum int, source 
 		}
 	}
 
-	return resolvedClassLikes(r.TypeResolver(ownerExpr, source, lineNum, file), file, index)
+	return resolvedClassLikes(r.TypeResolver(ownerExpr, source, lineNum, col, file), file, index)
 }
 
-// instanceofOwners adds the classes an expression is tested against before the
-// access, since the code may be relying on that check. The whole file so far is
-// searched, which can only spare a finding. ok is false when a tested class is
-// unknown, as the member could be on it.
+// instanceofOwners adds the classes an expression other than a plain
+// variable ($this, a property, a call) is tested against before the access,
+// since the code may be relying on that check: the resolver narrows plain
+// variables only. The whole file so far is searched, which can only spare a
+// finding. ok is false when a tested class is unknown, as the member could be
+// on it.
 func instanceofOwners(ownerExpr string, lines []string, instanceofLines []int, lineNum int, file *parser.FileNode, index *symbols.Index) (owners []string, ok bool) {
-	if !strings.HasPrefix(ownerExpr, "$") {
+	if !strings.HasPrefix(ownerExpr, "$") || isPlainVariable(ownerExpr) {
 		return nil, true
 	}
 	for _, i := range instanceofLines {
@@ -686,6 +688,20 @@ func instanceofTargets(line, expr string) []string {
 		}
 		out = append(out, after[:end])
 	}
+}
+
+// isPlainVariable reports whether expr is a local variable, which the type
+// resolver narrows by instanceof itself.
+func isPlainVariable(expr string) bool {
+	if len(expr) < 2 || expr[0] != '$' || expr == "$this" {
+		return false
+	}
+	for i := 1; i < len(expr); i++ {
+		if !isIdentChar(expr[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 // resolvedClassLikes lists the class-likes in a type from the type resolver,

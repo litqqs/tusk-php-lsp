@@ -26,7 +26,7 @@ type Provider struct {
 
 	// TypeResolver resolves the type of a PHP expression for redundant nullsafe checks.
 	// Set by the LSP server after initialization.
-	TypeResolver func(expr string, source string, line int, file *parser.FileNode) string
+	TypeResolver func(expr string, source string, line, col int, file *parser.FileNode) string
 
 	// BuilderModelResolver resolves the Eloquent model FQN from a builder chain.
 	// Set by the LSP server after initialization.
@@ -164,7 +164,7 @@ func (p *Provider) analyzeNative(uri, source string, bladePHP bool) []protocol.D
 			diags = append(diags, p.applyRuleSeverity("invalid-override", checks.SeverityError, findingsToDiagnostics(fs))...)
 		}
 		if p.cfg.IsRuleEnabled("argument-count-mismatch") {
-			fs := (&checks.ArgumentCountRule{Shared: shared}).Check(file, source, p.index)
+			fs := (&checks.ArgumentCountRule{Shared: shared, TypeResolver: typeResolver}).Check(file, source, p.index)
 			diags = append(diags, p.applyRuleSeverity("argument-count-mismatch", checks.SeverityWarning, findingsToDiagnostics(fs))...)
 		}
 	}

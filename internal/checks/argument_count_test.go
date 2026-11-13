@@ -72,22 +72,24 @@ $msg = greet("Alice");
 		assertNoFindings(t, findings)
 	})
 
-	t.Run("too few arguments not flagged (conservative - cannot detect optional params)", func(t *testing.T) {
-		// The parser does not currently propagate HasDefault through ParamNode→ParamInfo,
-		// so we cannot reliably distinguish required vs optional params.
-		// The "too few" check is conservatively disabled to avoid false positives.
+	t.Run("too few arguments flagged", func(t *testing.T) {
 		idx := indexWithFunctions(`<?php
 function add(int $a, int $b): int {
     return $a + $b;
 }
+function pad(string $s, int $n = 2, string $c = ' '): string { return $s; }
 `)
 		source := `<?php
 $result = add(1);
+$ok = pad('x');
+$ok = pad('x', 3, '-');
 `
 		file := parser.ParseFile(source)
 		findings := rule.Check(file, source, idx)
-		// Conservatively not flagged
-		assertNoFindings(t, findings)
+		assertFindingCodes(t, findings, []string{"argument-count-mismatch"})
+		if len(findings) == 1 && findings[0].Message != "Too few arguments to add(): 1 passed, at least 2 required" {
+			t.Errorf("message: %q", findings[0].Message)
+		}
 	})
 
 	t.Run("too many arguments flagged", func(t *testing.T) {
@@ -188,7 +190,9 @@ doSomething(1, 2, 3);
 		assertNoFindings(t, findings)
 	})
 
-	t.Run("static method too many args flagged", func(t *testing.T) {
+	// PHP allows extra arguments, and libraries read them with
+	// func_get_args() to stay compatible, as Ulid::isValid($id, $format) does.
+	t.Run("static method too many args not flagged, too few flagged", func(t *testing.T) {
 		idx := indexWithFunctions(`<?php
 namespace App;
 class Math {
@@ -201,10 +205,14 @@ class Math {
 namespace App;
 use App\Math;
 $result = Math::multiply(1, 2, 3, 4);
+$result = Math::multiply(1);
 `
 		file := parser.ParseFile(source)
 		findings := rule.Check(file, source, idx)
 		assertFindingCodes(t, findings, []string{"argument-count-mismatch"})
+		if len(findings) == 1 && findings[0].StartLine != 4 {
+			t.Errorf("finding on line %d, want 4", findings[0].StartLine)
+		}
 	})
 
 	t.Run("class with __call skips check", func(t *testing.T) {
@@ -266,4 +274,98 @@ init();
 		findings := rule.Check(file, source, idx)
 		assertNoFindings(t, findings)
 	})
+}
+
+// A call through -> is checked against the method of the receiver's class,
+// when that's one known class; @method tags, __call and unions aren't. Only
+// too few arguments is reported there: PHP allows too many, and libraries
+// read them with func_get_args().
+func TestArgumentCountOnMethodCalls(t *testing.T) {
+	idx := indexWithFunctions(`<?php
+namespace App;
+class Mailer {
+    public function send(string $to, string $subject): bool { return true; }
+    public function queue(string $to, int $delay = 0): void {}
+}
+class Other { public function send(): void {} }
+/** @method void magic(string $a, string $b) */
+class Magic { public function __call($n, $a) {} }
+/** @method void tagged(string $a, string $b) */
+class Tagged {}
+`)
+	types := map[string]string{"$this": `App\Mailer`, "$mailer": `App\Mailer`, "$either": `App\Mailer|App\Other`, "$magic": `App\Magic`, "$tagged": `App\Tagged`}
+	rule := &ArgumentCountRule{TypeResolver: func(expr, _ string, _, _ int, _ *parser.FileNode) string { return types[expr] }}
+	source := `<?php
+namespace App;
+$mailer->send('a@example.test');
+$mailer?->send('a', 'b', 'c');
+$mailer->queue('a');
+$mailer->send('a', 'b');
+$either->send('a');
+$magic->magic('a');
+$tagged->tagged('a');
+$unknown->send('a');
+$f = function () { $this->send('a'); };
+$mailer->send(...$args);
+$mailer->send(to: 'a', subject: 'b');
+`
+	got := rule.Check(parser.ParseFile(source), source, idx)
+	var messages []string
+	for _, f := range got {
+		messages = append(messages, f.Message)
+	}
+	want := []string{
+		"Too few arguments to send(): 1 passed, at least 2 required",
+	}
+	if len(messages) != len(want) || messages[0] != want[0] {
+		t.Errorf("got %q, want %q", messages, want)
+	}
+	if len(got) > 0 && (got[0].StartLine != 2 || got[0].StartCol != 9) {
+		t.Errorf("first finding at %d:%d, want 2:9", got[0].StartLine, got[0].StartCol)
+	}
+}
+
+// Code that checks a version first is written for several versions of PHP or a
+// library, whose signatures differ. Laravel calls PHPUnit's ErrorHandler
+// enable() with or without an argument depending on PHPUnit's version.
+func TestArgumentCountSkipsVersionGatedBranches(t *testing.T) {
+	idx := indexWithFunctions(`<?php
+namespace App;
+class Handler { public function enable(string $test): void {} }
+class Kernel { const VERSION_ID = 70000; }
+function pair($a, $b) {}
+`)
+	types := map[string]string{"$instance": `App\Handler`}
+	rule := &ArgumentCountRule{TypeResolver: func(expr, _ string, _, _ int, _ *parser.FileNode) string { return types[expr] }}
+	source := `<?php
+namespace App;
+if (version_compare(Version::id(), '12.3.4', '>=')) {
+    $instance->enable($test);
+} else {
+    $instance->enable();
+}
+if ($legacy) {
+    pair(1);
+} elseif (\PHP_VERSION_ID < 80100) {
+    pair(1);
+} else if ($other) {
+    pair(1);
+}
+if (Kernel::VERSION_ID >= 70000) pair(1);
+if (PHP_VERSION >= '8.0'):
+    pair(1);
+endif;
+$instance->enable();
+if ($unrelated) {
+    pair(1);
+}
+`
+	got := rule.Check(parser.ParseFile(source), source, idx)
+	var lines []int
+	for _, f := range got {
+		lines = append(lines, f.StartLine)
+	}
+	if len(lines) != 2 || lines[0] != 18 || lines[1] != 20 {
+		t.Errorf("findings on lines %v, want [18 20] (only outside the version checks)", lines)
+	}
 }

@@ -1,6 +1,6 @@
-.PHONY: build install test clean dev cross-build wasm conformance conformance-pr bench bench-install bench-self
+.PHONY: build install test clean dev cross-build wasm conformance conformance-pr bench bench-install bench-self field-run field-baseline field-baseline-update
 
-VERSION ?= 0.13.0
+VERSION ?= 0.14.0
 BINARY  := tusk-php
 LDFLAGS := -ldflags="-s -w -X main.version=$(VERSION)"
 
@@ -41,3 +41,16 @@ bench: build
 
 bench-self: build
 	go run ./bench/lspbench -servers tusk-php
+
+# Diagnostics over a real project, as the server reports them:
+#   make field-run ROOT=../framework PATHS='src/Illuminate' BASELINE=laravel.baseline
+field-run: build
+	./build/$(BINARY) check --root $(ROOT) $(if $(BASELINE),--baseline $(BASELINE)) $(PATHS)
+
+# Diagnostics over Laravel, Symfony, WordPress and Magento 2 at pinned commits,
+# compared with testdata/field/*.baseline. NAME=laravel checks one.
+field-baseline: build
+	bash scripts/field-baseline.sh $(NAME)
+
+field-baseline-update: build
+	bash scripts/field-baseline.sh --update $(NAME)

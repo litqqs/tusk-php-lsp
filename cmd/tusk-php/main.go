@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	version    = "0.13.0"
+	version    = "0.14.0"
 	showVer    = flag.Bool("version", false, "Print version and exit")
 	logFile    = flag.String("log", "", "Log file path (default: stderr)")
 	transport  = flag.String("transport", "stdio", "Transport: stdio")
@@ -49,6 +49,13 @@ func main() {
 			os.Exit(1)
 		}
 		return
+	}
+	if len(os.Args) > 1 && os.Args[1] == "check" {
+		code, err := runCheck(os.Args[2:], os.Stdout, os.Stderr)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		}
+		os.Exit(code)
 	}
 	if len(os.Args) > 1 && os.Args[1] == "mcp" {
 		runMCP(os.Args[2:])

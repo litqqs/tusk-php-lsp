@@ -7,8 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-13
+
+### Added
+
+- **`tusk-php check`** reports the diagnostics your editor shows from the command line, for a whole project or the files, directories and globs you name, as text or JSON, and exits with `1` on errors or warnings. `--exclude` leaves out paths such as test directories, and `--write-baseline` and `--baseline` let CI fail only on new findings. See [docs/command-line.md](docs/command-line.md).
+- **Too few arguments** is reported by `argument-count-mismatch`: `$mailer->send('to@example.test')` on a `send(string $to, string $subject)` says `Too few arguments to send(): 1 passed, at least 2 required`, which PHP would throw on. It covers functions, static calls and `->` calls whose receiver is one known class. Calls with named arguments or `...$spread`, variadic methods, classes with `__call`, methods only declared by `@method`, and `$this` inside closures aren't checked.
+- **`instanceof` narrows variables** for hover, completion and diagnostics alike: inside `if ($o instanceof Foo) { … }`, after a guard such as `if (!$o instanceof Foo) { return; }`, after `assert($o instanceof Foo)`, in a `while`, an `elseif`, a `switch (true)` case or a `match (true)` arm, and after `&&`, `||` or `?` in the same expression, `$o` is a `Foo`: `$o->` completes its members and unknown members are checked against it. A `Foo|Bar` tested against `Foo` is `Bar` in the `else` branch, and a class tested against an interface it doesn't implement is both.
+- **Catch variables are typed:** in `catch (NotFound $e)` hover shows `NotFound`, `$e->` completes its methods, and unknown members on it are reported. `catch (A|B $e)` gives `A|B`. When the variable already had a value before the `try`, after the `catch` it may hold either.
+
 ### Fixed
 
+- `argument-count-mismatch` no longer reports calls inside a version check, where each branch is written for a different version of PHP or of a library: any branch of an `if`/`elseif`/`else` whose condition uses `version_compare()`, `PHP_VERSION_ID` and the other `PHP_*VERSION` constants, a class constant such as `Kernel::VERSION_ID`, or Composer's `InstalledVersions`. Laravel's `$instance->enable()` for PHPUnit releases before 12.3.4 was reported against the newer signature.
+- **Class completion no longer adds a clashing import.** When the class's name is already taken in the file, by another `use`, a class declared in the file or a class in the file's namespace, it is imported under an alias made from its namespace instead, as in `use Illuminate\Foundation\Auth\User as UserAuth;` next to `use App\Models\User;`, and the alias is what gets inserted. Existing imports are never renamed, and a class that is already imported under an alias is inserted by that alias. The new `autoImport.aliasStyle` setting picks `suffix` (`UserAuth`, the default), `prefix` (`AuthUser`) or `fullyQualified` (no import, inserts `\Illuminate\Foundation\Auth\User`).
+- A comment inside a parameter list, as in `function getValues(/* bool $raw = false */)`, is no longer read as a parameter, so hover and signature help show the method's real parameters.
+- Hover, completion and go to definition work on a method called after a long multi-line argument list, as in a seeder's `Collection::make([ … hundreds of lines … ])->each(…)`. They stopped working once the list ran past 200 lines; it can now run to 2,000, and brackets inside its strings no longer throw it off.
 - **A variable assigned in different branches** now has the types of all of them: after `if ($c) { $x = new Foo(); } else { $x = new Bar(); }`, a `switch`, a `try`/`catch`, an `if` without `else`, a loop or `$x ??= new Bar()`, hover and completion show `Foo|Bar`, and `$x->fooOnly()` is no longer reported as an unknown member on `Bar`. When one of the values can't be typed, the variable is left unknown instead of taking the last assignment's type. Go to definition on such a variable goes to the first of its classes.
 - A `foreach` variable given a new value, as in `foreach ($foos as $item) { … } $item = new Bar();`, has that value's type instead of the loop's, so its members are no longer reported as unknown.
 - In `$query = $query->where('a');`, the `$query` on the right has the type it had before the assignment, so it completes and is typed in hover, also inside `if` blocks and loops.
@@ -20,10 +33,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The unknown-member warning no longer fires on a method or property your code checks for first, as in `if (method_exists($notification, 'toArray')) { return $notification->toArray($notifiable); }`. This also covers `property_exists()`, `is_callable([$x, 'name'])`, early returns and ternaries, on the same receiver within the same function.
 - Calling a static method or reading `::class` through a property, as in `$this->type::tryFrom($value)` or `$this->related::class`, no longer reports the property name as an unknown class.
 - `undefined-variable` no longer reports a static property used as the class name after `new`, as in `new static::$builder($query)`.
+- A closure or arrow function parameter that has the same name as a variable outside it, as in `catch (Outer $e) { array_map(fn (Inner $e) => $e->path(), $list); }`, has its own type in unknown-member checks; members were checked against the outer variable's type before.
 - Unknown-member warnings name each possible class once: `Unknown member 'nope' on 'Foo|Bar'` instead of `'Foo|Bar|Foo'`.
 
 ### Changed
 
+- `argument-count-mismatch` no longer reports too many arguments to a method. PHP allows it, and libraries read the extra arguments with `func_get_args()` to stay compatible, as `Ulid::isValid($id, $format)` does. Too many arguments to a plain function is still reported.
+- **Typing no longer waits for diagnostics:** after an edit, diagnostics are worked out in the background once you pause for about 200 ms, so completion, hover and signature help answer straight away. On a 6,700-line file, completion right after a keystroke went from about 440 ms to under 40 ms. Diagnostics still arrive for the latest text; results for text you've since changed are dropped. Diagnostics on open and on save (PHPStan, Pint) are unchanged.
 - Hover on a variable shows its whole union type, `array|bool|null` instead of `?array`. A callable inside a union is shown in parentheses, as in `(callable(TValue): float)|int|null`.
 - A string concatenation such as `$dir . '/' . $name` is typed as `string`.
 
