@@ -248,18 +248,14 @@ func TestResolveVariableType(t *testing.T) {
 	r := setupResolver()
 
 	t.Run("$this resolves to enclosing class", func(t *testing.T) {
-		file := parser.ParseFile(`<?php
+		source := `<?php
 namespace App;
 class Service {
     public function foo() { $this->bar(); }
 }
-`)
-		lines := SplitLines(`<?php
-namespace App;
-class Service {
-    public function foo() { $this->bar(); }
-}
-`)
+`
+		file := parser.ParseFile(source)
+		lines := SplitLines(source)
 		typ := r.ResolveVariableType("$this", lines, protocol.Position{Line: 3}, file)
 		if typ != "App\\Service" {
 			t.Errorf("expected App\\Service, got %q", typ)

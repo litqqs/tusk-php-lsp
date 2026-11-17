@@ -809,6 +809,7 @@ func (r *Resolver) resolveVariableTypeTypedBase(varName string, lines []string, 
 		if declaredType != "" {
 			return r.resolveDocType(declaredType, file)
 		}
+		rhs = strings.TrimPrefix(rhs, "&")
 		// /** @var Collection<int, User> $users */ above the assignment.
 		if declared := varDocAbove(lines, i, varName); declared != "" {
 			owner := FindEnclosingClass(file, pos)
@@ -1105,7 +1106,7 @@ func (r *Resolver) resolveVariableTypePlain(varName string, lines []string, pos 
 	if !vs.isLocal && !vs.inClosure {
 		for _, cls := range file.Classes {
 			for _, prop := range cls.Properties {
-				if "$"+prop.Name == varName && prop.Type.Name != "" {
+				if prop.Name == varName && prop.Type.Name != "" {
 					return r.ResolveClassName(prop.Type.Name, file)
 				}
 			}
@@ -1145,6 +1146,7 @@ func (r *Resolver) resolveVariableTypePlain(varName string, lines []string, pos 
 		}
 		// $var = expr; — infer literal type
 		rhs = strings.TrimSuffix(rhs, ";")
+		rhs = strings.TrimPrefix(rhs, "&")
 		rhs = strings.TrimSpace(rhs)
 		if t := InferLiteralType(rhs); t != "" {
 			return t
