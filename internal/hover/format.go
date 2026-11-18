@@ -125,7 +125,7 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 		if !strings.HasPrefix(propName, "$") {
 			propName = "$" + propName
 		}
-		sb.WriteString(fmt.Sprintf(" %s %s", t, propName))
+		sb.WriteString(fmt.Sprintf("%s %s", t, propName))
 		// PHP 8.4 property hooks: e.g. { get; set; }
 		if len(sym.Hooks) > 0 {
 			hookNames := make([]string, len(sym.Hooks))
