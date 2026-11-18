@@ -82,10 +82,13 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 			sb.WriteString("final ")
 		}
 		sb.WriteString(vis)
-		if sym.IsStatic {
-			sb.WriteString(" static")
+		if vis != "" {
+			sb.WriteString(" ")
 		}
-		sb.WriteString(" function " + sym.Name)
+		if sym.IsStatic {
+			sb.WriteString("static ")
+		}
+		sb.WriteString("function " + sym.Name)
 		sb.WriteString(fmtSignature(sb.Len(), sym.Params, sym.ReturnType))
 	case symbols.KindFunction:
 		sb.WriteString("function " + sym.Name)
@@ -105,15 +108,18 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 			t = shortTypes(types.RenderTypeExpr(t))
 		}
 		sb.WriteString(vis)
+		if vis != "" {
+			sb.WriteString(" ")
+		}
 		// PHP 8.4 asymmetric visibility: e.g. public private(set) string $x
 		if sym.SetVisibility != "" {
-			sb.WriteString(fmt.Sprintf(" %s(set)", sym.SetVisibility))
+			sb.WriteString(fmt.Sprintf(" %s(set) ", sym.SetVisibility))
 		}
 		if sym.IsStatic {
-			sb.WriteString(" static")
+			sb.WriteString("static ")
 		}
 		if sym.IsReadonly {
-			sb.WriteString(" readonly")
+			sb.WriteString("readonly ")
 		}
 		propName := sym.Name
 		if !strings.HasPrefix(propName, "$") {
