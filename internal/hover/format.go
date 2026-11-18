@@ -72,8 +72,8 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 			sb.WriteString("(magic) ")
 		}
 		vis := sym.Visibility
-		if vis == "" {
-			vis = "public"
+		if vis == "public" {
+			vis = ""
 		}
 		if sym.IsAbstract {
 			sb.WriteString("abstract ")
@@ -95,8 +95,8 @@ func (p *Provider) formatHoverDeclaration(sym *symbols.Symbol) string {
 			sb.WriteString("(magic) ")
 		}
 		vis := sym.Visibility
-		if vis == "" {
-			vis = "public"
+		if vis == "public" {
+			vis = ""
 		}
 		t := sym.Type
 		if t == "" {
