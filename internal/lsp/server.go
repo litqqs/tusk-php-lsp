@@ -25,6 +25,7 @@ import (
 	"github.com/Tusk-PHP/lsp/internal/coverage"
 	"github.com/Tusk-PHP/lsp/internal/diagnostics"
 	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
+	"github.com/Tusk-PHP/lsp/internal/framework/laravel/blade"
 	"github.com/Tusk-PHP/lsp/internal/hover"
 	"github.com/Tusk-PHP/lsp/internal/inlayhint"
 	"github.com/Tusk-PHP/lsp/internal/introspect"
@@ -64,6 +65,14 @@ type Server struct {
 	schemaCache   *models.SchemaCache
 	docMu         sync.RWMutex
 	documents     map[string]string
+	// blade keeps the compiled PHP of open Blade views (see blade.go).
+	blade bladeViews
+	// bladeFeatures answers requests about Blade itself: directives and the
+	// views, sections and stacks they name.
+	bladeFeatures *blade.Features
+	// components finds the app's Blade components; forgotten when a
+	// component or provider is saved.
+	components *frameworklaravel.Components
 	// writeMu keeps frames whole on the output stream (see writeMessage).
 	writeMu sync.Mutex
 	// publishMu orders diagnostics publishes (see publishDiagnostics).
@@ -460,6 +469,9 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 		PHPVersion: profile.PHPVersion,
 		Extensions: profile.Extensions,
 	}
+	s.components = frameworklaravel.NewComponents(s.rootPath, s.index, s.getDocumentReader())
+	s.bladeFeatures = &blade.Features{Views: viewResolver, Components: s.components, Read: s.getDocumentReader()}
+	s.diag.Blade = s.bladeFeatures
 	s.analyzer = analyzer.NewAnalyzer(s.index, s.container)
 	if opts := params.InitializationOptions; opts != nil {
 		s.analyzer.SetClientCommands(opts.ClientCommands)
@@ -478,7 +490,7 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 				Change:    1, // Full
 				Save:      &protocol.SaveOptions{IncludeText: false},
 			},
-			CompletionProvider:        &protocol.CompletionOptions{TriggerCharacters: []string{".", ">", ":", "$", "\\", "|", "#", "[", "(", "'", "\""}, ResolveProvider: true},
+			CompletionProvider:        &protocol.CompletionOptions{TriggerCharacters: []string{".", ">", ":", "$", "\\", "|", "#", "[", "(", "'", "\"", "@"}, ResolveProvider: true},
 			HoverProvider:             true,
 			DefinitionProvider:        true,
 			TypeDefinitionProvider:    true,
@@ -637,6 +649,7 @@ func (s *Server) handleDidClose(msg *jsonRPCMessage) {
 	s.docMu.Lock()
 	delete(s.documents, params.TextDocument.URI)
 	s.docMu.Unlock()
+	s.blade.forget(params.TextDocument.URI)
 	s.cancelDiagnostics(params.TextDocument.URI)
 	s.diag.ClearCache(params.TextDocument.URI)
 }
@@ -658,6 +671,9 @@ func (s *Server) handleDidSave(msg *jsonRPCMessage) {
 	if !isPHPDocument(uri) {
 		return
 	}
+	if affectsComponents(s.rootPath, uri) {
+		s.components.Invalidate()
+	}
 	s.goSafe("container.Analyze", s.container.Analyze)
 	if s.cfg.DiagnosticsEnabled {
 		s.goSafe("diagnostics.RunTools", func() {
@@ -675,13 +691,33 @@ func (s *Server) handleDidSave(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleCompletion(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
+	var params struct {
+		protocol.TextDocumentPositionParams
+		Context *struct {
+			TriggerCharacter string `json:"triggerCharacter"`
+		} `json:"context"`
+	}
 	if json.Unmarshal(msg.Params, &params) != nil {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	s.sendResponse(msg.ID, s.completion.GetCompletions(params.TextDocument.URI, source, params.Position))
+	uri := params.TextDocument.URI
+	if workspace.IsBlade(uri) {
+		if items, ok := s.bladeCompletion(uri, params.Position); ok {
+			s.sendResponse(msg.ID, items)
+			return
+		}
+	} else if params.Context != nil && params.Context.TriggerCharacter == "@" {
+		// `@` starts a Blade directive; in PHP it has nothing to complete.
+		s.sendResponse(msg.ID, []protocol.CompletionItem{})
+		return
+	}
+	req, ok := s.phpRequest(uri, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, []protocol.CompletionItem{})
+		return
+	}
+	s.sendResponse(msg.ID, req.completions(s.completion.GetCompletions(req.uri, req.source, req.pos)))
 }
 
 // handleCompletionResolve fills in the documentation and detail of a member
@@ -702,12 +738,20 @@ func (s *Server) handleHover(msg *jsonRPCMessage) {
 		return
 	}
 	uri := params.TextDocument.URI
-	source := s.getDocument(uri)
 	if cardhover.IsComposerJSON(uri) {
-		s.sendResponse(msg.ID, s.composerHover.Hover(uri, source, params.Position))
+		s.sendResponse(msg.ID, s.composerHover.Hover(uri, s.getDocument(uri), params.Position))
 		return
 	}
-	s.sendResponse(msg.ID, s.hover.GetHover(uri, source, params.Position))
+	if h, ok := s.bladeHover(uri, params.Position); ok {
+		s.sendResponse(msg.ID, h)
+		return
+	}
+	req, ok := s.phpRequest(uri, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, nil)
+		return
+	}
+	s.sendResponse(msg.ID, req.hover(s.hover.GetHover(req.uri, req.source, req.pos)))
 }
 
 func (s *Server) handleDefinition(msg *jsonRPCMessage) {
@@ -732,8 +776,17 @@ func (s *Server) handleDefinition(msg *jsonRPCMessage) {
 		return
 	}
 
+	if locs, ok := s.bladeDefinition(uri, params.Position); ok {
+		s.sendResponse(msg.ID, locs)
+		return
+	}
+	req, ok := s.phpRequest(uri, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, nil)
+		return
+	}
 	openManual := s.cfg.PHPManualOpenOnDefinition && s.clientSupportsShowDocument
-	result := s.analyzer.FindDefinitionWithManual(uri, source, params.Position, openManual, s.cfg.PHPManualLocale)
+	result := s.analyzer.FindDefinitionWithManual(req.uri, req.source, req.pos, openManual, s.cfg.PHPManualLocale)
 
 	if result.ExternalManualURL != "" {
 		s.sendServerRequest("window/showDocument", protocol.ShowDocumentParams{
@@ -745,7 +798,7 @@ func (s *Server) handleDefinition(msg *jsonRPCMessage) {
 		return
 	}
 
-	s.sendResponse(msg.ID, result.Location)
+	s.sendResponse(msg.ID, req.location(result.Location))
 }
 
 func (s *Server) handleTypeDefinition(msg *jsonRPCMessage) {
@@ -754,8 +807,12 @@ func (s *Server) handleTypeDefinition(msg *jsonRPCMessage) {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	s.sendResponse(msg.ID, s.analyzer.FindTypeDefinition(params.TextDocument.URI, source, params.Position))
+	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, []protocol.Location{})
+		return
+	}
+	s.sendResponse(msg.ID, req.locations(s.analyzer.FindTypeDefinition(req.uri, req.source, req.pos)))
 }
 
 func (s *Server) handleImplementation(msg *jsonRPCMessage) {
@@ -764,8 +821,12 @@ func (s *Server) handleImplementation(msg *jsonRPCMessage) {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	s.sendResponse(msg.ID, s.analyzer.FindImplementation(params.TextDocument.URI, source, params.Position))
+	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, []protocol.Location{})
+		return
+	}
+	s.sendResponse(msg.ID, req.locations(s.analyzer.FindImplementation(req.uri, req.source, req.pos)))
 }
 
 func (s *Server) handleReferences(msg *jsonRPCMessage) {
@@ -774,8 +835,12 @@ func (s *Server) handleReferences(msg *jsonRPCMessage) {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	s.sendResponse(msg.ID, s.analyzer.FindReferences(params.TextDocument.URI, source, params.Position))
+	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, []protocol.Location{})
+		return
+	}
+	s.sendResponse(msg.ID, req.locations(s.analyzer.FindAllReferences(req.uri, req.source, req.pos, s.openDocumentReader())))
 }
 
 func (s *Server) handleDocumentSymbol(msg *jsonRPCMessage) {
@@ -806,8 +871,12 @@ func (s *Server) handleDocumentHighlight(msg *jsonRPCMessage) {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	s.sendResponse(msg.ID, s.analyzer.GetDocumentHighlights(params.TextDocument.URI, source, params.Position))
+	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, []protocol.DocumentHighlight{})
+		return
+	}
+	s.sendResponse(msg.ID, req.highlights(s.analyzer.GetDocumentHighlights(req.uri, req.source, req.pos)))
 }
 
 func (s *Server) handleWorkspaceSymbol(msg *jsonRPCMessage) {
@@ -825,8 +894,12 @@ func (s *Server) handleSignatureHelp(msg *jsonRPCMessage) {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	s.sendResponse(msg.ID, s.analyzer.GetSignatureHelp(params.TextDocument.URI, source, params.Position))
+	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, nil)
+		return
+	}
+	s.sendResponse(msg.ID, s.analyzer.GetSignatureHelp(req.uri, req.source, req.pos))
 }
 
 func (s *Server) handlePrepareRename(msg *jsonRPCMessage) {
@@ -835,8 +908,20 @@ func (s *Server) handlePrepareRename(msg *jsonRPCMessage) {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	result := s.analyzer.PrepareRename(params.TextDocument.URI, source, params.Position)
+	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, nil)
+		return
+	}
+	result := s.analyzer.PrepareRename(req.uri, req.source, req.pos)
+	if result != nil && req.doc != nil {
+		rng, ok := req.toView(result.Range)
+		if !ok {
+			s.sendResponse(msg.ID, nil)
+			return
+		}
+		result.Range = rng
+	}
 	s.sendResponse(msg.ID, result)
 }
 
@@ -846,15 +931,24 @@ func (s *Server) handleRename(msg *jsonRPCMessage) {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	result := s.analyzer.Rename(params.TextDocument.URI, source, params.Position, params.NewName, s.getDocumentReader())
-	s.sendResponse(msg.ID, result)
+	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, nil)
+		return
+	}
+	result := s.analyzer.Rename(req.uri, req.source, req.pos, params.NewName, s.getDocumentReader())
+	s.sendResponse(msg.ID, req.workspaceEdit(result))
 }
 
 func (s *Server) handleCodeAction(msg *jsonRPCMessage) {
 	var params protocol.CodeActionParams
 	if json.Unmarshal(msg.Params, &params) != nil {
 		s.sendError(msg.ID, -32602, "Invalid params")
+		return
+	}
+	if workspace.IsBlade(params.TextDocument.URI) {
+		// The code actions edit PHP files; none of them knows a view yet.
+		s.sendResponse(msg.ID, []protocol.CodeAction{})
 		return
 	}
 	source := s.getDocument(params.TextDocument.URI)
@@ -889,8 +983,8 @@ func (s *Server) handleInlayHint(msg *jsonRPCMessage) {
 		s.sendError(msg.ID, -32602, "Invalid params")
 		return
 	}
-	source := s.getDocument(params.TextDocument.URI)
-	hints := s.inlayHint.GetInlayHints(params.TextDocument.URI, source, &s.cfg.InlayHints)
+	req := s.phpDocument(params.TextDocument.URI)
+	hints := req.inlayHints(s.inlayHint.GetInlayHints(req.uri, req.source, &s.cfg.InlayHints))
 	// Filter to the requested line range.
 	filtered := hints[:0]
 	for _, h := range hints {
@@ -1066,6 +1160,12 @@ func (s *Server) getDocumentReader() func(string) string {
 	}
 }
 
+// openDocumentReader reads open documents only, returning "" for the rest so
+// the caller falls back to the source the index keeps.
+func (s *Server) openDocumentReader() func(string) string {
+	return s.getDocument
+}
+
 func (s *Server) getDocument(uri string) string {
 	s.docMu.RLock()
 	source := s.documents[uri]
@@ -1095,6 +1195,7 @@ func (s *Server) indexFileByURI(uri string, source string) {
 	// Blade views declare no symbols, and reading one as PHP would index the
 	// HTML around its PHP.
 	if workspace.IsBlade(uri) {
+		s.index.AddTemplateFile(uri)
 		return
 	}
 	path := symbols.URIToPath(uri)

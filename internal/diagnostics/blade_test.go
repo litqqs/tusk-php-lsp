@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Tusk-PHP/lsp/internal/config"
+	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 )
 
@@ -43,5 +44,33 @@ func TestAnalyzeBladeChecksOnlyItsPHP(t *testing.T) {
 	line := strings.Split(view, "\n")[d.Range.Start.Line]
 	if !strings.Contains(d.Message, "missing_helper") || line[d.Range.Start.Character:d.Range.End.Character] != "missing_helper" {
 		t.Errorf("got %q at %v (%q)", d.Message, d.Range, line)
+	}
+}
+
+// TestAnalyzeBladeFacadeAliases checks that Laravel's facade aliases, used in
+// a view without an import, aren't unknown classes, while a class that is no
+// alias still is.
+func TestAnalyzeBladeFacadeAliases(t *testing.T) {
+	idx := symbols.NewIndex()
+	idx.RegisterBuiltins()
+	idx.IndexFile("file:///vendor/Route.php", "<?php\nnamespace Illuminate\\Support\\Facades;\n/** @method static bool has(string $name) */\nclass Route {}\n")
+	idx.IndexFile("file:///vendor/helpers.php", "<?php\nfunction route($name) {}\n")
+	aliases := frameworklaravel.NewAliases(t.TempDir())
+	aliases.Load()
+	idx.SetClassGenerator(aliases)
+	idx.MarkReady()
+	p := NewProvider(idx, "laravel", "/tmp", nil, config.DefaultConfig())
+
+	view := `@if (Route::has('login'))
+    <a href="{{ route('login') }}">Log in</a>
+@endif
+{{ Nope::make() }}
+`
+	diags := p.Analyze("file:///resources/views/welcome.blade.php", view)
+	if len(diags) != 1 || !strings.Contains(diags[0].Message, "'Nope'") {
+		for _, d := range diags {
+			t.Logf("%v %s", d.Range, d.Message)
+		}
+		t.Fatalf("got %d diagnostics, want only the unknown class Nope", len(diags))
 	}
 }

@@ -53,7 +53,7 @@ func (idx *Index) ensureGenerated(fqn string) bool {
 		return false
 	}
 	idx.mu.RLock()
-	exists := idx.symbols[fqn] != nil || len(idx.foldIndex[strings.ToLower(fqn)]) > 0
+	exists := idx.classLikeFoldLocked(fqn)
 	idx.mu.RUnlock()
 	if exists {
 		return false
@@ -70,7 +70,7 @@ func (idx *Index) ensureGenerated(fqn string) bool {
 
 	idx.mu.Lock()
 	defer idx.mu.Unlock()
-	if idx.symbols[fqn] != nil {
+	if idx.classLikeFoldLocked(fqn) {
 		return true // built meanwhile, or declared for real
 	}
 	origin := idx.symbols[from]
@@ -110,4 +110,23 @@ func (idx *Index) dropGeneratedLocked(fqn string) {
 	if uri := generatedScheme + fqn; idx.generatedURIs[uri] {
 		idx.removeFileSymbols(uri)
 	}
+}
+
+// classLikeFoldLocked reports whether a class, interface, trait or enum named
+// fqn, ignoring case, is indexed. A function of the same name, such as
+// Laravel's route() beside the Route alias, doesn't count.
+func (idx *Index) classLikeFoldLocked(fqn string) bool {
+	if sym := idx.symbols[fqn]; sym != nil && isClassLikeKind(sym.Kind) {
+		return true
+	}
+	for _, candidate := range idx.foldIndex[strings.ToLower(fqn)] {
+		if sym := idx.symbols[candidate]; sym != nil && isClassLikeKind(sym.Kind) {
+			return true
+		}
+	}
+	return false
+}
+
+func isClassLikeKind(kind SymbolKind) bool {
+	return kind == KindClass || kind == KindInterface || kind == KindTrait || kind == KindEnum
 }

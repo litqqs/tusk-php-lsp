@@ -22,6 +22,7 @@ import (
 	"github.com/Tusk-PHP/lsp/internal/coverage"
 	"github.com/Tusk-PHP/lsp/internal/diagnostics"
 	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
+	"github.com/Tusk-PHP/lsp/internal/framework/laravel/blade"
 	"github.com/Tusk-PHP/lsp/internal/hover"
 	"github.com/Tusk-PHP/lsp/internal/inlayhint"
 	"github.com/Tusk-PHP/lsp/internal/models"
@@ -748,6 +749,11 @@ func (s *Service) buildRuntime(ws *workspace.Bootstrapped) *serviceRuntime {
 	rt.Diagnostics.BuiltinUnavailableRule = &checks.BuiltinUnavailableRule{
 		PHPVersion: s.BuiltinProfile.PHPVersion,
 		Extensions: s.BuiltinProfile.Extensions,
+	}
+	rt.Diagnostics.Blade = &blade.Features{
+		Views:      viewResolver,
+		Components: frameworklaravel.NewComponents(s.RootPath, ws.Index, readFile),
+		Read:       readFile,
 	}
 	return rt
 }
@@ -1501,3 +1507,12 @@ func (w *slogWriter) Write(p []byte) (int, error) {
 }
 
 
+
+// readFile reads a file by URI, or returns "" when it can't be read.
+func readFile(uri string) string {
+	data, err := os.ReadFile(symbols.URIToPath(uri))
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}

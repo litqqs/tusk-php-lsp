@@ -32,9 +32,12 @@ type Bootstrapped struct {
 	Logger         *log.Logger
 	BuiltinProfile symbols.BuiltinProfile
 
-	Index         *symbols.Index
-	Container     *container.ContainerAnalyzer
-	RouteIndex    *frameworklaravel.RouteIndex
+	Index      *symbols.Index
+	Container  *container.ContainerAnalyzer
+	RouteIndex *frameworklaravel.RouteIndex
+	// Aliases are the Laravel class aliases (facades by short name), read
+	// with the Composer dependencies.
+	Aliases       *frameworklaravel.Aliases
 	SymfonyRoutes []frameworksymfony.Route
 	SchemaCache   *models.SchemaCache
 	Schema        *models.Schema
@@ -53,8 +56,11 @@ func New(opts Options) *Bootstrapped {
 	}
 
 	var routeIndex *frameworklaravel.RouteIndex
+	var aliases *frameworklaravel.Aliases
 	if opts.Framework == "laravel" {
 		routeIndex = frameworklaravel.NewRouteIndex(opts.RootPath)
+		aliases = frameworklaravel.NewAliases(opts.RootPath)
+		index.SetClassGenerator(aliases)
 	}
 
 	return &Bootstrapped{
@@ -66,6 +72,7 @@ func New(opts Options) *Bootstrapped {
 		Index:          index,
 		Container:      container.NewContainerAnalyzer(index, opts.RootPath, opts.Framework),
 		RouteIndex:     routeIndex,
+		Aliases:        aliases,
 		SchemaCache:    models.NewSchemaCache(),
 	}
 }
@@ -150,6 +157,7 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 		if !IsPHPSource(path) || IsBlade(path) {
 			return nil
 		}
+
 		if limit := ws.Config.MaxIndexFiles; limit > 0 && count >= limit {
 			ws.logf("Stopped indexing at maxIndexFiles (%d files); classes in the rest of the workspace will be unknown. Set maxIndexFiles to 0 to index everything.", limit)
 			return filepath.SkipAll
@@ -181,6 +189,10 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 func (ws *Bootstrapped) IndexComposerDependencies() int {
 	if ws == nil {
 		return 0
+	}
+
+	if ws.Aliases != nil {
+		ws.Aliases.Load()
 	}
 
 	entries := composer.GetAutoloadPaths(ws.RootPath)
