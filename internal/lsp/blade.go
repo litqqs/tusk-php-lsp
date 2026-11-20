@@ -4,6 +4,7 @@ import (
 	"strings"
 	"sync"
 
+	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
 	"github.com/Tusk-PHP/lsp/internal/framework/laravel/blade"
 	"github.com/Tusk-PHP/lsp/internal/protocol"
 	"github.com/Tusk-PHP/lsp/internal/workspace"
@@ -24,24 +25,32 @@ type bladeViews struct {
 
 type bladeEntry struct {
 	source string
+	vars   string // the declared variables, as a key
+	custom *blade.Custom
 	doc    *blade.Document
 }
 
-func (v *bladeViews) get(uri, source string) *blade.Document {
+// get returns the compiled PHP of a view that receives vars, with the
+// directives the project registers.
+func (v *bladeViews) get(uri, source string, vars []blade.Var, custom *blade.Custom) *blade.Document {
+	var key strings.Builder
+	for _, bv := range vars {
+		key.WriteString(bv.Name + ":" + bv.Type + ";")
+	}
 	v.mu.Lock()
-	if e, ok := v.entries[uri]; ok && e.source == source {
+	if e, ok := v.entries[uri]; ok && e.source == source && e.vars == key.String() && e.custom == custom {
 		v.mu.Unlock()
 		return e.doc
 	}
 	v.mu.Unlock()
 	// Compile outside the lock; two requests racing on a new version both
 	// compile it, which is harmless.
-	doc := blade.Compile(source)
+	doc := blade.CompileWith(source, blade.CompileOptions{Vars: vars, Custom: custom})
 	v.mu.Lock()
 	if v.entries == nil {
 		v.entries = make(map[string]bladeEntry)
 	}
-	v.entries[uri] = bladeEntry{source: source, doc: doc}
+	v.entries[uri] = bladeEntry{source: source, vars: key.String(), custom: custom, doc: doc}
 	v.mu.Unlock()
 	return doc
 }
@@ -59,6 +68,11 @@ type bladeRequest struct {
 	source string
 	pos    protocol.Position
 	doc    *blade.Document // nil unless the document is a Blade view
+	// For a Blade view: its own text, the offset of the request in it, and
+	// the variables passed to it.
+	template string
+	offset   int
+	vars     []frameworklaravel.TypedVar
 }
 
 // phpRequest prepares a positional request. ok is false when the position is
@@ -69,12 +83,17 @@ func (s *Server) phpRequest(uri string, pos protocol.Position) (bladeRequest, bo
 	if !workspace.IsBlade(uri) {
 		return bladeRequest{uri: uri, source: source, pos: pos}, true
 	}
-	doc := s.blade.get(uri, source)
+	in := s.viewVars(uri)
+	vars := in.Vars
+	doc := s.blade.get(uri, source, in.BladeVars(), s.providers.Custom())
 	line, col, ok := doc.PHPPosition(pos.Line, pos.Character)
 	if !ok {
 		return bladeRequest{}, false
 	}
-	return bladeRequest{uri: uri, source: doc.PHP, pos: protocol.Position{Line: line, Character: col}, doc: doc}, true
+	return bladeRequest{
+		uri: uri, source: doc.PHP, pos: protocol.Position{Line: line, Character: col}, doc: doc,
+		template: source, offset: blade.NewLines(source).Offset(pos.Line, pos.Character), vars: vars,
+	}, true
 }
 
 // phpDocument prepares a whole-document request, such as inlay hints.
@@ -83,8 +102,10 @@ func (s *Server) phpDocument(uri string) bladeRequest {
 	if !workspace.IsBlade(uri) {
 		return bladeRequest{uri: uri, source: source}
 	}
-	doc := s.blade.get(uri, source)
-	return bladeRequest{uri: uri, source: doc.PHP, doc: doc}
+	in := s.viewVars(uri)
+	vars := in.Vars
+	doc := s.blade.get(uri, source, in.BladeVars(), s.providers.Custom())
+	return bladeRequest{uri: uri, source: doc.PHP, doc: doc, template: source, vars: vars}
 }
 
 // toView moves a range in the virtual PHP to the view.

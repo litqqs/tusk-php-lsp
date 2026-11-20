@@ -29,10 +29,80 @@ type segment struct {
 
 // Compile builds the virtual PHP document of a template.
 func Compile(template string) *Document {
-	nodes := Parse(template)
-	doc := compile(template, nodes, true)
+	return CompileWithVars(template, nil)
+}
+
+// Var is a variable a view receives, with its type when it's known.
+type Var struct {
+	Name string // without `$`
+	Type string
+}
+
+// CompileWithVars builds the virtual PHP document of a template that
+// receives vars: each is declared with `/** @var Type $name */` on the first
+// line, which has no place in the template, so the PHP in it is typed.
+func CompileWithVars(template string, vars []Var) *Document {
+	return CompileWith(template, CompileOptions{Vars: vars})
+}
+
+// CompileOptions says what a template receives.
+type CompileOptions struct {
+	Vars []Var
+	// Defined is set when Vars are all the variables the template receives:
+	// they, and those Blade gives every view, are then declared as defined,
+	// so a variable none of them names is undefined.
+	Defined bool
+	// Custom is what the project registers with Blade.
+	Custom *Custom
+}
+
+// bladeVariables are the variables Blade gives a view, or a block of it,
+// itself: `$loop` in loops, `$message` in `@error`, `$value` in `@session`
+// and `@context`, and those every view shares.
+var bladeVariables = []string{"loop", "message", "value", "errors", "app", "__env", "__data", "slot", "attributes", "component"}
+
+// CompileWith builds the virtual PHP document of a template with the
+// variables it receives declared on its first line, which has no place in
+// the template.
+func CompileWith(template string, opts CompileOptions) *Document {
+	vars := opts.Vars
+	var header strings.Builder
+	for _, v := range vars {
+		if !validVarName(v.Name) {
+			continue
+		}
+		t := v.Type
+		// A type that would end the comment or name a variable can't be
+		// written in it.
+		if t == "" || strings.Contains(t, "*/") || strings.ContainsAny(t, "\n$") {
+			t = "mixed"
+		}
+		header.WriteString(" /** @var " + t + " $" + v.Name + " */")
+	}
+	nodes := ParseCustom(template, opts.Custom)
+	if opts.Defined {
+		names := make([]string, 0, len(vars)+len(bladeVariables))
+		seen := map[string]bool{}
+		addName := func(n string) {
+			if validVarName(n) && !seen[n] {
+				seen[n] = true
+				names = append(names, "$"+n)
+			}
+		}
+		for _, v := range vars {
+			addName(v.Name)
+		}
+		for _, n := range bladeVariables {
+			addName(n)
+		}
+		for _, n := range injected(template, nodes) {
+			addName(n)
+		}
+		header.WriteString(" global " + strings.Join(names, ", ") + ";")
+	}
+	doc := compile(template, nodes, true, header.String(), opts.Custom)
 	if !doc.Structured {
-		doc = compile(template, nodes, false)
+		doc = compile(template, nodes, false, header.String(), opts.Custom)
 	}
 	doc.phpLines = lineStarts(doc.PHP)
 	doc.tplLines = lineStarts(template)
@@ -58,12 +128,22 @@ type compiler struct {
 	last     int // template offset up to which newlines have been carried over
 	stack    []block
 	ok       bool
+	custom   *Custom
 }
 
-func compile(template string, nodes []Node, structured bool) *Document {
-	c := &compiler{tpl: template, ok: true}
-	c.out.Grow(len(template) / 2)
-	c.out.WriteString("<?php\n")
+// lookup returns how a directive becomes PHP: Blade's own, or one the
+// project registers.
+func (c *compiler) lookup(name string) directive {
+	if d, ok := c.custom.directive(name); ok && !isDirective(name) {
+		return d
+	}
+	return lookupDirective(name)
+}
+
+func compile(template string, nodes []Node, structured bool, header string, custom *Custom) *Document {
+	c := &compiler{tpl: template, ok: true, custom: custom}
+	c.out.Grow(len(template)/2 + len(header))
+	c.out.WriteString("<?php" + header + "\n")
 	for _, n := range nodes {
 		c.lines(n.Span.Start)
 		switch n.Kind {
@@ -190,7 +270,7 @@ func (c *compiler) top() (block, bool) {
 }
 
 func (c *compiler) directive(n Node) {
-	d := lookupDirective(n.Name)
+	d := c.lookup(n.Name)
 	switch d.kind {
 	case dirIf:
 		// `@empty` with no argument inside `@forelse` is its else branch.
@@ -289,7 +369,7 @@ func (c *compiler) directive(n Node) {
 // flatDirective writes a directive as a statement of its own, for templates
 // whose blocks don't balance.
 func (c *compiler) flatDirective(n Node) {
-	d := lookupDirective(n.Name)
+	d := c.lookup(n.Name)
 	switch d.kind {
 	case dirForeach, dirForelse:
 		c.emit("foreach (")
@@ -332,6 +412,34 @@ func (c *compiler) use(n Node) {
 		c.emit(" as " + parts[1])
 	}
 	c.emit(";")
+}
+
+// injected returns the variables `@inject('name', Service::class)` defines.
+func injected(template string, nodes []Node) []string {
+	var out []string
+	for _, n := range nodes {
+		if n.Kind != KindDirective || !n.HasArgs || !strings.EqualFold(n.Name, "inject") {
+			continue
+		}
+		if args := splitArgs(template, n.Args); len(args) > 0 {
+			if name, ok := stringLiteral(template, args[0]); ok {
+				out = append(out, template[name.Start:name.End])
+			}
+		}
+	}
+	return out
+}
+
+func validVarName(s string) bool {
+	if s == "" || ('0' <= s[0] && s[0] <= '9') {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if !isNameByte(s[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 func lineStarts(s string) []int {

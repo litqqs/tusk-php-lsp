@@ -67,12 +67,17 @@ type Server struct {
 	documents     map[string]string
 	// blade keeps the compiled PHP of open Blade views (see blade.go).
 	blade bladeViews
+	// viewTypes types the variables Blade views receive (see blade_vars.go).
+	viewTypes *frameworklaravel.ViewTypes
 	// bladeFeatures answers requests about Blade itself: directives and the
 	// views, sections and stacks they name.
 	bladeFeatures *blade.Features
 	// components finds the app's Blade components; forgotten when a
 	// component or provider is saved.
 	components *frameworklaravel.Components
+	// providers reads what service providers register with Blade and the
+	// view factory.
+	providers *frameworklaravel.Providers
 	// writeMu keeps frames whole on the output stream (see writeMessage).
 	writeMu sync.Mutex
 	// publishMu orders diagnostics publishes (see publishDiagnostics).
@@ -469,9 +474,22 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 		PHPVersion: profile.PHPVersion,
 		Extensions: profile.Extensions,
 	}
-	s.components = frameworklaravel.NewComponents(s.rootPath, s.index, s.getDocumentReader())
-	s.bladeFeatures = &blade.Features{Views: viewResolver, Components: s.components, Read: s.getDocumentReader()}
+	s.providers = frameworklaravel.NewProviders(s.rootPath, s.index)
+	viewResolver.SetProviders(s.providers)
+	s.components = frameworklaravel.NewComponents(s.rootPath, s.index, s.providers, s.getDocumentReader())
+	s.bladeFeatures = &blade.Features{Views: viewResolver, Components: s.components, Read: s.getDocumentReader(), Custom: s.providers.Custom}
 	s.diag.Blade = s.bladeFeatures
+	if s.workspace.ViewData != nil {
+		s.viewTypes = &frameworklaravel.ViewTypes{
+			Data:  s.workspace.ViewData,
+			Index: s.index,
+			Read:  s.getDocumentReader(),
+			Resolve: func(expr, source string, file *parser.FileNode, line, col int) string {
+				return s.completion.ResolveExpressionType(expr, source, protocol.Position{Line: line, Character: col}, file)
+			},
+		}
+		s.diag.ViewTypes = s.viewTypes
+	}
 	s.analyzer = analyzer.NewAnalyzer(s.index, s.container)
 	if opts := params.InitializationOptions; opts != nil {
 		s.analyzer.SetClientCommands(opts.ClientCommands)
@@ -717,7 +735,11 @@ func (s *Server) handleCompletion(msg *jsonRPCMessage) {
 		s.sendResponse(msg.ID, []protocol.CompletionItem{})
 		return
 	}
-	s.sendResponse(msg.ID, req.completions(s.completion.GetCompletions(req.uri, req.source, req.pos)))
+	items := req.completions(s.completion.GetCompletions(req.uri, req.source, req.pos))
+	if req.doc != nil {
+		items = withViewVarCompletions(items, req.vars, req.template, req.offset)
+	}
+	s.sendResponse(msg.ID, items)
 }
 
 // handleCompletionResolve fills in the documentation and detail of a member
@@ -751,7 +773,11 @@ func (s *Server) handleHover(msg *jsonRPCMessage) {
 		s.sendResponse(msg.ID, nil)
 		return
 	}
-	s.sendResponse(msg.ID, req.hover(s.hover.GetHover(req.uri, req.source, req.pos)))
+	h := req.hover(s.hover.GetHover(req.uri, req.source, req.pos))
+	if req.doc != nil {
+		h = s.viewVarHover(h, req.vars, req.template, req.offset)
+	}
+	s.sendResponse(msg.ID, h)
 }
 
 func (s *Server) handleDefinition(msg *jsonRPCMessage) {
@@ -784,6 +810,12 @@ func (s *Server) handleDefinition(msg *jsonRPCMessage) {
 	if !ok {
 		s.sendResponse(msg.ID, nil)
 		return
+	}
+	if req.doc != nil {
+		if locs, ok := viewVarDefinition(req.vars, req.template, req.offset); ok {
+			s.sendResponse(msg.ID, locs)
+			return
+		}
 	}
 	openManual := s.cfg.PHPManualOpenOnDefinition && s.clientSupportsShowDocument
 	result := s.analyzer.FindDefinitionWithManual(req.uri, req.source, req.pos, openManual, s.cfg.PHPManualLocale)
@@ -1192,6 +1224,10 @@ func (s *Server) republishOpenDocuments() {
 
 // indexFileByURI indexes a file, using the IDE helper merge strategy for known IDE helper files.
 func (s *Server) indexFileByURI(uri string, source string) {
+	// What the file passes to views, or the views a Blade view includes.
+	if s.workspace != nil {
+		s.workspace.ViewData.IndexFile(uri, source)
+	}
 	// Blade views declare no symbols, and reading one as PHP would index the
 	// HTML around its PHP.
 	if workspace.IsBlade(uri) {

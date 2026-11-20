@@ -144,6 +144,7 @@ type Index struct {
 	foldIndex            map[string][]string // lowercase FQN → FQNs of class-likes and functions, whose names PHP matches case-insensitively
 	fileSymbols          map[string][]*Symbol
 	namespaceIndex       map[string][]string
+	optionalNamespaces   []string // lowercase prefixes of optional packages that aren't installed; see SetOptionalNamespaces
 	inheritanceMap       map[string]string
 	childrenMap          map[string][]string // lowercase parent FQN → direct subclass FQNs, the reverse of inheritanceMap
 	implementsMap        map[string][]string // class → interfaces it implements
@@ -1127,7 +1128,10 @@ func (idx *Index) OverridesInherited(classFQN, method string) (overrides, known 
 				overrides = true
 			}
 		}
-		idx.walkAncestors(fqn, func(next string, isTrait bool) { walk(next, viaTrait || isTrait) })
+		// A parent class's traits are part of that class, so their concrete
+		// methods are overridden too; only the class's own traits (and the
+		// traits they use) merely provide the same method.
+		idx.walkAncestors(fqn, func(next string, isTrait bool) { walk(next, viaTrait && isTrait) })
 	}
 	idx.walkAncestors(classFQN, func(next string, isTrait bool) { walk(next, isTrait) })
 	return overrides, known

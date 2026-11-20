@@ -35,6 +35,8 @@ type Bootstrapped struct {
 	Index      *symbols.Index
 	Container  *container.ContainerAnalyzer
 	RouteIndex *frameworklaravel.RouteIndex
+	// ViewData indexes the data a Laravel app passes to its views.
+	ViewData *frameworklaravel.ViewData
 	// Aliases are the Laravel class aliases (facades by short name), read
 	// with the Composer dependencies.
 	Aliases       *frameworklaravel.Aliases
@@ -51,14 +53,17 @@ func New(opts Options) *Bootstrapped {
 
 	index := symbols.NewIndex()
 	index.RegisterBuiltinsForProfile(opts.BuiltinProfile)
+	index.SetOptionalNamespaces(composer.SuggestedNamespaces(opts.RootPath))
 	if opts.Framework == "magento" {
 		index.SetClassGenerator(frameworkmagento.GeneratedClasses{})
 	}
 
 	var routeIndex *frameworklaravel.RouteIndex
 	var aliases *frameworklaravel.Aliases
+	var viewData *frameworklaravel.ViewData
 	if opts.Framework == "laravel" {
 		routeIndex = frameworklaravel.NewRouteIndex(opts.RootPath)
+		viewData = frameworklaravel.NewViewData(opts.RootPath)
 		aliases = frameworklaravel.NewAliases(opts.RootPath)
 		index.SetClassGenerator(aliases)
 	}
@@ -72,6 +77,7 @@ func New(opts Options) *Bootstrapped {
 		Index:          index,
 		Container:      container.NewContainerAnalyzer(index, opts.RootPath, opts.Framework),
 		RouteIndex:     routeIndex,
+		ViewData:       viewData,
 		Aliases:        aliases,
 		SchemaCache:    models.NewSchemaCache(),
 	}
@@ -160,6 +166,11 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 		// references and rename, and their PHP is read when it's needed.
 		if IsBlade(path) {
 			ws.Index.AddTemplateFile("file://" + path)
+			if ws.ViewData != nil {
+				if content, err := os.ReadFile(path); err == nil {
+					ws.ViewData.IndexFile("file://"+path, string(content))
+				}
+			}
 			return nil
 		}
 
@@ -173,6 +184,7 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 		}
 		if content, err := os.ReadFile(path); err == nil {
 			ws.Index.IndexFileWithSource("file://"+path, string(content), symbols.SourceProject)
+			ws.ViewData.IndexFile("file://"+path, string(content))
 			count++
 		}
 		return nil
