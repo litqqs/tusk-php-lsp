@@ -111,7 +111,8 @@ func WordAt(source string, pos protocol.Position) (string, protocol.Range) {
 	if pos.Line < 0 || pos.Line >= len(lines) {
 		return "", protocol.Range{}
 	}
-	line := lines[pos.Line]
+	lineByte := lines[pos.Line]
+	line := []rune(lineByte)
 	if pos.Character > len(line) {
 		return "", protocol.Range{}
 	}
@@ -120,11 +121,16 @@ func WordAt(source string, pos protocol.Position) (string, protocol.Range) {
 	if ch < len(line) && line[ch] == '$' {
 		start := ch
 		end := ch + 1
-		for end < len(line) && resolve.IsWordChar(line[end]) {
+		//charEnd := end
+		for end < len(line) && resolve.IsWordCharRune(line[end]) {
 			end++
+			// if line[end] < 0x80 || line[end] >= 0xC0 { //utf8 first byte
+			// 	charEnd++
+			// }
 		}
+		//end = charEnd
 		if end > start+1 {
-			return line[start:end], protocol.Range{
+			return string(line[start:end]), protocol.Range{
 				Start: protocol.Position{Line: pos.Line, Character: start},
 				End:   protocol.Position{Line: pos.Line, Character: end},
 			}
@@ -133,20 +139,30 @@ func WordAt(source string, pos protocol.Position) (string, protocol.Range) {
 	}
 
 	start := pos.Character
-	for start > 0 && resolve.IsWordChar(line[start-1]) {
+	// charStart := start
+	for start > 0 && resolve.IsWordCharRune(line[start-1]) {
 		start--
+		// if line[start-1] < 0x80 || line[start-1] >= 0xC0 { //utf8 first byte
+		// 	charStart--
+		// }
 	}
+	//start = charStart
 	if start > 0 && line[start-1] == '$' {
 		start--
 	}
 	end := pos.Character
-	for end < len(line) && resolve.IsWordChar(line[end]) {
+	// charEnd := end
+	for end < len(line) && resolve.IsWordCharRune(line[end]) {
 		end++
+		// if line[end] < 0x80 || line[end] >= 0xC0 { //utf8 first byte
+		// 	charEnd++
+		// }
 	}
+	//end = charEnd
 	if start >= end {
 		return "", protocol.Range{}
 	}
-	return line[start:end], protocol.Range{
+	return string(line[start:end]), protocol.Range{
 		Start: protocol.Position{Line: pos.Line, Character: start},
 		End:   protocol.Position{Line: pos.Line, Character: end},
 	}

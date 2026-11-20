@@ -144,24 +144,50 @@ func (a *Analyzer) otherTemplateOccurrences(sym *symbols.Symbol, readDocument fu
 	return locs
 }
 
+// IndexRunes 在 s 中找 sub，返回起始下标，-1 未找到
+func IndexRunes(s, sub []rune) int {
+	n, m := len(s), len(sub)
+	if m == 0 {
+		return 0
+	}
+	if n < m {
+		return -1
+	}
+	for i := 0; i <= n-m; i++ {
+		match := true
+		for j := 0; j < m; j++ {
+			if s[i+j] != sub[j] {
+				match = false
+				break
+			}
+		}
+		if match {
+			return i
+		}
+	}
+	return -1
+}
+
 // findWordLocations finds all word-boundary occurrences of `word` on a line.
-func findWordLocations(uri, line string, lineNum int, word string) []protocol.Location {
+func findWordLocations(uri, lineByte string, lineNum int, wordByte string) []protocol.Location {
 	var locs []protocol.Location
+	line := []rune(lineByte)
+	word := []rune(wordByte)
 	offset := 0
 	for {
-		idx := strings.Index(line[offset:], word)
+		idx := IndexRunes(line[offset:], word)
 		if idx < 0 {
 			break
 		}
 		col := offset + idx
 		end := col + len(word)
 		// Word boundary before
-		if col > 0 && (resolve.IsWordChar(line[col-1]) || line[col-1] == '$') {
+		if col > 0 && (resolve.IsWordCharRune(line[col-1]) || line[col-1] == '$') {
 			offset = end
 			continue
 		}
 		// Word boundary after
-		if end < len(line) && resolve.IsWordChar(line[end]) {
+		if end < len(line) && resolve.IsWordCharRune(line[end]) {
 			offset = end
 			continue
 		}

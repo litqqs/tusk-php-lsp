@@ -1504,7 +1504,7 @@ func containsPos(r protocol.Range, pos protocol.Position) bool {
 func tokenRange(tok parser.Token) protocol.Range {
 	return protocol.Range{
 		Start: protocol.Position{Line: tok.Line, Character: tok.Column},
-		End:   protocol.Position{Line: tok.Line, Character: tok.Column + len(tok.Value)},
+		End:   protocol.Position{Line: tok.Line, Character: tok.Column + len([]rune(tok.Value))},
 	}
 }
 

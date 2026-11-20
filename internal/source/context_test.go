@@ -261,3 +261,33 @@ use App\Later\Thing;
 		t.Fatalf("Uses = %#v, want no active imports before declaration", ctx.Uses)
 	}
 }
+func TestWordAt(t *testing.T) {
+	source := `<?php
+$jjk中文 ="枯在";
+$jjk中文 ="枯在4324".$jjk中文;
+
+`
+
+	s, ctx := WordAt(source, protocol.Position{Line: 2, Character: 20})
+	if ctx.Start.Character != 17 {
+		t.Errorf("position start should 0. but %d", ctx.Start.Character)
+	}
+	if ctx.End.Character != 23 {
+		t.Errorf("position start should 6. but %d", ctx.End.Character)
+	}
+	if s != "$jjk中文" {
+		t.Errorf("position word  $jjk中文. but %s", s)
+	}
+
+	s, ctx = WordAt(source, protocol.Position{Line: 2, Character: 12})
+	if ctx.Start.Character != 9 {
+		t.Errorf("position start should 0. but %d", ctx.Start.Character)
+	}
+	if ctx.End.Character != 15 {
+		t.Errorf("position start should 6. but %d", ctx.End.Character)
+	}
+	if s != "枯在4324" {
+		t.Errorf("position word  枯在4324. but %s", s)
+	}
+
+}
