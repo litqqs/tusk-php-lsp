@@ -1292,7 +1292,7 @@ func IsWordChar(ch byte) bool {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '\\' || ch >= 0x80
 }
 func IsWordCharRune(ch rune) bool {
-	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '\\' || (ch >= 0x80 && !(ch >= 0x3000 && ch <= 0x303F) && ch < 0xFF00)
+	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '\\' || (ch >= 0x80 && !(ch >= 0x2000 && ch <= 0x2CFF) && !(ch >= 0x3000 && ch <= 0x303F) && ch < 0xFF00)
 }
 
 // JoinChainLines joins the current line with preceding continuation lines
