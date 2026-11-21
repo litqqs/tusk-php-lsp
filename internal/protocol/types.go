@@ -394,6 +394,26 @@ type InlayHintParams struct {
 	Range        Range                  `json:"range"`
 }
 
+// FormaterOptions is for
+type FormaterOptions struct {
+	TabSize                int  `json:"tabsize,omitempty"`
+	InsertSpaces           bool `json:"insertSpaces,omitempty"`
+	TrimTrailingWhitespace bool `json:"trimTrailingWhitespace,omitempty"`
+	InsertFinalNewline     bool `json:"insertFinalNewline,omitempty"`
+}
+
+// FormattingParams is the params type for textDocument/formatting
+type FormattingParams struct {
+	TextDocument  TextDocumentIdentifier `json:"textDocument"`
+	Optinos       FormaterOptions        `json:"options"`
+	WorkDoneToken string                 `json:"workDoneToken"`
+}
+
+type FormattingResult struct {
+	Range   Range  `json:"range"`
+	NewText string `json:"newText"`
+}
+
 // FoldingRangeParams is the params type for textDocument/foldingRange requests.
 type FoldingRangeParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`

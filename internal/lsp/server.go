@@ -24,6 +24,7 @@ import (
 	"github.com/Tusk-PHP/lsp/internal/container"
 	"github.com/Tusk-PHP/lsp/internal/coverage"
 	"github.com/Tusk-PHP/lsp/internal/diagnostics"
+	"github.com/Tusk-PHP/lsp/internal/formatter"
 	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
 	"github.com/Tusk-PHP/lsp/internal/framework/laravel/blade"
 	"github.com/Tusk-PHP/lsp/internal/hover"
@@ -59,6 +60,7 @@ type Server struct {
 	coverage      *coverage.Store
 	composerHover *cardhover.Provider
 	inlayHint     *inlayhint.Provider
+	formatter     *formatter.Provider
 	diag          *diagnostics.Provider
 	analyzer      *analyzer.Analyzer
 	routeIndex    *frameworklaravel.RouteIndex
@@ -342,6 +344,8 @@ func (s *Server) handleMessage(msg *jsonRPCMessage) {
 		s.handleCodeAction(msg)
 	case "textDocument/inlayHint":
 		s.handleInlayHint(msg)
+	case "textDocument/formatting":
+		s.handleFormatting(msg)
 	case "textDocument/selectionRange":
 		s.handleSelectionRange(msg)
 	case "textDocument/semanticTokens/full":
@@ -354,6 +358,7 @@ func (s *Server) handleMessage(msg *jsonRPCMessage) {
 		s.handleCoverageReport(msg)
 	case "tusk/fileCoverage":
 		s.handleFileCoverage(msg)
+
 	default:
 		if msg.ID != nil {
 			s.sendError(msg.ID, -32601, fmt.Sprintf("Method not found: %s", msg.Method))
@@ -439,6 +444,7 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 	s.inlayHint.SetTypedChainResolver(func(expr, source string, pos protocol.Position, file *parser.FileNode) resolve.ResolvedType {
 		return s.completion.ResolveExpressionTypeTyped(expr, source, pos, file)
 	})
+	s.formatter = formatter.NewProvider()
 	s.hover = hover.NewProvider(s.index, s.container, s.framework)
 	s.hover.SetArrayResolver(arrayResolver)
 	s.hover.SetConfig(s.cfg)
@@ -508,18 +514,19 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 				Change:    1, // Full
 				Save:      &protocol.SaveOptions{IncludeText: false},
 			},
-			CompletionProvider:        &protocol.CompletionOptions{TriggerCharacters: []string{".", ">", ":", "$", "\\", "|", "#", "[", "(", "'", "\"", "@"}, ResolveProvider: true},
-			HoverProvider:             true,
-			DefinitionProvider:        true,
-			TypeDefinitionProvider:    true,
-			ImplementationProvider:    true,
-			ReferencesProvider:        true,
-			DocumentSymbolProvider:    true,
-			DocumentHighlightProvider: true,
-			FoldingRangeProvider:      true,
-			WorkspaceSymbolProvider:   true,
-			SignatureHelpProvider:     &protocol.SignatureHelpOptions{TriggerCharacters: []string{"(", ","}},
-			RenameProvider:            &protocol.RenameOptions{PrepareProvider: true},
+			CompletionProvider:         &protocol.CompletionOptions{TriggerCharacters: []string{".", ">", ":", "$", "\\", "|", "#", "[", "(", "'", "\"", "@"}, ResolveProvider: true},
+			HoverProvider:              true,
+			DefinitionProvider:         true,
+			TypeDefinitionProvider:     true,
+			ImplementationProvider:     true,
+			ReferencesProvider:         true,
+			DocumentSymbolProvider:     true,
+			DocumentHighlightProvider:  true,
+			FoldingRangeProvider:       true,
+			WorkspaceSymbolProvider:    true,
+			DocumentFormattingProvider: true,
+			SignatureHelpProvider:      &protocol.SignatureHelpOptions{TriggerCharacters: []string{"(", ","}},
+			RenameProvider:             &protocol.RenameOptions{PrepareProvider: true},
 			CodeActionProvider: &protocol.CodeActionOptions{CodeActionKinds: []string{
 				"quickfix",
 				"refactor",
@@ -1025,6 +1032,17 @@ func (s *Server) handleInlayHint(msg *jsonRPCMessage) {
 		}
 	}
 	s.sendResponse(msg.ID, filtered)
+}
+
+func (s *Server) handleFormatting(msg *jsonRPCMessage) {
+	var params protocol.FormattingParams
+	if json.Unmarshal(msg.Params, &params) != nil {
+		s.sendError(msg.ID, -32602, "Invalid params")
+		return
+	}
+	req := s.phpDocument(params.TextDocument.URI)
+	result := s.formatter.FormatCode(req.source)
+	s.sendResponse(msg.ID, result)
 }
 
 func (s *Server) handleExecuteCommand(msg *jsonRPCMessage) {
