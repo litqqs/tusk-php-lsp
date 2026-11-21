@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/Tusk-PHP/lsp/internal/composer"
@@ -127,9 +128,16 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 	var ideHelperFiles []string
 	var fn filepath.WalkFunc
 	deep := 0
+	uriPre := "file://"
+	if runtime.GOOS == "windows" {
+		uriPre = "file:///"
+	}
 	fn = func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
+		}
+		if runtime.GOOS == "windows" {
+			path = strings.ReplaceAll(path, "\\", "/")
 		}
 		if info.IsDir() {
 			for _, ex := range ws.Config.ExcludePaths {
@@ -165,10 +173,10 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 		// Blade views declare no symbols; only their place is kept, for
 		// references and rename, and their PHP is read when it's needed.
 		if IsBlade(path) {
-			ws.Index.AddTemplateFile("file://" + path)
+			ws.Index.AddTemplateFile(uriPre + path)
 			if ws.ViewData != nil {
 				if content, err := os.ReadFile(path); err == nil {
-					ws.ViewData.IndexFile("file://"+path, string(content))
+					ws.ViewData.IndexFile(uriPre+path, string(content))
 				}
 			}
 			return nil
@@ -183,8 +191,8 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 			return nil
 		}
 		if content, err := os.ReadFile(path); err == nil {
-			ws.Index.IndexFileWithSource("file://"+path, string(content), symbols.SourceProject)
-			ws.ViewData.IndexFile("file://"+path, string(content))
+			ws.Index.IndexFileWithSource(uriPre+path, string(content), symbols.SourceProject)
+			ws.ViewData.IndexFile(uriPre+path, string(content))
 			count++
 		}
 		return nil
@@ -193,7 +201,7 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 
 	for _, path := range ideHelperFiles {
 		if content, err := os.ReadFile(path); err == nil {
-			ws.Index.IndexIDEHelperFile("file://"+path, string(content))
+			ws.Index.IndexIDEHelperFile(uriPre+path, string(content))
 			count++
 			ws.logf("Indexed IDE helper: %s", filepath.Base(path))
 		}

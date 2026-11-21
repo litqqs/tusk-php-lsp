@@ -33,7 +33,7 @@ func (p *Provider) FormatCode(s string) []protocol.FormattingResult {
 	ret := protocol.FormattingResult{}
 	ret.Range.Start.Line = 0
 	ret.Range.Start.Character = 0
-	ret.Range.End.Line = 999999
+	ret.Range.End.Line = 999999999
 	ret.Range.End.Character = 0
 	ret.NewText = p.Format(s)
 	r = append(r, ret)
