@@ -224,7 +224,10 @@ func (ws *Bootstrapped) IndexComposerDependencies() int {
 	if len(entries) == 0 {
 		return 0
 	}
-
+	uriPre := "file://"
+	if runtime.GOOS == "windows" {
+		uriPre = "file:///"
+	}
 	vendorCount := 0
 	for _, entry := range entries {
 		src := symbols.SourceProject
@@ -234,7 +237,7 @@ func (ws *Bootstrapped) IndexComposerDependencies() int {
 
 		if entry.IsFile {
 			if content, err := os.ReadFile(entry.Path); err == nil {
-				ws.Index.IndexFileWithSource("file://"+entry.Path, string(content), src)
+				ws.Index.IndexFileWithSource(uriPre+strings.ReplaceAll(entry.Path, "\\", "/"), string(content), src)
 				if entry.IsVendor {
 					vendorCount++
 				}
@@ -257,7 +260,7 @@ func (ws *Bootstrapped) IndexComposerDependencies() int {
 				return nil
 			}
 			if content, err := os.ReadFile(path); err == nil {
-				ws.Index.IndexFileWithSource("file://"+path, string(content), symbols.SourceVendor)
+				ws.Index.IndexFileWithSource(uriPre+strings.ReplaceAll(path, "\\", "/"), string(content), symbols.SourceVendor)
 				vendorCount++
 			}
 			return nil
