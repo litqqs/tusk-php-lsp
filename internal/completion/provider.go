@@ -369,6 +369,11 @@ func (p *Provider) completeMemberAccess(uri, source string, pos protocol.Positio
 	}
 	distance := memberDistances(members)
 	seen := make(map[string]bool, len(members))
+	// Local scopes of the model a query builder is for: $query->active().
+	for _, sc := range p.resolver.Scopes(resolved) {
+		seen[sc.Name] = true
+		items = append(items, p.scopeItem(sc, parenAfterCursor))
+	}
 	for _, m := range members {
 		// A class can reach its own private members, on any instance of itself.
 		if m.IsStatic || (m.Visibility == "private" && (enclosing == "" || m.ParentFQN != enclosing)) {
@@ -495,14 +500,36 @@ func (p *Provider) completeStaticAccess(source, prefix string, pos protocol.Posi
 	var items []protocol.CompletionItem
 	seen := map[string]bool{}
 	memberSets := []string{typeName}
+	forwarded := map[string]bool{}
 	if facadeConcrete != "" {
 		memberSets = append(memberSets, facadeConcrete)
+		forwarded[facadeConcrete] = true
+	}
+	// What the class forwards static calls to, as an Eloquent model does to
+	// its query builder, and that type's @mixin (the base query builder).
+	for _, fwd := range p.resolver.ForwardTypes(resolve.ResolvedType{FQN: typeName}) {
+		for _, t := range append([]resolve.ResolvedType{fwd}, p.resolver.MixinTypes(fwd)...) {
+			if fqn := t.MemberOwner(); fqn != "" && !forwarded[fqn] {
+				memberSets = append(memberSets, fqn)
+				forwarded[fqn] = true
+			}
+		}
+	}
+	// Local scopes, callable statically through the forward: Category::active().
+	for _, fwd := range p.resolver.ForwardTypes(resolve.ResolvedType{FQN: typeName}) {
+		for _, sc := range p.resolver.Scopes(fwd) {
+			if seen[sc.Name] {
+				continue
+			}
+			seen[sc.Name] = true
+			items = append(items, p.scopeItem(sc, parenAfterCursor))
+		}
 	}
 	for set, fqn := range memberSets {
 		members := p.index.GetClassMembers(fqn)
 		distance := memberDistances(members)
 		for _, m := range members {
-			isFacadeForwarded := fqn == facadeConcrete && m.Kind == symbols.KindMethod
+			isFacadeForwarded := forwarded[fqn] && m.Kind == symbols.KindMethod && m.Visibility == "public" && !strings.HasPrefix(m.Name, "__")
 			isInstanceCall := instanceCalls && m.Kind == symbols.KindMethod
 			if !isFacadeForwarded && !isInstanceCall && !m.IsStatic && m.Kind != symbols.KindConstant && m.Kind != symbols.KindEnumCase {
 				continue
@@ -764,6 +791,9 @@ func (p *Provider) resolveChainWithContext(line string, wordStart int, source st
 	if strings.HasSuffix(strings.TrimRight(line[:i], " \t"), "::") {
 		ownerResolved = resolve.ClassStringTarget(ownerResolved) // $class::create()
 	}
+	if fwd, ok := p.resolver.ForwardedReceiver(ownerResolved, target, parenEnd > 0); ok {
+		ownerResolved = fwd // Category::where() runs on Builder<Category>
+	}
 	member, foundOn := p.resolver.FindMemberOn(ownerResolved, target, parenEnd > 0)
 	firstClass := parenEnd > 0 && resolve.IsCallableArgs(callArgStr)
 	if member != nil && foundOn.FQN != ownerResolved.FQN {
@@ -775,6 +805,9 @@ func (p *Provider) resolveChainWithContext(line string, wordStart int, source st
 		ownerResolved = foundOn
 	}
 	ownerFQN = ownerResolved.BaseFQN()
+	if member == nil && parenEnd > 0 && p.resolver.ScopeMethod(ownerResolved, target) != nil {
+		return ownerResolved // a local scope gives back the builder
+	}
 	if member == nil {
 		// A property of an object shape: object{user: User}.
 		if ownerResolved.FQN == "object" && parenEnd == 0 {
@@ -991,7 +1024,23 @@ func (p *Provider) resolveAccessChain(line string, wordStart int, source string,
 	}
 	member := p.resolver.FindAccessedMember(ownerFQN, target, parenEnd > 0)
 	if member == nil {
-		return ""
+		// Category::where() runs on Builder<Category>, and a fluent builder
+		// method gives back the builder.
+		fwd, ok := p.resolver.ForwardedReceiver(resolve.ResolvedType{FQN: ownerFQN}, target, parenEnd > 0)
+		if !ok {
+			return ""
+		}
+		member, _ = p.resolver.FindMemberOn(fwd, target, parenEnd > 0)
+		if member == nil {
+			if parenEnd > 0 && p.resolver.ScopeMethod(fwd, target) != nil {
+				return fwd.BaseFQN() // Category::active() is the builder
+			}
+			return ""
+		}
+		if p.resolver.ReturnsCallingClass(member) {
+			return fwd.BaseFQN()
+		}
+		return resolve.PlainTypeName(p.resolver.MemberTypeResolved(member, file, fwd.BaseFQN(), fwd.Params))
 	}
 	// A method returning static/$this/self gives back the class it was called
 	// on, not the one that declares it: Child::create() is a Child. Calls through
@@ -1619,4 +1668,20 @@ func formatDocumentation(sym *symbols.Symbol) string {
 		return ""
 	}
 	return doc.Summary
+}
+
+// scopeItem is the completion item for a model's local scope, called by its
+// scope name (active for scopeActive) on the model or its query builder.
+func (p *Provider) scopeItem(sc resolve.Scope, parenAfterCursor bool) protocol.CompletionItem {
+	item := protocol.CompletionItem{Label: sc.Name, SortText: rankKey(rankMember, 0, sc.Name)}
+	p.describeMember(&item, sc.Method)
+	item.Label = sc.Name
+	item.Kind = protocol.CompletionItemKindMethod
+	if parenAfterCursor {
+		item.InsertText = sc.Name
+	} else {
+		item.InsertText = sc.Name + "($0)"
+		item.InsertTextFormat = 2
+	}
+	return item
 }
