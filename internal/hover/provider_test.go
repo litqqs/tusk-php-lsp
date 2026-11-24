@@ -580,7 +580,7 @@ function debug(string $msg, int $code): void { }`)
 	// Hovering over standalone debug() in a controller method declaration
 	source := `<?php
 class UserController {
-    function debug中文(string $msg) { }
+    function debug(string $msg) { }
 	function file_get_contents(string $filename): string { 
 		$this->debug('test-msg'); 
 		file_get_contents('out');
@@ -590,7 +590,7 @@ class UserController {
 `
 	idx.IndexFile("file:///controller.php", source)
 
-	pos := charPosOf(t, source, "debug中文", "debug中文")
+	pos := charPosOf(t, source, "debug", "debug")
 	hover := p.GetHover("file:///controller.php", source, pos)
 	if hover == nil {
 		t.Fatal("expected hover result for debug(string $msg)")
@@ -622,6 +622,7 @@ class UserController {
 
 	pos = charPosOf(t, source, "file_get_contents", "file_get_contents('out')")
 	hover = p.GetHover("file:///controller.php", source, pos)
+	val = hover.Contents.Value
 	if hover == nil {
 		t.Fatal("expected hover result for file_get_contents(string $filename,...)")
 	}
