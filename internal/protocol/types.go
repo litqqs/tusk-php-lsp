@@ -394,7 +394,7 @@ type InlayHintParams struct {
 	Range        Range                  `json:"range"`
 }
 
-// FormaterOptions is for
+// FormaterOptions is for textDocument/formatting
 type FormaterOptions struct {
 	TabSize                int  `json:"tabsize,omitempty"`
 	InsertSpaces           bool `json:"insertSpaces,omitempty"`

@@ -723,7 +723,6 @@ function f(&$a, array &$b, ?array &$c, A&B &$d, A&B $e, int &...$f, $g) {}
 	}
 }
 
-
 // A comment in a parameter list, as libraries write for a parameter read with
 // func_get_args(), isn't a parameter.
 func TestCommentInParameterListIsNotAParameter(t *testing.T) {
@@ -753,7 +752,7 @@ define('BB',"BBBBBB");
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}
-	if len(result.Constants) != 1 {
+	if len(result.Constants) != 2 {
 		t.Fatalf("expected 2 const , got %d", len(result.Constants))
 	}
 	c := result.Constants[0]
