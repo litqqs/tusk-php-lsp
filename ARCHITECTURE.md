@@ -1,409 +1,258 @@
 # Architecture
 
-A Go-based Language Server Protocol (LSP) implementation for PHP, with deep Laravel and Symfony awareness. PHP 7.4 is the supported baseline; layered embedded stubs add 8.0+ symbols on demand based on the project's selected PHP profile. No external PHP parser — includes a custom tokenizer and lightweight AST.
+Tusk PHP is a PHP language server written in Go, with deep Laravel and Symfony awareness. It has its own fault-tolerant tokenizer and lightweight AST, so no PHP runtime is needed to analyse code. PHP 7.4 is the baseline for builtin symbols; newer versions (up to 8.6, the default when a project doesn't say) and extensions are layered on from the project's `composer.json`.
 
-## Project Structure
+This document is the map: what each part does and how a request flows through it. The rules for changing the code (package layers, performance and correctness rules, the target structure) are in [AGENTS.md](AGENTS.md). User-facing behaviour is documented in [docs/](docs/).
+
+## One binary, several front ends
+
+`cmd/tusk-php` builds a single `tusk-php` binary:
+
+| Command | What it does | Docs |
+|---|---|---|
+| `tusk-php` (`--stdio`) | Language Server Protocol over stdio, the default | [docs/editors.md](docs/editors.md) |
+| `tusk-php mcp` | MCP server over stdio for AI agents (`mcp dump` writes an AI context pack to a folder) | [docs/ai-agents.md](docs/ai-agents.md) |
+| `tusk-php check` | Reports the diagnostics the server would show, as text or JSON, with baselines | [docs/command-line.md](docs/command-line.md) |
+| `tusk-php introspect` | Dumps what the server parsed and resolved for one file | |
+| `tusk-php deps` | Composer dependency usage (`deps unused` lists packages with no static reference) | |
+| `tusk-php -parse <file>` | Prints a file's AST as JSON | |
+
+Other flags: `--version`, `--log <file>`, `--strict` (re-panic after recovering, also `TUSK_STRICT`).
+
+The same code builds for WebAssembly (`GOOS=wasip1`, `make wasm`), so the server can run as a web worker (for example on vscode.dev). Platform differences live in build-tagged files (`*_wasip1.go`, `*_wasm.go`), such as stdin handling, memory limits and the live database connection.
+
+Every front end builds its analysis state the same way, through `workspace` (see [Startup](#startup)). The LSP and MCP servers each wire the providers on top of it; until a shared `session` package exists, a wiring change goes in both `lsp/initialize.go` and `mcpserver/server.go`.
+
+## Packages
+
+Packages are layered: a package imports only from its own layer or the ones above it. [AGENTS.md](AGENTS.md#architecture-today) holds the rule and the known exception.
 
 ```
-tusk-php/
-├── cmd/tusk-php/main.go             # Entry point: CLI flags, stdio, server startup
-├── internal/
-│   ├── lsp/                         # JSON-RPC server, message dispatch, lifecycle
-│   ├── protocol/                    # LSP type definitions (no logic)
-│   │
-│   ├── parser/                      # PHP tokenizer + lightweight AST (fault-tolerant)
-│   ├── symbols/                     # Central symbol table (Index) and BuiltinProfile
-│   ├── stubs/                       # Embedded PHP builtin stubs (per-version, per-extension)
-│   │
-│   ├── source/                      # Cursor-context abstraction (position, access kind, scope)
-│   ├── scope/                       # Variable/binding scope collector
-│   ├── resolve/                     # Symbol/type resolution (PHPDoc, generics, templates, aliases)
-│   ├── types/                       # Type model primitives (named, union, intersection, generic)
-│   ├── phparray/                    # PHP array literal helpers shared by parsers
-│   ├── phpdetect/                   # Detects locally installed PHP version (timeout-bounded)
-│   │
-│   ├── hover/                       # Hover cards with type resolution + access chain walking
-│   ├── completion/                  # Context-aware completions
-│   ├── analyzer/                    # Definition, references, document/workspace symbols, rename, signature help
-│   ├── inlayhint/                   # Inlay hints (variable types, parameter names, return types)
-│   ├── checks/                      # Standalone PHP static analysis rules (no LSP dependency)
-│   ├── diagnostics/                 # Wraps checks/ + PHPStan/Pint integration, publishes diagnostics
-│   │
-│   ├── composer/                    # composer.json autoload (PSR-4 + files) + platform detection
-│   ├── container/                   # Laravel/Symfony DI container analysis
-│   ├── config/                      # .tusk-php.json + client options + framework detection
-│   ├── framework/laravel/           # Routes, views, translations
-│   ├── framework/laravel/blade/     # Blade templates read as a virtual PHP document
-│   ├── framework/symfony/           # Routes and other Symfony-specific symbols
-│   ├── framework/magento/           # Classes Magento generates at build time
-│   ├── models/                      # Eloquent, Doctrine, migrations, array shape inference
-│   │
-│   └── conformance/                 # Whole-stack invariants and corpus tests (build-tagged)
-├── testdata/project/                # Test fixtures (mock PHP project)
-├── scripts/                         # Build, corpus fetch, builtin generators
-└── Makefile                         # Build, test, dev, conformance targets
+cmd/tusk-php/                 Entry point: flags, subcommands, stdio
+internal/
+├── protocol/                 1. LSP wire types, no logic
+│
+├── parser/                   2. Tokenizer and lightweight AST (fault-tolerant)
+├── types/                       Type model primitives (named, union, intersection, generic, …)
+├── phparray/                    PHP array literal helpers
+├── stubs/                       Embedded builtin stubs, per PHP version and extension
+├── phpdetect/                   Reads the local PHP version (timeout-bounded)
+│
+├── symbols/                  3. The central index and builtin profiles
+├── scope/                       Variables, closures, imports
+├── resolve/                     Types, PHPDoc, generics, member chains
+├── source/                      What is under the cursor
+│
+├── config/                   4. .tusk-php.json, client options, framework detection
+├── composer/                    composer.json, installed.json, platform; cardhover/, lockfile/, manifest/
+├── coverage/                    Coverage reports from PHPUnit and Pest
+├── container/                   Laravel and Symfony service container bindings
+├── models/                      Eloquent, Doctrine, migrations, database schema, array shapes
+├── framework/laravel/           Routes, views and view data, translations, components, registrations
+│   └── blade/                   Blade templates as virtual PHP
+├── framework/symfony/           Routes, translations, console commands
+├── framework/magento/           Classes Magento generates at build time
+├── workspace/                   Builds the index for a root: files, Composer dependencies, framework analysis
+│
+├── completion/ hover/        5. Features
+├── analyzer/                    Definition, references, symbols, rename, signature help
+├── inlayhint/
+├── checks/                      Native rules, no LSP types
+├── diagnostics/                 Runs checks, plus PHPStan and Pint
+├── symquery/ introspect/ deps/ unuseddeps/ graph/
+│
+├── lsp/                      6. LSP transport
+├── mcpserver/                   MCP transport
+│
+└── conformance/              7. Whole-stack invariants and corpus tests (build-tagged)
 ```
 
-## Entry Point
+## Core data
 
-`cmd/tusk-php/main.go` parses CLI flags (`--version`, `--log`, `--stdio`, `--strict`), creates a `lsp.Server` with stdin/stdout, and calls `server.Run()` which enters the JSON-RPC message loop.
+These are the shapes everything else queries. The source is authoritative; only the key fields are listed here.
 
-## JSON-RPC Protocol
+### Symbol (`symbols/index.go`)
 
-Communication uses stdio with `Content-Length` headers. The server reads messages in a single-threaded loop, dispatches to handlers, and sends responses/notifications.
+Any PHP declaration: class-like, method, property, function, constant, enum case. It carries its `FQN`, `Kind`, `Source` (project, vendor or builtin), location, modifiers, declared and PHPDoc types (`Type`, `ReturnType`, `Params`, `DocComment`), and its children (a class's members). It also records:
 
-### Supported Methods
+- inheritance (`Extends`, `Implements`) and `Supertypes` with their generic type arguments;
+- `Templates` and `TypeAliases` (`@template`, `@phpstan-type`);
+- PHP 8.4 `Hooks` and `SetVisibility`, and `Attributes`;
+- `IsVirtual` for members synthesised from `@property` / `@method` or IDE helper files, and `IsConditional` for a class declared inside a block (a placeholder under `if (false)`, a polyfill under `if (!class_exists(...))`), whose members may not be the ones code runs with.
 
-| Method | Purpose |
-|--------|---------|
-| `initialize` | Handshake: load config, detect framework, register builtins for resolved PHP profile |
-| `initialized` | Async start: workspace indexing, composer deps, container analysis |
-| `shutdown` / `exit` | Graceful termination (`exit` uses an injectable function for testability) |
-| `textDocument/didOpen` | Store document, index, run diagnostics |
-| `textDocument/didChange` | Update content, re-index, schedule diagnostics (background, debounced) |
-| `textDocument/didClose` | Drop in-memory document state |
-| `textDocument/didSave` | Re-index, trigger PHPStan/Pint |
-| `textDocument/completion` | Context-aware completions at cursor |
-| `textDocument/hover` | Type info and docs at cursor |
-| `textDocument/definition` | Jump to symbol definition |
-| `textDocument/typeDefinition` | Jump to the declared type of a variable/property |
-| `textDocument/implementation` | Jump to interface implementers (classes, enums) |
-| `textDocument/references` | Find all references in the workspace |
-| `textDocument/documentSymbol` | File outline (classes, methods, properties) |
-| `textDocument/foldingRange` | Folding regions for blocks, PHPDoc, etc. |
-| `textDocument/documentHighlight` | Highlight other occurrences of the symbol under cursor |
-| `textDocument/signatureHelp` | Parameter hints in function calls |
-| `textDocument/prepareRename` | Validate cursor target is renameable |
-| `textDocument/rename` | Rename a symbol across the workspace |
-| `textDocument/codeAction` | Quickfixes (remove unused import, organize imports, …) |
-| `textDocument/inlayHint` | Inline type/parameter-name annotations |
-| `workspace/symbol` | Workspace-wide symbol search |
-| `workspace/executeCommand` | Server-side commands (reindex, …) |
+`symbols.IsBuiltin(sym)` is the one way to tell a builtin symbol.
 
-## Core Data Structures
+### Index (`symbols/index.go`)
 
-### Symbol
+The thread-safe symbol table every provider reads. Besides FQN, short-name and per-file maps it keeps:
 
-Represents any PHP symbol (class, method, property, function, constant, enum, etc.):
+- **lookup indexes:** a case-insensitive FQN index (PHP matches class and function names case-insensitively) and sorted name/FQN lists for prefix search;
+- **hierarchy, both directions:** child → parent and parent → children, class → interfaces and interface → implementers, interface → sub-interfaces, class → traits;
+- **member tables** by class and name, and a **generation counter** that caches derived from the index (resolution, diagnostics) check to know when they are stale;
+- **framework hooks:** call forwards (a class that forwards unknown calls, like an Eloquent model to its query builder), scope conventions for builders, and a class generator that builds Magento's generated classes on a lookup miss and drops them when their source class changes;
+- the raw source of indexed files, used by find-references.
 
-```go
-type Symbol struct {
-    Name          string
-    FQN           string
-    Kind          SymbolKind
-    Source        SymbolSource             // Project, Builtin, or Vendor
-    URI           string
-    Range         protocol.Range
-    Visibility    string
-    SetVisibility string                   // PHP 8.4 asymmetric visibility
-    IsStatic      bool
-    IsAbstract    bool
-    IsFinal       bool
-    IsReadonly    bool
-    Type          string                   // Property/constant type
-    ReturnType    string                   // Method/function return type
-    DocComment    string                   // PHPDoc block
-    ParentFQN     string                   // Owning class FQN
-    Params        []ParamInfo
-    Children      []*Symbol                // Nested symbols (class → methods/properties)
-    Implements    []string
-    Extends       string
-    BackedType    string                   // Enum backing type
-    Value         string                   // Constant/enum-case value
-    IsVirtual     bool                     // Synthesized from @property/@method docs (IDE helper)
-    Templates     []TemplateParam          // @template T (of Bound)
-    TypeAliases   map[string]TypeAlias     // @phpstan-type / @phpstan-import-type
-    Hooks         []parser.PropertyHook    // PHP 8.4 property hooks (get/set)
-}
-```
+Indexing a file parses it outside the lock, then replaces that file's entries in one short critical section.
 
-### Index
+### Builtin profile (`symbols/`, `stubs/`)
 
-Thread-safe central symbol table. All providers read from it:
+A `BuiltinProfile` is a PHP version and a set of extensions. Builtins are registered in a fixed order, later layers overriding earlier ones:
 
-```go
-type Index struct {
-    mu                   sync.RWMutex
-    symbols              map[string]*Symbol   // FQN → Symbol
-    nameIndex            map[string][]string  // Short name → [FQNs]
-    fileSymbols          map[string][]*Symbol // URI → symbols in file
-    namespaceIndex       map[string][]string  // Namespace → [FQNs]
-    inheritanceMap       map[string]string    // Child → Parent FQN
-    implementsMap        map[string][]string  // Class → [Interface FQNs]
-    reverseImplementsMap map[string][]string  // Interface → [Implementer FQNs]
-    traitMap             map[string][]string  // Class → [Trait FQNs]
-    sortedNames          []string             // sorted lowercase names for binary search
-    sortedFQNs           []string             // sorted FQN keys for binary search
-    fileSource           map[string]string    // URI → raw source for in-memory lookups
-    ready                atomic.Bool          // true once project + vendor indexing settled
-}
-```
+1. the generated registry (names only, from phpstorm-stubs);
+2. the PHP 7.4 core baseline (`stubs/php/core/php-7.4.php`) and the per-area core stubs (`spl/`, `date/`, `reflection/`, `io-poll/`, `time/`, `uri-*/`, …);
+3. core version deltas up to the selected version (`php-8.0.php` … `php-8.6.php`);
+4. extension baselines (`stubs/php/extensions/<ext>/php-7.4.php`);
+5. extension version deltas;
+6. hand-written availability entries (`builtinAvailabilityByName`), which say since which version a builtin exists, for `builtin-unavailable`.
 
-Key methods: `IndexFileWithSource`, `IndexIDEHelperFile`, `Lookup(fqn)`, `LookupByName(name)`, `SearchByPrefix(prefix)`, `SearchByFQNPrefix(prefix)`, `GetClassMembers(classFQN)`, `GetInheritanceChain(classFQN)`, `RegisterBuiltinsForProfile(profile)`. The helper `symbols.IsBuiltin(sym)` is the canonical way to detect builtin symbols (URI prefix `builtin://` or empty URI with `SourceBuiltin`).
+### FileNode (`parser/`)
 
-### BuiltinProfile
+What `parser.ParseFile()` returns: the namespace and `use` imports, classes (including anonymous ones), interfaces, traits, enums, functions, top-level constants, and the syntax errors it recovered from (reported as `syntax-error`). The parser handles syntax up to PHP 8.6, including property hooks, asymmetric visibility, the pipe operator, partial function application and parameter doc comments. It is fault-tolerant: bail-out conditions, progress guards and partial results on panic.
 
-Selects which PHP builtin layers get indexed at startup:
-
-```go
-type BuiltinProfile struct {
-    PHPVersion string   // e.g. "8.2"
-    Extensions []string // e.g. ["json", "curl"]
-}
-```
-
-Layer ordering (deterministic, later layers override earlier ones):
-
-1. Generated fallback registry (cheap names-only entries from `phpstorm-stubs` generation)
-2. PHP 7.4 core baseline (full stub file: `internal/stubs/php/core/php-7.4.php`, plus the per-area core stubs such as `core/spl/` for the iteration classes with their PHPDoc generics)
-3. Core version deltas up to `PHPVersion` (e.g. `php-8.0.php`, `php-8.1.php`, …)
-4. Enabled extension baselines (`internal/stubs/php/extensions/<ext>/php-7.4.php`)
-5. Extension version deltas up to `PHPVersion`
-6. Hand-authored availability overrides in `symbols.builtinAvailabilityByName`
-
-`stubs.BuiltinPHPForProfile(Profile)` returns the version/extension-filtered set of embedded stubs the index parses.
-
-### FileNode
-
-Result of parsing a PHP file (from `parser.ParseFile()`):
-
-```go
-type FileNode struct {
-    Namespace  string
-    Uses       []UseNode
-    Classes    []ClassNode        // with Methods, Properties (Hooks, SetVisibility), Constants
-    Interfaces []InterfaceNode
-    Traits     []TraitNode
-    Enums      []EnumNode         // with Cases, Methods
-    Functions  []FunctionNode
-    Errors     []ParseError       // recovered syntax errors, surfaced as `syntax-error` diagnostics
-}
-```
-
-## Initialization Sequence
+## Startup
 
 ```
 Client                              Server
-  │                                   │
-  │──── initialize ──────────────────>│  Load config, detect framework,
-  │                                   │  resolve BuiltinProfile (composer
-  │                                   │  platform → .tusk-php.json → phpdetect),
-  │                                   │  index.RegisterBuiltinsForProfile(profile),
-  │<─── InitializeResult ────────────│  advertise server capabilities
-  │                                   │
-  │──── initialized ─────────────────>│  Spawn concurrent goroutines:
-  │                                   │    1. indexWorkspace()
-  │                                   │    2. indexComposerDependencies()
-  │                                   │    3. container.Analyze()
-  │                                   │  Once all settle, re-publish diagnostics
-  │                                   │  for open documents with unknown-symbol
-  │                                   │  findings re-enabled
+  │──── initialize ─────────────────>│  Load config, detect framework, pick the
+  │                                  │  builtin profile (composer platform →
+  │                                  │  .tusk-php.json → local PHP), register
+  │<─── InitializeResult ───────────│  builtins, create the workspace
+  │                                  │
+  │──── initialized ────────────────>│  In the background (goSafe):
+  │                                  │   - index workspace files
+  │                                  │   - index Composer dependencies
+  │                                  │   - container analysis
+  │                                  │   - coverage reports (read, then watched)
+  │                                  │   - Laravel routes
+  │                                  │   once both indexes settle:
+  │                                  │   - analyse models, Symfony commands
+  │                                  │   - re-publish diagnostics for open files
 ```
 
-**indexWorkspace**: Walks filesystem, indexes `.php` files as `SourceProject`, skips excluded dirs.
+`workspace` owns these steps (`IndexWorkspace`, `IndexComposerDependencies`, `ScanRoutes`, `AnalyzeModels`, `ScanSymfonyCommands`). The LSP server runs them in the background so it can answer straight away; `tusk-php check`, `introspect` and the MCP server call `workspace.Build`, which runs them before returning.
 
-**indexComposerDependencies**: Parses `composer.json` and `vendor/composer/installed.json` for PSR-4 directories and `autoload.files`. Indexes vendor PHP files as `SourceVendor`. Supports Composer v1 and v2.
+Until indexing settles, unknown-symbol findings are held back, since the index isn't complete yet and they would be false. Once it settles, diagnostics for open files are published again with every rule on.
 
-**container.Analyze**: Laravel → scans service providers for `bind`/`singleton` and pre-loads 25+ framework bindings. Symfony → parses `services.yaml`, PHP config files, and `#[Autowire]` attributes.
+Composer: project files are indexed as `SourceProject`; the PSR-0, PSR-4, classmap and `files` autoload entries of installed packages (Composer 1 and 2) as `SourceVendor`.
 
-**Soft-mode diagnostics**: Unknown-symbol findings are suppressed on the first publish (the index isn't yet fully populated, so they'd produce false positives). Once `indexWg` settles, diagnostics are re-published for open documents with the full rule set enabled.
+## The LSP server
 
-## How Indexing Works
+### Message loop and output
 
-`IndexFileWithSource(uri, source, src)`:
+`Server.Run()` reads one JSON-RPC message at a time and dispatches it (`dispatch.go`). Each handler runs under `recoverPanic`; background work runs through `goSafe`, which recovers panics too. In strict mode both re-panic.
 
-1. Parse source → `FileNode` (namespace, uses, classes, functions, etc.)
-2. Lock index, remove old symbols for this URI
-3. For each declaration: build FQN, resolve type names via `use` imports, create `Symbol` with source tag
-4. Store in all index maps (FQN, name, file, namespace, inheritance/implements/trait)
-5. Cache raw source for in-memory occurrence scans (used by find-references)
+Requests are handled on the loop, so the loop does no work that grows with the workspace. Indexing, workspace-wide work, PHPStan and Pint run in the background. All output goes through one writer (`output.go`), so frames from the loop and from background goroutines never interleave.
 
-**Type resolution**: Short names → FQN via `use` statements → current namespace fallback → global.
+### Documents
 
-**Symbol sources**: `SourceProject` (workspace files), `SourceBuiltin` (PHP built-ins, URI prefix `builtin://`), `SourceVendor` (composer dependencies). Used for completion sorting and navigation gating.
+Open documents are a map guarded by an `RWMutex`. On `didChange` the server stores the new text and re-indexes the file: synchronously for files up to 5,000 lines, otherwise through a background queue that only ever indexes the latest version. Diagnostics run in the background after a 200 ms pause in typing, one pending run per file; a result for text that has changed since is dropped.
 
-## Package Responsibilities
+### Methods
 
-### Foundational layers (consumed by every provider)
+| Method | Handled by |
+|---|---|
+| `initialize`, `initialized`, `shutdown`, `exit` | `lsp` |
+| `textDocument/didOpen`, `didChange`, `didClose`, `didSave` | `lsp` (documents, indexing, diagnostics) |
+| `textDocument/completion`, `completionItem/resolve` | `completion` |
+| `textDocument/hover` | `hover` (`composer/cardhover` for `composer.json`) |
+| `textDocument/definition`, `typeDefinition`, `implementation`, `references` | `analyzer` |
+| `textDocument/documentSymbol`, `workspace/symbol` | `analyzer` |
+| `textDocument/documentHighlight`, `foldingRange` | `analyzer` |
+| `textDocument/selectionRange` | `lsp` |
+| `textDocument/signatureHelp` | `analyzer` |
+| `textDocument/prepareRename`, `rename` | `analyzer` |
+| `textDocument/codeAction` | `analyzer`: import fixes, unknown-class fixes, implement missing methods, constructor and getter/setter generation, extract and inline variable |
+| `textDocument/inlayHint` | `inlayhint` |
+| `textDocument/semanticTokens/full` | `lsp` |
+| `workspace/executeCommand` | `lsp`: `tuskPhpLsp.namespaceForPath`, `copyNamespace`, `moveToNamespace`, `createObject`, `copyReference`, `debugDocument` |
 
-#### parser
+The server also advertises an experimental `tuskCoverage` capability for editors that show coverage.
 
-Custom PHP tokenizer + structural parser. Produces `FileNode` with classes, methods, properties, functions. Handles PHP 8.0–8.5 syntax: union/intersection types, enums, readonly classes, attributes (`#[Name]`), named arguments, **property hooks** (`{ get => ...; set => ...; }`), **asymmetric visibility** (`public private(set)`), **pipe operator** (`|>`), **dynamic class constant fetch** (`Class::{$name}`). Fault-tolerant: bail-out conditions, progress guards, partial results on panic, recovered syntax errors recorded on `FileNode.Errors`.
+Blade views (`.blade.php`) are compiled to virtual PHP (`framework/laravel/blade`) with a map back to the template. Hover, completion, definition, references and diagnostics run on that PHP and are mapped back; Blade's own directives, components and view names are answered by `lsp/blade_features.go`. Blade files are not added to the symbol index.
 
-#### symbols
+## The MCP server
 
-The `Index` is the shared data store. All providers receive `*Index` and query it. Handles FQN resolution, inheritance chain traversal, trait merging, namespace membership. `PickBestStandalone()` selects the most appropriate symbol when multiple share a name (prefers functions over methods in standalone context). `BuiltinProfile` and `RegisterBuiltinsForProfile` drive layered builtin indexing.
+`mcpserver` serves tools for AI agents over stdio: symbol lookup and explanation, references, diagnostics, project summary, container bindings, coverage, Laravel and Symfony routes, Laravel model schemas, and the database schema (`db_*`). It builds the workspace with `workspace.Build` and wires its own providers. See [docs/ai-agents.md](docs/ai-agents.md).
 
-#### stubs
+## Features
 
-Embedded PHP builtin stub files under `internal/stubs/php/core/` (language) and `internal/stubs/php/extensions/<ext>/` (extension symbols), named `php-<version>.php`. PHP 7.4 files are full baselines; later version files are deltas. `BuiltinPHPForProfile(Profile)` returns the deterministic, version/extension-filtered set of stubs the index parses.
+### Shared foundations
 
-#### source
+Every feature goes through these, so completion, hover, definition, references, rename, inlay hints and diagnostics agree:
 
-Shared cursor-context abstraction. `sourcectx.Analyze(uri, source, pos)` classifies the cursor (`AccessKind`, `ContextSymbolKind`, enclosing `Scope`, active namespace, active imports) so providers don't re-derive cursor state. Models named functions, anonymous closures, arrow functions, methods, and tracks namespace/import state at the cursor position rather than file-globally.
+- **`source`** (package `sourcectx`, `sourcectx.Analyze`): what is under the cursor: access kind (instance, static, …), the enclosing function, closure, method and class, and the namespace and imports in effect at that position.
+- **`scope`**: variables, parameters, closure captures (including implicit `fn` captures), `foreach`/`catch` bindings, destructuring, grouped imports.
+- **`resolve`**: types. PHPDoc (unions, intersections, shapes, literals, conditional types, `@phpstan-`/`@psalm-` tags), generics and templates, type aliases, class-string bindings, variable types with branch-aware narrowing, and one member-chain walker, `Resolver.AccessOwnerType`, that every feature uses. Results are memoised per index generation.
 
-#### scope
+### Providers
 
-Reusable scope/variable collector for parameters, closures (including implicit `fn (...) =>` captures), `foreach`/`catch` bindings, `list(...)` destructuring, and grouped imports. Required for undefined/unused variable diagnostics and scoped rename.
+- **`completion`**: classifies the cursor through `source` (member access, static access, `new`, namespaces and `use`, attributes, container calls, framework strings such as route, view, config and translation names) and ranks results: types, then same-namespace project symbols, other project symbols, builtins, vendor symbols, keywords.
+- **`hover`**: a markdown card: the declaration as PHP (with asymmetric visibility and property hooks), its PHPDoc, where it comes from (parent, override, container binding), coverage, and a PHP manual link for builtins.
+- **`analyzer`**: definition, type definition, implementation (through the reverse hierarchy maps), references (from the index's cached source, never re-reading disk), document and workspace symbols, signature help, rename. Builtins are never renamed or navigated into, and an unresolved receiver gives no answer rather than a guess.
+- **`inlayhint`**: variable types, `foreach` variable types, closure return types, method return types, and parameter names at call sites.
 
-#### resolve
+### Diagnostics
 
-Centralized type/symbol resolution. Hosts PHPDoc parsing, generic templates, type aliases (`@phpstan-type` / `@phpstan-import-type`), class-string bindings, member-chain walking, and re-entrancy depth-guarded variable type resolution. Completion, hover, and diagnostics go through this layer so they agree on what type a variable holds.
+Three sources, kept apart:
 
-#### types
+1. **Native rules** (`checks`, run by `diagnostics`): unknown classes, functions and members, undefined and unused variables, unused imports and private members, argument counts, deprecations, unavailable builtins for the project's PHP version, invalid overrides, unreachable code, redundant types and nullsafe operators, unknown Eloquent columns and relations, and more. `checks` has no LSP types, so the same rules serve `tusk-php check` and MCP. Every rule, its default severity and how to change it are in [docs/diagnostics.md](docs/diagnostics.md).
+   - Cheap rules run after the 200 ms pause on the edited file only.
+   - Heavier, type-aware rules run on save (`AnalyzeOnSave`); `tusk-php check` and MCP run both tiers.
+2. **PHPStan**, on save, when the project has it: its JSON output, with ranges narrowed to the identifier each message names.
+3. **Laravel Pint**, on save, when the project has it: style differences as warnings.
 
-Type model primitives (`TypeKind`: named, union, intersection, generic, …) used by `resolve/`.
+## Project context
 
-#### phparray
+- **`config`** merges `.tusk-php.json` with the client's `initializationOptions` and detects the framework (`artisan`, `bin/console`, `bin/magento`, or `composer.json`). Every option is in [docs/configuration.md](docs/configuration.md).
+- **`composer`** reads `composer.json`, `composer.lock` and `vendor/composer/installed.json`: autoload entries, the PHP version and extensions for the builtin profile, suggested packages, and Laravel/Symfony package discovery. `cardhover`, `lockfile` and `manifest` power hover and definition inside `composer.json`.
+- **`container`**: Laravel service providers (`bind`, `singleton`, …) and framework bindings; Symfony `services.yaml`, PHP config and `#[Autowire]`.
+- **`models`**: Eloquent attributes, casts, relations, scopes and accessors; Doctrine entities; table columns from migrations (read from tokens) or, when configured, the live database; IDE helper files.
+- **`framework/laravel`**: routes, views and the data each view receives, translations, Blade components and provider registrations (directives, components, view namespaces), and call forwarding for facades and models.
+- **`framework/symfony`**: routes, translations and console commands.
+- **`framework/magento`**: generated classes (`*Factory`, `*\Proxy`, `*\Interceptor`, `*SearchResults`, `*ExtensionInterface`, `*Extension`), built from their source class on demand.
+- **`coverage`**: reads coverage reports from PHPUnit and Pest (it never runs tests) for hover, the editor's coverage view and MCP.
 
-Shared utilities for parsing PHP array literals — used by config parsing, container analysis, and completion.
+## Concurrency
 
-#### phpdetect
+- **Index**: `sync.RWMutex`. The lock is held only to read or swap data; files are parsed and their symbols built outside it.
+- **Documents**: a map under an `RWMutex`; large-file indexing goes through a per-document queue that keeps only the latest version.
+- **Message loop**: single-threaded, one message at a time.
+- **Background work**: `goSafe` goroutines with panic recovery; their results are checked against the document version before they are used.
+- **Output**: one writer, so frames never interleave.
+- **Providers**: stateless query objects over the index.
 
-Runs the local PHP binary to read its version, bounded by an explicit timeout (default 1 s, overridable via `config.PHPDetectTimeoutMs`). Exports `ErrTimeout` so callers can distinguish "PHP took too long" from "binary missing".
+Concurrent, cancellable request handling and versioned document snapshots are planned ([#114](https://github.com/Tusk-PHP/lsp/issues/114)).
 
-### LSP providers
-
-#### hover
-
-Resolves the symbol under the cursor and renders a markdown card:
-
-1. Bold FQN header
-2. Docblock summary
-3. PHP code block with declaration (renders asymmetric visibility and property hooks)
-4. Context (parent class, override/implements info, container bindings)
-5. PHPDoc details (params, returns, throws, tags)
-6. PHP manual link (for builtins)
-
-Access chain resolution walks `$this->logger->info()` by resolving types at each step through the index. Primitive types (`string`, `int`, etc.) produce no hover. Variables typed with primitives show `type $varName` in the code block.
-
-#### completion
-
-Detects cursor context (via `source/`) from the line prefix:
-
-| Context | Detection | Result |
-|---------|-----------|--------|
-| `$obj->` / `$obj?->` | Trailing `->` or `?->` | Instance methods, properties |
-| `Class::` | Trailing `::` | Static methods, constants, enum cases |
-| `new ` | Last word is `new` | Class names |
-| `use Ns\` | Starts with `use`, contains `\` | Namespace segments + symbols |
-| `\Ns\` | Contains `\` | Namespace segments + symbols |
-| `#[` | Contains `#[` | Attribute names |
-| `app(` / `make(` | Container resolve call | Container-bound class names |
-| (default) | None of above | Types, functions, keywords, `$this` |
-
-**Sort order**: `"0"` types → `"1"` same-namespace project → `"2"` other project → `"3"` builtins → `"4"` vendor → `"5"` keywords. All return paths funnel through a sanitizer that drops empty-`Label` items and produces deterministic ordering.
-
-Variable type resolution (delegated to `resolve/`): method parameters → `$var = new Class()` assignments → `$var = 'literal'` inference → `@var` annotations → class properties.
-
-#### analyzer
-
-- **FindDefinition / FindTypeDefinition**: Resolves symbol → returns `Location`. Returns nil for unresolved-receiver access chains rather than matching unrelated same-name symbols (W1 guard).
-- **FindImplementation**: Looks up `reverseImplementsMap` to find classes/enums implementing an interface.
-- **FindAllReferences**: Uses the index's in-memory cached source (no per-call disk re-read). Skips built-in symbols — they're opaque to navigation.
-- **GetDocumentSymbols** / **GetWorkspaceSymbols**: File-level and workspace-level outlines. Workspace filter excludes builtins via `symbols.IsBuiltin`.
-- **GetSignatureHelp**: Identifies enclosing function call and clamps `activeParameter` to valid range.
-- **PrepareRename / Rename**: Scoped through `scope.Collect`; rejects builtins (via `symbols.IsBuiltin`) and unresolved access chains.
-
-#### inlayhint
-
-Five categories of inline annotations: variable types, foreach variable types, closure return types, method return types, and call-site parameter name labels.
-
-#### checks
-
-Standalone PHP static analysis rules with **no LSP dependency** — results are `Finding` values usable from CI, CLI, or LSP. Current rules: `unknown-class` / `unknown-function` / `unknown-member`, `unused-imports`, `unused-private`, `unreachable`, `redundant-types`, `invalid-builder-args`, `builtin-unavailable` (functions, class-likes, attributes, constants).
-
-#### diagnostics
-
-Two layers:
-
-1. **Fast checks** (on every change, debounced by about 200 ms and run in the background, so requests never wait for them; a result for text that has changed since is dropped): runs the `checks/` rule set plus parser recovery errors as `syntax-error`. Results published via `publishDiagnostics`.
-2. **External tools** (on save): PHPStan (JSON output → diagnostics with token-level ranges) and Laravel Pint (diff output → style warnings). Results cached per-file.
-
-PHPStan diagnostic ranges highlight the specific identifier mentioned in the error message, falling back to the trimmed line content.
-
-### Project context
-
-#### composer
-
-Parses `composer.json` (PSR-4 + `autoload.files`) and `vendor/composer/installed.json`. Returns `[]AutoloadEntry` with path, namespace, vendor flag, and file flag. `GetPlatform()` extracts the effective PHP version + `ext-*` set from `config.platform` / `require` for `BuiltinProfile` selection. Supports Composer v1 and v2.
-
-#### container
-
-Analyzes DI container bindings. **Laravel**: scans service providers for `bind`/`singleton` calls, pre-loads 25+ framework bindings. **Symfony**: parses `services.yaml`, PHP config files, and `#[Autowire]` attributes. Used by completion (container resolve context) and hover (binding info).
-
-#### config
-
-Loads `.tusk-php.json` and merges with LSP client `initializationOptions`. Auto-detects framework from `artisan` (Laravel), `bin/console` (Symfony), `bin/magento` (Magento 2), or `composer.json` requires. Hosts diagnostic severities, per-check enable/disable flags, and `PHPDetectTimeoutMs`. Defaults: no limit on indexed files, excludes `vendor`/`node_modules`/`.git`/`storage`.
-
-#### framework/laravel
-
-Routes, views, translations — Laravel-specific symbol resolution that doesn't belong in generic completion.
-
-`framework/laravel/blade` reads Blade templates. `Parse` splits a template into echoes, directives, PHP blocks and component tags; `Compile` assembles the PHP in it into a virtual PHP document with a map back to the template. Diagnostics run their native rules on that document and keep only findings in PHP the template contains, moved to their place in the template. Blade files aren't added to the symbol index.
-
-#### framework/symfony
-
-Routes and other Symfony-specific symbol resolution.
-
-#### framework/magento
-
-Classes Magento generates at build time (`*Factory`, `*\Proxy`, `*\Interceptor`, `*SearchResults`, `*ExtensionInterface`, `*Extension`). The index asks for one through its class generator hook only when a lookup misses, builds it from the class it's generated for, and drops it when that class changes.
-
-#### models
-
-Eloquent (relations/casts/scopes/accessors), Doctrine, migrations, array shape inference. Sources synthetic `IsVirtual` symbols (from `@property`/`@method` IDE helper files) into the index.
-
-### Server and conformance
-
-#### lsp
-
-The `Server` struct owns all providers, the index, configuration, and the document store. `Run()` is the JSON-RPC message loop. `handleMessage()` dispatches by method. Documents stored in `sync.Map`. Panic recovery wraps all handlers and goroutines via `recoverPanic` / `goSafe`. Strict mode (`--strict` / `TUSK_STRICT`) re-panics recovered errors for fatal termination, including from background goroutines. `exit` calls an injectable `exitFunc` so the full lifecycle is testable.
-
-#### conformance
-
-Build-tagged (`//go:build conformance`) invariants and corpus tests that exercise the whole parser/index/provider stack. The real-world PHP corpus is not vendored — fetch it with `scripts/fetch-corpus.sh` before running `make conformance`.
-
-## Editor Extensions
-
-The editor extensions live in their own repositories and consume the released LSP binary; they are no longer part of this repo. Each pins a known-good LSP version and verifies the downloaded binary against the SHA-256 sums published with the release.
-
-### VS Code — [`Tusk-PHP/vscode`](https://github.com/Tusk-PHP/vscode)
-
-TypeScript. Discovers binary from settings → bundled `bin/{os}-{arch}/tusk-php` → PATH. Passes user settings as `initializationOptions`. Watches `.php` and `composer.json` files. Commands: restart, reindex.
-
-### Zed — [`Tusk-PHP/zed`](https://github.com/Tusk-PHP/zed)
-
-Rust/WASM. Zero user configuration. Downloads binary from GitHub releases for current platform. Falls back to PATH. Server must have sensible defaults since Zed users cannot configure options.
-
-## Concurrency Model
-
-- **Index**: `sync.RWMutex` — multiple concurrent readers, exclusive writer. `sortedNames` / `sortedFQNs` rebuilt under the write lock when their dirty flags are set (powers binary-search prefix lookups).
-- **Documents**: `sync.Map` — lock-free concurrent access.
-- **Message loop**: Single-threaded in `Server.Run()`.
-- **Background work**: `goSafe()` spawns goroutines with panic recovery. Large documents (>5000 lines) are indexed asynchronously off the message loop; smaller ones stay synchronous for deterministic test behavior.
-- **Providers**: Stateless query objects, safe for concurrent use.
-
-## Request Flow Example
+## Request flow example
 
 ```
-User hovers over "$this->logger->info()" on "info"
+User hovers "info" in $this->logger->info()
   ↓
-VSCode sends textDocument/hover {uri, position}
+textDocument/hover {uri, position}
   ↓
-Server.handleHover()
+Server.handleHover → hover.Provider.GetHover(uri, source, position)
+  ├─ sourcectx.Analyze → instance access, subject "$this->logger"
+  ├─ resolve.Resolver.AccessOwnerType walks left (the walker completion,
+  │  definition, inlay hints and diagnostics share):
+  │    "info" ← "->" ← "logger" ← "->" ← "$this"
+  │    $this  → App\Service (enclosing class)
+  │    logger → property type Monolog\Logger
+  ├─ member lookup: Monolog\Logger::info
+  └─ format the hover card
   ↓
-hover.Provider.GetHover(uri, source, position)
-  ├─ sourcectx.Analyze() → AccessKind = instance, subject = "$this->logger"
-  ├─ resolveAccessChain() walks left:
-  │   "info" ← "->" ← "logger" ← "->" ← "$this"
-  │   $this → App\Service (enclosing class from sourcectx)
-  │   logger → property type Monolog\Logger (via resolve/)
-  │   returns "Monolog\Logger"
-  ├─ findMember("Monolog\Logger", "info") → Symbol
-  └─ formatHover(symbol) → markdown card
-  ↓
-Server.sendResponse(id, hover)
-  ↓
-VSCode renders hover popup
+response written through the single output writer
 ```
+
+## Tests
+
+- Unit tests sit next to the code and use the mock project in `testdata/project/` (`make test`, with `-race`).
+- `conformance` (build tag `conformance`) checks whole-stack invariants over a real-world PHP corpus fetched by `scripts/fetch-corpus.sh` (`make conformance-pr`, `make conformance`).
+- Field baselines hold the diagnostics for Laravel, Symfony, WordPress and Magento 2 at pinned commits in `testdata/field/*.baseline`; CI fails when findings appear or vanish (`make field-baseline`).
+- `bench/` compares speed, memory and correct answers with other PHP language servers (`make bench`).
+
+## Editor extensions
+
+The extensions live in their own repositories and download a released `tusk-php` binary, pinned by version and checked against the SHA-256 sums published with the release:
+
+- **VS Code**: [`Tusk-PHP/vscode`](https://github.com/Tusk-PHP/vscode), which passes its settings as `initializationOptions`.
+- **Zed**: [`Tusk-PHP/zed`](https://github.com/Tusk-PHP/zed). Zed users can't configure the server, so every default has to work without configuration.

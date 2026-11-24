@@ -25,30 +25,16 @@ _None open._
 
 ## Low / performance
 
-### L62 — A call made only for another version of a library is reported as having too few arguments
-- **Where:** `argument-count-mismatch` in `internal/checks/argument_count.go`.
-- **What:** Laravel's `Foundation/Bootstrap/HandleExceptions.php` (line 359) calls `$instance->enable()` in the `else` of `if (version_compare(Version::id(), '12.3.4', '>='))`, for PHPUnit versions before the one installed, whose `enable()` takes a `TestCase`. Symfony's `Bridge/Twig/Form/TwigRendererEngine.php` (line 242) calls `->unwrap()`, which the installed Twig 4 gives a required `Environment` parameter. Both are correct for the installed versions, but the code supports others.
-- **Fix:** Stay quiet inside a branch guarded by `version_compare()`, and weigh the project's `composer.json` constraints when the installed version is newer than what it allows.
+### L63 — A declaration's `EndLine` is the line of the token after its closing brace
+- **Where:** `internal/parser/parser.go` (`cls.EndLine = p.peek().Line` and the same for interfaces, traits, enums, functions and methods).
+- **What:** After parsing the body, `EndLine` is taken from the next token, so it is the line of the following declaration, or EOF, rather than the `}`. With blank lines or another declaration after it, a class "ends" further down than it does. Found while closing L40; about a dozen packages read `EndLine` (scope ranges, selection ranges, semantic tokens, guards, unused-private), so it wasn't changed there.
+- **Fix:** Record the line of the closing brace the body parser consumed, then check each reader, starting with `source/context.go` and `lsp/selection_range.go`.
 
-### L61 — Placeholder classes shadow the real ones when a variable is narrowed to them
-- **Where:** the symbol index (`internal/symbols`), seen through `instanceof` narrowing in `internal/resolve/instanceof.go`.
-- **What:** Symfony's `Bridge/PhpUnit/SymfonyTestsListener.php` declares an empty `SymfonyTestsListener` inside `if (false)` next to a `class_alias()` to the real class, and its tests ship `stubs/mongodb.php` with bare `MongoDB\Collection`, `Database` and `Client` classes. The index takes those as the classes, so `if ($l instanceof SymfonyTestsListener) { $l->globalListenerDisabled(); }` (`Legacy/CommandForV8.php`, `CommandForV9.php`) and `$mongo->withOptions()` and `->getCollection()` on `MongoDB\Collection`, `Database` and `Client` in `Cache/Traits/MongoDbTrait.php` are reported as unknown members. Before `instanceof` narrowing these variables had no known type, so nothing was reported. A parameter declared with those classes is reported the same way.
-- **Fix:** Index a class declared under `if (false)` as a placeholder that loses to the `class_alias()` target, and leave test stub folders (`Tests/**/stubs`) out of the index or below vendor code.
+### ~~L60~~ — Hover and go-to-definition find nothing on a member of a called closure's result — **RESOLVED**
+- Assigning a closure to a variable now gives it its `Closure(…): T` type, so calling it types the result for every feature. Hover and go-to-definition type the receiver with the shared walker (`resolve/chain.go`), as completion does.
 
-### L60 — Hover and go-to-definition find nothing on a member of a called closure's result
-- **Where:** member hover in `internal/hover/provider.go`, member definition in `internal/analyzer/analyzer.go` (their fallback chain walkers, see L49).
-- **What:** With `$g = fn (int $i): Foo => new Foo();`, `$x = $g(1);` types `$x` as `Foo`, but hover and go-to-definition on `fooOnly` in `$g(1)->fooOnly()` find nothing, and `$g(1)->nope()` isn't reported as an unknown member on `Foo`. The same on 0.13.0.
-- **Fix:** Route both through `resolve`'s chain resolution, which knows what calling a variable gives.
-
-### L59 — A variable destructured into keeps the type it had before
-- **Where:** `reachingType` in `internal/resolve/reaching.go` (the fallback to the line scan); `instanceofOwners` in `internal/checks/unknown_symbols.go`.
-- **What:** In Symfony's `Routing/Matcher/Dumper/CompiledUrlMatcherDumper.php` (line 405), `foreach ($routes as $route) { if ($route instanceof StaticPrefixCollection) { …; continue; } [$name, $regex, $vars, $route] = $route; $route->compile(); }` reports `Unknown member 'compile' on 'StaticPrefixCollection'`. The only write that reaches the call is the destructuring, which can't be typed on its own, so the old line scan answers, finds the `foreach` line and gives the loop's element type; the `instanceof` owner from the block that ended in `continue` is added on top. The same on 0.13.0.
-- **Fix:** Mark destructuring writes in the collector and return unknown for them instead of falling back to the line scan. Separately, drop an `instanceof` owner once the variable is written again or the tested block leaves with `continue`, `break`, `return` or `throw`.
-
-### L58 — Hover and go-to-definition on a member of a union receiver look at one class
-- **Where:** member hover in `internal/hover/provider.go`, member definition in `internal/analyzer/analyzer.go`.
-- **What:** After `if ($c) { $x = new Foo(); } else { $x = new Bar(); }`, `$x->barOnly()` is accepted and completed, but hover and go-to-definition on `barOnly` find nothing: they look the member up on one class of `Foo|Bar`. The same on 0.13.0 for any union receiver; branch-assigned variables now make it more common.
-- **Fix:** Look the member up on each class of the receiver's `MemberOwner()`, as completion and `unknown-member` do.
+### ~~L58~~ — Hover and go-to-definition on a member of a union receiver look at one class — **RESOLVED**
+- Hover and go-to-definition take the receiver from the shared walker and look the member up on every class of its `MemberOwner()`. `internal/lsp/member_owner_test.go` checks a branch-assigned union through the server.
 
 ### L57 — Branch shapes that still give a wider union than they should
 - **Where:** `internal/scope/reach.go` (`ReachingWrites`), `internal/scope/flow.go`.
@@ -80,50 +66,27 @@ _None open._
 - **What:** The plain resolver gives a class name, or `A|B|null` for several values, and callers split or trim it themselves. Returning a fuller string there broke go-to-definition on a variable during the branch-values work until a test caught it.
 - **Fix:** Move the callers to `ResolveVariableTypeTyped` and `MemberOwner()`/`ClassNames()`, then drop the plain form (root `AGENTS.md`: structured types).
 
-### L51 — A comment between `->` and the member name makes the call an unknown function
-- **Where:** the `unknown-function` rule in `internal/checks/unknown_symbols.go`.
-- **What:** `$f->/* note */bindTo(null);` reports `Unknown function 'bindTo'`: the rule looks at the text before the name and finds the comment, not the `->`. Valid PHP, rare in real code; the same on 0.13.0.
-- **Fix:** Decide "is this a member call" from the previous significant token, as the shared tokens give it.
-
 ### L50 — `completion/provider.go` and `resolve/resolve.go` are well past the 800-line guideline
-- **Where:** `internal/completion/provider.go` (1,564 lines), `internal/resolve/resolve.go` (1,459 lines), `internal/scope/collector.go` (1,539 lines).
-- **What:** All three were already over the guideline in root `AGENTS.md` before the false-warning fixes, which added only call-site lines to them (new logic went to `scope/flow.go`, `scope/reach.go`, `resolve/reaching.go`, `resolve/concat.go`). Every new typing rule lands in the same two functions (`resolveChainWithContext`, `resolveVariableTypeTypedBase`).
-- **Fix:** Split within the package before the next feature there: the chain walkers out of `provider.go`, the assignment branches of `resolveVariableTypeTypedBase` into one file per right-hand-side form.
+- **Where:** `internal/completion/provider.go` (1,269 lines, down from 1,564 since the generic-aware chain walker moved to `resolve/chain.go`), `internal/resolve/resolve.go` (1,527 lines), `internal/scope/collector.go` (1,539 lines).
+- **What:** All three were already over the guideline in root `AGENTS.md` before the false-warning fixes, which added only call-site lines to them (new logic went to `scope/flow.go`, `scope/reach.go`, `resolve/reaching.go`, `resolve/concat.go`). Every new typing rule lands in the same two functions (`accessOwnerType` in `resolve/chain.go`, `resolveVariableTypeTypedBase`).
+- **Fix:** Split within the package before the next feature there: completion's remaining plain walker goes with L52, the assignment branches of `resolveVariableTypeTypedBase` into one file per right-hand-side form.
 
-### L49 — Hover's and the analyzer's fallback chain walkers read `f(...)` as a call
-- **Where:** `internal/hover/provider.go` (`resolveAccessChainTyped`, line 311); `internal/analyzer/analyzer.go` (`resolveAccessChainTyped`, about line 532).
-- **What:** First-class callable syntax is a `Closure` in the shared resolver and in completion's walkers, but these two copies still type `$obj->m(...)` as what `m()` returns. They run only when the shared resolver returns nothing, so it isn't visible today.
-- **Fix:** Route both through `resolve.IsFirstClassCallableArgs`, or remove the copies once `session` wires one resolver for every feature.
+### ~~L49~~ — Hover's and the analyzer's fallback chain walkers read `f(...)` as a call — **RESOLVED**
+- The two fallback walkers are gone. Completion's generic-aware walker moved into `resolve` (`ChainType`, `AccessOwnerType`), and hover, the analyzer, inlay hints and the resolver itself call it, so `f(...)` is a `Closure` everywhere. Completion's plain string walker (`resolveAccessChain`) remains until L52.
 
 ### L48 — `unknown-member` stays quiet on a receiver typed `Closure(…): T`
 - **Where:** `internal/checks/unknown_symbols.go` (`collectClassLikes`, line 706).
 - **What:** There is no branch for the callable type kind, so a closure with a signature (written, or from `f(...)`) reads as an unknown owner and `$closure->fooOnly()` is not reported. Safe, but a real error is missed. A plain `Closure` is checked, now that the stubs declare its members.
 - **Fix:** Treat a callable kind named `Closure` as the class `Closure`; leave `callable(…)` alone.
 
-### L47 — Laravel notification methods called by convention are still reported
-- **Where:** `Illuminate/Notifications/Channels/MailChannel.php:55` (`toMail`), `Illuminate/Notifications/NotificationSender.php:233` (`via`) in the Laravel field run.
-- **What:** `Notification` declares neither method; channels call them by convention with no `method_exists()` guard, so `unknown-member` fires. The guard rule correctly doesn't cover them.
-- **Fix:** Teach `framework/laravel` the notification channel methods (`via`, `toMail`, `toArray`, `toDatabase`, `toBroadcast`, …) as known on `Notification` subclasses; not in the generic check.
+### ~~L46~~ — Existence guards over several lines, or in upper case, weren't recognised — **RESOLVED**
+- `memberGuards` reads `method_exists()`, `property_exists()` and `is_callable()` from the tokens, sharing the file's parse with the other rules, so arguments on following lines, comments between them and a trailing comma count; function names ignore case. A call to a method, a static method or a namespaced function of that name is no longer taken for the builtin.
 
-### L46 — Existence guards written over several lines, or in upper case, aren't recognised
-- **Where:** `internal/checks/member_guards.go` (`memberGuardCallRe`, `memberGuards.add`).
-- **What:** `method_exists(` with its arguments on following lines, and `METHOD_EXISTS(…)`, don't register as guards, so the guarded member is still reported. It fails towards warning, not towards silence.
-- **Fix:** Read the guard call from the shared tokens instead of one masked line; compare the function name case-insensitively.
+### ~~L44~~ — Go files weren't all gofmt-clean — **RESOLVED**
+- The 16 files are formatted, and the Test workflow fails on any tracked `.go` file `gofmt -l` lists.
 
-### L45 — A nullsafe link cuts the receiver of a longer chain
-- **Where:** `internal/checks/unknown_symbols.go` (`isExprChar`, line 1535).
-- **What:** `?` isn't an expression character, so the receiver of `$a?->b->c()` is read as `->b` onwards and the member check (and the guard match) sees the wrong owner expression.
-- **Fix:** Accept `?` when it is followed by `->`, with a test for `$a?->b->c()` and for a ternary that ends just before a variable.
-
-### L44 — 17 files under `internal/` aren't gofmt-clean
-- **Where:** `gofmt -l internal/`, for example `internal/config/config.go`, `internal/mcpserver/server.go`, `internal/workspace/workspace.go`.
-- **What:** Pre-existing on 0.13.0; unrelated diffs pick up formatting noise when an editor formats on save.
-- **Fix:** One `chore: gofmt` commit, and `gofmt -l` as a CI step.
-
-### L43 — Tests that need `testdata/laravel/vendor` fail instead of skipping
-- **Where:** `internal/analyzer/container_test.go` (`TestDefinitionAppStringBinding`, `TestDefinitionAppChainedMethod`, `TestDefinitionResolveHelper`); 15 end-to-end tests in `internal/completion`; `TestE2ESymfonyCompletions` in `internal/lsp` with an incomplete `testdata/symfony/vendor`.
-- **What:** `testdata/laravel/vendor` is git-ignored, so in a fresh clone or worktree these fail with or without any change. They pass in a checkout where `composer install` has been run there.
-- **Fix:** Skip with a message naming the setup step when the vendor directory is missing, and add that step to `make test` or the contributing notes.
+### ~~L43~~ — Tests that need the fixtures' `vendor` folders failed instead of skipping — **RESOLVED**
+- The 20 tests that read `testdata/laravel/vendor` and the one that reads `testdata/symfony/vendor` skip with a message naming the `composer install` to run, and `CONTRIBUTING.md` lists that step. The conformance walker also leaves those `vendor` folders and `testdata/field/_repos` out, as CI never has them, so `make conformance-pr` no longer times out in a checkout that has them.
 
 ### L42 — `unknown-class` before `::` is still matched with a regular expression per line
 - **Where:** `internal/checks/unknown_symbols.go` (`unknownClassStaticRe`, line 21; `checkUnknownStaticClassMatches`).
@@ -135,23 +98,17 @@ _None open._
 - **What:** The handler calls `models.ModelRelations` over the whole project and then filters to the requested model FQN — O(all project relations) per single-model query. Accepted per the graph-cli-removal plan ("revisit only if it shows up in profiling"); not a correctness issue.
 - **Fix:** Add a per-model relation derivation (filter during iteration, or index relations by `SourceModel`) if profiling shows it matters.
 
-### L40 — `InterfaceNode`/`TraitNode`/`EnumNode`/`FunctionNode` (compat layer) lack `EndLine`
-- **Where:** `internal/parser/compat.go` (struct defs ~80-128; `toFileNode` conversion ~550-617).
-- **What:** Same gap L23 fixed for `ClassNode`: the compat nodes for interfaces, traits, enums, and functions don't expose `EndLine`, although `InterfaceDef`/`TraitDef`/`EnumDef`/`FunctionDef` all carry it. (Discovered while fixing L23.)
-- **Fix:** Add `EndLine` to those four compat node types and map it through `toFileNode`, mirroring the `ClassNode` fix.
+### ~~L40~~ — Compat interface/trait nodes lacked `EndLine` — **RESOLVED**
+- `InterfaceNode` and `TraitNode` now carry `EndLine`, as `EnumNode` and `FunctionNode` already did. The value is the parser's, which has its own quirk (L63).
 
-### L39 — `checks.AllRules()` is stale dead code
-- **Where:** `internal/checks/checks.go` (`AllRules`, ~line 58).
-- **What:** `AllRules()` returns only three rules (UnusedImports/UnusedPrivate/UnreachableCode) and was never updated as new rules were added; it has zero production callers, so it silently misrepresents the rule set. (Discovered during the L34 unification.)
-- **Fix:** Delete `AllRules()` — the canonical native set now lives in `diagnostics.NativeRules`. (`checks` cannot import `diagnostics`, so don't delegate; just remove.)
+### ~~L39~~ — `checks.AllRules()` was stale dead code — **RESOLVED**
+- Deleted; `diagnostics.NativeRules` is the rule set.
 
 ### ~~L38~~ — Document introspection dumps only the first top-level symbol — **RESOLVED**
 - `introspect.Document` now builds a section for every top-level class/interface/trait/enum (`Dump.Symbols`), rendered with dividers; `PrimarySymbol` retained as the first element for back-compat. Cursor-first ordering deferred (no Position plumbing needed for "dump all").
 
-### L37 — `introspect` CLI URI derivation: not a bug (corrected)
-- **Where:** `cmd/tusk-php/main.go` (`runIntrospect`) vs `internal/workspace/workspace.go`.
-- **What:** CORRECTION — `workspace` keys files as `"file://"+path` (raw OS path, no `ToSlash`), and `runIntrospect` uses the same `"file://"+absFile` convention, so the two MATCH on every OS and the dump works (verified on Unix). The earlier "empty dump on Windows" premise was wrong.
-- **Fix:** No introspect-specific fix needed. The shared non-standard `file://` form on Windows (backslashes) is a pre-existing, workspace-wide concern; if proper RFC-8089 `file://` URIs are wanted, normalise in ONE shared path→URI helper used by both `workspace` and the CLI. Low-priority hygiene, not a correctness bug.
+### ~~L37~~ — `introspect` CLI URI derivation — **CLOSED, not a bug**
+- `workspace` and `runIntrospect` both use `"file://"+path`. Proper RFC 8089 URIs on Windows would be one shared path→URI helper, if ever wanted.
 
 ### ~~L36~~ — `tuskPhpLsp.debugDocument` lacks test coverage — **RESOLVED**
 - `execute_command_test.go` now asserts `tuskPhpLsp.debugDocument` in the advertised set and adds `TestExecuteCommandDebugDocument` (round-trip: invokes the command, asserts a non-empty string containing the dump header + class name).
@@ -240,6 +197,24 @@ _None open._
 ---
 
 ## Resolved
+
+### L62 — Calls written for another version of a library
+- A call inside a branch guarded by `version_compare()` was already left alone (`internal/checks/version_guards.go`). The remaining Symfony finding, `->unwrap()` in `TwigRendererEngine.php`, is a real error against the installed Twig 4.x, whose `unwrap()` requires an `Environment`, so it stays reported. Weighing `composer.json` ranges across majors was not added.
+
+### L61 — Placeholder and polyfill classes
+- The parser marks a class declared inside a block (`ClassDef.Conditional`, indexed as `Symbol.IsConditional`), and `unknown-member` treats it, or a class extending it, as open. A conditional class reached only as a subclass of the receiver (WordPress's `if ($c) { class ftp extends ftp_sockets {} }`) still counts only its own members and its parents', so `$this` in the parent is checked as before. Test stub folders are still indexed. Removed 30 Symfony and 5 Magento findings.
+
+### L59 — A destructured variable kept its earlier type
+- Destructuring writes are marked (`WriteSite.Destructure`) and `reachingType` no longer falls back to the line scan for them. A `foreach` variable is treated as written again at the start of each turn, so writes later in the body don't reach a read before them through the next iteration. The `instanceof`-owner half wasn't needed: that owner only ever widens the set.
+
+### L51 — A comment or space after `->` or `::`
+- `unknown-function` checks the trimmed text before the name for `->` and `::`. Also fixes `parent:: name()` (one Magento finding).
+
+### L47 — Laravel notification methods called by convention
+- `framework/laravel.ConventionMethod` lists them, and `UnknownMemberRule.ConventionMethod` (wired in `diagnostics`) consults it for every class in the receiver's hierarchy. Removed 2 Laravel findings.
+
+### L45 — A nullsafe link cut the receiver of a longer chain
+- `backwardExprStart` keeps a `?` that is followed by `->`. Members after a nullsafe link are now checked (a missed error before, not a false one).
 
 ### M12 — `builtin-unavailable` constants scope implemented
 - `internal/checks/builtin_unavailable.go` adds `checkConstants` with per-line scanning that skips

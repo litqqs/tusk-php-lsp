@@ -9,10 +9,10 @@ import (
 
 func TestDetectSymfonyTranslationContext(t *testing.T) {
 	tests := []struct {
-		name    string
-		line    string
-		cursor  int
-		wantKey string
+		name     string
+		line     string
+		cursor   int
+		wantKey  string
 		wantPart string
 	}{
 		{
@@ -43,6 +43,17 @@ func TestDetectSymfonyTranslationContext(t *testing.T) {
 			wantKey:  "validators.field.required",
 			wantPart: "validators",
 		},
+		{
+			name:     "fully qualified t()",
+			line:     `\Symfony\Component\Translation\t('nav.home')`,
+			cursor:   len(`\Symfony\Component\Translation\t('nav`),
+			wantKey:  "nav.home",
+			wantPart: "nav",
+		},
+		{name: "get() is not t()", line: `$container->get('app.mailer')`, cursor: len(`$container->get('app`)},
+		{name: "count() is not t()", line: `count('items')`, cursor: len(`count('it`)},
+		{name: "a method named t()", line: `$helper->t('label')`, cursor: len(`$helper->t('la`)},
+		{name: "another class ending in TranslatableMessage", line: `new MyTranslatableMessage('x')`, cursor: len(`new MyTranslatableMessage('`)},
 		{
 			name:    "cursor outside string returns nil",
 			line:    `$translator->trans('key')`,
@@ -193,9 +204,9 @@ func TestTranslationResolverMalformedXLIFF(t *testing.T) {
 
 func TestParseSymfonyTranslationFilename(t *testing.T) {
 	tests := []struct {
-		input          string
-		wantDomain     string
-		wantLocale     string
+		input      string
+		wantDomain string
+		wantLocale string
 	}{
 		{"messages.en.yaml", "messages", "en"},
 		{"validators.fr.yml", "validators", "fr"},

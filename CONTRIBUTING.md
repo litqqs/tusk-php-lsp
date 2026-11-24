@@ -23,6 +23,11 @@ cd tusk-php
 # Build the server
 make build
 
+# Install the Laravel and Symfony fixtures' dependencies (needs Composer).
+# Without them, the tests that read those frameworks' sources are skipped.
+composer install --working-dir testdata/laravel --no-scripts
+composer install --working-dir testdata/symfony --no-scripts
+
 # Run tests
 make test
 
@@ -179,7 +184,7 @@ Open an issue with the **feature request** label. Describe the use case and expe
 
 ## Release Process
 
-Releases are automated via GitHub Actions. Pushing a semver tag (e.g., `v0.14.0`) triggers:
+Releases are automated via GitHub Actions. Pushing a semver tag (e.g., `v0.15.0`) triggers:
 
 1. Full test suite
 2. Cross-platform binary builds

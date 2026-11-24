@@ -1,0 +1,24 @@
+# Changes to these paths need a review from the maintainer before they can be
+# merged into main. See AGENTS.md for the principles they protect.
+
+# CI, releases and this file
+/.github/                    @d8vjork
+
+# Project principles, agent instructions and architecture
+/AGENTS.md                   @d8vjork
+/CLAUDE.md                   @d8vjork
+/internal/**/AGENTS.md       @d8vjork
+/ARCHITECTURE.md             @d8vjork
+/CONTRIBUTING.md             @d8vjork
+/CODE_OF_CONDUCT.md          @d8vjork
+/LICENSE                     @d8vjork
+
+# Dependencies, build and release scripts
+/go.mod                      @d8vjork
+/go.sum                      @d8vjork
+/Makefile                    @d8vjork
+/scripts/                    @d8vjork
+
+# Quality gates: field baselines and coverage
+/testdata/field/             @d8vjork
+/codecov.yml                 @d8vjork

@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`diagnosticRules` in `.tusk-php.json` is checked**: a rule name that doesn't exist, such as `unused-imports`, or a severity other than `error`, `warning`, `info`, `hint` or `off` is reported instead of being silently treated as "on". The editor shows the error and the server runs with the default settings; `tusk-php check` and `tusk-php mcp` stop with it.
+- `tusk-php check` and the MCP diagnostics tool now also run the rules the editor runs on save (`redundant-nullsafe`, `unknown-column`, `unknown-relation`), so they report what an editor shows after saving.
+
+### Fixed
+
+- **Calling a closure stored in a variable** is now typed: after `$g = fn (int $i): Foo => new Foo();`, hover on `$g` shows `Closure(int): Foo`, `$g(1)->` completes `Foo`'s members, hover and go-to-definition work on them, and `$g(1)->nope()` is reported as `unknown-member`. Before, the variable had no type, so none of these worked.
+- `tusk-php introspect` and the editor's debug dump list the same native diagnostics the editor shows: syntax errors, abstract methods in a class that isn't abstract, and calls to deprecated PHP functions were missing from them.
+- **`redundant-nullsafe`** no longer reports `?->` on values that can be null. It used to flag nullable parameters (`?LoggerInterface $logger = null`), variables that a ternary may set to `null`, and chains after another `?->`; it now reports only `$this?->` and a parameter declared with a non-nullable type that its function never reassigns.
+- Group and comma-separated imports, `use App\Lib\{Alpha, Beta as B};` and `use App\A, App\B;`, now import every name, including `function` and `const` items in a group. Before, only the first name of a comma list counted and a group imported nothing, so the classes were reported as `unknown-class`.
+- A model's columns from an IDE helper file (`_ide_helper_models.php`) no longer disappear when the model is opened or edited, and re-reading the helper no longer lists them twice.
+- **Columns from migrations** are read more faithfully: only what a migration's `up()` does counts, so a column its `down()` drops is no longer lost; `morphs()` and its variants, `foreignIdFor()`, `increments()` and the like, `renameColumn()`, `dropMorphs()`, `dropTimestamps()`, `Schema::rename()` and `Schema::connection(…)->create()` are understood; and double-quoted names and a closure parameter named other than `$table` work.
+- **Symfony translation keys** now complete and go to their definition, as documented: inside `->trans('…')`, `t('…')` and `new TranslatableMessage('…')`, keys come from the project's `translations/` folder (YAML, PHP and XLIFF files), filtered by the domain argument when one is given. They were never connected before.
+- **Symfony console command names** now complete and go to the command's class inside a console application's `find('…')`, `get('…')` and `has('…')`, as documented. Commands come from `#[AsCommand]` and the older `$defaultName`, and a command added or renamed while the editor is open is picked up when its file changes. Other classes' `get('…')`, such as a container's, are left alone.
+- **Unknown Eloquent relations** in `with()`, `has()`, `whereHas()`, `load()` and the other relation methods are now reported on save as `unknown-relation`, as documented; the rule never ran before. To avoid false warnings it only reports a name the model has no method for at all, and stays quiet when part of the model (a parent class or a trait) isn't indexed or the model handles undeclared calls itself.
+- **Unknown Eloquent columns** (`unknown-column`) are now checked on save, but only for models whose table was read from a live database, the one source that lists every column. Column lists worked out from migrations miss columns (from `morphs()`, raw SQL, a rollback's `dropColumn()`), so they no longer produce warnings. Arguments that may be a select alias (`orderBy()`, `orderByDesc()`, `latest()`, `oldest()`, `groupBy()`, `having()`), anything that isn't a plain column name (`*`, `options->locale`, `posts.title`) and calls inside comments or strings are not checked either.
+- A model's database columns, relations and accessors no longer vanish from completion and hover after its file is opened or edited; they are worked out again for that file, and a relation added while editing shows up straight away.
+- Every rule's severity can now be set in `diagnosticRules`, and the setting always applies. Setting `redundant-union-member` to `"warning"` used to do nothing, because the rule reported at `info`. `syntax-error`, `abstract-in-concrete`, `unknown-column` and `unknown-relation` can now be turned off or given a severity like the other rules; their defaults are unchanged.
+- A `match` with a comment after its last arm, or between arms, is no longer reported as `syntax-error: malformed match arm`.
+- An import written with a leading backslash, `use \App\Lib\Thing;`, now resolves like `use App\Lib\Thing;`, so `Thing` is no longer reported as `unknown-class`.
+- `break(2);` and `continue(2);` are no longer reported as calls to unknown functions `break` and `continue`.
+- A method named with a reserved word, such as `public function use(string $name)` or `function list($items)`, sees its own parameters again instead of reporting them as `undefined-variable`.
+- Fewer false `unknown-member` and `unknown-function` warnings on real projects:
+  - A class declared inside a block, such as a placeholder under `if (false)` or a polyfill under `if (!class_exists(…))`, no longer has its members checked, since the class code runs with may be another one. Symfony's MongoDB and PHPUnit bridges and Magento's Redis adapter are no longer flagged.
+  - A variable written by a destructuring, such as `[$name, $route] = $route;`, no longer keeps the type it had before. A `foreach` variable is also known to take a new value on every turn of the loop.
+  - Methods Laravel calls on a notification by convention (`via()`, `toMail()`, `toArray()`, `toDatabase()`, `toBroadcast()` and the rest) are no longer reported on `Illuminate\Notifications\Notification`.
+  - A member call with a space or comment after `->` or `::`, as in `parent:: build()` or `$f->/* note */bindTo()`, is no longer reported as an unknown function.
+  - A member after a nullsafe link, as in `$a?->post->missing()`, is now checked against the class the whole chain gives.
+  - A member checked for first with `method_exists()`, `property_exists()` or `is_callable()` is no longer reported when the check is written over several lines or with the function name in another case, as in `METHOD_EXISTS($x, 'save')`.
+
+## [0.15.0] - 2026-11-22
+
 ### Added
 
 - **Eloquent static calls** such as `Category::where()`, `Category::find(1)` and `Category::orderBy()` are understood as Laravel runs them, on a query builder for the model: `Category::` completes every builder and query builder method, hover and go to definition reach them, and `Category::where(...)->first()` is a `?Category`. It works as soon as the project is indexed, instead of after a background pass over the models, and covers every builder method rather than a fixed list. Hover and go to definition also follow `@mixin`, so `->orderBy()` on an Eloquent query reaches the base query builder's method.
@@ -39,6 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A method declared only on an interface is now found on the classes that implement it, including through an abstract parent that leaves the method to its subclasses, or through an interface that extends another. Completion, hover, go-to-definition and generics work on it: with `@implements Repository<TEntity>` on the abstract parent and `@extends BaseRepository<Person>` on the class, `find()` returns `Person`.
+- **Doctrine entities:** each property reads only its own attributes, so an `#[ORM\Id]` no longer makes the next property read-only, and in the model relations `tusk-php introspect` and the MCP server list, a relation no longer takes the type of the one declared just above it. A bare `#[ORM\Column]` without arguments, as Symfony's maker bundle writes for `$id`, is recognised as a column.
 - A fully qualified function call inside a namespace, such as `\Vendor\Lib\helper()`, is no longer reported as `unknown-function`, and a qualified call like `Lib\helper()` resolves through `use Vendor\Lib;` as PHP does.
 - Functions and classes added in PHP 8.5, such as `array_first()`, `NoDiscard` and the `Uri` classes, are reported as `builtin-unavailable` on projects that require an older PHP instead of being treated as known.
 - A PHP builtin the project's PHP version or extensions don't have, such as `Redis` without `ext-redis`, is reported once, as `builtin-unavailable`, instead of also as `unknown-class` or `unknown-function`, and the message no longer ends in an empty "(PHP >= )".

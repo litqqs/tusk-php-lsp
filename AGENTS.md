@@ -61,7 +61,9 @@ detail; this is the map.
 Packages are layered. **A package may import only from its own layer or the ones
 above it in this list**, never from a later one:
 
-1. **Wire types:** `protocol` (LSP types, no logic).
+1. **Wire types and identifiers:** `protocol` (LSP types, no logic), `rule`
+   (diagnostic codes, severities and sources: every code a finding carries is a
+   `rule.Code` constant listed in `rule.All`).
 2. **Language core:** `parser` (own tokenizer and lightweight AST, fault-tolerant),
    `types`, `phparray`, `stubs` (embedded builtin stubs by PHP version and
    extension), `phpdetect`.
@@ -77,9 +79,6 @@ above it in this list**, never from a later one:
    `symquery`, `introspect`, `deps`, `unuseddeps`, `graph`, `composer/cardhover`.
 6. **Transports:** `lsp`, `mcpserver`.
 7. **Tests across everything:** `conformance`.
-
-Known exception to fix: `config` imports `checks` for its `Severity` type. Don't
-add more; the type belongs in a lower layer.
 
 Builtins are registered in a fixed order, later layers overriding earlier ones:
 generated registry → PHP 7.4 core baseline → core version deltas up to the
@@ -114,7 +113,7 @@ What each piece owns once it exists:
   between them. `lsp` and `mcpserver` ask it for providers and add only
   transport-specific parts (client commands, notifications, tool registration).
   Until it exists, any wiring change must be made in both
-  `lsp/server.go` (`handleInitialize`) and `mcpserver/server.go` (`buildRuntime`).
+  `lsp/initialize.go` (`handleInitialize`) and `mcpserver/server.go` (`buildRuntime`).
 - **`document`** owns the latest text of each open file and its version. Analysis
   runs on an immutable snapshot and its result is dropped if a newer version
   arrived meanwhile.
@@ -136,8 +135,8 @@ What each piece owns once it exists:
   `scope`, types and PHPDoc from `resolve`. Don't re-derive them with string
   scanning in a feature.
 - Keep files to one responsibility. Past roughly 800 lines, split within the same
-  package (for example `lsp/server.go` into transport, dispatch, initialize,
-  documents and handler files) before adding more. Don't create a new package
+  package (as `lsp` is split into transport, dispatch, initialize, documents,
+  commands and handler files) before adding more. Don't create a new package
   just to split a file.
 - Platform differences go in build-tagged files (`*_wasip1.go`), not runtime
   checks. Everything must still build with `make wasm`.

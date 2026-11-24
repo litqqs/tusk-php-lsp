@@ -45,6 +45,10 @@ type Resolver struct {
 	// preserving generic parameters. Used for variable type inference that
 	// needs to carry generic context through assignments.
 	TypedChainResolver func(expr string, source string, pos protocol.Position, file *parser.FileNode) ResolvedType
+	// ContainerCall, when set, gives the class a container call such as
+	// app('request') or $container->get(Foo::class) resolves to, "-" for one
+	// that gives a value rather than an object, or "" when it isn't one.
+	ContainerCall func(callExpr, source string, file *parser.FileNode) string
 	// Resolution state is tracked per goroutine so recursive chains are guarded
 	// without unrelated concurrent requests sharing the same depth budget.
 	stateMu sync.Mutex
@@ -954,6 +958,12 @@ func (r *Resolver) resolveVariableTypeTypedBase(varName string, lines []string, 
 			}
 		}
 
+		// $var = fn (int $i): Foo => …, or function () use (…): Foo { …: a
+		// Closure with that signature, so calling $var gives a Foo.
+		if closure := strings.TrimSuffix(strings.TrimSpace(rhs), ";"); isClosureExpr(closure) {
+			return r.ExpressionType(closure, exprCtx)
+		}
+
 		// $var = $fn(…): what calling it gives; $fn(...) is a Closure of it.
 		if rt, ok := r.invokedVariableType(rhs, varName, exprCtx); ok {
 			return rt
@@ -982,15 +992,15 @@ func (r *Resolver) resolveVariableTypeTypedBase(varName string, lines []string, 
 
 		// Use typed chain resolver if available. If a chain over several lines can't
 		// be followed to its end, what the first line gives is the best guess.
-		if r.TypedChainResolver != nil && (strings.Contains(rhs, "->") || strings.Contains(rhs, "::")) {
-			if rt := r.TypedChainResolver(rhs, r.JoinLines(lines), pos, file); !rt.IsEmpty() {
+		if strings.Contains(rhs, "->") || strings.Contains(rhs, "::") {
+			if rt := r.ChainType(rhs, r.JoinLines(lines), pos, file); !rt.IsEmpty() {
 				return rt
 			}
 			// Only when the text itself is cut short, as with unbalanced
 			// parentheses: a complete chain that can't be followed, say through
 			// a magic method, isn't what its first line is.
 			if first := strings.TrimSuffix(firstLine, ";"); first != rhs && strings.Count(rhs, "(") != strings.Count(rhs, ")") {
-				if rt := r.TypedChainResolver(first, r.JoinLines(lines), pos, file); !rt.IsEmpty() {
+				if rt := r.ChainType(first, r.JoinLines(lines), pos, file); !rt.IsEmpty() {
 					return rt
 				}
 			}

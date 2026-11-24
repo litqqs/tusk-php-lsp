@@ -22,7 +22,7 @@ Back to the [README](../README.md).
 
 ## Project Configuration
 
-Create `.tusk-php.json` in your project root to override settings per project:
+Create `.tusk-php.json` in your project root for settings everyone who opens the project shares. Your editor's settings override the same keys in this file; see [Where settings come from](diagnostics.md#where-settings-come-from).
 
 ```json
 {
@@ -65,7 +65,7 @@ Create `.tusk-php.json` in your project root to override settings per project:
 }
 ```
 
-All diagnostic rules are enabled by default. Set a rule to `false` to disable it. Framework is auto-detected from `artisan` (Laravel), `bin/console` (Symfony), `bin/magento` (Magento 2), or `composer.json`.
+All diagnostic rules are enabled by default. Set a rule to `false` (or `"off"`) to disable it, or to `"error"`, `"warning"`, `"info"` or `"hint"` to change its severity. A rule name or severity that doesn't exist is an error: the editor shows it, and `tusk-php check` stops with it. Every rule, and how to turn off PHPStan and Pint, is in [Diagnostics](diagnostics.md). Framework is auto-detected from `artisan` (Laravel), `bin/console` (Symfony), `bin/magento` (Magento 2), or `composer.json`.
 
 ## Auto-import
 

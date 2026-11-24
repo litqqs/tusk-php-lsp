@@ -64,6 +64,10 @@ type Symbol struct {
 	BackedType    string
 	Value         string
 	IsVirtual     bool
+	// IsConditional marks a class declared inside a block, such as a
+	// placeholder under `if (false)` or a polyfill under `if (!class_exists())`:
+	// its members may not be those of the class code runs with.
+	IsConditional bool
 	Templates     []TemplateParam
 	Supertypes    []Supertype
 	TypeAliases   map[string]TypeAlias
@@ -306,7 +310,7 @@ func (idx *Index) IndexIDEHelperFile(uri string, source string) {
 				resolvedImpls = append(resolvedImpls, resolve(impl))
 			}
 			sym := &Symbol{Name: c.Name, FQN: fqn, Kind: KindClass, URI: uri, DocComment: qualifyDocTypes(c.DocComment, file.Uses),
-				IsAbstract: c.IsAbstract, IsFinal: c.IsFinal, IsReadonly: c.IsReadonly,
+				IsAbstract: c.IsAbstract, IsFinal: c.IsFinal, IsReadonly: c.IsReadonly, IsConditional: c.Conditional,
 				Implements: resolvedImpls,
 				Range:      symRange(c.StartLine, c.StartCol, len(c.Name))}
 			if c.Extends != "" {
@@ -346,10 +350,60 @@ func (idx *Index) IndexFileWithSource(uri string, source string, src SymbolSourc
 	}
 	idx.mu.Lock()
 	defer idx.mu.Unlock()
+	foreign := idx.foreignMembersLocked(uri)
 	idx.removeFileSymbols(uri)
 	// Store the raw source text for this URI (replaces any previous version)
 	idx.fileSource[uri] = source
 	idx.indexParsedLocked(uri, file, src)
+	idx.reattachForeignMembersLocked(foreign)
+}
+
+// foreignMembersLocked returns, by class, the members other files added to
+// the classes uri declares, such as an IDE helper file's @property columns
+// on a model. Re-indexing uri replaces those classes, so the members are
+// attached again to the new ones afterwards.
+func (idx *Index) foreignMembersLocked(uri string) map[string][]*Symbol {
+	var out map[string][]*Symbol
+	for _, sym := range idx.fileSymbols[uri] {
+		if !isTopLevelSymbol(sym.Kind) {
+			continue
+		}
+		for _, child := range sym.Children {
+			if child.URI != uri && idx.symbols[child.FQN] == child {
+				if out == nil {
+					out = map[string][]*Symbol{}
+				}
+				out[sym.FQN] = append(out[sym.FQN], child)
+			}
+		}
+	}
+	return out
+}
+
+// reattachForeignMembersLocked gives each class back the members other files
+// added to it, unless the class now declares a member of that name itself.
+func (idx *Index) reattachForeignMembersLocked(foreign map[string][]*Symbol) {
+	for fqn, members := range foreign {
+		parent := idx.symbols[fqn]
+		if parent == nil {
+			continue
+		}
+		for _, m := range members {
+			if idx.symbols[m.FQN] != m {
+				continue
+			}
+			declared := false
+			for _, c := range parent.Children {
+				if c.Kind == m.Kind && c.Name == m.Name {
+					declared = true
+					break
+				}
+			}
+			if !declared {
+				parent.Children = append(parent.Children, m)
+			}
+		}
+	}
 }
 
 // indexParsedLocked adds the symbols a parsed file declares. The caller holds
@@ -382,7 +436,7 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 			resolvedImpls = append(resolvedImpls, resolve(impl))
 		}
 		sym := &Symbol{Name: c.Name, FQN: fqn, Kind: KindClass, URI: uri, DocComment: qualifyDocTypes(c.DocComment, file.Uses),
-			IsAbstract: c.IsAbstract, IsFinal: c.IsFinal, IsReadonly: c.IsReadonly,
+			IsAbstract: c.IsAbstract, IsFinal: c.IsFinal, IsReadonly: c.IsReadonly, IsConditional: c.Conditional,
 			Implements: resolvedImpls, Attributes: indexAttributes(c.Attributes, resolve),
 			Range: symRange(c.StartLine, c.StartCol, len(c.Name))}
 		previous := idx.symbols[fqn]
@@ -553,6 +607,13 @@ func (idx *Index) addSymbolWithSource(uri string, sym *Symbol, src SymbolSource)
 func (idx *Index) removeFileSymbols(uri string) {
 	idx.generation.Add(1)
 	for _, sym := range idx.fileSymbols[uri] {
+		// A member this file added to a class another file declares (an IDE
+		// helper's @property) leaves that class's members with it.
+		if !isTopLevelSymbol(sym.Kind) && sym.ParentFQN != "" {
+			if parent := idx.symbols[sym.ParentFQN]; parent != nil && parent.URI != uri {
+				parent.Children = withoutSymbol(parent.Children, sym)
+			}
+		}
 		if narrowsTypes(sym) {
 			key := strings.ToLower(sym.Name)
 			if idx.narrowingNames[key] <= 1 {
@@ -608,6 +669,19 @@ func (idx *Index) removeFileSymbols(uri string) {
 	delete(idx.fileSymbols, uri)
 	delete(idx.fileSource, uri)
 	delete(idx.generatedURIs, uri)
+}
+
+// withoutSymbol returns a copy of syms without sym; readers may hold the
+// original slice.
+func withoutSymbol(syms []*Symbol, sym *Symbol) []*Symbol {
+	for i, s := range syms {
+		if s == sym {
+			out := make([]*Symbol, 0, len(syms)-1)
+			out = append(out, syms[:i]...)
+			return append(out, syms[i+1:]...)
+		}
+	}
+	return syms
 }
 
 func isTopLevelSymbol(kind SymbolKind) bool {
@@ -1084,18 +1158,41 @@ func (idx *Index) getClassMembersRecursive(fqn string, visited map[string]bool) 
 	if parent, ok := idx.inheritanceMap[fqn]; ok {
 		members = append(members, idx.getClassMembersRecursive(parent, visited)...)
 	}
-	// Interfaces are read for their constants only: the methods they declare are
-	// the class's own to implement.
+	// Interfaces come last: their constants, and the methods nothing above
+	// declares, which an abstract class may leave to its subclasses. A method
+	// the class or a parent declares wins over the interface's signature.
 	if interfaces, ok := idx.implementsMap[fqn]; ok {
+		var declared map[string]bool
 		for _, iface := range interfaces {
 			for _, member := range idx.getClassMembersRecursive(iface, visited) {
-				if member.Kind == KindConstant {
+				switch member.Kind {
+				case KindConstant:
 					members = append(members, member)
+				case KindMethod:
+					if declared == nil {
+						declared = methodNames(members)
+					}
+					key := strings.ToLower(member.Name)
+					if !declared[key] {
+						declared[key] = true
+						members = append(members, member)
+					}
 				}
 			}
 		}
 	}
 	return members
+}
+
+// methodNames returns the lowercased names of the methods in members.
+func methodNames(members []*Symbol) map[string]bool {
+	names := make(map[string]bool, len(members))
+	for _, m := range members {
+		if m.Kind == KindMethod {
+			names[strings.ToLower(m.Name)] = true
+		}
+	}
+	return names
 }
 
 // HasAttributedSymbols reports whether anything indexed so far has attributes.

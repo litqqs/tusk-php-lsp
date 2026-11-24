@@ -9,7 +9,7 @@ Shared type and symbol resolution. Hover, completion, diagnostics, and the analy
 - `ParseGenericType(raw)` / `InferArrayLiteralType(literal)` — produce `ResolvedType` from raw strings.
 - `ResolveTemplateReturn(classFQN, methodName, typeArgs)` (`templates.go`) — applies `@template` substitution for known generic methods (e.g. `Collection<T>::first(): T`).
 - `FindEnclosingClass(file, pos)` / `FindEnclosingMethod(file, pos)` — scope helpers used by every provider.
-- `doc_types.go` — PHPDoc type parsing (unions, nullable, generics, array shapes).
+- PHPDoc types are parsed by `internal/types` and read into `ResolvedType` through `parseType` (`parse_cache.go`) and `resolveDocType` (`resolve.go`).
 - `type_aliases.go` — `@phpstan-type` / `@phpstan-import-type` aliases.
 
 ### Generics engine (PHPStan semantics, issue #68)
@@ -17,6 +17,7 @@ Shared type and symbol resolution. Hover, completion, diagnostics, and the analy
 - `generics.go` — `applyEnv` (substitute templates and `static`, resolve names, evaluate `key-of`/`value-of`/`T[K]`/`new<T>`), `bindTemplates` (match a parameter's declared type against an argument's type), `AncestorTypeArgs` (`@extends`/`@implements`/`@use` arguments through the hierarchy), `fillUnbound` (default, then bound, then `mixed`), `IterableTypes`.
 - `call.go` — `MemberTypeForCall` / `FunctionTypeForCall`: what a member or function gives at a call, with the receiver's and the call's templates bound and conditional return types decided. `MemberTypeResolved` is the same without arguments.
 - `member_types.go` — `rawMemberReturnType` / `preferDocType`: when PHPDoc wins over the native type.
+- `chain.go` — `ChainType` / `AccessOwnerType`: the one walker every feature types a `->`/`::` chain with (variables, `$this`/`self`/`static`/`parent`, `new`, function calls, calling a closure, offsets, container calls through the `ContainerCall` hook). A resolver wired to another through `TypedChainResolver` asks that one, so the providers share the completion provider's resolver, which knows the container. Don't add another chain walker in a feature; extend this one.
 - `expression.go` — `ExpressionType`: the type of an argument or right-hand side (variables, literals, `new`, `::class`, arrays, closures, function calls, chains, offsets).
 - `closure_type.go`, `closure_context.go` — closures as `Closure(…): T`, and the call a closure is passed to (its parameter types, `@param-closure-this`).
 - `mixins.go` — generic `@mixin T`; `narrowing.go` — `@phpstan-assert*`, `@param-out`, `@phpstan-self-out`.
@@ -34,6 +35,6 @@ Templates are stored at index time (`symbols.Symbol.Templates` on classes, metho
 - Prefer `ResolvedType` over passing raw type strings around. The string form is fine for hover output, but internal flow should be structured.
 - `PickBestUnionPart`, `HasNullInUnion`, `IndexOutsideBrackets` are intentionally exported — they're used by completion/hover and tested via `*_coverage_test.go`. Don't inline-copy them.
 - Recursion guards exist (`recursion_test.go`) because chain resolution and template expansion can loop on self-referential generics. Preserve them.
-- The roadmap direction is to widen `doc_types.go` into a fuller structured PHPDoc model (intersections, conditional return types, callable signatures). New PHPDoc handling belongs here, not in feature-specific string parsing.
+- New PHPDoc handling belongs in `internal/types` (the structured type) and here (reading it into `ResolvedType`), not in feature-specific string parsing.
 
 The project-wide rules in the root [AGENTS.md](../../AGENTS.md) apply here too.

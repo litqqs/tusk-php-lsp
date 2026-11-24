@@ -176,9 +176,10 @@ func (c *Collector) collectResult(result *parser.ParseResult) *Document {
 	// per open brace, rootRebinds those outside any.
 	var blocks [][]rebindRef
 	var rootRebinds []rebindRef
-	foreachVars := map[int]int{} // foreach variable token → its loop body's `{`, or -1
-	caught := map[int][]string{} // catch variable token → the classes it catches, as written
-	catchBodies := map[int]int{} // catch variable token → its catch body's `{`
+	foreachVars := map[int]int{}   // foreach variable token → its loop body's `{`, or -1
+	caught := map[int][]string{}   // catch variable token → the classes it catches, as written
+	destructured := map[int]bool{} // variable tokens written by `[…] = …` or `list(…) = …`
+	catchBodies := map[int]int{}   // catch variable token → its catch body's `{`
 	// loop or catch body `{` → the rebinds of its foreach or catch variables,
 	// which hold only to the end of that body.
 	foreachBodies := map[int][]rebindRef{}
@@ -245,12 +246,14 @@ func (c *Collector) collectResult(result *parser.ParseResult) *Document {
 		if tok.Kind == parser.TokenIdentifier && tok.Value == "list" {
 			for idx, binding := range parseListDestructureBindings(result.Tokens, i, active[len(active)-1].scope, doc) {
 				declByToken[idx] = binding
+				destructured[idx] = true
 			}
 		}
 
 		if tok.Kind == parser.TokenOpenBracket {
 			for idx, binding := range parseDestructureBindings(result.Tokens, i, active[len(active)-1].scope, doc) {
 				declByToken[idx] = binding
+				destructured[idx] = true
 			}
 		}
 
@@ -314,12 +317,14 @@ func (c *Collector) collectResult(result *parser.ParseResult) *Document {
 				_, isForeach := foreachVars[i]
 				if binding.Decl == tokenRange(tok) {
 					binding.declEffect = writeEffect(result.Tokens, i, isForeach)
+					binding.declEffect.destructure = destructured[i]
 					binding.declCaught = caught[i]
 				} else {
 					binding.Writes = append(binding.Writes, tokenRange(tok))
 					if r, ok := newRebind(result.Tokens, i, foreachVars); ok {
 						r.block = flow.current()
 						r.effect = writeEffect(result.Tokens, i, isForeach)
+						r.effect.destructure = destructured[i]
 						r.Caught = caught[i]
 						binding.Rebinds = append(binding.Rebinds, r)
 						r := rebindRef{binding, len(binding.Rebinds) - 1}
@@ -477,6 +482,23 @@ func resolveVariable(active []scopeFrame, name string) *Binding {
 	return nil
 }
 
+// isWordToken reports whether t is a word, such as a keyword, rather than
+// punctuation, a variable or a literal.
+func isWordToken(t parser.Token) bool {
+	v := t.Value
+	if v == "" || t.Kind == parser.TokenVariable || t.Kind == parser.TokenStringLiteral {
+		return false
+	}
+	for i := 0; i < len(v); i++ {
+		c := v[i]
+		if c == '_' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || i > 0 && c >= '0' && c <= '9' {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
 func parseFunctionLike(tokens []parser.Token, start int, parent *Scope, doc *Document, declByToken map[int]*Binding) (*pendingScope, map[int]*Binding) {
 	name := ""
 	kind := ScopeClosure
@@ -485,7 +507,9 @@ func parseFunctionLike(tokens []parser.Token, start int, parent *Scope, doc *Doc
 	if nameIdx >= 0 && tokens[nameIdx].Kind == parser.TokenAmpersand {
 		nameIdx = nextSignificant(tokens, nameIdx+1)
 	}
-	if nameIdx >= 0 && tokens[nameIdx].Kind == parser.TokenIdentifier {
+	// A method may be named with a reserved word (`function use(…)`,
+	// `function list(…)`), which the tokenizer reads as a keyword.
+	if nameIdx >= 0 && (tokens[nameIdx].Kind == parser.TokenIdentifier || isWordToken(tokens[nameIdx])) {
 		name = tokens[nameIdx].Value
 		kind = ScopeFunction
 		if enclosingClassName(tokens, start) != "" {

@@ -64,6 +64,10 @@ type ClassDef struct {
 	Line        int
 	EndLine     int
 	DocComment  string
+	// Conditional is set for a class declared inside a block, such as
+	// `if (false) { class Foo {} }` or `if (!class_exists(Foo::class)) { … }`:
+	// a placeholder or polyfill that may not be the class code runs with.
+	Conditional bool
 	// BodyLine and BodyCol are where an anonymous class's `{` is.
 	BodyLine, BodyCol int
 }
@@ -895,6 +899,20 @@ type structParser struct {
 	// class body being parsed, where @use gives the trait's type arguments.
 	traitUseDocs      []string
 	isGlobalNamespace bool
+	// blocks holds the braces open at the top level: true for a braced
+	// namespace, false for any other block (if, else, try, …).
+	blocks []bool
+}
+
+// inBlock reports whether the parser is inside a top-level block other than
+// a braced namespace.
+func (p *structParser) inBlock() bool {
+	for _, namespace := range p.blocks {
+		if !namespace {
+			return true
+		}
+	}
+	return false
 }
 
 // parseClassBodyWithTraitDocs parses a class-like body and also returns the
@@ -1018,6 +1036,10 @@ func (p *structParser) parse() {
 			continue
 		case TokenNamespace:
 			p.parseNamespace()
+			if p.peek().Kind == TokenOpenBrace {
+				p.blocks = append(p.blocks, true)
+				p.advance()
+			}
 		case TokenUse:
 			p.parseUse()
 		case TokenClass:
@@ -1035,6 +1057,14 @@ func (p *structParser) parse() {
 			p.parseFunction(lastDocComment)
 		case TokenConst:
 			p.parseConst()
+		case TokenOpenBrace:
+			p.blocks = append(p.blocks, false)
+			p.advance()
+		case TokenCloseBrace:
+			if len(p.blocks) > 0 {
+				p.blocks = p.blocks[:len(p.blocks)-1]
+			}
+			p.advance()
 		default:
 			if t.Kind == TokenIdentifier && t.Value == "define" {
 				p.parseDefineConst()
@@ -1174,46 +1204,95 @@ func (p *structParser) parseNamespace() {
 
 func (p *structParser) parseUse() {
 	p.advance()
-	kind := "class"
-	if p.peek().Kind == TokenFunction {
-		kind = "function"
-		p.advance()
-	} else if p.peek().Kind == TokenConst {
-		kind = "const"
-		p.advance()
-	}
+	kind := p.useKind("class")
 
-	var parts []string
-	line := p.peek().Line
+	// One statement can import several names: `use A\B, C\D as E;` or a
+	// group, `use A\{B, C as D, function f};`, whose prefix every item shares.
 	for {
-		t := p.peek()
-		if t.Kind == TokenIdentifier && t.Value != "as" {
-			parts = append(parts, t.Value)
+		line := p.peek().Line
+		name := p.readUseName()
+		if p.peek().Kind == TokenOpenBrace {
 			p.advance()
-		} else if t.Kind == TokenBackslash {
-			parts = append(parts, "\\")
-			p.advance()
-		} else {
+			prefix := strings.TrimPrefix(name, "\\")
+			for p.peek().Kind != TokenCloseBrace && p.peek().Kind != TokenEOF && p.peek().Kind != TokenSemicolon {
+				itemKind := p.useKind(kind)
+				itemLine := p.peek().Line
+				item := p.readUseName()
+				if item == "" {
+					break // not a name: leave the rest to the recovery below
+				}
+				p.addUse(prefix+strings.TrimPrefix(item, "\\"), p.readUseAlias(), itemKind, itemLine)
+				if p.peek().Kind != TokenComma {
+					break
+				}
+				p.advance() // a trailing comma before `}` is allowed
+			}
+			p.expect(TokenCloseBrace)
+		} else if name != "" {
+			p.addUse(name, p.readUseAlias(), kind, line)
+		}
+		if p.peek().Kind != TokenComma {
 			break
 		}
-	}
-
-	fullName := strings.Join(parts, "")
-	alias := ""
-	if p.peek().Value == "as" {
 		p.advance()
-		if t, ok := p.expect(TokenIdentifier); ok {
-			alias = t.Value
+	}
+	p.expect(TokenSemicolon)
+}
+
+// useKind reads an optional `function` or `const` before an imported name,
+// returning kind when there is none.
+func (p *structParser) useKind(kind string) string {
+	switch p.peek().Kind {
+	case TokenFunction:
+		p.advance()
+		return "function"
+	case TokenConst:
+		p.advance()
+		return "const"
+	}
+	return kind
+}
+
+// readUseName reads a possibly qualified name, as written.
+func (p *structParser) readUseName() string {
+	var b strings.Builder
+	for {
+		t := p.peek()
+		if t.Kind == TokenIdentifier && t.Value != "as" || t.Kind == TokenBackslash {
+			b.WriteString(t.Value)
+			p.advance()
+			continue
 		}
+		return b.String()
+	}
+}
+
+// readUseAlias reads an optional `as Alias`.
+func (p *structParser) readUseAlias() string {
+	if p.peek().Kind != TokenIdentifier || p.peek().Value != "as" {
+		return ""
+	}
+	p.advance()
+	if t, ok := p.expect(TokenIdentifier); ok {
+		return t.Value
+	}
+	return ""
+}
+
+// addUse records one imported name. An imported name is always fully
+// qualified, so a leading backslash (`use \App\Thing;`) means the same as
+// none.
+func (p *structParser) addUse(fullName, alias, kind string, line int) {
+	fullName = strings.TrimPrefix(fullName, "\\")
+	if fullName == "" || strings.HasSuffix(fullName, "\\") {
+		return
 	}
 	if alias == "" {
-		segments := strings.Split(fullName, "\\")
-		alias = segments[len(segments)-1]
+		alias = fullName[strings.LastIndex(fullName, "\\")+1:]
 	}
 	p.result.Uses = append(p.result.Uses, UseStatement{
 		FullName: fullName, Alias: alias, Kind: kind, Line: line,
 	})
-	p.expect(TokenSemicolon)
 }
 
 func (p *structParser) parseClass(docComment string) {
@@ -1275,6 +1354,7 @@ afterMod:
 		}
 	}
 	cls.EndLine = p.peek().Line
+	cls.Conditional = p.inBlock()
 	p.result.Classes = append(p.result.Classes, cls)
 }
 

@@ -4,67 +4,55 @@ import (
 	"testing"
 
 	"github.com/Tusk-PHP/lsp/internal/checks"
+	"github.com/Tusk-PHP/lsp/internal/framework/laravel/blade"
 	"github.com/Tusk-PHP/lsp/internal/parser"
+	"github.com/Tusk-PHP/lsp/internal/rule"
 )
 
-// TestNativeRulesParityWithProvider is a parity guard that asserts the rule
-// codes returned by NativeRules (with all deps provided) match the set of rule
-// codes that provider.go runs across Analyze and AnalyzeOnSave. If provider.go
-// ever gains or drops a native rule, this test will fail, prompting the
-// developer to update NativeRules accordingly.
-func TestNativeRulesParityWithProvider(t *testing.T) {
-	// providerRuleCodes is the exhaustive set of native rule codes that
-	// provider.go covers across Analyze() + AnalyzeOnSave(). Keep in sync with
-	// provider.go manually; the test alerts when they drift.
-	providerRuleCodes := map[string]bool{
-		// Analyze() — parameterless
-		"unknown-class":           true,
-		"unknown-function":        true,
-		"unused-import":           true,
-		"unused-private":          true,
-		"unreachable-code":        true,
-		"redundant-union-member":  true,
-		"undefined-variable":      true,
-		"unused-variable":         true,
-		"argument-count-mismatch": true,
-		"invalid-override":        true,
-		"deprecated":              true,
-		"unused-result":           true,
-		// Analyze() — requires TypeResolver
-		"unknown-member": true,
-		// Analyze() — requires BuiltinUnavailableRule
-		"builtin-unavailable": true,
-		// AnalyzeOnSave() — requires TypeResolver
-		"redundant-nullsafe": true,
-		// AnalyzeOnSave() — requires BuilderModelResolver + BuilderMemberChecker
-		"invalid-builder-arg": true,
-	}
-
-	tr := func(expr, source string, line, col int, file *parser.FileNode) string { return "" }
-	builtinRule := &checks.BuiltinUnavailableRule{}
-	opts := NativeRulesOptions{
-		TypeResolver:           tr,
-		BuiltinUnavailableRule: builtinRule,
-		BuilderModelResolver: func(prefix, method, source string, line int, file *parser.FileNode) string {
-			return ""
-		},
-		BuilderMemberChecker: &stubMemberChecker{},
-	}
-
-	rules := NativeRules(opts)
-	nativeRuleCodes := make(map[string]bool, len(rules))
+func TestEveryRuleCodeIsEmittedByARule(t *testing.T) {
+	rules := NativeRules(NativeRulesOptions{
+		TypeResolver:           func(expr, source string, line, col int, file *parser.FileNode) string { return "" },
+		BuiltinUnavailableRule: &checks.BuiltinUnavailableRule{},
+		BuilderModelResolver:   func(prefix, method, source string, line int, file *parser.FileNode) string { return "" },
+		BuilderMemberChecker:   &stubMemberChecker{},
+	})
+	emitted := map[rule.Code]bool{}
 	for _, r := range rules {
-		nativeRuleCodes[r.Code()] = true
-	}
-
-	for code := range providerRuleCodes {
-		if !nativeRuleCodes[code] {
-			t.Errorf("NativeRules is missing rule code %q that provider.go covers", code)
+		for _, code := range r.Codes() {
+			emitted[code] = true
 		}
 	}
-	for code := range nativeRuleCodes {
-		if !providerRuleCodes[code] {
-			t.Errorf("NativeRules includes rule code %q not covered by provider.go — add it to providerRuleCodes or remove from NativeRules", code)
+	for _, code := range blade.Codes {
+		emitted[code] = true
+	}
+	for _, code := range rule.All {
+		if !emitted[code] {
+			t.Errorf("%q is declared in rule.All but no rule emits it", code)
+		}
+	}
+	if len(emitted) != len(rule.All) {
+		t.Errorf("rules emit %d codes, rule.All declares %d", len(emitted), len(rule.All))
+	}
+}
+
+func TestEveryRuleAcceptsAFileThatDidNotParse(t *testing.T) {
+	rules := NativeRules(NativeRulesOptions{
+		TypeResolver:           func(expr, source string, line, col int, file *parser.FileNode) string { return "" },
+		BuiltinUnavailableRule: &checks.BuiltinUnavailableRule{PHPVersion: "8.4"},
+		BuilderModelResolver:   func(prefix, method, source string, line int, file *parser.FileNode) string { return "" },
+		BuilderMemberChecker:   &stubMemberChecker{},
+	})
+	for _, r := range rules {
+		if got := r.Check(nil, "<?php $a?->b; missing();", nil); len(got) != 0 {
+			t.Errorf("%v reported %+v for a file that didn't parse", r.Codes(), got)
+		}
+	}
+}
+
+func TestEverySeverityHasAnLSPSeverity(t *testing.T) {
+	for _, severity := range rule.Severities {
+		if lspSeverity[severity] == 0 {
+			t.Errorf("severity %s has no LSP severity", severity)
 		}
 	}
 }
@@ -74,9 +62,9 @@ func TestNativeRulesParityWithProvider(t *testing.T) {
 func TestNativeRulesWithoutDepsOmitsDependentRules(t *testing.T) {
 	rules := NativeRules(NativeRulesOptions{}) // no deps
 	for _, r := range rules {
-		switch r.Code() {
-		case "unknown-member", "redundant-nullsafe", "builtin-unavailable", "invalid-builder-arg":
-			t.Errorf("rule %q should be omitted when no deps provided, but was included", r.Code())
+		switch r.Codes()[0] {
+		case rule.UnknownMember, rule.RedundantNullsafe, rule.BuiltinUnavailable, rule.UnknownColumn:
+			t.Errorf("rule %v should be omitted when no deps provided, but was included", r.Codes())
 		}
 	}
 }
@@ -86,25 +74,28 @@ func TestNativeRulesWithoutDepsOmitsDependentRules(t *testing.T) {
 func TestNativeRulesDeterministicOrder(t *testing.T) {
 	rules := NativeRules(NativeRulesOptions{})
 
-	wantOrder := []string{
-		"unknown-class",
-		"unknown-function",
-		"unused-import",
-		"unused-private",
-		"unreachable-code",
-		"redundant-union-member",
-		"undefined-variable",
-		"unused-variable",
-		"argument-count-mismatch",
-		"invalid-override",
-		"deprecated",
-		"unused-result",
+	wantOrder := []rule.Code{
+		rule.SyntaxError,
+		rule.AbstractInConcrete,
+		rule.UnknownClass,
+		rule.UnknownFunction,
+		rule.UnusedImport,
+		rule.UnusedPrivateMethod,
+		rule.UnreachableCode,
+		rule.RedundantUnionMember,
+		rule.UndefinedVariable,
+		rule.UnusedVariable,
+		rule.Deprecated,
+		rule.Deprecated,
+		rule.UnusedResult,
+		rule.InvalidOverride,
+		rule.ArgumentCountMismatch,
 	}
 	if len(rules) != len(wantOrder) {
 		t.Fatalf("expected %d parameterless rules, got %d", len(wantOrder), len(rules))
 	}
 	for i, want := range wantOrder {
-		if got := rules[i].Code(); got != want {
+		if got := rules[i].Codes()[0]; got != want {
 			t.Errorf("rules[%d]: expected %q, got %q", i, want, got)
 		}
 	}
@@ -117,3 +108,5 @@ func (s *stubMemberChecker) IsColumn(modelFQN, name string) bool          { retu
 func (s *stubMemberChecker) IsDBColumn(modelFQN, name string) bool        { return false }
 func (s *stubMemberChecker) IsRelation(modelFQN, name string) bool        { return false }
 func (s *stubMemberChecker) RelatedModelFQN(modelFQN, name string) string { return "" }
+func (s *stubMemberChecker) KnowsColumns(modelFQN string) bool            { return true }
+func (s *stubMemberChecker) KnowsRelations(modelFQN string) bool          { return true }

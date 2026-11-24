@@ -23,6 +23,7 @@ import (
 	"github.com/Tusk-PHP/lsp/internal/diagnostics"
 	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
 	"github.com/Tusk-PHP/lsp/internal/framework/laravel/blade"
+	frameworksymfony "github.com/Tusk-PHP/lsp/internal/framework/symfony"
 	"github.com/Tusk-PHP/lsp/internal/hover"
 	"github.com/Tusk-PHP/lsp/internal/inlayhint"
 	"github.com/Tusk-PHP/lsp/internal/models"
@@ -302,10 +303,10 @@ type PhpContainerBindingsOutput struct {
 
 // SymfonyRouteRecord is a single Symfony route entry returned by the MCP tools.
 type SymfonyRouteRecord struct {
-	Name          string         `json:"name"`
-	Path          string         `json:"path,omitempty"`
-	URI           string         `json:"uri,omitempty"`
-	DeclRange     protocol.Range `json:"declRange"`
+	Name      string         `json:"name"`
+	Path      string         `json:"path,omitempty"`
+	URI       string         `json:"uri,omitempty"`
+	DeclRange protocol.Range `json:"declRange"`
 }
 
 type SymfonyRoutesOutput struct {
@@ -315,7 +316,6 @@ type SymfonyRoutesOutput struct {
 type SymfonyRouteInput struct {
 	Name string `json:"name" jsonschema:"Symfony route name"`
 }
-
 
 func New(ctx context.Context, rootPath string, logger *slog.Logger) (*Service, error) {
 	if rootPath == "" {
@@ -705,6 +705,7 @@ func (s *Service) buildRuntime(ws *workspace.Bootstrapped) *serviceRuntime {
 	arrayResolver := models.NewFrameworkArrayResolver(ws.Index, s.RootPath, s.Framework)
 	viewResolver := frameworklaravel.NewViews(s.RootPath)
 	translationResolver := frameworklaravel.NewTranslationResolver(s.RootPath)
+	symfonyTranslations := frameworksymfony.NewTranslationResolver(s.RootPath)
 
 	rt.Completion = completion.NewProvider(ws.Index, ws.Container, s.Framework)
 	rt.Completion.SetArrayResolver(arrayResolver)
@@ -716,6 +717,8 @@ func (s *Service) buildRuntime(ws *workspace.Bootstrapped) *serviceRuntime {
 	}
 	rt.Completion.SetViewResolver(viewResolver)
 	rt.Completion.SetTranslationResolver(translationResolver)
+	rt.Completion.SetSymfonyTranslationResolver(symfonyTranslations)
+	rt.Completion.SetSymfonyCommands(ws.SymfonyCommands)
 
 	rt.InlayHint = inlayhint.NewProvider(ws.Index, ws.Container)
 	rt.InlayHint.SetTypedChainResolver(func(expr, source string, pos protocol.Position, file *parser.FileNode) resolve.ResolvedType {
@@ -725,9 +728,6 @@ func (s *Service) buildRuntime(ws *workspace.Bootstrapped) *serviceRuntime {
 	rt.Hover = hover.NewProvider(ws.Index, ws.Container, s.Framework)
 	rt.Hover.SetArrayResolver(arrayResolver)
 	rt.Hover.SetConfig(s.Config)
-	rt.Hover.GenericExprResolver = func(expr, source string, pos protocol.Position, file *parser.FileNode) resolve.ResolvedType {
-		return rt.Completion.ResolveExpressionTypeTyped(expr, source, pos, file)
-	}
 	rt.Hover.SetTypedChainResolver(func(expr, source string, pos protocol.Position, file *parser.FileNode) resolve.ResolvedType {
 		return rt.Completion.ResolveExpressionTypeTyped(expr, source, pos, file)
 	})
@@ -740,12 +740,15 @@ func (s *Service) buildRuntime(ws *workspace.Bootstrapped) *serviceRuntime {
 	rt.Analyzer.SetTypedChainResolver(rt.Completion.ResolveExpressionTypeTyped)
 	rt.Analyzer.SetViewResolver(viewResolver)
 	rt.Analyzer.SetTranslationResolver(translationResolver)
+	rt.Analyzer.SetSymfonyTranslationResolver(symfonyTranslations)
+	rt.Analyzer.SetSymfonyCommands(ws.SymfonyCommands)
 
 	rt.Diagnostics = diagnostics.NewProvider(ws.Index, s.Framework, s.RootPath, newStdLogger(nil), s.Config)
 	rt.Diagnostics.TypeResolver = func(expr, source string, line, col int, file *parser.FileNode) string {
 		return rt.Completion.ResolveDiagnosticType(expr, source, protocol.Position{Line: line, Character: col}, file)
 	}
-	rt.Diagnostics.BuilderMemberChecker = diagnostics.NewIndexMemberChecker(ws.Index)
+	rt.Diagnostics.BuilderModelResolver = rt.Completion.ResolveBuilderModel
+	rt.Diagnostics.BuilderMemberChecker = diagnostics.NewIndexMemberChecker(ws.Index, ws.SchemaIsLive)
 	rt.Diagnostics.BuiltinUnavailableRule = &checks.BuiltinUnavailableRule{
 		PHPVersion: s.BuiltinProfile.PHPVersion,
 		Extensions: s.BuiltinProfile.Extensions,
@@ -953,7 +956,7 @@ func (s *Service) projectDiagnostics(path string) (DiagnosticsOutput, error) {
 			continue
 		}
 		uri := "file://" + absPath
-		diags := rt.Diagnostics.Analyze(uri, string(data))
+		diags := rt.Diagnostics.AnalyzeAll(uri, string(data))
 		out.Files = append(out.Files, FileDiagnostics{
 			Path:        normalizedRelativePath(s.RootPath, absPath),
 			Diagnostics: diags,
@@ -1100,7 +1103,6 @@ func (s *Service) findSymfonyRoute(name string) *SymfonyRouteRecord {
 	}
 	return nil
 }
-
 
 func (s *Service) laravelModelSchema(fqn string) (LaravelModelSchemaOutput, error) {
 	ws := s.runtime().Workspace
@@ -1518,8 +1520,6 @@ func (w *slogWriter) Write(p []byte) (int, error) {
 	}
 	return len(p), nil
 }
-
-
 
 // readFile reads a file by URI, or returns "" when it can't be read.
 func readFile(uri string) string {

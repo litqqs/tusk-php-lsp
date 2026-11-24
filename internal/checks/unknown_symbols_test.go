@@ -64,8 +64,8 @@ class Foo {
 	idx := symbols.NewIndex()
 	idx.RegisterBuiltinsForProfile(symbols.BuiltinProfile{PHPVersion: "8.3"})
 
-	rule := &UnknownClassRule{}
-	findings := rule.Check(file, source, idx)
+	checker := &UnknownClassRule{}
+	findings := checker.Check(file, source, idx)
 
 	var relevant []Finding
 	for _, f := range findings {
@@ -180,10 +180,10 @@ func checkUnknownMembers(t *testing.T, vars map[string]string, sources ...string
 		idx.IndexFileWithSource("file:///f"+strconv.Itoa(i)+".php", source, src)
 	}
 	source := sources[len(sources)-1]
-	rule := &UnknownMemberRule{TypeResolver: func(expr, _ string, _, _ int, _ *parser.FileNode) string {
+	checker := &UnknownMemberRule{TypeResolver: func(expr, _ string, _, _ int, _ *parser.FileNode) string {
 		return vars[expr]
 	}}
-	return rule.Check(parser.ParseFile(source), source, idx)
+	return checker.Check(parser.ParseFile(source), source, idx)
 }
 
 func unknownMemberMessages(findings []Finding) []string {
@@ -298,11 +298,11 @@ func TestUnknownMemberBuiltinWithoutMembersIsNotFlagged(t *testing.T) {
 	idx := symbols.NewIndex()
 	idx.RegisterBuiltins()
 	source := "<?php\nnamespace App;\n$v->open();\n"
-	rule := &UnknownMemberRule{TypeResolver: func(string, string, int, int, *parser.FileNode) string { return "ZipArchive" }}
+	checker := &UnknownMemberRule{TypeResolver: func(string, string, int, int, *parser.FileNode) string { return "ZipArchive" }}
 	if sym := idx.Lookup("ZipArchive"); sym == nil || len(sym.Children) != 0 {
 		t.Skip("ZipArchive now has its members listed")
 	}
-	if got := rule.Check(parser.ParseFile(source), source, idx); len(got) != 0 {
+	if got := checker.Check(parser.ParseFile(source), source, idx); len(got) != 0 {
 		t.Errorf("got %v", unknownMemberMessages(got))
 	}
 }
@@ -394,10 +394,10 @@ $t = DateTime::createFromTimestamp(1);
 	check := func(version string) []string {
 		idx := symbols.NewIndex()
 		idx.RegisterBuiltinsForProfile(symbols.BuiltinProfile{PHPVersion: version})
-		rule := &UnknownMemberRule{TypeResolver: func(expr, _ string, _, _ int, _ *parser.FileNode) string {
+		checker := &UnknownMemberRule{TypeResolver: func(expr, _ string, _, _ int, _ *parser.FileNode) string {
 			return vars[expr]
 		}}
-		return unknownMemberMessages(rule.Check(parser.ParseFile(source), source, idx))
+		return unknownMemberMessages(checker.Check(parser.ParseFile(source), source, idx))
 	}
 	if got := check("8.4"); len(got) != 0 {
 		t.Errorf("PHP 8.4: got %v", got)
@@ -415,5 +415,111 @@ func TestUnknownFunctionWindowsBuiltins(t *testing.T) {
 	file := parser.ParseFile(source)
 	if got := (&UnknownFunctionRule{}).Check(file, source, idx); len(got) != 0 {
 		t.Errorf("got %v", unknownMemberMessages(got))
+	}
+}
+
+// TestUnknownClassLeadingBackslashImport verifies that `use \Ns\Thing;`, which
+// PHP reads the same as `use Ns\Thing;`, resolves the imported class.
+func TestUnknownClassLeadingBackslashImport(t *testing.T) {
+	idx := symbols.NewIndex()
+	idx.IndexFile("file:///lib.php", `<?php
+namespace Vendor\Lib;
+class Thing {}
+interface Contract {}
+`)
+	source := `<?php
+namespace App;
+
+use \Vendor\Lib\Thing;
+use \Vendor\Lib\Contract;
+
+class Consumer implements Contract
+{
+    public function make(): Thing
+    {
+        return new Thing();
+    }
+}
+`
+	file := parser.ParseFile(source)
+	for _, f := range (&UnknownClassRule{}).Check(file, source, idx) {
+		t.Errorf("unexpected unknown-class finding: %q at line %d", f.Message, f.StartLine)
+	}
+	for _, f := range (&UnusedImportsRule{}).Check(file, source, idx) {
+		t.Errorf("unexpected unused-import finding: %q at line %d", f.Message, f.StartLine)
+	}
+}
+
+// TestUnknownFunctionIgnoresKeywordsWithParentheses verifies that language
+// constructs written with parentheses, such as `break(2);`, are not read as
+// calls to unknown functions.
+func TestUnknownFunctionIgnoresKeywordsWithParentheses(t *testing.T) {
+	idx := symbols.NewIndex()
+	idx.RegisterBuiltinsForProfile(symbols.BuiltinProfile{PHPVersion: "8.3"})
+	source := `<?php
+function run(array $rows) {
+    foreach ($rows as $row) {
+        foreach ($row as $cell) {
+            if ($cell === null) { continue(2); }
+            if ($cell === false) { break(2); }
+            print($cell);
+        }
+    }
+    include('a.php');
+    require_once('b.php');
+    if (!$rows) { exit(1); }
+    return(count($rows));
+}
+`
+	file := parser.ParseFile(source)
+	for _, f := range (&UnknownFunctionRule{}).Check(file, source, idx) {
+		t.Errorf("unexpected unknown-function finding: %q at line %d", f.Message, f.StartLine)
+	}
+}
+
+// TestUndefinedVariableInMethodNamedUse verifies that a method named with a
+// reserved word, such as use(), sees its own parameters.
+func TestUndefinedVariableInMethodNamedUse(t *testing.T) {
+	source := `<?php
+class Manager {
+    public function use(string $name) { return $name; }
+}
+trait Pipes { public function use($value, ...$rest) { return [$value, $rest]; } }
+enum Mode: string { case A = 'a'; public function use(int $n): int { return $n; } }
+`
+	file := parser.ParseFile(source)
+	for _, f := range (&UndefinedVariableRule{}).Check(file, source, symbols.NewIndex()) {
+		t.Errorf("unexpected undefined-variable finding: %q at line %d", f.Message, f.StartLine)
+	}
+}
+
+// TestUnknownClassGroupAndCommaImports verifies that every name a group or
+// comma-separated import brings in resolves.
+func TestUnknownClassGroupAndCommaImports(t *testing.T) {
+	idx := symbols.NewIndex()
+	idx.IndexFile("file:///lib.php", `<?php
+namespace Vendor\Lib;
+class Alpha {}
+class Beta {}
+class Gamma {}
+`)
+	idx.IndexFile("file:///other.php", `<?php
+namespace Vendor\Other;
+class Delta {}
+`)
+	source := `<?php
+namespace App;
+
+use Vendor\Lib\{Alpha, Beta as B};
+use Vendor\Lib\Gamma, Vendor\Other\Delta;
+
+function make() { return [new Alpha(), new B(), new Gamma(), new Delta()]; }
+`
+	file := parser.ParseFile(source)
+	for _, f := range (&UnknownClassRule{}).Check(file, source, idx) {
+		t.Errorf("unexpected unknown-class finding: %q", f.Message)
+	}
+	for _, f := range (&UnusedImportsRule{}).Check(file, source, idx) {
+		t.Errorf("unexpected unused-import finding: %q", f.Message)
 	}
 }

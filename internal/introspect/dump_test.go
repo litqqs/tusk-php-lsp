@@ -6,6 +6,7 @@ import (
 
 	"github.com/Tusk-PHP/lsp/internal/checks"
 	"github.com/Tusk-PHP/lsp/internal/container"
+	"github.com/Tusk-PHP/lsp/internal/rule"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 )
 
@@ -76,24 +77,24 @@ class OrderItem extends Model {}
 
 	// A to-one relation: stored with the concrete FQN.
 	idx.AddVirtualMember(`App\Models\Order`, &symbols.Symbol{
-		Name:      "$customer",
-		FQN:       `App\Models\Order::$customer`,
-		Kind:      symbols.KindProperty,
-		URI:       testURI,
-		Type:      `App\Models\Customer`,
-		IsVirtual: true,
+		Name:       "$customer",
+		FQN:        `App\Models\Order::$customer`,
+		Kind:       symbols.KindProperty,
+		URI:        testURI,
+		Type:       `App\Models\Customer`,
+		IsVirtual:  true,
 		DocComment: "← relation belongsTo",
 	})
 
 	// A to-many relation: stored with the collapsed type "Collection".
 	// This is the fidelity wart we must surface.
 	idx.AddVirtualMember(`App\Models\Order`, &symbols.Symbol{
-		Name:      "$items",
-		FQN:       `App\Models\Order::$items`,
-		Kind:      symbols.KindProperty,
-		URI:       testURI,
-		Type:      "Collection",
-		IsVirtual: true,
+		Name:       "$items",
+		FQN:        `App\Models\Order::$items`,
+		Kind:       symbols.KindProperty,
+		URI:        testURI,
+		Type:       "Collection",
+		IsVirtual:  true,
 		DocComment: "← relation hasMany(OrderItem)",
 	})
 
@@ -439,8 +440,8 @@ func TestDocument_Diagnostics(t *testing.T) {
 		Verbosity:   Compact,
 		BufferState: "disk",
 		Diagnostics: []checks.Finding{
-			{StartLine: 20, Code: "unused-import", Severity: checks.SeverityHint, Message: "unused import Foo"},
-			{StartLine: 5, Code: "unknown-class", Severity: checks.SeverityWarning, Message: "unknown class Bar"},
+			{StartLine: 20, Code: "unused-import", Severity: rule.SeverityHint, Message: "unused import Foo"},
+			{StartLine: 5, Code: "unknown-class", Severity: rule.SeverityWarning, Message: "unknown class Bar"},
 		},
 	})
 

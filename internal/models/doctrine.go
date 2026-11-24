@@ -13,29 +13,29 @@ import (
 
 // Doctrine SQL type → PHP type mapping.
 var doctrineTypeMap = map[string]string{
-	"string":          "string",
-	"text":            "string",
-	"integer":         "int",
-	"smallint":        "int",
-	"bigint":          "int",
-	"boolean":         "bool",
-	"decimal":         "string",
-	"float":           "float",
-	"datetime":        "\\DateTimeInterface",
+	"string":             "string",
+	"text":               "string",
+	"integer":            "int",
+	"smallint":           "int",
+	"bigint":             "int",
+	"boolean":            "bool",
+	"decimal":            "string",
+	"float":              "float",
+	"datetime":           "\\DateTimeInterface",
 	"datetime_immutable": "\\DateTimeImmutable",
-	"datetimetz":      "\\DateTimeInterface",
-	"date":            "\\DateTimeInterface",
-	"date_immutable":  "\\DateTimeImmutable",
-	"time":            "\\DateTimeInterface",
-	"time_immutable":  "\\DateTimeImmutable",
-	"array":           "array",
-	"simple_array":    "array",
-	"json":            "array",
-	"json_array":      "array",
-	"object":          "object",
-	"binary":          "string",
-	"blob":            "string",
-	"guid":            "string",
+	"datetimetz":         "\\DateTimeInterface",
+	"date":               "\\DateTimeInterface",
+	"date_immutable":     "\\DateTimeImmutable",
+	"time":               "\\DateTimeInterface",
+	"time_immutable":     "\\DateTimeImmutable",
+	"array":              "array",
+	"simple_array":       "array",
+	"json":               "array",
+	"json_array":         "array",
+	"object":             "object",
+	"binary":             "string",
+	"blob":               "string",
+	"guid":               "string",
 }
 
 // Regexes for PHP 8 attribute syntax.
@@ -43,7 +43,7 @@ var (
 	// Matches #[ORM\Entity(...)] or #[ORM\Entity]
 	ormEntityRe = regexp.MustCompile(`#\[\s*(?:ORM\\)?Entity\b(?:\(([^)]*)\))?`)
 	// Matches #[ORM\Column(...)] with named args
-	ormColumnRe = regexp.MustCompile(`#\[\s*(?:ORM\\)?Column\b\(([^)]*)\)`)
+	ormColumnRe = regexp.MustCompile(`#\[\s*(?:ORM\\)?Column\b(?:\(([^)]*)\))?`) // arguments are optional: #[ORM\Column]
 	// Matches #[ORM\Id]
 	ormIdRe = regexp.MustCompile(`#\[\s*(?:ORM\\)?Id\b`)
 	// Matches #[ORM\GeneratedValue]
@@ -54,8 +54,8 @@ var (
 	ormTableRe = regexp.MustCompile(`#\[\s*(?:ORM\\)?Table\b\(([^)]*)\)`)
 
 	// Annotation syntax: @ORM\Column(type="string")
-	ormColumnAnnotRe  = regexp.MustCompile(`@ORM\\Column\(([^)]*)\)`)
-	ormEntityAnnotRe  = regexp.MustCompile(`@ORM\\Entity\b(?:\(([^)]*)\))?`)
+	ormColumnAnnotRe   = regexp.MustCompile(`@ORM\\Column\(([^)]*)\)`)
+	ormEntityAnnotRe   = regexp.MustCompile(`@ORM\\Entity\b(?:\(([^)]*)\))?`)
 	ormRelationAnnotRe = regexp.MustCompile(`@ORM\\(OneToOne|OneToMany|ManyToOne|ManyToMany)\(([^)]*)\)`)
 
 	// Matches a PHP property declaration line: visibility [static] [readonly] [?Type] $name
@@ -63,10 +63,10 @@ var (
 	ormIdAnnotRe      = regexp.MustCompile(`@ORM\\Id\b`)
 
 	// Extract named argument values
-	typeArgRe       = regexp.MustCompile(`type\s*[:=]\s*['"]([^'"]+)['"]`)
-	targetEntityRe  = regexp.MustCompile(`targetEntity\s*[:=]\s*([A-Za-z_\\]+)::class`)
-	repoClassRe     = regexp.MustCompile(`repositoryClass\s*[:=]\s*([A-Za-z_\\]+)::class`)
-	nameArgRe       = regexp.MustCompile(`name\s*[:=]\s*['"]([^'"]+)['"]`)
+	typeArgRe      = regexp.MustCompile(`type\s*[:=]\s*['"]([^'"]+)['"]`)
+	targetEntityRe = regexp.MustCompile(`targetEntity\s*[:=]\s*([A-Za-z_\\]+)::class`)
+	repoClassRe    = regexp.MustCompile(`repositoryClass\s*[:=]\s*([A-Za-z_\\]+)::class`)
+	nameArgRe      = regexp.MustCompile(`name\s*[:=]\s*['"]([^'"]+)['"]`)
 )
 
 // Singular Doctrine relations (result is nullable entity).
@@ -89,53 +89,57 @@ func AnalyzeDoctrineEntities(index *symbols.Index, rootPath string) {
 		if err != nil {
 			continue
 		}
-		source := string(content)
+		analyzeDoctrineSource(index, rootPath, string(content))
+	}
+}
 
-		// Quick check: does this file mention ORM\Entity?
-		if !strings.Contains(source, "ORM\\Entity") && !strings.Contains(source, "ORM\\Column") {
+// analyzeDoctrineSource injects the members of the Doctrine entities declared
+// in source, one file's text.
+func analyzeDoctrineSource(index *symbols.Index, rootPath, source string) {
+	// Quick check: does this file mention ORM\Entity?
+	if !strings.Contains(source, "ORM\\Entity") && !strings.Contains(source, "ORM\\Column") {
+		return
+	}
+
+	file := parser.ParseFile(source)
+	if file == nil {
+		return
+	}
+
+	for i := range file.Classes {
+		cls := &file.Classes[i]
+		fqn := file.Namespace + "\\" + cls.Name
+		if file.Namespace == "" {
+			fqn = cls.Name
+		}
+
+		sym := index.Lookup(fqn)
+		if sym == nil {
 			continue
 		}
 
-		file := parser.ParseFile(source)
-		if file == nil {
+		resolve := func(name string) string {
+			return resolveWithUses(name, file.Namespace, file.Uses)
+		}
+
+		// Check for ORM\Entity in class docblock (annotation syntax) or source around class declaration
+		classSource := extractClassSource(source, cls)
+		if !isDoctrineEntity(classSource, cls.DocComment) {
 			continue
 		}
 
-		for i := range file.Classes {
-			cls := &file.Classes[i]
-			fqn := file.Namespace + "\\" + cls.Name
-			if file.Namespace == "" {
-				fqn = cls.Name
-			}
+		// Try PHP 8 attributes on properties first, then XML fallback
+		foundAttrs := analyzeDoctrineAttributes(index, sym, source, cls, resolve)
 
-			sym := index.Lookup(fqn)
-			if sym == nil {
-				continue
-			}
+		if !foundAttrs {
+			// XML mapping fallback
+			analyzeDoctrineXML(index, sym, rootPath, fqn, cls, resolve)
+		}
 
-			resolve := func(name string) string {
-				return resolveWithUses(name, file.Namespace, file.Uses)
-			}
-
-			// Check for ORM\Entity in class docblock (annotation syntax) or source around class declaration
-			classSource := extractClassSource(source, cls)
-			if !isDoctrineEntity(classSource, cls.DocComment) {
-				continue
-			}
-
-			// Try PHP 8 attributes on properties first, then XML fallback
-			foundAttrs := analyzeDoctrineAttributes(index, sym, source, cls, resolve)
-
-			if !foundAttrs {
-				// XML mapping fallback
-				analyzeDoctrineXML(index, sym, rootPath, fqn, cls, resolve)
-			}
-
-			// Repository magic methods
-			repoFQN := extractRepositoryClass(classSource, cls.DocComment, resolve)
-			if repoFQN != "" {
-				injectRepositoryMagicMethods(index, repoFQN, fqn, sym)
-			}
+		// Repository magic methods
+		repoFQN := extractRepositoryClass(classSource, cls.DocComment, resolve)
+		if repoFQN != "" {
+			injectRepositoryMagicMethods(index, repoFQN, fqn, sym)
 		}
 	}
 }
@@ -189,12 +193,7 @@ func analyzeDoctrineAttributes(index *symbols.Index, entitySym *symbols.Symbol, 
 		propTypeHint := m[1] // may be empty
 		propName := m[2]     // includes $
 
-		// Gather attribute lines above this property (up to 6 lines back)
-		attrStart := i - 6
-		if attrStart < cls.StartLine {
-			attrStart = cls.StartLine
-		}
-		attrBlock := strings.Join(lines[attrStart:i+1], "\n")
+		attrBlock := propertyAttributeBlock(lines, i, cls.StartLine)
 
 		// Check for #[ORM\Column]
 		if cm := ormColumnRe.FindStringSubmatch(attrBlock); cm != nil {
@@ -455,14 +454,14 @@ type doctrineMappingXML struct {
 }
 
 type doctrineEntityXML struct {
-	Name       string                 `xml:"name,attr"`
-	Table      string                 `xml:"table,attr"`
-	Fields     []doctrineFieldXML     `xml:"field"`
-	Id         []doctrineFieldXML     `xml:"id"`
-	OneToOne   []doctrineRelationXML  `xml:"one-to-one"`
-	OneToMany  []doctrineRelationXML  `xml:"one-to-many"`
-	ManyToOne  []doctrineRelationXML  `xml:"many-to-one"`
-	ManyToMany []doctrineRelationXML  `xml:"many-to-many"`
+	Name       string                `xml:"name,attr"`
+	Table      string                `xml:"table,attr"`
+	Fields     []doctrineFieldXML    `xml:"field"`
+	Id         []doctrineFieldXML    `xml:"id"`
+	OneToOne   []doctrineRelationXML `xml:"one-to-one"`
+	OneToMany  []doctrineRelationXML `xml:"one-to-many"`
+	ManyToOne  []doctrineRelationXML `xml:"many-to-one"`
+	ManyToMany []doctrineRelationXML `xml:"many-to-many"`
 }
 
 type doctrineFieldXML struct {
@@ -588,4 +587,21 @@ func parseDoctrineXMLMapping(index *symbols.Index, entitySym *symbols.Symbol, en
 			DocComment: "ManyToMany relation",
 		})
 	}
+}
+
+// propertyAttributeBlock returns the property declaration at lines[i] with
+// the attribute lines written above it: up to 6 lines back, stopping at the
+// previous statement (a line ending in `;`, `{` or `}`) or the class's first
+// line, so another property's #[ORM\Id] or #[ORM\ManyToOne] isn't read as
+// this one's.
+func propertyAttributeBlock(lines []string, i, classStart int) string {
+	start := i
+	for start > classStart && start > i-6 {
+		prev := strings.TrimSpace(lines[start-1])
+		if strings.HasSuffix(prev, ";") || strings.HasSuffix(prev, "{") || strings.HasSuffix(prev, "}") {
+			break
+		}
+		start--
+	}
+	return strings.Join(lines[start:i+1], "\n")
 }

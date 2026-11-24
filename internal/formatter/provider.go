@@ -20,7 +20,7 @@ func NewProvider() *Provider {
 func (p *Provider) Format(s string) string {
 	in := strings.NewReader(s)
 	var out bytes.Buffer
-	opts := naive.Standard
+	opts := naive.PHP74Compat | naive.LowercaseKeywords
 	err := format.Pipe("<stdin>", &out, in, opts)
 	if err != nil {
 		return s

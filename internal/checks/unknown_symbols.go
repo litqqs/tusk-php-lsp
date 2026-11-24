@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Tusk-PHP/lsp/internal/parser"
+	"github.com/Tusk-PHP/lsp/internal/rule"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 	"github.com/Tusk-PHP/lsp/internal/types"
 )
@@ -14,7 +15,7 @@ import (
 // stable runtime and declaration contexts.
 type UnknownClassRule struct{}
 
-func (r *UnknownClassRule) Code() string { return "unknown-class" }
+func (r *UnknownClassRule) Codes() []rule.Code { return []rule.Code{rule.UnknownClass} }
 
 var unknownClassNewRe = regexp.MustCompile(`\bnew\s+(\\?[A-Za-z_][A-Za-z0-9_\\]*)`)
 var unknownClassSingleRefRe = regexp.MustCompile(`\b(?:extends|instanceof)\s+(\\?[A-Za-z_][A-Za-z0-9_\\]*)`)
@@ -61,8 +62,8 @@ func checkUnknownClassMatches(line string, lineNum int, file *parser.FileNode, i
 			StartCol:  start,
 			EndLine:   lineNum,
 			EndCol:    end,
-			Severity:  SeverityWarning,
-			Code:      "unknown-class",
+			Severity:  rule.SeverityWarning,
+			Code:      rule.UnknownClass,
 			Message:   fmt.Sprintf("Unknown class '%s'", strings.TrimPrefix(name, "\\")),
 		})
 	}
@@ -107,8 +108,8 @@ func checkUnknownStaticClassMatches(line, prevLine string, lineNum int, file *pa
 			StartCol:  start,
 			EndLine:   lineNum,
 			EndCol:    end,
-			Severity:  SeverityWarning,
-			Code:      "unknown-class",
+			Severity:  rule.SeverityWarning,
+			Code:      rule.UnknownClass,
 			Message:   fmt.Sprintf("Unknown class '%s'", strings.TrimPrefix(name, "\\")),
 		})
 	}
@@ -153,8 +154,8 @@ func checkUnknownCatchClasses(line string, lineNum int, file *parser.FileNode, i
 				StartCol:  start,
 				EndLine:   lineNum,
 				EndCol:    end,
-				Severity:  SeverityWarning,
-				Code:      "unknown-class",
+				Severity:  rule.SeverityWarning,
+				Code:      rule.UnknownClass,
 				Message:   fmt.Sprintf("Unknown class '%s'", strings.TrimPrefix(trimmed, "\\")),
 			})
 			offset += len(part) + 1
@@ -190,8 +191,8 @@ func checkUnknownImplementsClasses(line string, lineNum int, file *parser.FileNo
 				StartCol:  start,
 				EndLine:   lineNum,
 				EndCol:    end,
-				Severity:  SeverityWarning,
-				Code:      "unknown-class",
+				Severity:  rule.SeverityWarning,
+				Code:      rule.UnknownClass,
 				Message:   fmt.Sprintf("Unknown class '%s'", strings.TrimPrefix(trimmed, "\\")),
 			})
 			offset += len(part) + 1
@@ -216,8 +217,8 @@ func checkUnknownAttributeClasses(line string, lineNum int, file *parser.FileNod
 				StartCol:  tok.start,
 				EndLine:   lineNum,
 				EndCol:    tok.start + len(tok.name),
-				Severity:  SeverityWarning,
-				Code:      "unknown-class",
+				Severity:  rule.SeverityWarning,
+				Code:      rule.UnknownClass,
 				Message:   fmt.Sprintf("Unknown attribute '%s'", strings.TrimPrefix(tok.name, "\\")),
 			})
 		}
@@ -346,7 +347,7 @@ func posInAttributeGroup(pos int, groups []attrGroup) bool {
 // UnknownFunctionRule detects unresolved plain function calls.
 type UnknownFunctionRule struct{}
 
-func (r *UnknownFunctionRule) Code() string { return "unknown-function" }
+func (r *UnknownFunctionRule) Codes() []rule.Code { return []rule.Code{rule.UnknownFunction} }
 
 var unknownFunctionCallRe = regexp.MustCompile(`\b([A-Za-z_][A-Za-z0-9_\\]*)\s*\(`)
 
@@ -359,6 +360,8 @@ var skippedFunctionLikeKeywords = map[string]bool{
 	"fn": true, "use": true, "return": true, "list": true, "case": true,
 	"and": true, "or": true, "xor": true, "instanceof": true, "throw": true,
 	"yield": true, "static": true, "declare": true,
+	// `break(2);` and `continue(2);` are legal: the level is an expression.
+	"break": true, "continue": true,
 	// `new ($class)()`, `new\nclass($args)`, and the PHP 8.4 asymmetric
 	// visibility and DNF types of `public private(set)` and
 	// `private (A&B)|null $x` are not calls; none of these names can be a
@@ -402,8 +405,8 @@ func (r *UnknownFunctionRule) Check(file *parser.FileNode, source string, index 
 				StartCol:  start,
 				EndLine:   lineNum,
 				EndCol:    end,
-				Severity:  SeverityWarning,
-				Code:      "unknown-function",
+				Severity:  rule.SeverityWarning,
+				Code:      rule.UnknownFunction,
 				Message:   fmt.Sprintf("Unknown function '%s'", strings.TrimPrefix(name, "\\")),
 			})
 		}
@@ -445,7 +448,11 @@ func shouldSkipFunctionCall(line string, start int, name string) bool {
 		prefix = strings.TrimSpace(trimmed)
 	}
 	switch {
-	case strings.HasSuffix(prefix, "function"),
+	// A member called with space or a comment after the operator, as in
+	// `$f->/* note */bindTo()`: comments are masked to spaces.
+	case strings.HasSuffix(prefix, "->"),
+		strings.HasSuffix(prefix, "::"),
+		strings.HasSuffix(prefix, "function"),
 		strings.HasSuffix(prefix, "fn"),
 		strings.HasSuffix(prefix, "new"),
 		strings.HasSuffix(prefix, "new \\"),
@@ -503,9 +510,17 @@ func hasKeywordSuffix(s, kw string) bool {
 // the receiver type can be resolved reliably.
 type UnknownMemberRule struct {
 	TypeResolver func(expr string, source string, line, col int, file *parser.FileNode) string
+	// ConventionMethod, when set, reports whether a framework calls method on
+	// instances of class (one class of the receiver's hierarchy) by convention,
+	// without the class declaring it, as Laravel does with a notification's
+	// toMail().
+	ConventionMethod func(class, method string) bool
+	// Shared, when set, shares the file's parse with the other rules. The
+	// rule reads tokens only in a file that may check for a member first.
+	Shared *Shared
 }
 
-func (r *UnknownMemberRule) Code() string { return "unknown-member" }
+func (r *UnknownMemberRule) Codes() []rule.Code { return []rule.Code{rule.UnknownMember} }
 
 var unknownMemberAccessRe = regexp.MustCompile(`(\?\->|\->|::)\s*([A-Za-z_][A-Za-z0-9_]*)`)
 
@@ -519,10 +534,14 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 	hierarchies := map[string]*memberHierarchy{}
 	instanceofLines := linesWithInstanceof(lines)
 	guards := memberGuards{file: file}
+	if memberGuardHintRe.MatchString(source) {
+		if result := r.Shared.parse(source); result != nil {
+			guards.collect(result.Tokens)
+		}
+	}
 
 	for lineNum, raw := range lines {
 		line := maskPHPLine(raw, &mask)
-		guards.add(line, raw, lineNum)
 		for _, match := range unknownMemberAccessRe.FindAllStringSubmatchIndex(line, -1) {
 			opStart, opEnd := match[2], match[3]
 			nameStart, nameEnd := match[4], match[5]
@@ -563,7 +582,7 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 					continue
 				}
 			}
-			if anyOwnerMayHaveMember(owners, access, file, index, hierarchies) {
+			if anyOwnerMayHaveMember(owners, access, file, index, hierarchies) || r.conventionMethod(owners, access, hierarchies) {
 				continue
 			}
 			if anyImplementationHasMember(owners, isLateBoundOwner(ownerExpr), access, file, index, hierarchies) {
@@ -578,8 +597,8 @@ func (r *UnknownMemberRule) Check(file *parser.FileNode, source string, index *s
 				StartCol:  nameStart,
 				EndLine:   lineNum,
 				EndCol:    nameEnd,
-				Severity:  SeverityWarning,
-				Code:      "unknown-member",
+				Severity:  rule.SeverityWarning,
+				Code:      rule.UnknownMember,
 				Message:   fmt.Sprintf("Unknown member '%s' on '%s'", member, strings.Join(names, "|")),
 			})
 		}
@@ -997,6 +1016,31 @@ type memberHierarchy struct {
 	members []*symbols.Symbol
 	open    bool
 	visited map[string]bool
+	// subclass is set for a hierarchy looked at as a subclass of the receiver,
+	// where a class declared inside a block still has its own members and its
+	// parents': it doesn't stand for a class defined elsewhere.
+	subclass string
+}
+
+// conventionMethod reports whether a framework calls the accessed method on
+// one of owners, or a class it extends, by convention.
+func (r *UnknownMemberRule) conventionMethod(owners []string, access memberAccess, hierarchies map[string]*memberHierarchy) bool {
+	if r.ConventionMethod == nil || !access.isCall || access.isStatic {
+		return false
+	}
+	for _, owner := range owners {
+		if r.ConventionMethod(owner, access.name) {
+			return true
+		}
+		if h := hierarchies[owner]; h != nil {
+			for class := range h.visited {
+				if r.ConventionMethod(class, access.name) {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func anyOwnerMayHaveMember(owners []string, access memberAccess, file *parser.FileNode, index *symbols.Index, hierarchies map[string]*memberHierarchy) bool {
@@ -1052,6 +1096,12 @@ func (h *memberHierarchy) walk(fqn string, index *symbols.Index) {
 	h.visited[fqn] = true
 	sym := index.Lookup(fqn)
 	if !isClassLikeSymbol(sym) {
+		h.open = true
+		return
+	}
+	// A class declared inside a block is a placeholder or polyfill: the class
+	// code runs with may be another one, with more members.
+	if sym.IsConditional && fqn != h.subclass {
 		h.open = true
 		return
 	}
@@ -1156,6 +1206,21 @@ func anyImplementationHasMember(owners []string, lateBound bool, access memberAc
 			continue
 		}
 		for _, sub := range index.Implementations(owner) {
+			if sym := index.Lookup(sub); sym != nil && sym.IsConditional {
+				// As `if ($c) { class ftp extends ftp_sockets {} }`: the subclass
+				// is one of the variants, whose members are its own and its parents'.
+				key := "subclass|" + sub
+				h, ok := hierarchies[key]
+				if !ok {
+					h = &memberHierarchy{visited: map[string]bool{}, subclass: sub}
+					h.walk(sub, index)
+					hierarchies[key] = h
+				}
+				if h.open || h.answers(access) {
+					return true
+				}
+				continue
+			}
 			if ownerMayHaveMember(sub, access, file, index, hierarchies) {
 				return true
 			}
@@ -1576,7 +1641,9 @@ func backwardExprStart(line string, end int) int {
 		if depthParen > 0 || depthBracket > 0 {
 			continue
 		}
-		if isExprChar(line[i]) {
+		// The `?` of a nullsafe `?->` is part of the chain, as in `$a?->b->c()`;
+		// a ternary's isn't.
+		if isExprChar(line[i]) || line[i] == '?' && strings.HasPrefix(line[i+1:], "->") {
 			continue
 		}
 		return i + 1

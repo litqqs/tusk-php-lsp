@@ -1,9 +1,8 @@
 package diagnostics
 
 import (
-	"fmt"
 	"log"
-	"strings"
+	"slices"
 	"sync"
 
 	"github.com/Tusk-PHP/lsp/internal/checks"
@@ -12,6 +11,7 @@ import (
 	"github.com/Tusk-PHP/lsp/internal/framework/laravel/blade"
 	"github.com/Tusk-PHP/lsp/internal/parser"
 	"github.com/Tusk-PHP/lsp/internal/protocol"
+	"github.com/Tusk-PHP/lsp/internal/rule"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 	"github.com/Tusk-PHP/lsp/internal/workspace"
 )
@@ -71,114 +71,86 @@ func NewProvider(index *symbols.Index, framework, rootPath string, logger *log.L
 // Analyze runs fast static checks and merges cached external tool results.
 // Called on every file change — only includes lightweight checks.
 func (p *Provider) Analyze(uri, source string) []protocol.Diagnostic {
+	return p.analyze(uri, source, false)
+}
+
+// AnalyzeAll returns what Analyze does plus the on-save rules' findings for
+// this source, computed now and not cached: for one-shot runs over files on
+// disk, such as `tusk-php check` and the MCP diagnostics tool, where every
+// file counts as saved.
+func (p *Provider) AnalyzeAll(uri, source string) []protocol.Diagnostic {
+	return p.analyze(uri, source, true)
+}
+
+func (p *Provider) analyze(uri, source string, withSaveRules bool) []protocol.Diagnostic {
 	var diags []protocol.Diagnostic
 	if workspace.IsBlade(uri) {
 		// A Blade view is checked through the PHP it contains, and only what
 		// is found in that PHP is reported, at its place in the view.
 		in := p.ViewTypes.For(uri)
 		doc := blade.CompileWith(source, blade.CompileOptions{Vars: in.BladeVars(), Defined: in.Complete, Custom: p.bladeCustom()})
-		diags = toTemplate(doc, p.analyzeNative(uri, doc.PHP, true, !in.Complete))
+		diags = toTemplate(doc, p.analyzeNative(doc.PHP, true, !in.Complete))
 		diags = append(diags, p.analyzeBlade(source)...)
 	} else {
-		diags = p.analyzeNative(uri, source, false, workspace.IsTemplate(uri))
+		diags = p.analyzeNative(source, false, workspace.IsTemplate(uri))
 	}
 	p.mu.RLock()
 	if cached, ok := p.toolResults[uri]; ok {
 		diags = append(diags, cached...)
 	}
-	if cached, ok := p.saveResults[uri]; ok {
+	if cached, ok := p.saveResults[uri]; ok && !withSaveRules {
 		diags = append(diags, cached...)
 	}
 	p.mu.RUnlock()
+	if withSaveRules {
+		diags = append(diags, p.saveDiagnostics(uri, source)...)
+	}
 
 	// Soft-mode the unknown-* rules until the workspace + composer index has
 	// completed at least once. The rules still ran (for testability), but their
 	// findings depend on cross-file symbol presence and produce false positives
 	// during the warm-up window.
 	if p.index != nil && !p.index.Ready() {
-		diags = filterOutCodes(diags, "unknown-class", "unknown-function", "unknown-member", "invalid-override")
+		diags = filterOutCodes(diags, rule.UnknownClass, rule.UnknownFunction, rule.UnknownMember, rule.InvalidOverride)
 	}
 
 	return diags
 }
 
-// analyzeNative runs the native rules on PHP source. bladePHP is set for the
-// virtual PHP of a Blade view.
-// includedFile is set when the source's top-level variables are set by
-// code the server can't see, and aren't reported as undefined.
-func (p *Provider) analyzeNative(uri, source string, bladePHP, includedFile bool) []protocol.Diagnostic {
-	var diags []protocol.Diagnostic
-	file := parser.ParseFile(source)
-	if file != nil {
-		// One run of the rules over this version of the file: the rules that
-		// type receivers share what they learn, and find attribute uses once.
-		typeResolver := MemoizeTypeResolver(p.TypeResolver)
-		shared := &checks.Shared{}
-		uses := &checks.MemberUseCache{Shared: shared}
-		diags = append(diags, parserErrorsToDiagnostics(file.Errors, source)...)
-		diags = append(diags, p.checkClassStructure(file)...)
-		if p.cfg.IsRuleEnabled("unknown-class") {
-			fs := (&checks.UnknownClassRule{}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("unknown-class", checks.SeverityWarning, findingsToDiagnostics(fs))...)
+func (p *Provider) analyzeNative(source string, bladePHP, includedFile bool) []protocol.Diagnostic {
+	rules := EditRules(p.ruleOptions(bladePHP, includedFile))
+	return p.toDiagnostics(p.runRules(rules, parser.ParseFile(source), source))
+}
+
+func (p *Provider) ruleOptions(bladePHP, includedFile bool) NativeRulesOptions {
+	return NativeRulesOptions{
+		TypeResolver:           p.TypeResolver,
+		BuiltinUnavailableRule: p.BuiltinUnavailableRule,
+		BuilderModelResolver:   p.BuilderModelResolver,
+		BuilderMemberChecker:   p.BuilderMemberChecker,
+		BladePHP:               bladePHP,
+		IncludedFile:           includedFile,
+	}
+}
+
+func (p *Provider) runRules(rules []checks.Rule, file *parser.FileNode, source string) []checks.Finding {
+	var findings []checks.Finding
+	for _, r := range rules {
+		if slices.ContainsFunc(r.Codes(), p.cfg.IsRuleEnabled) {
+			findings = append(findings, r.Check(file, source, p.index)...)
 		}
-		if p.cfg.IsRuleEnabled("unknown-function") {
-			fs := (&checks.UnknownFunctionRule{}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("unknown-function", checks.SeverityWarning, findingsToDiagnostics(fs))...)
+	}
+	return findings
+}
+
+func (p *Provider) toDiagnostics(findings []checks.Finding) []protocol.Diagnostic {
+	diags := make([]protocol.Diagnostic, 0, len(findings))
+	for _, f := range findings {
+		if !p.cfg.IsRuleEnabled(f.Code) {
+			continue
 		}
-		if p.TypeResolver != nil && p.cfg.IsRuleEnabled("unknown-member") {
-			fs := (&checks.UnknownMemberRule{TypeResolver: typeResolver}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("unknown-member", checks.SeverityWarning, findingsToDiagnostics(fs))...)
-		}
-		if p.BuiltinUnavailableRule != nil && p.cfg.IsRuleEnabled("builtin-unavailable") {
-			fs := p.BuiltinUnavailableRule.Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("builtin-unavailable", checks.SeverityWarning, findingsToDiagnostics(fs))...)
-		}
-		if p.cfg.IsRuleEnabled("unused-import") {
-			fs := (&checks.UnusedImportsRule{}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("unused-import", checks.SeverityHint, findingsToDiagnostics(fs))...)
-		}
-		if p.cfg.IsRuleEnabled("unused-private-method") || p.cfg.IsRuleEnabled("unused-private-property") {
-			diags = append(diags, p.filterByConfig(p.applyUnusedPrivateSeverity(findingsToDiagnostics((&checks.UnusedPrivateRule{}).Check(file, source, p.index))))...)
-		}
-		if p.cfg.IsRuleEnabled("unreachable-code") {
-			fs := (&checks.UnreachableCodeRule{Shared: shared}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("unreachable-code", checks.SeverityWarning, findingsToDiagnostics(fs))...)
-		}
-		if p.cfg.IsRuleEnabled("redundant-union-member") {
-			fs := (&checks.RedundantUnionRule{}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("redundant-union-member", checks.SeverityWarning, findingsToDiagnostics(fs))...)
-		}
-		if p.cfg.IsRuleEnabled("undefined-variable") {
-			fs := (&checks.UndefinedVariableRule{IncludedFile: includedFile, Shared: shared}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("undefined-variable", checks.SeverityWarning, findingsToDiagnostics(fs))...)
-		}
-		// A Blade view's variables are also read by the views it includes,
-		// which see all of them, so none can be called unused from here.
-		if p.cfg.IsRuleEnabled("unused-variable") && !bladePHP {
-			fs := (&checks.UnusedVariableRule{Shared: shared}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("unused-variable", checks.SeverityHint, findingsToDiagnostics(fs))...)
-		}
-		if p.cfg.IsRuleEnabled("deprecated") {
-			fs := (&checks.DeprecatedUsageRule{TypeResolver: typeResolver, Uses: uses}).Check(file, source, p.index)
-			deprecatedFns := &checks.DeprecatedFunctionRule{}
-			if p.BuiltinUnavailableRule != nil {
-				deprecatedFns.PHPVersion = p.BuiltinUnavailableRule.PHPVersion
-			}
-			fs = append(fs, deprecatedFns.Check(file, source, p.index)...)
-			diags = append(diags, p.applyRuleSeverity("deprecated", checks.SeverityWarning, findingsToDiagnostics(fs))...)
-		}
-		if p.cfg.IsRuleEnabled("unused-result") {
-			fs := (&checks.UnusedResultRule{TypeResolver: typeResolver, Uses: uses}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("unused-result", checks.SeverityWarning, findingsToDiagnostics(fs))...)
-		}
-		if p.cfg.IsRuleEnabled("invalid-override") {
-			fs := (&checks.InvalidOverrideRule{}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("invalid-override", checks.SeverityError, findingsToDiagnostics(fs))...)
-		}
-		if p.cfg.IsRuleEnabled("argument-count-mismatch") {
-			fs := (&checks.ArgumentCountRule{Shared: shared, TypeResolver: typeResolver}).Check(file, source, p.index)
-			diags = append(diags, p.applyRuleSeverity("argument-count-mismatch", checks.SeverityWarning, findingsToDiagnostics(fs))...)
-		}
+		f.Severity = p.cfg.RuleSeverity(f.Code, f.Severity)
+		diags = append(diags, findingToDiagnostic(f))
 	}
 	return diags
 }
@@ -192,15 +164,6 @@ func (p *Provider) bladeCustom() *blade.Custom {
 	return p.Blade.Custom()
 }
 
-// bladeSeverity is the default severity of the Blade rules.
-var bladeSeverity = map[string]checks.Severity{
-	// A block that doesn't close doesn't compile.
-	blade.CodeUnclosedDirective: checks.SeverityError,
-	blade.CodeUnknownView:       checks.SeverityWarning,
-	blade.CodeUnknownComponent:  checks.SeverityWarning,
-}
-
-// analyzeBlade checks a Blade view's directives and the views they name.
 func (p *Provider) analyzeBlade(source string) []protocol.Diagnostic {
 	if p.Blade == nil {
 		return nil
@@ -210,25 +173,16 @@ func (p *Provider) analyzeBlade(source string) []protocol.Diagnostic {
 		return nil
 	}
 	lines := blade.NewLines(source)
-	byCode := map[string][]checks.Finding{}
+	findings := make([]checks.Finding, 0, len(found))
 	for _, d := range found {
-		if !p.cfg.IsRuleEnabled(d.Code) {
-			continue
-		}
 		sl, sc := lines.Position(d.Span.Start)
 		el, ec := lines.Position(d.Span.End)
-		byCode[d.Code] = append(byCode[d.Code], checks.Finding{
+		findings = append(findings, checks.Finding{
 			StartLine: sl, StartCol: sc, EndLine: el, EndCol: ec,
-			Severity: bladeSeverity[d.Code], Code: d.Code, Message: d.Message,
+			Severity: d.Severity, Code: d.Code, Message: d.Message,
 		})
 	}
-	var diags []protocol.Diagnostic
-	for _, code := range []string{blade.CodeUnclosedDirective, blade.CodeUnknownView, blade.CodeUnknownComponent} {
-		if fs := byCode[code]; len(fs) > 0 {
-			diags = append(diags, p.applyRuleSeverity(code, bladeSeverity[code], findingsToDiagnostics(fs))...)
-		}
-	}
-	return diags
+	return p.toDiagnostics(findings)
 }
 
 // toTemplate moves diagnostics found in a Blade view's virtual PHP to the
@@ -251,40 +205,24 @@ func toTemplate(doc *blade.Document, diags []protocol.Diagnostic) []protocol.Dia
 // AnalyzeOnSave runs heavier checks that need type resolution or model lookups.
 // Called on file save only. Results are cached and merged into Analyze() output.
 func (p *Provider) AnalyzeOnSave(uri, source string) {
+	diags := p.saveDiagnostics(uri, source)
+	p.mu.Lock()
+	p.saveResults[uri] = diags
+	p.mu.Unlock()
+}
+
+// saveDiagnostics runs the rules that wait for a save.
+func (p *Provider) saveDiagnostics(uri, source string) []protocol.Diagnostic {
 	var doc *blade.Document
 	if workspace.IsBlade(uri) {
 		doc = blade.CompileWith(source, blade.CompileOptions{Vars: p.ViewTypes.For(uri).BladeVars(), Custom: p.bladeCustom()})
 		source = doc.PHP
 	}
-	file := parser.ParseFile(source)
-	if file == nil {
-		return
-	}
-	var diags []protocol.Diagnostic
-
-	// Redundant nullsafe — needs type resolution
-	if p.TypeResolver != nil && p.cfg.IsRuleEnabled("redundant-nullsafe") {
-		rule := &checks.RedundantNullsafeRule{TypeResolver: p.TypeResolver}
-		fs := rule.Check(file, source, p.index)
-		diags = append(diags, p.applyRuleSeverity("redundant-nullsafe", checks.SeverityInfo, findingsToDiagnostics(fs))...)
-	}
-	// Invalid builder args — needs model resolution + member checking
-	if p.BuilderModelResolver != nil && p.BuilderMemberChecker != nil {
-		if p.cfg.IsRuleEnabled("unknown-column") || p.cfg.IsRuleEnabled("unknown-relation") {
-			rule := &checks.InvalidBuilderArgRule{
-				ModelResolver: p.BuilderModelResolver,
-				Members:       p.BuilderMemberChecker,
-			}
-			diags = append(diags, p.filterByConfig(findingsToDiagnostics(rule.Check(file, source, p.index)))...)
-		}
-	}
-
+	diags := p.toDiagnostics(p.runRules(SaveRules(p.ruleOptions(doc != nil, false)), parser.ParseFile(source), source))
 	if doc != nil {
 		diags = toTemplate(doc, diags)
 	}
-	p.mu.Lock()
-	p.saveResults[uri] = diags
-	p.mu.Unlock()
+	return diags
 }
 
 // RunTools executes external analysis tools (PHPStan, Pint) on a file.
@@ -310,176 +248,17 @@ func (p *Provider) ClearCache(uri string) {
 	p.mu.Unlock()
 }
 
-// filterByConfig removes diagnostics whose Code is disabled in config.
-func (p *Provider) filterByConfig(diags []protocol.Diagnostic) []protocol.Diagnostic {
-	var filtered []protocol.Diagnostic
-	for _, d := range diags {
-		if d.Code == "" || p.cfg.IsRuleEnabled(d.Code) {
-			filtered = append(filtered, d)
-		}
-	}
-	return filtered
-}
-
-// applyRuleSeverity overrides the severity of diagnostics for a specific rule
-// code if the config has an explicit severity set. If no override is configured
-// the default severity is used (diagnostics are returned as-is).
-func (p *Provider) applyRuleSeverity(code string, defaultSeverity checks.Severity, diags []protocol.Diagnostic) []protocol.Diagnostic {
-	override := p.cfg.RuleSeverity(code, defaultSeverity)
-	if override == defaultSeverity {
-		return diags
-	}
-	var lspSev protocol.DiagnosticSeverity
-	switch override {
-	case checks.SeverityError:
-		lspSev = protocol.DiagnosticSeverityError
-	case checks.SeverityWarning:
-		lspSev = protocol.DiagnosticSeverityWarning
-	case checks.SeverityInfo:
-		lspSev = protocol.DiagnosticSeverityInformation
-	default:
-		lspSev = protocol.DiagnosticSeverityHint
-	}
-	out := make([]protocol.Diagnostic, len(diags))
-	copy(out, diags)
-	for i := range out {
-		out[i].Severity = lspSev
-	}
-	return out
-}
-
-func (p *Provider) checkClassStructure(file *parser.FileNode) []protocol.Diagnostic {
-	var diags []protocol.Diagnostic
-	for _, cls := range file.Classes {
-		if !cls.IsAbstract {
-			for _, m := range cls.Methods {
-				if m.IsAbstract {
-					diags = append(diags, protocol.Diagnostic{
-						Range:    protocol.Range{Start: protocol.Position{Line: m.StartLine}},
-						Severity: protocol.DiagnosticSeverityError, Source: "tusk-php",
-						Message: fmt.Sprintf("Class '%s' contains abstract method '%s' but is not declared abstract", cls.Name, m.Name),
-						Code:    "abstract-in-concrete",
-					})
-				}
-			}
-		}
-	}
-	return diags
-}
-
-// applyUnusedPrivateSeverity applies per-code severity overrides for
-// unused-private-method and unused-private-property diagnostics.
-func (p *Provider) applyUnusedPrivateSeverity(diags []protocol.Diagnostic) []protocol.Diagnostic {
-	if len(diags) == 0 {
-		return diags
-	}
-	out := make([]protocol.Diagnostic, len(diags))
-	copy(out, diags)
-	for i, d := range out {
-		switch d.Code {
-		case "unused-private-method":
-			out[i].Severity = severityToLSP(p.cfg.RuleSeverity("unused-private-method", checks.SeverityInfo))
-		case "unused-private-property":
-			out[i].Severity = severityToLSP(p.cfg.RuleSeverity("unused-private-property", checks.SeverityHint))
-		}
-	}
-	return out
-}
-
-// severityToLSP converts a checks.Severity to an LSP DiagnosticSeverity.
-func severityToLSP(s checks.Severity) protocol.DiagnosticSeverity {
-	switch s {
-	case checks.SeverityError:
-		return protocol.DiagnosticSeverityError
-	case checks.SeverityWarning:
-		return protocol.DiagnosticSeverityWarning
-	case checks.SeverityInfo:
-		return protocol.DiagnosticSeverityInformation
-	default:
-		return protocol.DiagnosticSeverityHint
-	}
-}
-
-func (p *Provider) checkUnusedImports(file *parser.FileNode, source string) []protocol.Diagnostic {
-	rule := &checks.UnusedImportsRule{}
-	return findingsToDiagnostics(rule.Check(file, source, p.index))
-}
-
-func parserErrorsToDiagnostics(errors []parser.ParseError, source string) []protocol.Diagnostic {
-	if len(errors) == 0 {
-		return nil
-	}
-	lines := strings.Split(source, "\n")
-	diags := make([]protocol.Diagnostic, 0, len(errors))
-	for _, parseErr := range errors {
-		line := clamp(parseErr.Line, 0, max(len(lines)-1, 0))
-		lineText := ""
-		if line >= 0 && line < len(lines) {
-			lineText = lines[line]
-		}
-		lineLen := len(lineText)
-		startCol := clamp(parseErr.Column, 0, lineLen)
-		endCol := startCol + parserErrorWidth(parseErr.Message)
-		if endCol > lineLen {
-			endCol = lineLen
-		}
-		if endCol <= startCol {
-			switch {
-			case lineLen == 0:
-				endCol = startCol + 1
-			case startCol < lineLen:
-				endCol = startCol + 1
-			default:
-				startCol = max(lineLen-1, 0)
-				endCol = lineLen
-			}
-		}
-		diags = append(diags, protocol.Diagnostic{
-			Range: protocol.Range{
-				Start: protocol.Position{Line: line, Character: startCol},
-				End:   protocol.Position{Line: line, Character: endCol},
-			},
-			Severity: protocol.DiagnosticSeverityError,
-			Source:   "tusk-php",
-			Message:  parseErr.Message,
-			Code:     "syntax-error",
-		})
-	}
-	return diags
-}
-
-func parserErrorWidth(message string) int {
-	switch {
-	case strings.Contains(message, "doc comment"):
-		return 3
-	case strings.Contains(message, "comment"):
-		return 2
-	default:
-		return 1
-	}
-}
-
-func clamp(value, low, high int) int {
-	if value < low {
-		return low
-	}
-	if value > high {
-		return high
-	}
-	return value
-}
-
 // filterOutCodes returns a new slice with all diagnostics whose Code matches
 // one of the provided codes removed. It reuses the backing array of diags when
 // possible to avoid an allocation in the common (no-op) case where the slice is
 // already empty.
-func filterOutCodes(diags []protocol.Diagnostic, codes ...string) []protocol.Diagnostic {
+func filterOutCodes(diags []protocol.Diagnostic, codes ...rule.Code) []protocol.Diagnostic {
 	if len(diags) == 0 {
 		return diags
 	}
 	skip := make(map[string]bool, len(codes))
 	for _, c := range codes {
-		skip[c] = true
+		skip[string(c)] = true
 	}
 	out := diags[:0]
 	for _, d := range diags {
@@ -490,35 +269,26 @@ func filterOutCodes(diags []protocol.Diagnostic, codes ...string) []protocol.Dia
 	return out
 }
 
-// findingsToDiagnostics converts standalone check findings to LSP diagnostics.
-func findingsToDiagnostics(findings []checks.Finding) []protocol.Diagnostic {
-	diags := make([]protocol.Diagnostic, 0, len(findings))
-	for _, f := range findings {
-		sev := protocol.DiagnosticSeverityHint
-		switch f.Severity {
-		case checks.SeverityError:
-			sev = protocol.DiagnosticSeverityError
-		case checks.SeverityWarning:
-			sev = protocol.DiagnosticSeverityWarning
-		case checks.SeverityInfo:
-			sev = protocol.DiagnosticSeverityInformation
-		case checks.SeverityHint:
-			sev = protocol.DiagnosticSeverityHint
-		}
-		d := protocol.Diagnostic{
-			Range: protocol.Range{
-				Start: protocol.Position{Line: f.StartLine, Character: f.StartCol},
-				End:   protocol.Position{Line: f.EndLine, Character: f.EndCol},
-			},
-			Severity: sev,
-			Source:   "tusk-php",
-			Message:  f.Message,
-			Code:     f.Code,
-		}
-		for _, tag := range f.Tags {
-			d.Tags = append(d.Tags, protocol.DiagnosticTag(tag))
-		}
-		diags = append(diags, d)
+var lspSeverity = map[rule.Severity]protocol.DiagnosticSeverity{
+	rule.SeverityError:   protocol.DiagnosticSeverityError,
+	rule.SeverityWarning: protocol.DiagnosticSeverityWarning,
+	rule.SeverityInfo:    protocol.DiagnosticSeverityInformation,
+	rule.SeverityHint:    protocol.DiagnosticSeverityHint,
+}
+
+func findingToDiagnostic(f checks.Finding) protocol.Diagnostic {
+	d := protocol.Diagnostic{
+		Range: protocol.Range{
+			Start: protocol.Position{Line: f.StartLine, Character: f.StartCol},
+			End:   protocol.Position{Line: f.EndLine, Character: f.EndCol},
+		},
+		Severity: lspSeverity[f.Severity],
+		Source:   string(rule.SourceTusk),
+		Message:  f.Message,
+		Code:     string(f.Code),
 	}
-	return diags
+	for _, tag := range f.Tags {
+		d.Tags = append(d.Tags, protocol.DiagnosticTag(tag))
+	}
+	return d
 }
