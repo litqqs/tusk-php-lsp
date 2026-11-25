@@ -10,7 +10,6 @@ import (
 )
 
 type Provider struct {
-	//cfg *config.Config
 }
 
 func NewProvider() *Provider {
