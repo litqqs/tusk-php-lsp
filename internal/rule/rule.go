@@ -17,6 +17,7 @@ const (
 	UnusedImport          Code = "unused-import"
 	UnusedPrivateMethod   Code = "unused-private-method"
 	UnusedPrivateProperty Code = "unused-private-property"
+	UnusedPrivateConstant Code = "unused-private-constant"
 	UnreachableCode       Code = "unreachable-code"
 	RedundantUnionMember  Code = "redundant-union-member"
 	RedundantNullsafe     Code = "redundant-nullsafe"
@@ -26,6 +27,7 @@ const (
 	UnusedResult          Code = "unused-result"
 	InvalidOverride       Code = "invalid-override"
 	ArgumentCountMismatch Code = "argument-count-mismatch"
+	UnknownNamedArgument  Code = "unknown-named-argument"
 	UnknownColumn         Code = "unknown-column"
 	UnknownRelation       Code = "unknown-relation"
 	UnknownView           Code = "unknown-view"
@@ -43,6 +45,7 @@ var All = []Code{
 	UnusedImport,
 	UnusedPrivateMethod,
 	UnusedPrivateProperty,
+	UnusedPrivateConstant,
 	UnreachableCode,
 	RedundantUnionMember,
 	RedundantNullsafe,
@@ -52,6 +55,7 @@ var All = []Code{
 	UnusedResult,
 	InvalidOverride,
 	ArgumentCountMismatch,
+	UnknownNamedArgument,
 	UnknownColumn,
 	UnknownRelation,
 	UnknownView,

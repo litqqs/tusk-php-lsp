@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Type hierarchy** (`textDocument/prepareTypeHierarchy`): from a class, interface, trait or enum, browse up to its parent, interfaces and traits, and down to the classes that extend or implement it, one level at a time. Deprecated types are marked.
+- **`unknown-named-argument`** (error): a named argument the function, method or constructor has no parameter for, such as `new User(nmae: 'x')` or `$user->rename(nme: 'y')`, which PHP throws on. Calls to variadic functions, to classes with `__call`, with an argument unpacked by `...`, and to PHP's own functions are left alone.
+- **Document links**: `require` and `include` paths built from `__DIR__`, `__FILE__`, `dirname()`, `DIRECTORY_SEPARATOR` and string literals, Laravel's path helpers (`base_path('routes/web.php')`, `resource_path('views')` and the rest, and `config_path()` or `storage_path()` alone link to their directory) and URLs in comments are clickable. Only files and directories that exist are linked, and a path built from variables never is.
+- **`unused-private-constant`** (hint, shown faded): a private class constant nothing reads, found from the class's own code, its attributes (`#[AsCommand(name: self::NAME)]`) and its traits. `constant('self::X')` and `defined('self::X')` count as reads of `X`; a class that fetches constants by a computed name (`self::{$name}`, `constant($name)`) or through reflection (`getConstants()`, `getConstant()`, `ReflectionClassConstant`) isn't checked.
+
 ### Changed
 
 - **`diagnosticRules` in `.tusk-php.json` is checked**: a rule name that doesn't exist, such as `unused-imports`, or a severity other than `error`, `warning`, `info`, `hint` or `off` is reported instead of being silently treated as "on". The editor shows the error and the server runs with the default settings; `tusk-php check` and `tusk-php mcp` stop with it.
@@ -14,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Inline variable** is offered in editors that only ask for the code action kinds the server announces: its kind, `refactor.inline`, was missing from the list.
+- **Answers are right from the first request.** While the workspace is still being indexed, a class the editor asks about is read straight away from where Composer's autoload says it lives, with its parents, interfaces and traits, and a project model read this way gets its relations at once and keeps them. Only files indexing would read are loaded: `excludePaths` and `maxIndexFiles` apply, and a class asked for in another case than its file name doesn't appear twice. Before, a class or vendor helper indexed later than the request (such as `Str::of()` in a Laravel app) had no definition, hover or completion until indexing finished. On a 9,700-file Laravel app the first correct cross-file answer now comes after about 80 ms instead of 280 ms.
+- **Doctrine** entity analysis no longer changes property types while a request is reading them.
 - **Calling a closure stored in a variable** is now typed: after `$g = fn (int $i): Foo => new Foo();`, hover on `$g` shows `Closure(int): Foo`, `$g(1)->` completes `Foo`'s members, hover and go-to-definition work on them, and `$g(1)->nope()` is reported as `unknown-member`. Before, the variable had no type, so none of these worked.
 - `tusk-php introspect` and the editor's debug dump list the same native diagnostics the editor shows: syntax errors, abstract methods in a class that isn't abstract, and calls to deprecated PHP functions were missing from them.
 - **`redundant-nullsafe`** no longer reports `?->` on values that can be null. It used to flag nullable parameters (`?LoggerInterface $logger = null`), variables that a ternary may set to `null`, and chains after another `?->`; it now reports only `$this?->` and a parameter declared with a non-nullable type that its function never reassigns.

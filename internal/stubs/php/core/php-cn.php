@@ -22584,4 +22584,365 @@ namespace Dom {
 	const NAMESPACE_ERR = 14;
 	const VALIDATION_ERR = 16;
 	const HTML_NO_DEFAULT_NS = 2147483648;
+
+enum AdjacentPosition: string {
+    case BeforeBegin;
+    case AfterBegin;
+    case BeforeEnd;
+    case AfterEnd;
+    public readonly string $name;
+    public readonly string $value;
+    public static function cases(): array {}
+    public static function from(string|int $value): static {}
+    public static function tryFrom(string|int $value): ?static {}
+}
+
+class Implementation {
+    public function createDocumentType(string $qualifiedName, string $publicId, string $systemId): Dom\DocumentType {}
+    public function createDocument(?string $namespace, string $qualifiedName, ?Dom\DocumentType $doctype = null): Dom\XMLDocument {}
+    public function createHTMLDocument(?string $title = null): Dom\HTMLDocument {}
+}
+
+class Node {
+    public const int DOCUMENT_POSITION_DISCONNECTED = 1;
+    public const int DOCUMENT_POSITION_PRECEDING = 2;
+    public const int DOCUMENT_POSITION_FOLLOWING = 4;
+    public const int DOCUMENT_POSITION_CONTAINS = 8;
+    public const int DOCUMENT_POSITION_CONTAINED_BY = 16;
+    public const int DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
+    public int $nodeType;
+    public string $nodeName;
+    public string $baseURI;
+    public bool $isConnected;
+    public ?Dom\Document $ownerDocument;
+    public ?Dom\Node $parentNode;
+    public ?Dom\Element $parentElement;
+    public Dom\NodeList $childNodes;
+    public ?Dom\Node $firstChild;
+    public ?Dom\Node $lastChild;
+    public ?Dom\Node $previousSibling;
+    public ?Dom\Node $nextSibling;
+    public ?string $nodeValue;
+    public ?string $textContent;
+    private final function __construct() {}
+    public function getRootNode(array $options = []): Dom\Node {}
+    public function hasChildNodes(): bool {}
+    public function normalize(): void {}
+    public function cloneNode(bool $deep = false): Dom\Node {}
+    public function isEqualNode(?Dom\Node $otherNode): bool {}
+    public function isSameNode(?Dom\Node $otherNode): bool {}
+    public function compareDocumentPosition(Dom\Node $other): int {}
+    public function contains(?Dom\Node $other): bool {}
+    public function lookupPrefix(?string $namespace): ?string {}
+    public function lookupNamespaceURI(?string $prefix): ?string {}
+    public function isDefaultNamespace(?string $namespace): bool {}
+    public function insertBefore(Dom\Node $node, ?Dom\Node $child): Dom\Node {}
+    public function appendChild(Dom\Node $node): Dom\Node {}
+    public function replaceChild(Dom\Node $node, Dom\Node $child): Dom\Node {}
+    public function removeChild(Dom\Node $child): Dom\Node {}
+    public function getLineNo(): int {}
+    public function getNodePath(): string {}
+    public function C14N(bool $exclusive = false, bool $withComments = false, ?array $xpath = null, ?array $nsPrefixes = null): string|false {}
+    public function C14NFile(string $uri, bool $exclusive = false, bool $withComments = false, ?array $xpath = null, ?array $nsPrefixes = null): int|false {}
+    public function __sleep(): array {}
+    public function __wakeup(): void {}
+}
+
+final class NamespaceInfo {
+    public readonly ?string $prefix;
+    public readonly ?string $namespaceURI;
+    public readonly Dom\Element $element;
+    private function __construct() {}
+}
+
+class DocumentFragment extends Node implements ParentNode {
+    public Dom\HTMLCollection $children;
+    public ?Dom\Element $firstElementChild;
+    public ?Dom\Element $lastElementChild;
+    public int $childElementCount;
+    public function appendXml(string $data): bool {}
+    public function append(Dom\Node|string ...$nodes): void {}
+    public function prepend(Dom\Node|string ...$nodes): void {}
+    public function replaceChildren(Dom\Node|string ...$nodes): void {}
+    public function querySelector(string $selectors): ?Dom\Element {}
+    public function querySelectorAll(string $selectors): Dom\NodeList {}
+}
+
+abstract class Document extends Node implements ParentNode {
+    public Dom\HTMLCollection $children;
+    public ?Dom\Element $firstElementChild;
+    public ?Dom\Element $lastElementChild;
+    public int $childElementCount;
+    public Dom\Implementation $implementation;
+    public string $URL;
+    public string $documentURI;
+    public string $characterSet;
+    public string $charset;
+    public string $inputEncoding;
+    public ?Dom\DocumentType $doctype;
+    public ?Dom\Element $documentElement;
+    public ?Dom\HTMLElement $body;
+    public ?Dom\HTMLElement $head;
+    public string $title;
+    public function getElementsByTagName(string $qualifiedName): Dom\HTMLCollection {}
+    public function getElementsByTagNameNS(?string $namespace, string $localName): Dom\HTMLCollection {}
+    public function getElementsByClassName(string $classNames): Dom\HTMLCollection {}
+    public function createElement(string $localName): Dom\Element {}
+    public function createElementNS(?string $namespace, string $qualifiedName): Dom\Element {}
+    public function createDocumentFragment(): Dom\DocumentFragment {}
+    public function createTextNode(string $data): Dom\Text {}
+    public function createCDATASection(string $data): Dom\CDATASection {}
+    public function createComment(string $data): Dom\Comment {}
+    public function createProcessingInstruction(string $target, string $data): Dom\ProcessingInstruction {}
+    public function importNode(?Dom\Node $node, bool $deep = false): Dom\Node {}
+    public function adoptNode(Dom\Node $node): Dom\Node {}
+    public function createAttribute(string $localName): Dom\Attr {}
+    public function createAttributeNS(?string $namespace, string $qualifiedName): Dom\Attr {}
+    public function getElementById(string $elementId): ?Dom\Element {}
+    public function registerNodeClass(string $baseClass, ?string $extendedClass): void {}
+    public function schemaValidate(string $filename, int $flags = 0): bool {}
+    public function schemaValidateSource(string $source, int $flags = 0): bool {}
+    public function relaxNgValidate(string $filename): bool {}
+    public function relaxNgValidateSource(string $source): bool {}
+    public function append(Dom\Node|string ...$nodes): void {}
+    public function prepend(Dom\Node|string ...$nodes): void {}
+    public function replaceChildren(Dom\Node|string ...$nodes): void {}
+    public function importLegacyNode(DOMNode $node, bool $deep = false): Dom\Node {}
+    public function querySelector(string $selectors): ?Dom\Element {}
+    public function querySelectorAll(string $selectors): Dom\NodeList {}
+}
+
+final class HTMLDocument extends Document implements ParentNode {
+    public static function createEmpty(string $encoding = "UTF-8"): Dom\HTMLDocument {}
+    public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): Dom\HTMLDocument {}
+    public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): Dom\HTMLDocument {}
+    public function saveXml(?Dom\Node $node = null, int $options = 0): string|false {}
+    public function saveXmlFile(string $filename, int $options = 0): int|false {}
+    public function saveHtml(?Dom\Node $node = null): string {}
+    public function saveHtmlFile(string $filename): int|false {}
+}
+
+final class XMLDocument extends Document implements ParentNode {
+    public string $xmlEncoding;
+    public bool $xmlStandalone;
+    public string $xmlVersion;
+    public bool $formatOutput;
+    public static function createEmpty(string $version = "1.0", string $encoding = "UTF-8"): Dom\XMLDocument {}
+    public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): Dom\XMLDocument {}
+    public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): Dom\XMLDocument {}
+    public function createEntityReference(string $name): Dom\EntityReference {}
+    public function validate(): bool {}
+    public function xinclude(int $options = 0): int {}
+    public function saveXml(?Dom\Node $node = null, int $options = 0): string|false {}
+    public function saveXmlFile(string $filename, int $options = 0): int|false {}
+}
+
+class NodeList implements IteratorAggregate, Traversable, Countable {
+    public int $length;
+    public function count(): int {}
+    public function getIterator(): Iterator {}
+    public function item(int $index): ?Dom\Node {}
+}
+
+class NamedNodeMap implements IteratorAggregate, Traversable, Countable {
+    public int $length;
+    public function item(int $index): ?Dom\Attr {}
+    public function getNamedItem(string $qualifiedName): ?Dom\Attr {}
+    public function getNamedItemNS(?string $namespace, string $localName): ?Dom\Attr {}
+    public function count(): int {}
+    public function getIterator(): Iterator {}
+}
+
+class DtdNamedNodeMap implements IteratorAggregate, Traversable, Countable {
+    public int $length;
+    public function item(int $index): Dom\Entity|Dom\Notation|null {}
+    public function getNamedItem(string $qualifiedName): Dom\Entity|Dom\Notation|null {}
+    public function getNamedItemNS(?string $namespace, string $localName): Dom\Entity|Dom\Notation|null {}
+    public function count(): int {}
+    public function getIterator(): Iterator {}
+}
+
+class HTMLCollection implements IteratorAggregate, Traversable, Countable {
+    public int $length;
+    public function item(int $index): ?Dom\Element {}
+    public function namedItem(string $key): ?Dom\Element {}
+    public function count(): int {}
+    public function getIterator(): Iterator {}
+}
+
+class CharacterData extends Node implements ChildNode {
+    public ?Dom\Element $previousElementSibling;
+    public ?Dom\Element $nextElementSibling;
+    public string $data;
+    public int $length;
+    public function substringData(int $offset, int $count): string {}
+    public function appendData(string $data): void {}
+    public function insertData(int $offset, string $data): void {}
+    public function deleteData(int $offset, int $count): void {}
+    public function replaceData(int $offset, int $count, string $data): void {}
+    public function remove(): void {}
+    public function before(Dom\Node|string ...$nodes): void {}
+    public function after(Dom\Node|string ...$nodes): void {}
+    public function replaceWith(Dom\Node|string ...$nodes): void {}
+}
+
+class Attr extends Node {
+    public ?string $namespaceURI;
+    public ?string $prefix;
+    public string $localName;
+    public string $name;
+    public string $value;
+    public ?Dom\Element $ownerElement;
+    public bool $specified;
+    public function isId(): bool {}
+    public function rename(?string $namespaceURI, string $qualifiedName): void {}
+}
+
+class Element extends Node implements ParentNode, ChildNode {
+    public ?string $namespaceURI;
+    public ?string $prefix;
+    public string $localName;
+    public string $tagName;
+    public Dom\HTMLCollection $children;
+    public ?Dom\Element $firstElementChild;
+    public ?Dom\Element $lastElementChild;
+    public int $childElementCount;
+    public ?Dom\Element $previousElementSibling;
+    public ?Dom\Element $nextElementSibling;
+    public string $id;
+    public string $className;
+    public Dom\TokenList $classList;
+    public Dom\NamedNodeMap $attributes;
+    public string $innerHTML;
+    public string $outerHTML;
+    public string $substitutedNodeValue;
+    public function hasAttributes(): bool {}
+    public function getAttributeNames(): array {}
+    public function getAttribute(string $qualifiedName): ?string {}
+    public function getAttributeNS(?string $namespace, string $localName): ?string {}
+    public function setAttribute(string $qualifiedName, string $value): void {}
+    public function setAttributeNS(?string $namespace, string $qualifiedName, string $value): void {}
+    public function removeAttribute(string $qualifiedName): void {}
+    public function removeAttributeNS(?string $namespace, string $localName): void {}
+    public function toggleAttribute(string $qualifiedName, ?bool $force = null): bool {}
+    public function hasAttribute(string $qualifiedName): bool {}
+    public function hasAttributeNS(?string $namespace, string $localName): bool {}
+    public function getAttributeNode(string $qualifiedName): ?Dom\Attr {}
+    public function getAttributeNodeNS(?string $namespace, string $localName): ?Dom\Attr {}
+    public function setAttributeNode(Dom\Attr $attr): ?Dom\Attr {}
+    public function setAttributeNodeNS(Dom\Attr $attr): ?Dom\Attr {}
+    public function removeAttributeNode(Dom\Attr $attr): Dom\Attr {}
+    public function getElementsByTagName(string $qualifiedName): Dom\HTMLCollection {}
+    public function getElementsByTagNameNS(?string $namespace, string $localName): Dom\HTMLCollection {}
+    public function getElementsByClassName(string $classNames): Dom\HTMLCollection {}
+    public function insertAdjacentElement(Dom\AdjacentPosition $where, Dom\Element $element): ?Dom\Element {}
+    public function insertAdjacentText(Dom\AdjacentPosition $where, string $data): void {}
+    public function insertAdjacentHTML(Dom\AdjacentPosition $where, string $string): void {}
+    public function setIdAttribute(string $qualifiedName, bool $isId): void {}
+    public function setIdAttributeNS(?string $namespace, string $qualifiedName, bool $isId): void {}
+    public function setIdAttributeNode(Dom\Attr $attr, bool $isId): void {}
+    public function remove(): void {}
+    public function before(Dom\Node|string ...$nodes): void {}
+    public function after(Dom\Node|string ...$nodes): void {}
+    public function replaceWith(Dom\Node|string ...$nodes): void {}
+    public function append(Dom\Node|string ...$nodes): void {}
+    public function prepend(Dom\Node|string ...$nodes): void {}
+    public function replaceChildren(Dom\Node|string ...$nodes): void {}
+    public function querySelector(string $selectors): ?Dom\Element {}
+    public function querySelectorAll(string $selectors): Dom\NodeList {}
+    public function closest(string $selectors): ?Dom\Element {}
+    public function matches(string $selectors): bool {}
+    public function getInScopeNamespaces(): array {}
+    public function getDescendantNamespaces(): array {}
+    public function rename(?string $namespaceURI, string $qualifiedName): void {}
+}
+
+class HTMLElement extends Element implements ChildNode, ParentNode {
+}
+
+class Text extends CharacterData implements ChildNode {
+    public string $wholeText;
+    public function splitText(int $offset): Dom\Text {}
+}
+
+class Comment extends CharacterData implements ChildNode {
+}
+
+class CDATASection extends Text implements ChildNode {
+}
+
+class DocumentType extends Node implements ChildNode {
+    public string $name;
+    public Dom\DtdNamedNodeMap $entities;
+    public Dom\DtdNamedNodeMap $notations;
+    public string $publicId;
+    public string $systemId;
+    public ?string $internalSubset;
+    public function remove(): void {}
+    public function before(Dom\Node|string ...$nodes): void {}
+    public function after(Dom\Node|string ...$nodes): void {}
+    public function replaceWith(Dom\Node|string ...$nodes): void {}
+}
+
+class Notation extends Node {
+    public string $publicId;
+    public string $systemId;
+}
+
+class Entity extends Node {
+    public ?string $publicId;
+    public ?string $systemId;
+    public ?string $notationName;
+}
+
+class EntityReference extends Node {
+}
+
+class ProcessingInstruction extends CharacterData implements ChildNode {
+    public string $target;
+}
+
+final class XPath {
+    public Dom\Document $document;
+    public bool $registerNodeNamespaces;
+    public function __construct(Dom\Document $document, bool $registerNodeNS = true) {}
+    public function evaluate(string $expression, ?Dom\Node $contextNode = null, bool $registerNodeNS = true): Dom\NodeList|string|float|bool|null {}
+    public function query(string $expression, ?Dom\Node $contextNode = null, bool $registerNodeNS = true): Dom\NodeList {}
+    public function registerNamespace(string $prefix, string $namespace): bool {}
+    public function registerPhpFunctions(array|string|null $restrict = null): void {}
+    public function registerPhpFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
+    public static function quote(string $str): string {}
+}
+
+final class TokenList implements IteratorAggregate, Traversable, Countable {
+    public int $length;
+    public string $value;
+    private function __construct() {}
+    public function item(int $index): ?string {}
+    public function contains(string $token): bool {}
+    public function add(string ...$tokens): void {}
+    public function remove(string ...$tokens): void {}
+    public function toggle(string $token, ?bool $force = null): bool {}
+    public function replace(string $token, string $newToken): bool {}
+    public function supports(string $token): bool {}
+    public function count(): int {}
+    public function getIterator(): Iterator {}
+}
+
+interface ParentNode {
+    public abstract function append(Dom\Node|string ...$nodes): void;
+    public abstract function prepend(Dom\Node|string ...$nodes): void;
+    public abstract function replaceChildren(Dom\Node|string ...$nodes): void;
+    public abstract function querySelector(string $selectors): ?Dom\Element;
+    public abstract function querySelectorAll(string $selectors): Dom\NodeList;
+}
+
+interface ChildNode {
+    public abstract function remove(): void;
+    public abstract function before(Dom\Node|string ...$nodes): void;
+    public abstract function after(Dom\Node|string ...$nodes): void;
+    public abstract function replaceWith(Dom\Node|string ...$nodes): void;
+}
+
+function import_simplexml(object $node): Dom\Attr|Dom\Element {}
 }

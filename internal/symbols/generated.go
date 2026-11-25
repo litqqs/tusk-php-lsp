@@ -42,14 +42,7 @@ func (idx *Index) SetClassGenerator(g ClassGenerator) {
 // whether it added anything.
 func (idx *Index) ensureGenerated(fqn string) bool {
 	holder := idx.generator.Load()
-	if holder == nil {
-		return false
-	}
-	fqn = strings.TrimPrefix(fqn, "\\")
-	if i := strings.Index(fqn, "::"); i >= 0 {
-		fqn = fqn[:i]
-	}
-	if fqn == "" || !holder.g.Candidate(fqn) {
+	if holder == nil || !holder.g.Candidate(fqn) {
 		return false
 	}
 	idx.mu.RLock()
@@ -116,17 +109,13 @@ func (idx *Index) dropGeneratedLocked(fqn string) {
 // fqn, ignoring case, is indexed. A function of the same name, such as
 // Laravel's route() beside the Route alias, doesn't count.
 func (idx *Index) classLikeFoldLocked(fqn string) bool {
-	if sym := idx.symbols[fqn]; sym != nil && isClassLikeKind(sym.Kind) {
+	if sym := idx.symbols[fqn]; sym.IsClassLike() {
 		return true
 	}
 	for _, candidate := range idx.foldIndex[strings.ToLower(fqn)] {
-		if sym := idx.symbols[candidate]; sym != nil && isClassLikeKind(sym.Kind) {
+		if sym := idx.symbols[candidate]; sym.IsClassLike() {
 			return true
 		}
 	}
 	return false
-}
-
-func isClassLikeKind(kind SymbolKind) bool {
-	return kind == KindClass || kind == KindInterface || kind == KindTrait || kind == KindEnum
 }

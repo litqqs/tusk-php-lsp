@@ -711,7 +711,8 @@ use Swow\SocketException;
 use Swow\WebSocket\WebSocket;
 use Swow\WebSocket\Opcode as WebSocketOpcode;
 echo WebSocket::mask("a",1,5);
-echo  WebSocketOpcode::PONG ; 
+echo WebSocketOpcode::PONG ; 
+echo Swow\WebSocket\WebSocket::mask("bbb",0,5);
 
 `
 	idx.IndexFile("file:///index.php", source)
@@ -721,10 +722,13 @@ echo  WebSocketOpcode::PONG ;
 	if hover == nil {
 		t.Fatal("expected hover result for Swow\\WebSocket\\Opcode::PONG")
 	}
-	pos = charPosOf(t, source, "WebSocket", "WebSocket::mask(\"a\",1,5)")
+	pos = charPosOf(t, source, "mask", "WebSocket::mask(\"a\",1,5)")
 	hover = p.GetHover("file:///index.php", source, pos)
 	if hover == nil {
-		t.Fatal("expected hover result for Swow\\WebSocket\\Opcode::PONG")
+		t.Fatal("expected hover result for Swow\\WebSocket\\WebSocket::mask")
+	}
+	if !strings.Contains(hover.Contents.Value, "**Swow\\WebSocket\\WebSocket::mask**") {
+		t.Fatal("expected hover result for Swow\\WebSocket\\WebSocket::mask")
 	}
 
 }

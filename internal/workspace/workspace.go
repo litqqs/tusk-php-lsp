@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 
@@ -49,6 +50,10 @@ type Bootstrapped struct {
 	SymfonyCommands *frameworksymfony.CommandIndex
 	SchemaCache     *models.SchemaCache
 	Schema          *models.Schema
+
+	autoloadOnce    sync.Once
+	autoloadEntries []composer.AutoloadEntry
+	projectFiles    *projectFiles
 
 	// modelMu guards what model analysis read, for re-analysing one file
 	// later: Schema once AnalyzeModels has set it, and the following.
@@ -99,6 +104,7 @@ func New(opts Options) *Bootstrapped {
 		Aliases:         aliases,
 		SymfonyCommands: commands,
 		SchemaCache:     models.NewSchemaCache(),
+		projectFiles:    newProjectFiles(cfg.MaxIndexFiles),
 	}
 }
 
@@ -143,7 +149,7 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 
 	ws.logf("Indexing workspace: %s", ws.RootPath)
 
-	count := 0
+	ws.projectFiles.begin()
 	var ideHelperFiles []string
 	var fn filepath.WalkFunc
 	deep := 0
@@ -159,10 +165,8 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 			path = strings.ReplaceAll(path, "\\", "/")
 		}
 		if info.IsDir() {
-			for _, ex := range ws.Config.ExcludePaths {
-				if filepath.Base(path) == ex {
-					return filepath.SkipDir
-				}
+			if ws.excludedDir(filepath.Base(path)) {
+				return filepath.SkipDir
 			}
 			return nil
 		}
@@ -200,9 +204,8 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 			}
 			return nil
 		}
-
-		if limit := ws.Config.MaxIndexFiles; limit > 0 && count >= limit {
-			ws.logf("Stopped indexing at maxIndexFiles (%d files); classes in the rest of the workspace will be unknown. Set maxIndexFiles to 0 to index everything.", limit)
+		if !ws.projectFiles.admit(path) {
+			ws.logf("Stopped indexing at maxIndexFiles (%d files); classes in the rest of the workspace will be unknown. Set maxIndexFiles to 0 to index everything.", ws.Config.MaxIndexFiles)
 			return filepath.SkipAll
 		}
 		if IsIDEHelperFile(path) {
@@ -212,7 +215,6 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 		if content, err := os.ReadFile(path); err == nil {
 			ws.Index.IndexFileWithSource(uriPre+path, string(content), symbols.SourceProject)
 			ws.ViewData.IndexFile(uriPre+path, string(content))
-			count++
 		}
 		return nil
 	}
@@ -221,13 +223,17 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 	for _, path := range ideHelperFiles {
 		if content, err := os.ReadFile(path); err == nil {
 			ws.Index.IndexIDEHelperFile(uriPre+path, string(content))
-			count++
 			ws.logf("Indexed IDE helper: %s", filepath.Base(path))
 		}
 	}
 
+	count := ws.projectFiles.finish()
 	ws.logf("Indexed %d PHP files", count)
 	return count
+}
+
+func (ws *Bootstrapped) excludedDir(name string) bool {
+	return slices.Contains(ws.Config.ExcludePaths, name)
 }
 
 func (ws *Bootstrapped) IndexComposerDependencies() int {
@@ -239,7 +245,7 @@ func (ws *Bootstrapped) IndexComposerDependencies() int {
 		ws.Aliases.Load()
 	}
 
-	entries := composer.GetAutoloadPaths(ws.RootPath)
+	entries := ws.autoload()
 	if len(entries) == 0 {
 		return 0
 	}
@@ -306,17 +312,26 @@ func (ws *Bootstrapped) ScanRoutes() error {
 }
 
 func (ws *Bootstrapped) AnalyzeModels() {
+	ws.AnalyzeModelClasses()
+	ws.AnalyzeModelSchema()
+}
+
+func (ws *Bootstrapped) AnalyzeModelClasses() {
 	if ws == nil {
 		return
 	}
-
 	switch ws.Framework {
 	case "laravel":
 		models.AnalyzeEloquentModels(ws.Index, ws.RootPath)
 	case "symfony":
 		models.AnalyzeDoctrineEntities(ws.Index, ws.RootPath)
 	}
+}
 
+func (ws *Bootstrapped) AnalyzeModelSchema() {
+	if ws == nil {
+		return
+	}
 	schema, _ := models.ScanSchema(ws.RootPath, ws.Framework, ws.Config, ws.Logger, ws.SchemaCache)
 	models.InjectDatabaseSchema(ws.Index, ws.RootPath, ws.Framework, schema)
 	var migrationColumns map[string]map[string]*models.MigrationColumn

@@ -186,42 +186,31 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 				Change:    1, // Full
 				Save:      &protocol.SaveOptions{IncludeText: false},
 			},
-			CompletionProvider:         &protocol.CompletionOptions{TriggerCharacters: []string{".", ">", ":", "$", "\\", "|", "#", "[", "(", "'", "\"", "@"}, ResolveProvider: true},
-			HoverProvider:              true,
-			DefinitionProvider:         true,
-			TypeDefinitionProvider:     true,
-			ImplementationProvider:     true,
-			ReferencesProvider:         true,
-			DocumentSymbolProvider:     true,
-			DocumentHighlightProvider:  true,
-			FoldingRangeProvider:       true,
-			WorkspaceSymbolProvider:    true,
-			DocumentFormattingProvider: true,
-			SignatureHelpProvider:      &protocol.SignatureHelpOptions{TriggerCharacters: []string{"(", ","}},
-			RenameProvider:             &protocol.RenameOptions{PrepareProvider: true},
-			CodeActionProvider: &protocol.CodeActionOptions{CodeActionKinds: []string{
-				"quickfix",
-				"refactor",
-				"refactor.extract",
-				"refactor.move",
-				"source",
-				"source.organizeImports",
-			}},
-			ExecuteCommandProvider: &protocol.ExecuteCommandOptions{Commands: []string{
-				"tuskPhpLsp.namespaceForPath",
-				"tuskPhpLsp.copyNamespace",
-				"tuskPhpLsp.moveToNamespace",
-				"tuskPhpLsp.createObject",
-				"tuskPhpLsp.copyReference",
-				"tuskPhpLsp.debugDocument",
-			}},
-			InlayHintProvider:      &protocol.InlayHintOptions{ResolveProvider: false},
-			SelectionRangeProvider: true,
+			CompletionProvider:        &protocol.CompletionOptions{TriggerCharacters: []string{".", ">", ":", "$", "\\", "|", "#", "[", "(", "'", "\"", "@"}, ResolveProvider: true},
+			HoverProvider:             true,
+			DefinitionProvider:        true,
+			TypeHierarchyProvider:     true,
+			DocumentLinkProvider:      &protocol.DocumentLinkOptions{},
+			TypeDefinitionProvider:    true,
+			ImplementationProvider:    true,
+			ReferencesProvider:        true,
+			DocumentSymbolProvider:    true,
+			DocumentHighlightProvider: true,
+			FoldingRangeProvider:      true,
+			WorkspaceSymbolProvider:   true,
+			SignatureHelpProvider:     &protocol.SignatureHelpOptions{TriggerCharacters: []string{"(", ","}},
+			RenameProvider:            &protocol.RenameOptions{PrepareProvider: true},
+			CodeActionProvider:        &protocol.CodeActionOptions{CodeActionKinds: protocol.CodeActionKinds},
+			ExecuteCommandProvider:    &protocol.ExecuteCommandOptions{Commands: protocol.Commands},
+			InlayHintProvider:         &protocol.InlayHintOptions{ResolveProvider: false},
+			SelectionRangeProvider:    true,
 			SemanticTokensProvider: &protocol.SemanticTokensOptions{
 				Legend: SemanticTokensLegend,
 				Full:   true,
 			},
 			Experimental: &protocol.ExperimentalCapabilities{TuskCoverage: true},
+
+			DocumentFormattingProvider: true,
 		},
 		ServerInfo: protocol.ServerInfo{Name: ServerName, Version: ServerVersion},
 	})
@@ -248,11 +237,13 @@ func (s *Server) resolveBuiltinProfile() symbols.BuiltinProfile {
 }
 
 func (s *Server) handleInitialized(msg *jsonRPCMessage) {
+	s.index.SetClassLoader(s.workspace.ClassLoader())
 	var indexWg sync.WaitGroup
 	indexWg.Add(2)
 	s.goSafe("indexWorkspace", func() {
 		defer indexWg.Done()
 		count := s.workspace.IndexWorkspace()
+		s.workspace.AnalyzeModelClasses()
 		s.sendNotification("window/logMessage", map[string]interface{}{"type": protocol.MessageTypeInfo, "message": fmt.Sprintf("PHP LSP: Indexed %d files (%s framework)", count, s.framework)})
 		if limit := s.cfg.MaxIndexFiles; limit > 0 && count >= limit {
 			s.sendNotification("window/logMessage", map[string]interface{}{"type": protocol.MessageTypeWarning, "message": fmt.Sprintf("PHP LSP: stopped indexing at maxIndexFiles (%d files), so classes in the rest of the workspace will be reported as unknown. Set maxIndexFiles to 0 to index everything.", limit)})

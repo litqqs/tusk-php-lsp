@@ -1,9 +1,6 @@
 package symbols
 
 import (
-	"net/url"
-	"path/filepath"
-	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -24,9 +21,7 @@ const (
 	KindMethod
 	KindProperty
 	KindConstant
-	KindVariable
 	KindEnumCase
-	KindNamespace
 )
 
 type SymbolSource int
@@ -73,6 +68,10 @@ type Symbol struct {
 	TypeAliases   map[string]TypeAlias
 	Hooks         []parser.PropertyHook // PHP 8.4 property hooks (get/set accessors)
 	Attributes    []Attribute
+}
+
+func (s *Symbol) IsDeprecated() bool {
+	return s.Attribute("Deprecated") != nil || (s.DocComment != "" && parser.ParseDocBlock(s.DocComment).Deprecated)
 }
 
 // Attribute is a PHP 8 attribute on a symbol.
@@ -157,13 +156,14 @@ type Index struct {
 	reverseImplementsMap map[string][]string // interface → classes that implement it
 	subInterfaceMap      map[string][]string // interface → interfaces that extend it
 	traitMap             map[string][]string
-	sortedNames          []string          // sorted lowercase name keys for binary search
-	sortedNamesDirty     bool              // rebuild flag
-	sortedFQNs           []string          // sorted FQN keys for binary search (SearchByFQNPrefix)
-	sortedFQNsDirty      bool              // rebuild flag for sortedFQNs
-	fileSource           map[string]string // URI → raw source text stored during IndexFileWithSource
-	ready                atomic.Bool       // true once project + vendor indexing has completed at least once
+	sortedNames          []string // sorted lowercase name keys for binary search
+	sortedNamesDirty     bool     // rebuild flag
+	sortedFQNs           []string // sorted FQN keys for binary search (SearchByFQNPrefix)
+	sortedFQNsDirty      bool     // rebuild flag for sortedFQNs
+	fileSource           map[string]indexedText
+	ready                atomic.Bool // true once project + vendor indexing has completed at least once
 	generator            atomic.Pointer[classGeneratorHolder]
+	loader               atomic.Pointer[classLoaderHolder]
 	generatedURIs        map[string]bool     // URIs of generated classes, which are not files on disk
 	generatedFrom        map[string][]string // lowercase source FQN → URIs of the classes generated from it
 	// templateFiles holds the URIs of templates (Blade views) in the
@@ -212,7 +212,7 @@ func NewIndex() *Index {
 		reverseImplementsMap: make(map[string][]string),
 		subInterfaceMap:      make(map[string][]string),
 		traitMap:             make(map[string][]string),
-		fileSource:           make(map[string]string),
+		fileSource:           make(map[string]indexedText),
 		generatedURIs:        make(map[string]bool),
 		generatedFrom:        make(map[string][]string),
 	}
@@ -235,8 +235,7 @@ func (idx *Index) IndexIDEHelperFile(uri string, source string) {
 
 	// Remove any previously indexed symbols from this URI (for re-indexing)
 	idx.removeFileSymbols(uri)
-	// Store the raw source text for this URI, mirroring IndexFileWithSource.
-	idx.fileSource[uri] = source
+	idx.fileSource[uri] = indexedText{text: source, ideHelper: true}
 	if _, ok := idx.fileSymbols[uri]; !ok {
 		idx.fileSymbols[uri] = nil
 	}
@@ -343,7 +342,20 @@ func (idx *Index) IndexIDEHelperFile(uri string, source string) {
 	}
 }
 
+type indexedText struct {
+	text      string
+	from      SymbolSource
+	ideHelper bool
+}
+
 func (idx *Index) IndexFileWithSource(uri string, source string, src SymbolSource) {
+	indexed := indexedText{text: source, from: src}
+	idx.mu.RLock()
+	previous, indexedBefore := idx.fileSource[uri]
+	idx.mu.RUnlock()
+	if indexedBefore && previous == indexed {
+		return
+	}
 	file := parser.ParseFile(source)
 	if file == nil {
 		return
@@ -352,8 +364,7 @@ func (idx *Index) IndexFileWithSource(uri string, source string, src SymbolSourc
 	defer idx.mu.Unlock()
 	foreign := idx.foreignMembersLocked(uri)
 	idx.removeFileSymbols(uri)
-	// Store the raw source text for this URI (replaces any previous version)
-	idx.fileSource[uri] = source
+	idx.fileSource[uri] = indexed
 	idx.indexParsedLocked(uri, file, src)
 	idx.reattachForeignMembersLocked(foreign)
 }
@@ -585,7 +596,7 @@ func (idx *Index) addFoldLocked(fqn string) {
 // wins. match, when not nil, must accept the symbol (for example to want a
 // class and not a function of the same name).
 func (idx *Index) LookupFold(fqn string, match func(*Symbol) bool) *Symbol {
-	idx.ensureGenerated(fqn)
+	idx.ensureClass(fqn)
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	if sym := idx.symbols[fqn]; sym != nil && (match == nil || match(sym)) {
@@ -915,7 +926,7 @@ func (idx *Index) Lookup(fqn string) *Symbol {
 	idx.mu.RLock()
 	sym := idx.symbols[fqn]
 	idx.mu.RUnlock()
-	if sym == nil && idx.ensureGenerated(fqn) {
+	if sym == nil && idx.ensureClass(fqn) {
 		idx.mu.RLock()
 		sym = idx.symbols[fqn]
 		idx.mu.RUnlock()
@@ -1125,7 +1136,7 @@ func (idx *Index) GetFileSymbols(uri string) []*Symbol {
 }
 
 func (idx *Index) GetClassMembers(classFQN string) []*Symbol {
-	idx.ensureGenerated(classFQN)
+	idx.ensureClass(classFQN)
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	return idx.getClassMembersRecursive(classFQN, make(map[string]bool))
@@ -1215,7 +1226,7 @@ func (idx *Index) OverridesInheritedConstant(classFQN, name string) (overrides, 
 }
 
 func (idx *Index) overridesInherited(classFQN, method string, kind SymbolKind) (overrides, known bool) {
-	idx.ensureGenerated(classFQN)
+	idx.ensureClass(classFQN)
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	known = true
@@ -1269,7 +1280,7 @@ func (idx *Index) IsSubtypeOf(child, parent string) bool {
 	if strings.EqualFold(child, parent) {
 		return true
 	}
-	idx.ensureGenerated(child)
+	idx.ensureClass(child)
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	visited := map[string]bool{child: true}
@@ -1293,7 +1304,7 @@ func (idx *Index) IsSubtypeOf(child, parent string) bool {
 }
 
 func (idx *Index) GetInheritanceChain(classFQN string) []string {
-	idx.ensureGenerated(classFQN)
+	idx.ensureClass(classFQN)
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	var chain []string
@@ -1362,6 +1373,44 @@ func (idx *Index) AddVirtualMember(parentFQN string, member *Symbol) {
 	idx.addSymbol(member.URI, member)
 }
 
+func (idx *Index) RefineProperty(fqn, fallbackType string, readonly bool) bool {
+	idx.mu.Lock()
+	defer idx.mu.Unlock()
+	existing := idx.symbols[fqn]
+	if existing == nil {
+		return false
+	}
+	refined := *existing
+	if refined.Type == "" || refined.Type == "mixed" {
+		refined.Type = fallbackType
+	}
+	refined.IsReadonly = refined.IsReadonly || readonly
+	if refined.Type != existing.Type || refined.IsReadonly != existing.IsReadonly {
+		idx.replaceSymbolLocked(existing, &refined)
+	}
+	return true
+}
+
+func (idx *Index) replaceSymbolLocked(old, replacement *Symbol) {
+	idx.generation.Add(1)
+	idx.symbols[old.FQN] = replacement
+	idx.fileSymbols[old.URI] = withSymbolReplaced(idx.fileSymbols[old.URI], old, replacement)
+	if parent := idx.symbols[old.ParentFQN]; parent != nil {
+		parent.Children = withSymbolReplaced(parent.Children, old, replacement)
+	}
+}
+
+func withSymbolReplaced(syms []*Symbol, old, replacement *Symbol) []*Symbol {
+	for i, s := range syms {
+		if s == old {
+			out := append([]*Symbol(nil), syms...)
+			out[i] = replacement
+			return out
+		}
+	}
+	return syms
+}
+
 func (idx *Index) GetImplementors(ifaceFQN string) []*Symbol {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
@@ -1389,7 +1438,7 @@ func (idx *Index) collectImplementorLocked(classFQN string, seen map[string]bool
 }
 
 func (idx *Index) GetImplementedInterfaces(classFQN string) []string {
-	idx.ensureGenerated(classFQN)
+	idx.ensureClass(classFQN)
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	return idx.implementsMap[classFQN]
@@ -1572,7 +1621,7 @@ func (idx *Index) TemplateFileURIs() []string {
 func (idx *Index) GetFileSource(uri string) string {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
-	return idx.fileSource[uri]
+	return idx.fileSource[uri].text
 }
 
 // Ready reports whether at least one full workspace + composer indexing pass
@@ -1588,6 +1637,7 @@ func (idx *Index) Ready() bool {
 // multiple times.
 func (idx *Index) MarkReady() {
 	idx.ready.Store(true)
+	idx.loader.Store(nil)
 }
 
 // TraitsOf returns a copy of the trait FQNs used by the class identified by
@@ -1597,21 +1647,6 @@ func (idx *Index) TraitsOf(fqn string) []string {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	return append([]string(nil), idx.traitMap[fqn]...)
-}
-
-func URIToPath(uri string) string {
-	if u, err := url.Parse(uri); err == nil && u.Scheme == "file" {
-		// url.Parse decodes percent-encoding in the path (e.g. %3A → :)
-		p := u.Path
-		// On Windows, file URIs look like file:///C:/... → Path="/C:/..."
-		// Strip the leading slash before the drive letter.
-		if runtime.GOOS == "windows" && len(p) >= 3 && p[0] == '/' && p[2] == ':' {
-			p = p[1:]
-		}
-		return filepath.Clean(p)
-	}
-	// Not a URI — treat as a plain path.
-	return filepath.Clean(uri)
 }
 
 // PickBestStandalone selects the most appropriate symbol when multiple symbols
@@ -1687,10 +1722,39 @@ func (idx *Index) Implementations(fqn string) []string {
 	for len(queue) > 0 {
 		next := queue[0]
 		queue = queue[1:]
-		visit(idx.childrenMap[strings.ToLower(next)])
-		visit(idx.reverseImplementsMap[next])
-		visit(idx.subInterfaceMap[next])
+		idx.directSubtypesLocked(next, visit)
 	}
+	return out
+}
+
+func (idx *Index) DirectSubtypes(fqn string) []string {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	var out []string
+	seen := map[string]bool{strings.ToLower(fqn): true}
+	idx.directSubtypesLocked(fqn, func(names []string) {
+		for _, name := range names {
+			if key := strings.ToLower(name); !seen[key] {
+				seen[key] = true
+				out = append(out, name)
+			}
+		}
+	})
+	return out
+}
+
+func (idx *Index) directSubtypesLocked(fqn string, visit func([]string)) {
+	visit(idx.childrenMap[strings.ToLower(fqn)])
+	visit(idx.reverseImplementsMap[fqn])
+	visit(idx.subInterfaceMap[fqn])
+}
+
+func (idx *Index) DirectSupertypes(fqn string) []string {
+	idx.ensureGenerated(fqn)
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	var out []string
+	idx.walkAncestors(fqn, func(next string, _ bool) { out = append(out, next) })
 	return out
 }
 

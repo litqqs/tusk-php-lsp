@@ -1,6 +1,9 @@
 package protocol
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 // MessageType represents LSP message types.
 type MessageType int
@@ -309,7 +312,7 @@ type InitializationOptions struct {
 	// ClientCommands lists the tuskPhpLsp.* commands the client handles itself
 	// (e.g. by copying the result to the clipboard). Code actions that depend on
 	// that are only offered for commands listed here.
-	ClientCommands []string `json:"clientCommands,omitempty"`
+	ClientCommands []CommandName `json:"clientCommands,omitempty"`
 	// CoverageNotifications asks the server to watch for new coverage reports and
 	// send tusk/coverageChanged, instead of only noticing them on the next request.
 	CoverageNotifications bool `json:"coverageNotifications,omitempty"`
@@ -479,6 +482,8 @@ type ServerCapabilities struct {
 	CompletionProvider         *CompletionOptions        `json:"completionProvider,omitempty"`
 	HoverProvider              bool                      `json:"hoverProvider"`
 	DefinitionProvider         bool                      `json:"definitionProvider"`
+	TypeHierarchyProvider      bool                      `json:"typeHierarchyProvider"`
+	DocumentLinkProvider       *DocumentLinkOptions      `json:"documentLinkProvider,omitempty"`
 	TypeDefinitionProvider     bool                      `json:"typeDefinitionProvider"`
 	ImplementationProvider     bool                      `json:"implementationProvider"`
 	ReferencesProvider         bool                      `json:"referencesProvider"`
@@ -707,9 +712,63 @@ type DeleteFileOptions struct {
 
 // --- Code action types ---
 
+type CodeActionKind string
+
+const (
+	CodeActionQuickFix              CodeActionKind = "quickfix"
+	CodeActionRefactor              CodeActionKind = "refactor"
+	CodeActionRefactorExtract       CodeActionKind = "refactor.extract"
+	CodeActionRefactorInline        CodeActionKind = "refactor.inline"
+	CodeActionRefactorMove          CodeActionKind = "refactor.move"
+	CodeActionSource                CodeActionKind = "source"
+	CodeActionSourceOrganizeImports CodeActionKind = "source.organizeImports"
+)
+
+var CodeActionKinds = []CodeActionKind{
+	CodeActionQuickFix,
+	CodeActionRefactor,
+	CodeActionRefactorExtract,
+	CodeActionRefactorInline,
+	CodeActionRefactorMove,
+	CodeActionSource,
+	CodeActionSourceOrganizeImports,
+}
+
+func (k CodeActionKind) In(only []CodeActionKind) bool {
+	if len(only) == 0 {
+		return true
+	}
+	for _, filter := range only {
+		if k == filter || strings.HasPrefix(string(k), string(filter)+".") {
+			return true
+		}
+	}
+	return false
+}
+
+type CommandName string
+
+const (
+	CommandNamespaceForPath CommandName = "tuskPhpLsp.namespaceForPath"
+	CommandCopyNamespace    CommandName = "tuskPhpLsp.copyNamespace"
+	CommandMoveToNamespace  CommandName = "tuskPhpLsp.moveToNamespace"
+	CommandCreateObject     CommandName = "tuskPhpLsp.createObject"
+	CommandCopyReference    CommandName = "tuskPhpLsp.copyReference"
+	CommandDebugDocument    CommandName = "tuskPhpLsp.debugDocument"
+)
+
+var Commands = []CommandName{
+	CommandNamespaceForPath,
+	CommandCopyNamespace,
+	CommandMoveToNamespace,
+	CommandCreateObject,
+	CommandCopyReference,
+	CommandDebugDocument,
+}
+
 // CodeActionOptions for code action support.
 type CodeActionOptions struct {
-	CodeActionKinds []string `json:"codeActionKinds,omitempty"`
+	CodeActionKinds []CodeActionKind `json:"codeActionKinds,omitempty"`
 }
 
 // CodeActionParams for textDocument/codeAction.
@@ -722,14 +781,14 @@ type CodeActionParams struct {
 // CodeActionContext carries additional information about the context in which
 // a code action is requested.
 type CodeActionContext struct {
-	Diagnostics []Diagnostic `json:"diagnostics"`
-	Only        []string     `json:"only,omitempty"`
+	Diagnostics []Diagnostic     `json:"diagnostics"`
+	Only        []CodeActionKind `json:"only,omitempty"`
 }
 
 // CodeAction represents a change that can be performed in code.
 type CodeAction struct {
 	Title       string         `json:"title"`
-	Kind        string         `json:"kind,omitempty"`
+	Kind        CodeActionKind `json:"kind,omitempty"`
 	Diagnostics []Diagnostic   `json:"diagnostics,omitempty"`
 	IsPreferred bool           `json:"isPreferred,omitempty"`
 	Edit        *WorkspaceEdit `json:"edit,omitempty"`
@@ -739,7 +798,7 @@ type CodeAction struct {
 // Command represents a reference to a command.
 type Command struct {
 	Title     string            `json:"title"`
-	Command   string            `json:"command"`
+	Command   CommandName       `json:"command"`
 	Arguments []json.RawMessage `json:"arguments,omitempty"`
 }
 
@@ -747,12 +806,12 @@ type Command struct {
 
 // ExecuteCommandOptions for executeCommand support.
 type ExecuteCommandOptions struct {
-	Commands []string `json:"commands"`
+	Commands []CommandName `json:"commands"`
 }
 
 // ExecuteCommandParams for workspace/executeCommand.
 type ExecuteCommandParams struct {
-	Command   string            `json:"command"`
+	Command   CommandName       `json:"command"`
 	Arguments []json.RawMessage `json:"arguments,omitempty"`
 }
 
@@ -776,4 +835,40 @@ type ShowDocumentParams struct {
 	External  bool   `json:"external,omitempty"`
 	TakeFocus bool   `json:"takeFocus,omitempty"`
 	Selection *Range `json:"selection,omitempty"`
+}
+
+type SymbolTag int
+
+const SymbolTagDeprecated SymbolTag = 1
+
+type TypeHierarchyItem struct {
+	Name           string            `json:"name"`
+	Kind           SymbolKind        `json:"kind"`
+	Tags           []SymbolTag       `json:"tags,omitempty"`
+	Detail         string            `json:"detail,omitempty"`
+	URI            string            `json:"uri"`
+	Range          Range             `json:"range"`
+	SelectionRange Range             `json:"selectionRange"`
+	Data           TypeHierarchyData `json:"data"`
+}
+
+type TypeHierarchyData struct {
+	FQN string `json:"fqn"`
+}
+
+type TypeHierarchyItemParams struct {
+	Item TypeHierarchyItem `json:"item"`
+}
+
+type DocumentLinkOptions struct {
+	ResolveProvider bool `json:"resolveProvider"`
+}
+
+type DocumentLinkParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+}
+
+type DocumentLink struct {
+	Range  Range  `json:"range"`
+	Target string `json:"target"`
 }

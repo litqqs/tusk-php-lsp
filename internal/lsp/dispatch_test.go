@@ -3,12 +3,16 @@ package lsp
 import (
 	"sort"
 	"testing"
+
+	"github.com/Tusk-PHP/lsp/internal/protocol"
 )
 
 var capabilityRequests = map[string][]string{
 	"completionProvider":         {"textDocument/completion", "completionItem/resolve"},
 	"hoverProvider":              {"textDocument/hover"},
 	"definitionProvider":         {"textDocument/definition"},
+	"typeHierarchyProvider":      {"textDocument/prepareTypeHierarchy", "typeHierarchy/supertypes", "typeHierarchy/subtypes"},
+	"documentLinkProvider":       {"textDocument/documentLink"},
 	"typeDefinitionProvider":     {"textDocument/typeDefinition"},
 	"implementationProvider":     {"textDocument/implementation"},
 	"referencesProvider":         {"textDocument/references"},
@@ -78,6 +82,29 @@ func TestEveryAdvertisedCapabilityHasAHandler(t *testing.T) {
 			if message, _ := errObj["message"].(string); message == "Method not found: "+method {
 				t.Errorf("capability %q is advertised but %s has no handler", name, method)
 			}
+		}
+	}
+}
+
+func TestEveryAdvertisedCommandIsHandled(t *testing.T) {
+	h := newHarness(t)
+	defer h.close()
+
+	caps := h.readResponse(h.send("initialize", initParams()))["result"].(map[string]interface{})["capabilities"].(map[string]interface{})
+	h.notify("initialized", map[string]interface{}{})
+	advertised := caps["executeCommandProvider"].(map[string]interface{})["commands"].([]interface{})
+	if len(advertised) != len(protocol.Commands) {
+		t.Fatalf("advertised %v, want every command in protocol.Commands", advertised)
+	}
+	kinds := caps["codeActionProvider"].(map[string]interface{})["codeActionKinds"].([]interface{})
+	if len(kinds) != len(protocol.CodeActionKinds) {
+		t.Errorf("advertised kinds %v, want every kind in protocol.CodeActionKinds", kinds)
+	}
+	for _, command := range advertised {
+		resp := h.readResponse(h.send("workspace/executeCommand", map[string]interface{}{"command": command}))
+		errObj, _ := resp["error"].(map[string]interface{})
+		if message, _ := errObj["message"].(string); message == "Unknown command: "+command.(string) {
+			t.Errorf("%s is advertised but not handled", command)
 		}
 	}
 }
