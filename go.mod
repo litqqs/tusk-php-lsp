@@ -1,10 +1,10 @@
 module github.com/Tusk-PHP/lsp
 
-go 1.25.0
+go 1.27.0
 
 require (
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/lib/pq v1.12.0	
+	github.com/lib/pq v1.12.0
 	mibk.dev/phpfmt v0.2.0
 	modernc.org/sqlite v1.47.0
 )
