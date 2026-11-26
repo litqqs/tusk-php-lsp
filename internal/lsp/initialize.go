@@ -1,7 +1,6 @@
 package lsp
 
 import (
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"sync"
@@ -29,9 +28,8 @@ import (
 )
 
 func (s *Server) handleInitialize(msg *jsonRPCMessage) {
-	var params protocol.InitializeParams
-	if err := json.Unmarshal(msg.Params, &params); err != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.InitializeParams](msg)
+	if !ok {
 		return
 	}
 	s.rootPath = symbols.URIToPath(params.RootURI)
@@ -49,6 +47,13 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 		})
 	} else {
 		s.cfg = cfg
+	}
+	for _, problem := range s.cfg.Problems() {
+		s.logger.Printf("Config problem: %v", problem)
+		s.sendNotification("window/showMessage", map[string]interface{}{
+			"type":    protocol.MessageTypeWarning,
+			"message": "Tusk PHP skipped part of its configuration: " + problem.Error(),
+		})
 	}
 	// Merge client initializationOptions over file-based config
 	if opts := params.InitializationOptions; opts != nil {
@@ -191,6 +196,7 @@ func (s *Server) handleInitialize(msg *jsonRPCMessage) {
 			DefinitionProvider:        true,
 			TypeHierarchyProvider:     true,
 			DocumentLinkProvider:      &protocol.DocumentLinkOptions{},
+			DeclarationProvider:       true,
 			TypeDefinitionProvider:    true,
 			ImplementationProvider:    true,
 			ReferencesProvider:        true,
@@ -242,11 +248,11 @@ func (s *Server) handleInitialized(msg *jsonRPCMessage) {
 	indexWg.Add(2)
 	s.goSafe("indexWorkspace", func() {
 		defer indexWg.Done()
-		count := s.workspace.IndexWorkspace()
+		indexed := s.workspace.IndexWorkspace()
 		s.workspace.AnalyzeModelClasses()
-		s.sendNotification("window/logMessage", map[string]interface{}{"type": protocol.MessageTypeInfo, "message": fmt.Sprintf("PHP LSP: Indexed %d files (%s framework)", count, s.framework)})
-		if limit := s.cfg.MaxIndexFiles; limit > 0 && count >= limit {
-			s.sendNotification("window/logMessage", map[string]interface{}{"type": protocol.MessageTypeWarning, "message": fmt.Sprintf("PHP LSP: stopped indexing at maxIndexFiles (%d files), so classes in the rest of the workspace will be reported as unknown. Set maxIndexFiles to 0 to index everything.", limit)})
+		s.sendNotification("window/logMessage", map[string]interface{}{"type": protocol.MessageTypeInfo, "message": fmt.Sprintf("PHP LSP: Indexed %d files (%s framework)", indexed.Count, s.framework)})
+		if indexed.Truncated {
+			s.sendNotification("window/logMessage", map[string]interface{}{"type": protocol.MessageTypeWarning, "message": "PHP LSP: " + workspace.MaxIndexFilesWarning(s.cfg.MaxIndexFiles)})
 		}
 	})
 	s.goSafe("indexComposerDeps", func() {

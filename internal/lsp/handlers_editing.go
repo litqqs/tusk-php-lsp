@@ -1,22 +1,22 @@
 package lsp
 
 import (
-	"encoding/json"
-
+	"github.com/Tusk-PHP/lsp/internal/analyzer"
 	"github.com/Tusk-PHP/lsp/internal/composer/cardhover"
 	"github.com/Tusk-PHP/lsp/internal/protocol"
 	"github.com/Tusk-PHP/lsp/internal/workspace"
 )
 
+type completionParams struct {
+	protocol.TextDocumentPositionParams
+	Context *struct {
+		TriggerCharacter string `json:"triggerCharacter"`
+	} `json:"context"`
+}
+
 func (s *Server) handleCompletion(msg *jsonRPCMessage) {
-	var params struct {
-		protocol.TextDocumentPositionParams
-		Context *struct {
-			TriggerCharacter string `json:"triggerCharacter"`
-		} `json:"context"`
-	}
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[completionParams](msg)
+	if !ok {
 		return
 	}
 	uri := params.TextDocument.URI
@@ -45,18 +45,16 @@ func (s *Server) handleCompletion(msg *jsonRPCMessage) {
 // handleCompletionResolve fills in the documentation and detail of a member
 // item that were left out of the completion list.
 func (s *Server) handleCompletionResolve(msg *jsonRPCMessage) {
-	var item protocol.CompletionItem
-	if json.Unmarshal(msg.Params, &item) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	item, ok := s.decodeParams[protocol.CompletionItem](msg)
+	if !ok {
 		return
 	}
 	s.sendResponse(msg.ID, s.completion.ResolveCompletionItem(item))
 }
 
 func (s *Server) handleHover(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
 		return
 	}
 	uri := params.TextDocument.URI
@@ -81,9 +79,8 @@ func (s *Server) handleHover(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleSignatureHelp(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
 		return
 	}
 	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
@@ -95,9 +92,8 @@ func (s *Server) handleSignatureHelp(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handlePrepareRename(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
 		return
 	}
 	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
@@ -118,9 +114,8 @@ func (s *Server) handlePrepareRename(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleRename(msg *jsonRPCMessage) {
-	var params protocol.RenameParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.RenameParams](msg)
+	if !ok {
 		return
 	}
 	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
@@ -133,17 +128,15 @@ func (s *Server) handleRename(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleCodeAction(msg *jsonRPCMessage) {
-	var params protocol.CodeActionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
-		return
-	}
-	if workspace.IsBlade(params.TextDocument.URI) {
-		// The code actions edit PHP files; none of them knows a view yet.
-		s.sendResponse(msg.ID, []protocol.CodeAction{})
+	params, ok := s.decodeParams[protocol.CodeActionParams](msg)
+	if !ok {
 		return
 	}
 	source := s.getDocument(params.TextDocument.URI)
+	if workspace.IsBlade(params.TextDocument.URI) {
+		s.sendResponse(msg.ID, analyzer.BladeIgnoreDiagnosticActions(params.TextDocument.URI, source, params, s.providers.Custom()))
+		return
+	}
 	result := s.analyzer.GetCodeActions(params.TextDocument.URI, source, params)
 	if len(params.Context.Only) > 0 {
 		filtered := result[:0]
@@ -158,9 +151,8 @@ func (s *Server) handleCodeAction(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleInlayHint(msg *jsonRPCMessage) {
-	var params protocol.InlayHintParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.InlayHintParams](msg)
+	if !ok {
 		return
 	}
 	req := s.phpDocument(params.TextDocument.URI)

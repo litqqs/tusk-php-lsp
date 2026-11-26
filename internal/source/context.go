@@ -80,7 +80,7 @@ func Analyze(uri, source string, pos protocol.Position) *CursorContext {
 	joinedLine, joinedWordStart := resolve.JoinChainLines(lines, pos.Line, wordRange.Start.Character)
 	accessKind, subjectExpr := detectAccess(joinedLine, joinedWordStart)
 	namespace, uses := namespaceUsesAt(result, pos)
-	enclosingFQN := enclosingClassAt(result, pos)
+	enclosingFQN := enclosingClassAt(result, file, pos)
 
 	ctx := &CursorContext{
 		URI:             uri,
@@ -100,10 +100,6 @@ func Analyze(uri, source string, pos protocol.Position) *CursorContext {
 	}
 	ctx.Scope = scopeAt(result, pos, ctx.EnclosingFQN)
 	return ctx
-}
-
-func Namespace(source string) string {
-	return namespaceFromFile(parser.ParseFile(source))
 }
 
 func WordAt(source string, pos protocol.Position) (string, protocol.Range) {
@@ -209,13 +205,6 @@ func detectAccess(line string, wordStart int) (AccessKind, string) {
 	return AccessNone, ""
 }
 
-func namespaceFromFile(file *parser.FileNode) string {
-	if file == nil {
-		return ""
-	}
-	return file.Namespace
-}
-
 func classifySymbolKind(word string) ContextSymbolKind {
 	if strings.HasPrefix(word, "$") {
 		return ContextSymbolVariable
@@ -251,64 +240,41 @@ func scopeAt(result *parser.ParseResult, pos protocol.Position, classFQN string)
 }
 
 func methodScopeAt(result *parser.ParseResult, pos protocol.Position, classFQN string) *Scope {
+	var best *parser.MethodDef
+	consider := func(line, endLine int, methods []parser.MethodDef) {
+		if !lineInRange(pos.Line, line, endLine) {
+			return
+		}
+		for i := range methods {
+			m := &methods[i]
+			if lineInRange(pos.Line, m.Line, m.EndLine) && (best == nil || m.Line > best.Line) {
+				best = m
+			}
+		}
+	}
 	for _, cls := range result.Classes {
-		if !lineInRange(pos.Line, cls.Line, cls.EndLine) {
-			continue
-		}
-		for _, method := range cls.Methods {
-			if !lineInRange(pos.Line, method.Line, method.EndLine) {
-				continue
-			}
-			return &Scope{
-				Kind:       ScopeMethod,
-				Name:       method.Name,
-				ClassFQN:   classFQN,
-				MethodName: method.Name,
-				StartLine:  method.Line,
-				EndLine:    method.EndLine,
-			}
-		}
+		consider(cls.Line, cls.EndLine, cls.Methods)
 	}
-
+	for _, cls := range result.AnonymousClasses {
+		consider(cls.Line, cls.EndLine, cls.Methods)
+	}
 	for _, trait := range result.Traits {
-		if !lineInRange(pos.Line, trait.Line, trait.EndLine) {
-			continue
-		}
-		for _, method := range trait.Methods {
-			if !lineInRange(pos.Line, method.Line, method.EndLine) {
-				continue
-			}
-			return &Scope{
-				Kind:       ScopeMethod,
-				Name:       method.Name,
-				ClassFQN:   classFQN,
-				MethodName: method.Name,
-				StartLine:  method.Line,
-				EndLine:    method.EndLine,
-			}
-		}
+		consider(trait.Line, trait.EndLine, trait.Methods)
 	}
-
 	for _, enum := range result.Enums {
-		if !lineInRange(pos.Line, enum.Line, enum.EndLine) {
-			continue
-		}
-		for _, method := range enum.Methods {
-			if !lineInRange(pos.Line, method.Line, method.EndLine) {
-				continue
-			}
-			return &Scope{
-				Kind:       ScopeMethod,
-				Name:       method.Name,
-				ClassFQN:   classFQN,
-				MethodName: method.Name,
-				StartLine:  method.Line,
-				EndLine:    method.EndLine,
-			}
-		}
+		consider(enum.Line, enum.EndLine, enum.Methods)
 	}
-
-	return nil
+	if best == nil {
+		return nil
+	}
+	return &Scope{
+		Kind:       ScopeMethod,
+		Name:       best.Name,
+		ClassFQN:   classFQN,
+		MethodName: best.Name,
+		StartLine:  best.Line,
+		EndLine:    best.EndLine,
+	}
 }
 
 func functionScopeAt(result *parser.ParseResult, pos protocol.Position) *Scope {
@@ -340,7 +306,7 @@ func closureScopeAt(result *parser.ParseResult, pos protocol.Position, classFQN 
 			continue
 		}
 
-		closeParen := findMatchingToken(result.Tokens, next, parser.TokenOpenParen, parser.TokenCloseParen)
+		closeParen := parser.MatchingClose(result.Tokens, next)
 		if closeParen < 0 {
 			continue
 		}
@@ -349,7 +315,7 @@ func closureScopeAt(result *parser.ParseResult, pos protocol.Position, classFQN 
 		if body >= 0 && result.Tokens[body].Kind == parser.TokenUse {
 			useOpen := nextSignificantToken(result.Tokens, body+1)
 			if useOpen >= 0 && result.Tokens[useOpen].Kind == parser.TokenOpenParen {
-				useClose := findMatchingToken(result.Tokens, useOpen, parser.TokenOpenParen, parser.TokenCloseParen)
+				useClose := parser.MatchingClose(result.Tokens, useOpen)
 				if useClose < 0 {
 					continue
 				}
@@ -391,7 +357,7 @@ func closureScopeAt(result *parser.ParseResult, pos protocol.Position, classFQN 
 			continue
 		}
 
-		closeBrace := findMatchingToken(result.Tokens, body, parser.TokenOpenBrace, parser.TokenCloseBrace)
+		closeBrace := parser.MatchingClose(result.Tokens, body)
 		if closeBrace < 0 {
 			continue
 		}
@@ -468,7 +434,10 @@ func namespaceUsesAt(result *parser.ParseResult, pos protocol.Position) (string,
 	return namespace, uses
 }
 
-func enclosingClassAt(result *parser.ParseResult, pos protocol.Position) string {
+func enclosingClassAt(result *parser.ParseResult, file *parser.FileNode, pos protocol.Position) string {
+	if anon := file.AnonymousClassAt(pos.Line, pos.Character); anon != nil {
+		return anon.FullName
+	}
 	if result == nil {
 		return ""
 	}
@@ -608,22 +577,6 @@ func prevSignificantToken(tokens []parser.Token, i int) int {
 			i--
 		default:
 			return i
-		}
-	}
-	return -1
-}
-
-func findMatchingToken(tokens []parser.Token, start int, openKind, closeKind parser.TokenKind) int {
-	depth := 0
-	for i := start; i < len(tokens); i++ {
-		switch tokens[i].Kind {
-		case openKind:
-			depth++
-		case closeKind:
-			depth--
-			if depth == 0 {
-				return i
-			}
 		}
 	}
 	return -1

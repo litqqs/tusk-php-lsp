@@ -43,6 +43,7 @@ make field-baseline   # Laravel, Symfony, WordPress, Magento 2 against testdata/
 make field-baseline-update   # rewrite those baselines after an intended change
 
 go test -v -race -run TestHoverMethodChain ./internal/hover/   # one test
+TUSK_PHP_TOKENIZERS='php;docker run --rm -i -v /tmp:/tmp:ro php:7.4-cli php' go test ./internal/php/lexer/   # lexer against each PHP's token_get_all
 php scripts/generate-builtins.php registry --output=internal/symbols/builtin_registry_generated.go
 php scripts/generate-builtins.php stubs --output=/tmp/php-builtins.generated.php
 ```
@@ -64,7 +65,11 @@ above it in this list**, never from a later one:
 1. **Wire types and identifiers:** `protocol` (LSP types, no logic), `rule`
    (diagnostic codes, severities and sources: every code a finding carries is a
    `rule.Code` constant listed in `rule.All`).
-2. **Language core:** `parser` (own tokenizer and lightweight AST, fault-tolerant),
+2. **Language core:** `php/token` and `php/lexer` (lossless lexer that matches
+   the tokenizer of PHP 7.4 and 8.0 to 8.6 with `short_open_tag` off, so `<?` is
+   inline HTML; see issue #140; it leaves out the empty `T_ENCAPSED_AND_WHITESPACE`
+   PHP emits for a space in an unquoted string offset like `"$a[ b]"`), `parser` (own tokenizer and
+   lightweight AST, fault-tolerant),
    `types`, `phparray`, `stubs` (embedded builtin stubs by PHP version and
    extension), `phpdetect`.
 3. **Index and resolution:** `symbols` (the central index), `scope` (variables,
@@ -100,6 +105,7 @@ internal/
 ├── document/         open documents: versions, immutable snapshots, edits, UTF-16 positions
 ├── indexing/         when and what to (re)index: scheduling, invalidation, caches
 ├── workspace/        roots, Composer discovery, project profile
+├── php/              token, lexer: PHP's own grammar, version by version (issue #140)
 ├── parser/ types/ symbols/ scope/ resolve/ source/      language core (no transport types over time)
 ├── completion/ hover/ analyzer/ inlayhint/ checks/ diagnostics/   features
 ├── framework/
@@ -227,19 +233,14 @@ cross-file answer on a 9,700-file Laravel app. Every change must keep it.
 
 ## Before opening a pull request
 
-1. `make test` passes (with `-race`).
-2. `make conformance-pr` passes for changes to the parser, index or providers,
-   and `make field-baseline` for changes to diagnostics or typing.
-3. `make wasm` still builds.
-4. New behaviour has a test that fails without it. Tests use the mock project in
-   `testdata/project/`; corpus tests fetch real projects with
-   `scripts/fetch-corpus.sh`.
-5. Performance numbers are in the PR when the rules above ask for them.
-6. `CHANGELOG.md` has an entry under `[Unreleased]` for anything a user would
-   notice, written for users ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/)):
-   what changed for them, not which functions moved.
-7. Commit messages follow the existing style: `fix: …`, `feat: …`, `docs: …`,
-   `chore: …`, `refactor: …`.
+[CONTRIBUTING.md](CONTRIBUTING.md) is the source of truth for how changes get in:
+the pull request checklist (tests, conformance, field baselines, `make wasm`,
+performance numbers, the release note, commit style), keeping pull requests small,
+drafts and stacks, review and releases. Read it and follow its checklist before
+opening a pull request. This file covers the code's principles.
+
+Pull requests don't edit `CHANGELOG.md`: put a **Release note** in the pull request
+description instead, and the maintainers write the changelog from it when they release.
 
 ## Direction
 
@@ -256,4 +257,6 @@ cross-file answer on a 9,700-file Laravel app. Every change must keep it.
 - **Editors**: VS Code, Zed and Neovim are first-class. Zed users can't configure
   the server, so every default must be sensible.
 - **Non-goals**: no native formatter (Laravel Pint stays the formatting path), and
-  no whole-parser rewrite while the current one can be extended.
+  no big-bang parser rewrite. The current parser can't grow a statement and
+  expression tree, so issue #140 replaces it one step at a time (lexer, parser,
+  then moving callers over); the old parser stays until its last caller has moved.

@@ -55,10 +55,15 @@ type Symbol struct {
 	ReturnType    string
 	Children      []*Symbol
 	Implements    []string
-	Extends       string
-	BackedType    string
-	Value         string
-	IsVirtual     bool
+	Traits        []string
+	traitRules    *traitRules
+	// AliasOf is the trait method a member is an `as` alias of, under the
+	// alias's own name in the class or trait whose use block makes it.
+	AliasOf    *Symbol
+	Extends    string
+	BackedType string
+	Value      string
+	IsVirtual  bool
 	// IsConditional marks a class declared inside a block, such as a
 	// placeholder under `if (false)` or a polyfill under `if (!class_exists())`:
 	// its members may not be those of the class code runs with.
@@ -143,6 +148,7 @@ type Index struct {
 	members              memberTables
 	mu                   sync.RWMutex
 	symbols              map[string]*Symbol
+	shadowed             map[string][]*Symbol
 	nameIndex            map[string][]string
 	foldIndex            map[string][]string // lowercase FQN → FQNs of class-likes and functions, whose names PHP matches case-insensitively
 	fileSymbols          map[string][]*Symbol
@@ -304,28 +310,15 @@ func (idx *Index) IndexIDEHelperFile(uri string, source string) {
 			}
 		} else {
 			// Class doesn't exist yet — index it normally
-			var resolvedImpls []string
-			for _, impl := range c.Implements {
-				resolvedImpls = append(resolvedImpls, resolve(impl))
-			}
 			sym := &Symbol{Name: c.Name, FQN: fqn, Kind: KindClass, URI: uri, DocComment: qualifyDocTypes(c.DocComment, file.Uses),
 				IsAbstract: c.IsAbstract, IsFinal: c.IsFinal, IsReadonly: c.IsReadonly, IsConditional: c.Conditional,
-				Implements: resolvedImpls,
-				Range:      symRange(c.StartLine, c.StartCol, len(c.Name))}
+				Implements: resolveNames(c.Implements, resolve), Traits: resolveNames(c.Traits, resolve), traitRules: newTraitRules(fqn, c.TraitRules, resolve),
+				Range: symRange(c.StartLine, c.StartCol, len(c.Name))}
 			if c.Extends != "" {
 				sym.Extends = resolve(c.Extends)
 			}
 			idx.addSymbolWithSource(uri, sym, SourceProject)
-			if c.Extends != "" {
-				idx.setParentLocked(fqn, sym.Extends)
-			}
-			for _, impl := range resolvedImpls {
-				idx.implementsMap[fqn] = append(idx.implementsMap[fqn], impl)
-				idx.reverseImplementsMap[impl] = appendUnique(idx.reverseImplementsMap[impl], fqn)
-			}
-			for _, tr := range c.Traits {
-				idx.traitMap[fqn] = append(idx.traitMap[fqn], resolve(tr))
-			}
+			idx.linkTypeLocked(sym)
 			for _, prop := range c.Properties {
 				ps := &Symbol{Name: prop.Name, FQN: fqn + "::" + prop.Name, Kind: KindProperty, URI: uri,
 					Visibility: prop.Visibility, SetVisibility: prop.SetVisibility,
@@ -376,7 +369,7 @@ func (idx *Index) IndexFileWithSource(uri string, source string, src SymbolSourc
 func (idx *Index) foreignMembersLocked(uri string) map[string][]*Symbol {
 	var out map[string][]*Symbol
 	for _, sym := range idx.fileSymbols[uri] {
-		if !isTopLevelSymbol(sym.Kind) {
+		if sym.Kind.IsMember() {
 			continue
 		}
 		for _, child := range sym.Children {
@@ -442,29 +435,16 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 		if c.Name == parser.AnonymousClassName {
 			fqn = c.FullName
 		}
-		var resolvedImpls []string
-		for _, impl := range c.Implements {
-			resolvedImpls = append(resolvedImpls, resolve(impl))
-		}
 		sym := &Symbol{Name: c.Name, FQN: fqn, Kind: KindClass, URI: uri, DocComment: qualifyDocTypes(c.DocComment, file.Uses),
 			IsAbstract: c.IsAbstract, IsFinal: c.IsFinal, IsReadonly: c.IsReadonly, IsConditional: c.Conditional,
-			Implements: resolvedImpls, Attributes: indexAttributes(c.Attributes, resolve),
-			Range: symRange(c.StartLine, c.StartCol, len(c.Name))}
+			Implements: resolveNames(c.Implements, resolve), Traits: resolveNames(c.Traits, resolve), traitRules: newTraitRules(fqn, c.TraitRules, resolve),
+			Attributes: indexAttributes(c.Attributes, resolve),
+			Range:      symRange(c.StartLine, c.StartCol, len(c.Name))}
 		previous := idx.symbols[fqn]
 		if c.Extends != "" {
 			sym.Extends = resolve(c.Extends)
 		}
 		idx.addSymbolWithSource(uri, sym, src)
-		if c.Extends != "" {
-			idx.setParentLocked(fqn, sym.Extends)
-		}
-		for _, impl := range resolvedImpls {
-			idx.implementsMap[fqn] = append(idx.implementsMap[fqn], impl)
-			idx.reverseImplementsMap[impl] = appendUnique(idx.reverseImplementsMap[impl], fqn)
-		}
-		for _, tr := range c.Traits {
-			idx.traitMap[fqn] = append(idx.traitMap[fqn], resolve(tr))
-		}
 		idx.indexProperties(uri, sym, fqn, c.Properties, src, resolve, file.Uses)
 		idx.indexMethods(uri, sym, fqn, c.Methods, src, resolve, file.Uses)
 		idx.indexConstants(uri, sym, fqn, c.Constants, src, resolve)
@@ -473,22 +453,16 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 		if src == SourceBuiltin {
 			mergeEarlierLayer(sym, previous)
 		}
+		idx.linkTypeLocked(sym)
 	}
 
 	for _, iface := range file.Interfaces {
 		fqn := buildFQN(ns, iface.FullName)
-		var resolvedParents []string
-		for _, parent := range iface.Extends {
-			resolvedParents = append(resolvedParents, resolve(parent))
-		}
 		sym := &Symbol{Name: iface.Name, FQN: fqn, Kind: KindInterface, URI: uri, DocComment: qualifyDocTypes(iface.DocComment, file.Uses),
-			Implements: resolvedParents, Attributes: indexAttributes(iface.Attributes, resolve),
+			Implements: resolveNames(iface.Extends, resolve), Attributes: indexAttributes(iface.Attributes, resolve),
 			Range: symRange(iface.StartLine, iface.StartCol, len(iface.Name))}
 		idx.addSymbolWithSource(uri, sym, src)
-		for _, parent := range resolvedParents {
-			idx.implementsMap[fqn] = append(idx.implementsMap[fqn], parent)
-			idx.subInterfaceMap[parent] = appendUnique(idx.subInterfaceMap[parent], fqn)
-		}
+		idx.linkTypeLocked(sym)
 		idx.indexProperties(uri, sym, fqn, iface.Properties, src, resolve, file.Uses)
 		idx.indexMethods(uri, sym, fqn, iface.Methods, src, resolve, file.Uses)
 		idx.indexConstants(uri, sym, fqn, iface.Constants, src, resolve)
@@ -498,11 +472,10 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 	for _, tr := range file.Traits {
 		fqn := buildFQN(ns, tr.FullName)
 		sym := &Symbol{Name: tr.Name, FQN: fqn, Kind: KindTrait, URI: uri, DocComment: qualifyDocTypes(tr.DocComment, file.Uses),
+			Traits: resolveNames(tr.Traits, resolve), traitRules: newTraitRules(fqn, tr.TraitRules, resolve),
 			Range: symRange(tr.StartLine, tr.StartCol, len(tr.Name))}
 		idx.addSymbolWithSource(uri, sym, src)
-		for _, usedTrait := range tr.Traits {
-			idx.traitMap[fqn] = append(idx.traitMap[fqn], resolve(usedTrait))
-		}
+		idx.linkTypeLocked(sym)
 		idx.indexProperties(uri, sym, fqn, tr.Properties, src, resolve, file.Uses)
 		idx.indexMethods(uri, sym, fqn, tr.Methods, src, resolve, file.Uses)
 		idx.indexConstants(uri, sym, fqn, tr.Constants, src, resolve)
@@ -512,27 +485,19 @@ func (idx *Index) indexParsedLocked(uri string, file *parser.FileNode, src Symbo
 
 	for _, en := range file.Enums {
 		fqn := buildFQN(ns, en.FullName)
-		var resolvedEnumImpls []string
-		for _, impl := range en.Implements {
-			resolvedEnumImpls = append(resolvedEnumImpls, resolve(impl))
-		}
 		sym := &Symbol{Name: en.Name, FQN: fqn, Kind: KindEnum, URI: uri, DocComment: qualifyDocTypes(en.DocComment, file.Uses),
-			BackedType: en.BackedType, Implements: resolvedEnumImpls, Attributes: indexAttributes(en.Attributes, resolve),
-			Range: symRange(en.StartLine, en.StartCol, len(en.Name))}
+			BackedType: en.BackedType, Implements: resolveNames(en.Implements, resolve), Traits: resolveNames(en.Traits, resolve),
+			traitRules: newTraitRules(fqn, en.TraitRules, resolve),
+			Attributes: indexAttributes(en.Attributes, resolve),
+			Range:      symRange(en.StartLine, en.StartCol, len(en.Name))}
 		idx.addSymbolWithSource(uri, sym, src)
-		for _, impl := range resolvedEnumImpls {
-			idx.implementsMap[fqn] = append(idx.implementsMap[fqn], impl)
-			idx.reverseImplementsMap[impl] = appendUnique(idx.reverseImplementsMap[impl], fqn)
-		}
+		idx.linkTypeLocked(sym)
 		for _, ec := range en.Cases {
 			cs := &Symbol{Name: ec.Name, FQN: fqn + "::" + ec.Name, Kind: KindEnumCase, URI: uri, ParentFQN: fqn, Value: ec.Value,
 				DocComment: ec.DocComment, Attributes: indexAttributes(ec.Attributes, resolve),
 				Range: symRange(ec.StartLine, ec.StartCol, len(ec.Name))}
 			sym.Children = append(sym.Children, cs)
 			idx.addSymbolWithSource(uri, cs, src)
-		}
-		for _, tr := range en.Traits {
-			idx.traitMap[fqn] = append(idx.traitMap[fqn], resolve(tr))
 		}
 		idx.indexProperties(uri, sym, fqn, en.Properties, src, resolve, file.Uses)
 		idx.indexMethods(uri, sym, fqn, en.Methods, src, resolve, file.Uses)
@@ -563,9 +528,12 @@ func (idx *Index) addSymbol(uri string, sym *Symbol) {
 		}
 		idx.narrowingNames[strings.ToLower(sym.Name)]++
 	}
-	if sym.Source != SourceGenerated && isTopLevelSymbol(sym.Kind) {
+	if sym.Source != SourceGenerated && !sym.Kind.IsMember() {
 		// A real declaration replaces a class generated under the same name.
 		idx.dropGeneratedLocked(sym.FQN)
+	}
+	if sym.isGlobal() {
+		idx.shadowLocked(sym)
 	}
 	idx.symbols[sym.FQN] = sym
 	if len(sym.Attributes) > 0 {
@@ -580,7 +548,7 @@ func (idx *Index) addSymbol(uri string, sym *Symbol) {
 	idx.sortedNamesDirty = true
 	idx.sortedFQNsDirty = true
 	// Index top-level symbols by their namespace
-	if isTopLevelSymbol(sym.Kind) {
+	if !sym.Kind.IsMember() {
 		idx.namespaceIndex[namespaceForFQN(sym.FQN)] = appendUnique(idx.namespaceIndex[namespaceForFQN(sym.FQN)], sym.FQN)
 		idx.addFoldLocked(sym.FQN)
 	}
@@ -620,7 +588,7 @@ func (idx *Index) removeFileSymbols(uri string) {
 	for _, sym := range idx.fileSymbols[uri] {
 		// A member this file added to a class another file declares (an IDE
 		// helper's @property) leaves that class's members with it.
-		if !isTopLevelSymbol(sym.Kind) && sym.ParentFQN != "" {
+		if sym.Kind.IsMember() && sym.ParentFQN != "" {
 			if parent := idx.symbols[sym.ParentFQN]; parent != nil && parent.URI != uri {
 				parent.Children = withoutSymbol(parent.Children, sym)
 			}
@@ -633,9 +601,16 @@ func (idx *Index) removeFileSymbols(uri string) {
 				idx.narrowingNames[key]--
 			}
 		}
-		if isTopLevelSymbol(sym.Kind) {
+		if !sym.Kind.IsMember() {
 			// Classes generated from this one are rebuilt on their next lookup.
 			idx.dropGeneratedFromLocked(sym.FQN)
+		}
+		if idx.symbols[sym.FQN] != sym {
+			idx.unshadowLocked(sym)
+			continue
+		}
+		if sym.isGlobal() && idx.promoteShadowedLocked(sym) {
+			continue
 		}
 		delete(idx.symbols, sym.FQN)
 		if fqns, ok := idx.nameIndex[sym.Name]; ok {
@@ -644,7 +619,7 @@ func (idx *Index) removeFileSymbols(uri string) {
 		idx.sortedNamesDirty = true
 		idx.sortedFQNsDirty = true
 		// Clean up namespace index
-		if isTopLevelSymbol(sym.Kind) {
+		if !sym.Kind.IsMember() {
 			ns := namespaceForFQN(sym.FQN)
 			if fqns, ok := idx.namespaceIndex[ns]; ok {
 				idx.namespaceIndex[ns] = removeFromSlice(fqns, sym.FQN)
@@ -656,30 +631,109 @@ func (idx *Index) removeFileSymbols(uri string) {
 				delete(idx.foldIndex, key)
 			}
 		}
-		// Clean up reverse implements map
-		if ifaces, ok := idx.implementsMap[sym.FQN]; ok {
-			for _, iface := range ifaces {
-				idx.reverseImplementsMap[iface] = removeFromSlice(idx.reverseImplementsMap[iface], sym.FQN)
-				if sym.Kind == KindInterface {
-					idx.subInterfaceMap[iface] = removeFromSlice(idx.subInterfaceMap[iface], sym.FQN)
-				}
-			}
-		}
-		delete(idx.implementsMap, sym.FQN)
-		if parent, ok := idx.inheritanceMap[sym.FQN]; ok {
-			key := strings.ToLower(parent)
-			if children := removeFromSlice(idx.childrenMap[key], sym.FQN); len(children) > 0 {
-				idx.childrenMap[key] = children
-			} else {
-				delete(idx.childrenMap, key)
-			}
-		}
-		delete(idx.inheritanceMap, sym.FQN)
-		delete(idx.traitMap, sym.FQN)
+		idx.unlinkTypeLocked(sym)
 	}
 	delete(idx.fileSymbols, uri)
 	delete(idx.fileSource, uri)
 	delete(idx.generatedURIs, uri)
+}
+
+func (idx *Index) shadowLocked(sym *Symbol) {
+	prev := idx.symbols[sym.FQN]
+	if prev == nil || prev == sym || !prev.isGlobal() || prev.Source == SourceGenerated || sym.Source == SourceGenerated ||
+		(prev.Source == SourceBuiltin && sym.Source == SourceBuiltin) {
+		return
+	}
+	if idx.shadowed == nil {
+		idx.shadowed = make(map[string][]*Symbol)
+	}
+	idx.shadowed[sym.FQN] = append(idx.shadowed[sym.FQN], prev)
+	idx.unlinkTypeLocked(prev)
+}
+
+func (idx *Index) unshadowLocked(sym *Symbol) {
+	defs, ok := idx.shadowed[sym.FQN]
+	if !ok {
+		return
+	}
+	if defs = withoutSymbol(defs, sym); len(defs) > 0 {
+		idx.shadowed[sym.FQN] = defs
+	} else {
+		delete(idx.shadowed, sym.FQN)
+	}
+}
+
+func (idx *Index) promoteShadowedLocked(removed *Symbol) bool {
+	defs := idx.shadowed[removed.FQN]
+	if len(defs) == 0 {
+		return false
+	}
+	promoted := defs[len(defs)-1]
+	idx.unshadowLocked(promoted)
+	idx.unlinkTypeLocked(removed)
+	idx.symbols[promoted.FQN] = promoted
+	for _, child := range promoted.Children {
+		idx.symbols[child.FQN] = child
+	}
+	idx.linkTypeLocked(promoted)
+	return true
+}
+
+func (idx *Index) linkTypeLocked(sym *Symbol) {
+	fqn := sym.FQN
+	if sym.Extends != "" {
+		idx.setParentLocked(fqn, sym.Extends)
+	}
+	for _, parent := range sym.Implements {
+		idx.implementsMap[fqn] = appendUnique(idx.implementsMap[fqn], parent)
+		if sym.Kind == KindInterface {
+			idx.subInterfaceMap[parent] = appendUnique(idx.subInterfaceMap[parent], fqn)
+		} else {
+			idx.reverseImplementsMap[parent] = appendUnique(idx.reverseImplementsMap[parent], fqn)
+		}
+	}
+	for _, tr := range sym.Traits {
+		idx.traitMap[fqn] = appendUnique(idx.traitMap[fqn], tr)
+	}
+}
+
+func (idx *Index) unlinkTypeLocked(sym *Symbol) {
+	fqn := sym.FQN
+	for _, parent := range idx.implementsMap[fqn] {
+		if sym.Kind == KindInterface {
+			idx.subInterfaceMap[parent] = removeFromSlice(idx.subInterfaceMap[parent], fqn)
+		} else {
+			idx.reverseImplementsMap[parent] = removeFromSlice(idx.reverseImplementsMap[parent], fqn)
+		}
+	}
+	delete(idx.implementsMap, fqn)
+	idx.clearParentLocked(fqn)
+	delete(idx.traitMap, fqn)
+}
+
+func resolveNames(names []string, resolve func(string) string) []string {
+	if len(names) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(names))
+	for _, name := range names {
+		out = append(out, resolve(name))
+	}
+	return out
+}
+
+func (idx *Index) clearParentLocked(fqn string) {
+	parent, ok := idx.inheritanceMap[fqn]
+	if !ok {
+		return
+	}
+	key := strings.ToLower(parent)
+	if children := removeFromSlice(idx.childrenMap[key], fqn); len(children) > 0 {
+		idx.childrenMap[key] = children
+	} else {
+		delete(idx.childrenMap, key)
+	}
+	delete(idx.inheritanceMap, fqn)
 }
 
 // withoutSymbol returns a copy of syms without sym; readers may hold the
@@ -693,10 +747,6 @@ func withoutSymbol(syms []*Symbol, sym *Symbol) []*Symbol {
 		}
 	}
 	return syms
-}
-
-func isTopLevelSymbol(kind SymbolKind) bool {
-	return kind != KindMethod && kind != KindProperty && kind != KindConstant && kind != KindEnumCase
 }
 
 func namespaceForFQN(fqn string) string {
@@ -802,8 +852,14 @@ func mergeEarlierLayer(sym, previous *Symbol) {
 	if sym.Extends == "" {
 		sym.Extends = previous.Extends
 	}
-	if len(sym.Implements) == 0 {
-		sym.Implements = previous.Implements
+	for _, impl := range previous.Implements {
+		sym.Implements = appendUnique(sym.Implements, impl)
+	}
+	for _, tr := range previous.Traits {
+		sym.Traits = appendUnique(sym.Traits, tr)
+	}
+	if sym.traitRules == nil {
+		sym.traitRules = previous.traitRules
 	}
 }
 
@@ -959,6 +1015,57 @@ func (idx *Index) LookupByName(name string) []*Symbol {
 	return results
 }
 
+func (idx *Index) ensureSortedNames() {
+	idx.mu.RLock()
+	needRebuild := idx.sortedNamesDirty || len(idx.sortedNames) == 0
+	idx.mu.RUnlock()
+	if !needRebuild {
+		return
+	}
+	idx.mu.Lock()
+	defer idx.mu.Unlock()
+	if !idx.sortedNamesDirty && len(idx.sortedNames) > 0 {
+		return
+	}
+	idx.sortedNames = make([]string, 0, len(idx.nameIndex))
+	for name := range idx.nameIndex {
+		idx.sortedNames = append(idx.sortedNames, name)
+	}
+	sort.Slice(idx.sortedNames, func(i, j int) bool {
+		return strings.ToLower(idx.sortedNames[i]) < strings.ToLower(idx.sortedNames[j])
+	})
+	idx.sortedNamesDirty = false
+}
+
+// FirstDeclaredByName returns the declared symbols (not builtins, and with a
+// file) whose kind keep accepts, in case-insensitive name order, stopping at
+// the first name that brings the count to limit or beyond. Every symbol of
+// that last name is included, so which ones are returned doesn't depend on
+// the order they were indexed in.
+func (idx *Index) FirstDeclaredByName(limit int, keep func(SymbolKind) bool) []*Symbol {
+	if limit <= 0 {
+		return nil
+	}
+	idx.ensureSortedNames()
+
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	results := make([]*Symbol, 0, limit)
+	for _, name := range idx.sortedNames {
+		for _, fqn := range idx.nameIndex[name] {
+			sym, ok := idx.symbols[fqn]
+			if !ok || IsBuiltin(sym) || sym.URI == "" || !keep(sym.Kind) {
+				continue
+			}
+			results = append(results, sym)
+		}
+		if len(results) >= limit {
+			break
+		}
+	}
+	return results
+}
+
 func (idx *Index) SearchByPrefix(prefix string) []*Symbol {
 	// Empty prefix: return all symbols without touching the sorted slice.
 	if prefix == "" {
@@ -975,28 +1082,7 @@ func (idx *Index) SearchByPrefix(prefix string) []*Symbol {
 		return results
 	}
 
-	// Ensure the sorted names slice is up-to-date under a write lock if needed,
-	// then perform the binary search under a read lock.
-	idx.mu.RLock()
-	needRebuild := idx.sortedNamesDirty || len(idx.sortedNames) == 0
-	idx.mu.RUnlock()
-
-	if needRebuild {
-		idx.mu.Lock()
-		// Re-check under write lock to avoid duplicate work when two goroutines
-		// both observed dirty and one completes the rebuild before the other.
-		if idx.sortedNamesDirty || len(idx.sortedNames) == 0 {
-			idx.sortedNames = make([]string, 0, len(idx.nameIndex))
-			for name := range idx.nameIndex {
-				idx.sortedNames = append(idx.sortedNames, name)
-			}
-			sort.Slice(idx.sortedNames, func(i, j int) bool {
-				return strings.ToLower(idx.sortedNames[i]) < strings.ToLower(idx.sortedNames[j])
-			})
-			idx.sortedNamesDirty = false
-		}
-		idx.mu.Unlock()
-	}
+	idx.ensureSortedNames()
 
 	// Binary search for the first matching prefix under a read lock.
 	idx.mu.RLock()
@@ -1028,7 +1114,7 @@ func (idx *Index) rebuildSortedFQNs() {
 	idx.sortedFQNs = make([]string, 0, len(idx.symbols))
 	for fqn, sym := range idx.symbols {
 		// Only top-level symbols are needed for FQN-prefix search
-		if sym.Kind == KindMethod || sym.Kind == KindProperty || sym.Kind == KindConstant || sym.Kind == KindEnumCase {
+		if sym.Kind.IsMember() {
 			continue
 		}
 		// Never store a symbol with an empty short name (M1 guard), nor an
@@ -1142,6 +1228,31 @@ func (idx *Index) GetClassMembers(classFQN string) []*Symbol {
 	return idx.getClassMembersRecursive(classFQN, make(map[string]bool))
 }
 
+func (idx *Index) TraitMembers(fqn string) []*Symbol {
+	idx.ensureClass(fqn)
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	return idx.appendTraitMembersLocked(nil, idx.traitMap[fqn], idx.traitRulesLocked(fqn), map[string]bool{fqn: true})
+}
+
+func (idx *Index) appendTraitMembersLocked(members []*Symbol, traits []string, rules *traitRules, visited map[string]bool) []*Symbol {
+	var aliases []*Symbol
+	for _, tr := range traits {
+		if rules == nil {
+			members = append(members, idx.getClassMembersRecursive(tr, visited)...)
+			continue
+		}
+		for _, member := range idx.getClassMembersRecursive(tr, visited) {
+			kept, renamed := rules.adapt(tr, member)
+			aliases = append(aliases, renamed...)
+			if kept != nil {
+				members = append(members, kept)
+			}
+		}
+	}
+	return append(members, aliases...)
+}
+
 func (idx *Index) getClassMembersRecursive(fqn string, visited map[string]bool) []*Symbol {
 	// A union, intersection or DNF type has the members of each class in it.
 	if strings.ContainsAny(fqn, "|&(") {
@@ -1155,39 +1266,64 @@ func (idx *Index) getClassMembersRecursive(fqn string, visited map[string]bool) 
 		return nil
 	}
 	visited[fqn] = true
-	var members []*Symbol
+	var own []*Symbol
+	var rules *traitRules
 	if sym, ok := idx.symbols[fqn]; ok {
-		members = append(members, sym.Children...)
-	}
-	// PHP's precedence: the class's own members, then its traits', then the
-	// parent's. Callers take the first match, so the order matters.
-	if traits, ok := idx.traitMap[fqn]; ok {
-		for _, tr := range traits {
-			members = append(members, idx.getClassMembersRecursive(tr, visited)...)
+		own, rules = sym.Children, sym.traitRules
+		if sym.Kind == KindTrait {
+			defer delete(visited, fqn)
 		}
 	}
-	if parent, ok := idx.inheritanceMap[fqn]; ok {
+	return idx.membersLocked(own, idx.traitMap[fqn], rules, idx.inheritanceMap[fqn], idx.implementsMap[fqn], visited)
+}
+
+func (idx *Index) Definitions(fqn string) []*Symbol {
+	idx.ensureClass(fqn)
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	current := idx.symbols[fqn]
+	if current == nil {
+		return nil
+	}
+	shadowed := idx.shadowed[fqn]
+	defs := make([]*Symbol, 0, 1+len(shadowed))
+	return append(append(defs, current), shadowed...)
+}
+
+func (idx *Index) DefinitionMembers(def *Symbol) []*Symbol {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	if idx.symbols[def.FQN] == def {
+		return idx.getClassMembersRecursive(def.FQN, make(map[string]bool))
+	}
+	return idx.membersLocked(def.Children, def.Traits, def.traitRules, def.Extends, def.Implements, map[string]bool{def.FQN: true})
+}
+
+func (idx *Index) membersLocked(own []*Symbol, traits []string, rules *traitRules, parent string, interfaces []string, visited map[string]bool) []*Symbol {
+	members := append([]*Symbol(nil), own...)
+	// PHP's precedence: the class's own members, then its traits', then the
+	// parent's. Callers take the first match, so the order matters.
+	members = idx.appendTraitMembersLocked(members, traits, rules, visited)
+	if parent != "" {
 		members = append(members, idx.getClassMembersRecursive(parent, visited)...)
 	}
 	// Interfaces come last: their constants, and the methods nothing above
 	// declares, which an abstract class may leave to its subclasses. A method
 	// the class or a parent declares wins over the interface's signature.
-	if interfaces, ok := idx.implementsMap[fqn]; ok {
-		var declared map[string]bool
-		for _, iface := range interfaces {
-			for _, member := range idx.getClassMembersRecursive(iface, visited) {
-				switch member.Kind {
-				case KindConstant:
+	var declared map[string]bool
+	for _, iface := range interfaces {
+		for _, member := range idx.getClassMembersRecursive(iface, visited) {
+			switch member.Kind {
+			case KindConstant:
+				members = append(members, member)
+			case KindMethod:
+				if declared == nil {
+					declared = methodNames(members)
+				}
+				key := strings.ToLower(member.Name)
+				if !declared[key] {
+					declared[key] = true
 					members = append(members, member)
-				case KindMethod:
-					if declared == nil {
-						declared = methodNames(members)
-					}
-					key := strings.ToLower(member.Name)
-					if !declared[key] {
-						declared[key] = true
-						members = append(members, member)
-					}
 				}
 			}
 		}
@@ -1277,12 +1413,16 @@ func (idx *Index) walkAncestors(fqn string, visit func(next string, isTrait bool
 // IsSubtypeOf reports whether child is parent or extends, implements or uses
 // it, directly or further up. Only child's ancestors are visited.
 func (idx *Index) IsSubtypeOf(child, parent string) bool {
-	if strings.EqualFold(child, parent) {
-		return true
-	}
 	idx.ensureClass(child)
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
+	return idx.isSubtypeOfLocked(child, parent)
+}
+
+func (idx *Index) isSubtypeOfLocked(child, parent string) bool {
+	if strings.EqualFold(child, parent) {
+		return true
+	}
 	visited := map[string]bool{child: true}
 	found := false
 	var walk func(fqn string)

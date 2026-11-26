@@ -61,6 +61,7 @@ type ClassDef struct {
 	IsFinal     bool
 	IsReadonly  bool
 	TraitUseDoc string // docblocks above the trait `use` statements in the body
+	TraitRules  TraitAdaptations
 	Line        int
 	EndLine     int
 	DocComment  string
@@ -94,6 +95,7 @@ type TraitDef struct {
 	Constants   []ConstantDef
 	Attributes  []AttributeDef
 	TraitUseDoc string // docblocks above the trait `use` statements in the body
+	TraitRules  TraitAdaptations
 	DocComment  string
 	Line        int
 	EndLine     int
@@ -112,6 +114,7 @@ type EnumDef struct {
 	Attributes  []AttributeDef
 	DocComment  string
 	TraitUseDoc string // docblocks above the trait `use` statements in the body
+	TraitRules  TraitAdaptations
 	Line        int
 	EndLine     int
 }
@@ -899,6 +902,7 @@ type structParser struct {
 	// class body being parsed, where @use gives the trait's type arguments.
 	traitUseDocs      []string
 	isGlobalNamespace bool
+	traitRules   TraitAdaptations
 	// blocks holds the braces open at the top level: true for a braced
 	// namespace, false for any other block (if, else, try, …).
 	blocks []bool
@@ -915,14 +919,16 @@ func (p *structParser) inBlock() bool {
 	return false
 }
 
-// parseClassBodyWithTraitDocs parses a class-like body and also returns the
-// docblocks written above its trait `use` statements, joined.
-func (p *structParser) parseClassBodyWithTraitDocs() (methods []MethodDef, props []PropertyDef, consts []ConstantDef, traits []string, traitDoc string) {
-	saved := p.traitUseDocs
-	p.traitUseDocs = nil
+// parseClassBodyWithTraitUses parses a class-like body and also returns the
+// docblocks written above its trait `use` statements, joined, and the rules
+// of their adaptation blocks.
+func (p *structParser) parseClassBodyWithTraitUses() (methods []MethodDef, props []PropertyDef, consts []ConstantDef, traits []string, traitDoc string, traitRules TraitAdaptations) {
+	savedDocs, savedRules := p.traitUseDocs, p.traitRules
+	p.traitUseDocs, p.traitRules = nil, TraitAdaptations{}
 	methods, props, consts, traits = p.parseClassBody()
 	traitDoc = strings.Join(p.traitUseDocs, "\n")
-	p.traitUseDocs = saved
+	traitRules = p.traitRules
+	p.traitUseDocs, p.traitRules = savedDocs, savedRules
 	return
 }
 
@@ -1347,7 +1353,7 @@ afterMod:
 	if _, ok := p.expect(TokenOpenBrace); !ok {
 		return
 	}
-	cls.Methods, cls.Properties, cls.Constants, cls.Traits, cls.TraitUseDoc = p.parseClassBodyWithTraitDocs()
+	cls.Methods, cls.Properties, cls.Constants, cls.Traits, cls.TraitUseDoc, cls.TraitRules = p.parseClassBodyWithTraitUses()
 	if cls.IsReadonly {
 		for i := range cls.Properties {
 			cls.Properties[i].IsReadonly = true
@@ -1408,7 +1414,7 @@ func (p *structParser) parseTrait(docComment string) {
 	if _, ok := p.expect(TokenOpenBrace); !ok {
 		return
 	}
-	trait.Methods, trait.Properties, trait.Constants, trait.Traits, trait.TraitUseDoc = p.parseClassBodyWithTraitDocs()
+	trait.Methods, trait.Properties, trait.Constants, trait.Traits, trait.TraitUseDoc, trait.TraitRules = p.parseClassBodyWithTraitUses()
 	trait.EndLine = p.peek().Line
 	p.result.Traits = append(p.result.Traits, trait)
 }
@@ -1448,7 +1454,7 @@ func (p *structParser) parseEnum(docComment string) {
 		return
 	}
 	p.enumCases = &e.Cases
-	e.Methods, e.Properties, e.Constants, e.Traits, e.TraitUseDoc = p.parseClassBodyWithTraitDocs()
+	e.Methods, e.Properties, e.Constants, e.Traits, e.TraitUseDoc, e.TraitRules = p.parseClassBodyWithTraitUses()
 	p.enumCases = nil
 	e.EndLine = p.peek().Line
 	p.result.Enums = append(p.result.Enums, e)
@@ -1692,18 +1698,8 @@ func (p *structParser) parseClassBody() (methods []MethodDef, props []PropertyDe
 				}
 				break
 			}
-			// Handle optional conflict resolution block: { ... }
 			if p.peek().Kind == TokenOpenBrace {
-				innerDepth := 1
-				p.advance()
-				for innerDepth > 0 && p.peek().Kind != TokenEOF {
-					if p.peek().Kind == TokenOpenBrace {
-						innerDepth++
-					} else if p.peek().Kind == TokenCloseBrace {
-						innerDepth--
-					}
-					p.advance()
-				}
+				p.parseTraitAdaptations()
 			} else {
 				p.expect(TokenSemicolon)
 			}

@@ -1,16 +1,13 @@
 package lsp
 
 import (
-	"encoding/json"
-
 	"github.com/Tusk-PHP/lsp/internal/composer/cardhover"
 	"github.com/Tusk-PHP/lsp/internal/protocol"
 )
 
 func (s *Server) handleDefinition(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
 		return
 	}
 	uri := params.TextDocument.URI
@@ -60,10 +57,26 @@ func (s *Server) handleDefinition(msg *jsonRPCMessage) {
 	s.sendResponse(msg.ID, req.location(result.Location))
 }
 
+func (s *Server) handleDeclaration(msg *jsonRPCMessage) {
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
+		return
+	}
+	if locs, ok := s.bladeDefinition(params.TextDocument.URI, params.Position); ok {
+		s.sendResponse(msg.ID, locs)
+		return
+	}
+	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
+	if !ok {
+		s.sendResponse(msg.ID, nil)
+		return
+	}
+	s.sendResponse(msg.ID, req.location(s.analyzer.FindDeclaration(req.uri, req.source, req.pos)))
+}
+
 func (s *Server) handleTypeDefinition(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
 		return
 	}
 	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
@@ -75,9 +88,8 @@ func (s *Server) handleTypeDefinition(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleImplementation(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
 		return
 	}
 	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
@@ -89,9 +101,8 @@ func (s *Server) handleImplementation(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleReferences(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
 		return
 	}
 	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
@@ -102,12 +113,13 @@ func (s *Server) handleReferences(msg *jsonRPCMessage) {
 	s.sendResponse(msg.ID, req.locations(s.analyzer.FindAllReferences(req.uri, req.source, req.pos, s.openDocumentReader())))
 }
 
+type documentSymbolParams struct {
+	TextDocument protocol.TextDocumentIdentifier `json:"textDocument"`
+}
+
 func (s *Server) handleDocumentSymbol(msg *jsonRPCMessage) {
-	var params struct {
-		TextDocument protocol.TextDocumentIdentifier `json:"textDocument"`
-	}
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[documentSymbolParams](msg)
+	if !ok {
 		return
 	}
 	source := s.getDocument(params.TextDocument.URI)
@@ -115,9 +127,8 @@ func (s *Server) handleDocumentSymbol(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleFoldingRange(msg *jsonRPCMessage) {
-	var params protocol.FoldingRangeParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.FoldingRangeParams](msg)
+	if !ok {
 		return
 	}
 	source := s.getDocument(params.TextDocument.URI)
@@ -125,9 +136,8 @@ func (s *Server) handleFoldingRange(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleDocumentHighlight(msg *jsonRPCMessage) {
-	var params protocol.TextDocumentPositionParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.TextDocumentPositionParams](msg)
+	if !ok {
 		return
 	}
 	req, ok := s.phpRequest(params.TextDocument.URI, params.Position)
@@ -139,9 +149,8 @@ func (s *Server) handleDocumentHighlight(msg *jsonRPCMessage) {
 }
 
 func (s *Server) handleWorkspaceSymbol(msg *jsonRPCMessage) {
-	var params protocol.WorkspaceSymbolParams
-	if json.Unmarshal(msg.Params, &params) != nil {
-		s.sendError(msg.ID, -32602, "Invalid params")
+	params, ok := s.decodeParams[protocol.WorkspaceSymbolParams](msg)
+	if !ok {
 		return
 	}
 	s.sendResponse(msg.ID, s.analyzer.GetWorkspaceSymbols(params.Query))

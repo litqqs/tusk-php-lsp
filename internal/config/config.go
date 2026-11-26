@@ -168,6 +168,7 @@ type Config struct {
 	DatabaseEnabled         *bool           `json:"databaseEnabled,omitempty"`
 	DatabaseSource          string          `json:"databaseSource,omitempty"`
 	DiagnosticRules         DiagnosticRules `json:"diagnosticRules,omitempty"`
+	DiagnosticIgnore        IgnoreRules     `json:"diagnosticIgnore,omitzero"`
 	// MaxIndexFiles caps how many workspace PHP files are indexed; 0 means no
 	// limit (the native default). Composer dependencies aren't counted.
 	MaxIndexFiles             int                 `json:"maxIndexFiles"`
@@ -193,6 +194,10 @@ func (c *Config) SetDiagnosticRulesJSON(raw string) error {
 	}
 	c.DiagnosticRules = m
 	return nil
+}
+
+func (c *Config) Problems() []error {
+	return c.DiagnosticIgnore.Invalid
 }
 
 // IsPHPVersionExplicitlySet reports whether PHPVersion was supplied by a

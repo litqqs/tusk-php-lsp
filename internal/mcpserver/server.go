@@ -1189,7 +1189,7 @@ func (s *Service) symbolCatalog() []SymbolMatch {
 	})
 	out := make([]SymbolMatch, 0, len(all))
 	for _, sym := range all {
-		if sym.Kind == symbols.KindMethod || sym.Kind == symbols.KindProperty || sym.Kind == symbols.KindConstant || sym.Kind == symbols.KindEnumCase {
+		if sym.Kind.IsMember() {
 			continue
 		}
 		out = append(out, toSymbolMatch(sym))
@@ -1220,6 +1220,9 @@ func loadProjectMetadata(rootPath string, logger *slog.Logger) (*config.Config, 
 		return nil, "", symbols.BuiltinProfile{}, "", err
 	}
 	cfg = loaded
+	for _, problem := range cfg.Problems() {
+		logger.Warn("skipped part of the configuration", "problem", problem)
+	}
 
 	framework := cfg.Framework
 	if framework == "" || framework == "auto" {

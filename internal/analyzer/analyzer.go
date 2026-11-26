@@ -98,128 +98,7 @@ func (a *Analyzer) SetViewResolver(resolver *frameworklaravel.Views) {
 }
 
 func (a *Analyzer) FindDefinition(uri, source string, pos protocol.Position) *protocol.Location {
-	if a.framework == "symfony" {
-		if routeName, _, ok := frameworksymfony.RouteNameAtPosition(source, pos); ok {
-			if route := frameworksymfony.FindRoute(a.index, routeName); route != nil {
-				return &protocol.Location{URI: route.URI, Range: route.DeclRange}
-			}
-		}
-		if a.symfonyCommands != nil {
-			if loc := a.definitionForSymfonyCommand(uri, source, pos); loc != nil {
-				return loc
-			}
-		}
-		if a.symfonyTranslations != nil {
-			if loc := a.definitionForSymfonyTranslationKey(source, pos); loc != nil {
-				return loc
-			}
-		}
-	}
-	ctx := sourcectx.Analyze(uri, source, pos)
-	if ctx == nil {
-		return nil
-	}
-	line := ctx.Line
-
-	file := ctx.File
-
-	// Handle container call arguments: app('request'), app(Request::class)
-	// Go to the concrete class definition
-	if a.container != nil {
-		if loc := a.definitionForContainerArg(line, pos, source, file, false); loc != nil {
-			return loc
-		}
-	}
-	if a.framework == "laravel" && a.views != nil {
-		if loc := a.definitionForLaravelView(line, pos.Character); loc != nil {
-			return loc
-		}
-	}
-	if a.translations != nil {
-		if loc := a.definitionForTranslationKey(line, pos.Character); loc != nil {
-			return loc
-		}
-	}
-	if a.framework == "laravel" && a.routes != nil {
-		if loc := a.definitionForRouteName(line, pos.Character); loc != nil {
-			return loc
-		}
-	}
-
-	word := ctx.SymbolText
-	if word == "" {
-		return nil
-	}
-
-	// Handle $variable → go to its type definition. After `::` a $name is a
-	// static property (self::$cache), found with the other members below.
-	if strings.HasPrefix(word, "$") && ctx.AccessKind != sourcectx.AccessStatic {
-		return a.definitionForVariable(word, source, pos, file)
-	}
-
-	// self, static and parent go to the class they stand for.
-	if fqn := a.classKeywordFQN(word, ctx); fqn != "" {
-		if sym := a.index.Lookup(fqn); sym != nil {
-			return symbolLocation(sym)
-		}
-		return nil
-	}
-
-	// Check for -> or :: access (method/property on a class)
-	if ctx.AccessKind != sourcectx.AccessNone {
-		owner := a.resolver.AccessOwnerType(ctx.JoinedLine, ctx.JoinedWordStart, source, pos, file)
-		classFQN := owner.BaseFQN()
-		if classFQN == "" {
-			return nil
-		}
-		if sym := a.resolver.FindMemberAnywhere(classFQN, word); sym != nil {
-			return symbolLocation(sym)
-		}
-		// With the receiver's type arguments and every class of a union: a
-		// local scope on Builder<Post> is found on Post.
-		if sym := a.resolver.FindMemberAnywhereOn(owner, word); sym != nil {
-			return symbolLocation(sym)
-		}
-		return nil
-	}
-
-	// Resolve via use statements
-	if file != nil {
-		for _, u := range ctx.Uses {
-			if u.Alias == word {
-				if sym := a.index.Lookup(u.FullName); sym != nil {
-					return symbolLocation(sym)
-				}
-			}
-		}
-		// Try as class name in current namespace
-		fqn := a.resolver.ResolveClassName(word, file)
-		if fqn != word {
-			if sym := a.index.Lookup(fqn); sym != nil {
-				return symbolLocation(sym)
-			}
-		}
-	}
-
-	// FQN with backslashes
-	if strings.Contains(word, "\\") {
-		if sym := a.index.Lookup(word); sym != nil {
-			return symbolLocation(sym)
-		}
-	}
-
-	// Fallback: lookup by short name — prefer standalone-appropriate symbols
-	// (functions/classes over methods/properties) since we have no access chain.
-	lookupName := word
-	if idx := strings.LastIndex(word, "\\"); idx >= 0 {
-		lookupName = word[idx+1:]
-	}
-	syms := a.index.LookupByName(lookupName)
-	if best := symbols.PickBestStandalone(syms, word); best != nil {
-		return symbolLocation(best)
-	}
-
-	return nil
+	return a.resolveDefinitionSymbol(uri, source, pos).loc
 }
 
 // classKeywordFQN returns the class that self, static or parent stands for at
@@ -250,80 +129,106 @@ func (a *Analyzer) classKeywordFQN(word string, ctx *sourcectx.CursorContext) st
 // locale is forwarded to symbols.PHPManualURL. Empty string is fine —
 // the URL builder falls back to "en".
 func (a *Analyzer) FindDefinitionWithManual(uri, source string, pos protocol.Position, openManualEnabled bool, locale string) DefinitionResult {
-	// Quick path: when the flag is off, behave exactly like FindDefinition.
-	if !openManualEnabled {
-		return DefinitionResult{Location: a.FindDefinition(uri, source, pos)}
+	target := a.resolveDefinitionSymbol(uri, source, pos)
+	if !openManualEnabled || target.sym == nil || !symbols.IsBuiltin(target.sym) {
+		return DefinitionResult{Location: target.loc}
 	}
-
-	sym, owner, loc := a.resolveDefinitionSymbol(uri, source, pos)
-	if sym != nil && symbols.IsBuiltin(sym) {
-		if url := symbols.PHPManualURL(sym, owner, locale); url != "" {
-			return DefinitionResult{ExternalManualURL: url}
-		}
-		// URL builder had nothing — fall through to nil location (builtin with no page).
-		return DefinitionResult{}
-	}
-	return DefinitionResult{Location: loc}
+	return DefinitionResult{ExternalManualURL: symbols.PHPManualURL(target.sym, target.owner, locale)}
 }
 
-// resolveDefinitionSymbol resolves the symbol at the cursor position and returns
-// the resolved symbol, its owner (for member kinds), and the would-be Location.
-// The returned location may be nil (e.g. for builtin symbols where symbolLocation
-// filters them out). Callers that need to distinguish builtins from genuinely
-// unresolvable positions should inspect sym directly.
-func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Position) (sym *symbols.Symbol, owner *symbols.Symbol, loc *protocol.Location) {
+// FindDeclaration returns where the symbol at pos is first declared: for a
+// member reached through a class, or named in its own declaration, the
+// interface, parent class or trait member it implements or overrides
+// (symbols.Index.Prototype); for anything else, or a member nothing above
+// declares, its definition.
+func (a *Analyzer) FindDeclaration(uri, source string, pos protocol.Position) *protocol.Location {
+	target := a.resolveDefinitionSymbol(uri, source, pos)
+	if target.receiver == "" {
+		return target.loc
+	}
+	if declared := symbolLocation(a.index.Prototype(target.receiver, target.sym)); declared != nil {
+		return declared
+	}
+	return target.loc
+}
+
+// definitionTarget is what the cursor names: the symbol, and for a member the
+// class that declares it and the class it was reached through, or declared in
+// when the cursor is on its declaration. receiver is empty for a symbol found
+// by its name alone, which may be any member of that name. loc is where
+// the symbol is, nil for a builtin (symbolLocation filters them out) or for
+// nothing resolved; callers telling the two apart inspect sym.
+type definitionTarget struct {
+	sym      *symbols.Symbol
+	owner    *symbols.Symbol
+	receiver string
+	loc      *protocol.Location
+}
+
+// resolveDefinitionSymbol resolves the symbol at the cursor position.
+func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Position) definitionTarget {
 	if a.framework == "symfony" {
 		if routeName, _, ok := frameworksymfony.RouteNameAtPosition(source, pos); ok {
 			if route := frameworksymfony.FindRoute(a.index, routeName); route != nil {
-				return nil, nil, &protocol.Location{URI: route.URI, Range: route.DeclRange}
+				return definitionTarget{loc: &protocol.Location{URI: route.URI, Range: route.DeclRange}}
+			}
+		}
+		if a.symfonyCommands != nil {
+			if l := a.definitionForSymfonyCommand(uri, source, pos); l != nil {
+				return definitionTarget{loc: l}
+			}
+		}
+		if a.symfonyTranslations != nil {
+			if l := a.definitionForSymfonyTranslationKey(source, pos); l != nil {
+				return definitionTarget{loc: l}
 			}
 		}
 	}
 	ctx := sourcectx.Analyze(uri, source, pos)
 	if ctx == nil {
-		return nil, nil, nil
+		return definitionTarget{}
 	}
 	line := ctx.Line
 	file := ctx.File
 
 	if a.container != nil {
 		if l := a.definitionForContainerArg(line, pos, source, file, false); l != nil {
-			return nil, nil, l
+			return definitionTarget{loc: l}
 		}
 	}
 	if a.framework == "laravel" && a.views != nil {
 		if l := a.definitionForLaravelView(line, pos.Character); l != nil {
-			return nil, nil, l
+			return definitionTarget{loc: l}
 		}
 	}
 	if a.translations != nil {
 		if l := a.definitionForTranslationKey(line, pos.Character); l != nil {
-			return nil, nil, l
+			return definitionTarget{loc: l}
 		}
 	}
 	if a.framework == "laravel" && a.routes != nil {
 		if l := a.definitionForRouteName(line, pos.Character); l != nil {
-			return nil, nil, l
+			return definitionTarget{loc: l}
 		}
 	}
 
 	word := ctx.SymbolText
 	if word == "" {
-		return nil, nil, nil
+		return definitionTarget{}
 	}
 
 	// Handle $variable → go to its type definition. After `::` a $name is a
 	// static property (self::$cache), found with the other members below.
 	if strings.HasPrefix(word, "$") && ctx.AccessKind != sourcectx.AccessStatic {
-		return nil, nil, a.definitionForVariable(word, source, pos, file)
+		return definitionTarget{loc: a.definitionForVariable(word, source, pos, file)}
 	}
 
 	// self, static and parent go to the class they stand for.
 	if fqn := a.classKeywordFQN(word, ctx); fqn != "" {
 		if s := a.index.Lookup(fqn); s != nil {
-			return s, nil, symbolLocation(s)
+			return definitionTarget{sym: s, loc: symbolLocation(s)}
 		}
-		return nil, nil, nil
+		return definitionTarget{}
 	}
 
 	// Check for -> or :: access (method/property on a class)
@@ -331,7 +236,7 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 		owner := a.resolver.AccessOwnerType(ctx.JoinedLine, ctx.JoinedWordStart, source, pos, file)
 		classFQN := owner.BaseFQN()
 		if classFQN == "" {
-			return nil, nil, nil
+			return definitionTarget{}
 		}
 		member := a.resolver.FindMemberAnywhere(classFQN, word)
 		if member == nil {
@@ -349,9 +254,13 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 				ownerFQN = classFQN
 			}
 			ownerSym := a.index.Lookup(ownerFQN)
-			return member, ownerSym, symbolLocation(member)
+			return definitionTarget{sym: member, owner: ownerSym, receiver: classFQN, loc: symbolLocation(member)}
 		}
-		return nil, nil, nil
+		return definitionTarget{}
+	}
+
+	if member := a.index.MemberDeclaredAt(uri, pos, word); member != nil {
+		return definitionTarget{sym: member, owner: a.index.Lookup(member.ParentFQN), receiver: member.ParentFQN, loc: symbolLocation(member)}
 	}
 
 	// Resolve via use statements
@@ -359,7 +268,7 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 		for _, u := range ctx.Uses {
 			if u.Alias == word {
 				if s := a.index.Lookup(u.FullName); s != nil {
-					return s, nil, symbolLocation(s)
+					return definitionTarget{sym: s, loc: symbolLocation(s)}
 				}
 			}
 		}
@@ -367,7 +276,7 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 		fqn := a.resolver.ResolveClassName(word, file)
 		if fqn != word {
 			if s := a.index.Lookup(fqn); s != nil {
-				return s, nil, symbolLocation(s)
+				return definitionTarget{sym: s, loc: symbolLocation(s)}
 			}
 		}
 	}
@@ -375,7 +284,7 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 	// FQN with backslashes
 	if strings.Contains(word, "\\") {
 		if s := a.index.Lookup(word); s != nil {
-			return s, nil, symbolLocation(s)
+			return definitionTarget{sym: s, loc: symbolLocation(s)}
 		}
 	}
 
@@ -387,10 +296,10 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 	}
 	syms := a.index.LookupByName(lookupName)
 	if best := symbols.PickBestStandalone(syms, word); best != nil {
-		return best, nil, symbolLocation(best)
+		return definitionTarget{sym: best, loc: symbolLocation(best)}
 	}
 
-	return nil, nil, nil
+	return definitionTarget{}
 }
 
 func (a *Analyzer) definitionForTranslationKey(line string, character int) *protocol.Location {
@@ -1076,14 +985,30 @@ func (a *Analyzer) GetFoldingRanges(uri, source string) []protocol.FoldingRange 
 	return out
 }
 
+const maxWorkspaceSymbols = 500
+
+func emptyQueryScore(sym *symbols.Symbol) int {
+	if sym.IsClassLike() {
+		return 0
+	}
+	return 1
+}
+
 func (a *Analyzer) GetWorkspaceSymbols(query string) []protocol.SymbolInformation {
 	query = strings.TrimSpace(query)
 
-	candidates := a.index.SearchByPrefix(query)
-	if strings.Contains(query, "\\") {
+	var candidates []*symbols.Symbol
+	switch {
+	case query == "":
+		candidates = a.index.FirstDeclaredByName(maxWorkspaceSymbols, symbols.SymbolKind.IsClassLike)
+		candidates = append(candidates, a.index.FirstDeclaredByName(maxWorkspaceSymbols-len(candidates), func(k symbols.SymbolKind) bool { return !k.IsClassLike() })...)
+	case strings.Contains(query, "\\"):
+		candidates = a.index.SearchByPrefix(query)
 		if fqns, _ := a.index.SearchByFQNPrefix(strings.TrimPrefix(query, "\\")); len(fqns) > 0 {
 			candidates = append(candidates, fqns...)
 		}
+	default:
+		candidates = a.index.SearchByPrefix(query)
 	}
 
 	type scoredSymbol struct {
@@ -1106,8 +1031,8 @@ func (a *Analyzer) GetWorkspaceSymbols(query string) []protocol.SymbolInformatio
 
 		score := 3
 		switch {
-		case lowerQuery == "":
-			score = 3
+		case query == "":
+			score = emptyQueryScore(sym)
 		case strings.EqualFold(sym.Name, query):
 			score = 0
 		case strings.EqualFold(sym.FQN, strings.TrimPrefix(query, "\\")):
@@ -1131,6 +1056,7 @@ func (a *Analyzer) GetWorkspaceSymbols(query string) []protocol.SymbolInformatio
 		return scored[i].sym.URI < scored[j].sym.URI
 	})
 
+	scored = scored[:min(len(scored), maxWorkspaceSymbols)]
 	results := make([]protocol.SymbolInformation, 0, len(scored))
 	for _, item := range scored {
 		sym := item.sym
@@ -1329,6 +1255,9 @@ func (a *Analyzer) CopyReference(uri, source string, pos protocol.Position) []Re
 	} else {
 		classFQN = sym.ParentFQN
 	}
+	if parser.IsAnonymousClass(classFQN) {
+		return nil
+	}
 
 	// Fall back to treating the symbol itself as the class when ParentFQN is
 	// absent (e.g. standalone functions have no parent).
@@ -1428,6 +1357,10 @@ func (a *Analyzer) PrepareRename(uri, source string, pos protocol.Position) *pro
 		return nil
 	}
 
+	if sym != nil && sym.AliasOf != nil {
+		return nil
+	}
+
 	// If resolved as a known symbol, allow rename
 	if sym != nil {
 		// For properties, show the placeholder with the appropriate form
@@ -1524,7 +1457,7 @@ func (a *Analyzer) Rename(uri, source string, pos protocol.Position, newName str
 
 	// If it's a known symbol, rename it across the workspace
 	if sym != nil {
-		if symbols.IsBuiltin(sym) || sym.Source == symbols.SourceVendor || sym.Source == symbols.SourceGenerated {
+		if symbols.IsBuiltin(sym) || sym.Source == symbols.SourceVendor || sym.Source == symbols.SourceGenerated || sym.AliasOf != nil {
 			return nil
 		}
 		return a.renameSymbol(sym, newName, readDocument, uri, source)
@@ -1653,6 +1586,7 @@ func (a *Analyzer) GetCodeActions(uri, source string, params protocol.CodeAction
 
 	actions = append(actions, a.unknownClassCodeActions(uri, source, file, params)...)
 	actions = append(actions, a.importUnusedImportQuickFixes(uri, source, params)...)
+	actions = append(actions, IgnoreDiagnosticActions(uri, source, params)...)
 	if action := a.generateConstructorCodeAction(uri, source, parseResult, params.Context.Only, params.Range.Start); action != nil {
 		actions = append(actions, *action)
 	}

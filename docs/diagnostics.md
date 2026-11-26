@@ -97,6 +97,9 @@ It uses `vendor/bin/pint`, otherwise `pint` on your `PATH`, and Pint's own
 To keep PHPStan and drop the built-in checks, leave diagnostics on and turn off
 the built-in rules one by one in `diagnosticRules`.
 
+To silence a single finding, or every finding in some files, see
+[Ignoring a finding](#ignoring-a-finding).
+
 ### Rule severity
 
 `diagnosticRules` takes each rule's code with one of these values:
@@ -119,6 +122,81 @@ the built-in rules one by one in `diagnosticRules`.
 
 Rules you don't list stay on at their default severity. PHPStan and Pint
 findings can't be re-graded this way; use their own configuration.
+
+## Ignoring a finding
+
+To silence one finding, put a `@tusk-ignore` comment on the line or on its own
+line above it, naming the codes to ignore. A comment on its own line covers the
+next line of code and everything between, so markers can be stacked and can sit
+above a method's docblock and attributes. It reaches across at most one blank
+line; a marker followed by two blank lines covers nothing. The marker starts
+the comment (or, in a docblock, one of its lines), so a note such as
+`// TODO: drop @tusk-ignore` silences nothing:
+
+```php
+// @tusk-ignore unknown-member
+$legacy->magicCall();
+
+$value = $row->total; // @tusk-ignore unknown-member, undefined-variable (set by an include)
+```
+
+Codes are separated by commas, and each may be followed by a reason in
+parentheses; anything after the list is ignored, as is punctuation right after a
+code (`unused-variable: read by an include`). A bare `@tusk-ignore` ignores every
+finding on that line, and so does `@tusk-ignore: reason`. In a Blade view, use
+a Blade comment: `{{-- @tusk-ignore unknown-view --}}`; inside
+`@php … @endphp`, use a PHP comment. A directive or `{{ … }}` echo that spans
+several lines counts as one line: a marker above it, or after its end, covers
+all of it, and the quick fix puts the marker above the line it starts on. This
+holds for the directives and conditionals your service providers register
+(`Blade::directive`, `Blade::if`) as well as Blade's own.
+
+Findings from external tools are named with the tool in front of their code:
+`@tusk-ignore phpstan:argument.type` ignores one PHPStan identifier, and
+`@tusk-ignore phpstan` ignores all of PHPStan's findings on the line. Pint
+reports a line once for all the fixers that would change it; `pint:single_quote`
+ignores that line when `single_quote` is one of them. `tusk-php` names every
+Tusk PHP finding. The "Ignore … on this line" quick fix writes the comment for
+you, above any docblock and attributes, offering one action per Pint fixer. For
+PHPStan it writes PHPStan's own `@phpstan-ignore` at the end of the line, the
+one place PHPStan reads it however the declaration is laid out, so PHPStan in
+CI agrees.
+
+Comments already written for PHPStan work as they are, with PHPStan's rules for
+which line they cover: a `@phpstan-ignore` on its own line and
+`@phpstan-ignore-next-line` cover the very next line only, not code below a
+docblock, another comment or a blank line. `@phpstan-ignore-line` and
+`@phpstan-ignore-next-line` silence PHPStan's and Tusk PHP's findings on their
+line, but not Pint's.
+`@phpstan-ignore <identifier>, …` silences those PHPStan identifiers, and the
+Tusk PHP finding that matches each identifier too, for example
+`method.notFound` → `unknown-member`, `variable.undefined` →
+`undefined-variable`, `arguments.count` → `argument-count-mismatch` and
+`deadCode.unreachable` → `unreachable-code`. A bare `@phpstan-ignore`, which
+PHPStan rejects, silences nothing.
+
+To ignore findings across files, list rules under `diagnosticIgnore` in
+`.tusk-php.json`. Each rule has any of `code`, `path` and `message` (a regular
+expression); a finding is ignored when it matches everything its rule gives.
+`path` is a glob relative to the project root, read like a `.gitignore` entry:
+`**` matches any number of directories, a directory covers everything below it,
+a pattern without a `/` (`*.blade.php`) matches at any depth, and a leading `/`
+anchors it to the root. `./` in front and Windows `\` separators are accepted:
+
+```json
+{
+  "diagnosticIgnore": [
+    { "path": "app/Legacy/**" },
+    { "code": "unknown-member", "message": "on 'LegacyModel'$" },
+    { "code": "phpstan:missingType.iterableValue", "path": "tests/**" }
+  ]
+}
+```
+
+A rule with an unknown `code` (a rule that doesn't exist, or a tool other than
+`phpstan` and `pint`) or an invalid `path` or `message` is skipped, and the
+editor shows which rule and why; the rest of the configuration still applies. Both kinds of suppression apply in the editor and to
+`tusk-php check`.
 
 ## Where settings come from
 

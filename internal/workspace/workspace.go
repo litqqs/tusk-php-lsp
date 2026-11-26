@@ -2,6 +2,7 @@ package workspace
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -51,6 +52,7 @@ type Bootstrapped struct {
 	SchemaCache     *models.SchemaCache
 	Schema          *models.Schema
 
+	exclude         excludeRules
 	autoloadOnce    sync.Once
 	autoloadEntries []composer.AutoloadEntry
 	projectFiles    *projectFiles
@@ -104,6 +106,7 @@ func New(opts Options) *Bootstrapped {
 		Aliases:         aliases,
 		SymfonyCommands: commands,
 		SchemaCache:     models.NewSchemaCache(),
+		exclude:         newExcludeRules(cfg.ExcludePaths),
 		projectFiles:    newProjectFiles(cfg.MaxIndexFiles),
 	}
 }
@@ -142,14 +145,24 @@ func Build(ctx context.Context, opts Options) (*Bootstrapped, error) {
 	return ws, nil
 }
 
-func (ws *Bootstrapped) IndexWorkspace() int {
+type IndexedFiles struct {
+	Count     int
+	Truncated bool
+}
+
+func MaxIndexFilesWarning(limit int) string {
+	return fmt.Sprintf("Stopped indexing at maxIndexFiles (%d files); classes in the rest of the workspace will be unknown. Set maxIndexFiles to 0 to index everything.", limit)
+}
+
+func (ws *Bootstrapped) IndexWorkspace() IndexedFiles {
 	if ws == nil {
-		return 0
+		return IndexedFiles{}
 	}
 
 	ws.logf("Indexing workspace: %s", ws.RootPath)
 
 	ws.projectFiles.begin()
+	truncated := false
 	var ideHelperFiles []string
 	var fn filepath.WalkFunc
 	deep := 0
@@ -165,7 +178,7 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 			path = strings.ReplaceAll(path, "\\", "/")
 		}
 		if info.IsDir() {
-			if ws.excludedDir(filepath.Base(path)) {
+			if ws.excludedDir(path) {
 				return filepath.SkipDir
 			}
 			return nil
@@ -205,7 +218,8 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 			return nil
 		}
 		if !ws.projectFiles.admit(path) {
-			ws.logf("Stopped indexing at maxIndexFiles (%d files); classes in the rest of the workspace will be unknown. Set maxIndexFiles to 0 to index everything.", ws.Config.MaxIndexFiles)
+			truncated = true
+			ws.logf("%s", MaxIndexFilesWarning(ws.Config.MaxIndexFiles))
 			return filepath.SkipAll
 		}
 		if IsIDEHelperFile(path) {
@@ -229,11 +243,15 @@ func (ws *Bootstrapped) IndexWorkspace() int {
 
 	count := ws.projectFiles.finish()
 	ws.logf("Indexed %d PHP files", count)
-	return count
+	return IndexedFiles{Count: count, Truncated: truncated}
 }
 
-func (ws *Bootstrapped) excludedDir(name string) bool {
-	return slices.Contains(ws.Config.ExcludePaths, name)
+func (ws *Bootstrapped) excludedDir(path string) bool {
+	rel, err := filepath.Rel(ws.RootPath, path)
+	if err != nil || rel == "." {
+		return false
+	}
+	return ws.exclude.excludes(filepath.ToSlash(rel))
 }
 
 func (ws *Bootstrapped) IndexComposerDependencies() int {

@@ -3,6 +3,7 @@ package rule
 import (
 	"fmt"
 	"slices"
+	"strings"
 )
 
 type Code string
@@ -112,3 +113,92 @@ const (
 	SourcePHPStan ExternalSource = "phpstan"
 	SourcePint    ExternalSource = "pint"
 )
+
+var ExternalSources = []ExternalSource{SourcePHPStan, SourcePint}
+
+const pintFixerSeparator = ", "
+
+func PintCode(fixers []string) string {
+	return strings.Join(fixers, pintFixerSeparator)
+}
+
+func parseExternalSource(s string) (ExternalSource, bool) {
+	source := ExternalSource(s)
+	return source, slices.Contains(ExternalSources, source)
+}
+
+func identifiers(source, code string) []string {
+	if source == string(SourcePint) {
+		return strings.Split(code, pintFixerSeparator)
+	}
+	return []string{code}
+}
+
+type Target struct {
+	source string
+	code   string
+}
+
+func NativeTarget(code Code) Target {
+	return Target{source: string(SourceTusk), code: string(code)}
+}
+
+func AllNativeTarget() Target {
+	return Target{source: string(SourceTusk)}
+}
+
+func ExternalTarget(source ExternalSource, identifier string) Target {
+	return Target{source: string(source), code: identifier}
+}
+
+func TargetsOf(source, code string) ([]Target, error) {
+	if external, ok := parseExternalSource(source); ok {
+		ids := identifiers(source, code)
+		targets := make([]Target, len(ids))
+		for i, id := range ids {
+			targets[i] = ExternalTarget(external, id)
+		}
+		return targets, nil
+	}
+	if Source(source) != SourceTusk {
+		return nil, fmt.Errorf("unknown diagnostic source %q", source)
+	}
+	parsed, err := ParseCode(code)
+	if err != nil {
+		return nil, err
+	}
+	return []Target{NativeTarget(parsed)}, nil
+}
+
+func ParseTarget(s string) (Target, error) {
+	if s == string(SourceTusk) {
+		return AllNativeTarget(), nil
+	}
+	name, identifier, qualified := strings.Cut(s, ":")
+	if external, ok := parseExternalSource(name); ok {
+		return ExternalTarget(external, identifier), nil
+	}
+	if qualified {
+		return Target{}, fmt.Errorf("unknown diagnostic source %q", name)
+	}
+	code, err := ParseCode(s)
+	if err != nil {
+		return Target{}, err
+	}
+	return NativeTarget(code), nil
+}
+
+func (t Target) Matches(source, code string) bool {
+	return t.source == source && (t.code == "" || slices.Contains(identifiers(source, code), t.code))
+}
+
+func (t Target) String() string {
+	switch {
+	case t.code == "":
+		return t.source
+	case t.source == string(SourceTusk):
+		return t.code
+	default:
+		return t.source + ":" + t.code
+	}
+}

@@ -7,12 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Building from source needs Go 1.27** or later (was 1.25).
+- A request whose parameters can't be read, or a `workspace/executeCommand` call with a missing or wrongly typed argument, now gets an `Invalid params` error naming the method and the argument, and the server log records it. Before, commands answered with an empty result, and a malformed notification was dropped without a trace.
+
+### Fixed
+
+- The "stopped indexing at maxIndexFiles" warning no longer appears when the workspace has exactly `maxIndexFiles` PHP files; it shows only when files were actually left out.
+
+## [0.16.0] - 2026-11-25
+
+Thanks to [@stubbedev](https://github.com/stubbedev) and [@AJenbo](https://github.com/AJenbo), who contributed to this release.
+
 ### Added
 
 - **Type hierarchy** (`textDocument/prepareTypeHierarchy`): from a class, interface, trait or enum, browse up to its parent, interfaces and traits, and down to the classes that extend or implement it, one level at a time. Deprecated types are marked.
-- **`unknown-named-argument`** (error): a named argument the function, method or constructor has no parameter for, such as `new User(nmae: 'x')` or `$user->rename(nme: 'y')`, which PHP throws on. Calls to variadic functions, to classes with `__call`, with an argument unpacked by `...`, and to PHP's own functions are left alone.
+- **`unknown-named-argument`** (error): a named argument the function, method or constructor has no parameter for, such as `new User(nmae: 'x')` or `$user->rename(nme: 'y')`, which PHP throws on. Calls to variadic functions, to classes with `__call` or `__callStatic`, with an argument unpacked by `...`, and to PHP's own functions are left alone. A function or class declared more than once, such as a helper guarded by `if (!function_exists('h'))` in two packages, is reported only when none of its declarations takes the argument, each with the methods of its own traits and parent.
 - **Document links**: `require` and `include` paths built from `__DIR__`, `__FILE__`, `dirname()`, `DIRECTORY_SEPARATOR` and string literals, Laravel's path helpers (`base_path('routes/web.php')`, `resource_path('views')` and the rest, and `config_path()` or `storage_path()` alone link to their directory) and URLs in comments are clickable. Only files and directories that exist are linked, and a path built from variables never is.
 - **`unused-private-constant`** (hint, shown faded): a private class constant nothing reads, found from the class's own code, its attributes (`#[AsCommand(name: self::NAME)]`) and its traits. `constant('self::X')` and `defined('self::X')` count as reads of `X`; a class that fetches constants by a computed name (`self::{$name}`, `constant($name)`) or through reflection (`getConstants()`, `getConstant()`, `ReflectionClassConstant`) isn't checked.
+- **Ignore a diagnostic where it is**: a `// @tusk-ignore unknown-member` comment on the line, or on its own line above it, silences that finding; a bare `@tusk-ignore` silences everything on the line. The marker has to start the comment, so `// TODO: drop @tusk-ignore` silences nothing. In Blade views use `{{-- @tusk-ignore … --}}`; above a directive or echo that spans several lines, such as an `@include` with a multi-line array, it covers the whole of it. PHPStan and Pint findings are named `phpstan:<identifier>` and `pint:<rule>`.
+- **"Ignore … on this line" quick fix** writes that comment for you, above the docblock and attributes so they stay attached. For PHPStan findings it writes PHPStan's own `@phpstan-ignore` at the end of the line, so PHPStan agrees.
+- **Existing `@phpstan-ignore` comments are honoured**, so a codebase that already silences PHPStan needs no changes: `@phpstan-ignore-line` and `@phpstan-ignore-next-line` silence PHPStan's and Tusk PHP's findings on that line (not Pint's), and `@phpstan-ignore <identifier> (reason), …` silences those identifiers and the matching Tusk PHP finding (`method.notFound` → `unknown-member`, `class.notFound` → `unknown-class`, `variable.undefined` → `undefined-variable`, and 31 more).
+- **Ignore diagnostics across files** with `diagnosticIgnore` rules in `.tusk-php.json`, matching by code, by a path glob read like a `.gitignore` entry (`app/Legacy`, `*.blade.php`), and by a regular expression on the message. A rule that can't be read is skipped and shown in the editor; the rest of the configuration still applies. Both kinds of suppression apply in the editor and to `tusk-php check`. See [Ignoring a finding](docs/diagnostics.md#ignoring-a-finding).
+- **Go to declaration** (`textDocument/declaration`): on a method, property or constant, it opens the interface, parent class or trait that first declares it, such as the interface method a class implements or the `casts()` a Laravel model's `HasAttributes` trait declares, while go to definition keeps opening the implementation. PHP's own interfaces (`ArrayAccess`, `JsonSerializable`) are passed over for your project's declaration below them. On a method's own name, as on `public function handle()`, it opens what that class's method implements, never a same-named method of another class. It works in Blade views too.
 
 ### Changed
 
@@ -21,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Go to definition on the name of a method, constant or enum case where it's declared stays on it instead of jumping to a same-named member of another class.
+- **`argument-count-mismatch`** no longer warns about a call to a function or class declared in more than one file when one of the declarations takes that many arguments.
+- A function or class declared in two files no longer goes missing from go-to-definition, hover and completion when one of those files is edited or deleted. A class declared twice now has the traits, interfaces and parent of the declaration in use, instead of those of both, in hover, completion, go to implementation and the type hierarchy.
 - **Inline variable** is offered in editors that only ask for the code action kinds the server announces: its kind, `refactor.inline`, was missing from the list.
 - **Answers are right from the first request.** While the workspace is still being indexed, a class the editor asks about is read straight away from where Composer's autoload says it lives, with its parents, interfaces and traits, and a project model read this way gets its relations at once and keeps them. Only files indexing would read are loaded: `excludePaths` and `maxIndexFiles` apply, and a class asked for in another case than its file name doesn't appear twice. Before, a class or vendor helper indexed later than the request (such as `Str::of()` in a Laravel app) had no definition, hover or completion until indexing finished. On a 9,700-file Laravel app the first correct cross-file answer now comes after about 80 ms instead of 280 ms.
 - **Doctrine** entity analysis no longer changes property types while a request is reading them.
