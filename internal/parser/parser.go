@@ -902,7 +902,7 @@ type structParser struct {
 	// class body being parsed, where @use gives the trait's type arguments.
 	traitUseDocs      []string
 	isGlobalNamespace bool
-	traitRules   TraitAdaptations
+	traitRules        TraitAdaptations
 	// blocks holds the braces open at the top level: true for a braced
 	// namespace, false for any other block (if, else, try, …).
 	blocks []bool
