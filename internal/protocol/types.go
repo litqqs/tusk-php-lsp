@@ -500,6 +500,8 @@ type ServerCapabilities struct {
 	SelectionRangeProvider    bool                      `json:"selectionRangeProvider,omitempty"`
 	SemanticTokensProvider    *SemanticTokensOptions    `json:"semanticTokensProvider,omitempty"`
 	Experimental              *ExperimentalCapabilities `json:"experimental,omitempty"`
+
+	DocumentFormattingProvider bool `json:"documentFormattingProvider"`
 }
 
 // ExperimentalCapabilities advertises the server's requests outside the LSP spec.

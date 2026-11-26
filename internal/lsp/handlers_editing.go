@@ -1,6 +1,8 @@
 package lsp
 
 import (
+	"encoding/json"
+
 	"github.com/Tusk-PHP/lsp/internal/analyzer"
 	"github.com/Tusk-PHP/lsp/internal/composer/cardhover"
 	"github.com/Tusk-PHP/lsp/internal/protocol"
