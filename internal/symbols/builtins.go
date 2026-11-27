@@ -1,6 +1,7 @@
 package symbols
 
 import (
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -297,6 +298,8 @@ func (idx *Index) RegisterBuiltinsForProfile(profile BuiltinProfile) {
 // func (idx *Index) registerBuiltinRegistry(profile BuiltinProfile) {
 // 	idx.mu.Lock()
 // 	defer idx.mu.Unlock()
+//	idx.registerBuiltinRegistryLocked(profile)
+//}
 
 // 	for _, fn := range builtinFunctions {
 // 		if !builtinAvailable(fn.Name, profile) {
@@ -434,33 +437,41 @@ func parseBuiltinMajorMinor(version string) (int, int) {
 }
 
 func (idx *Index) addBuiltinFunctionLocked(name string, params []ParamInfo, ret string, doc string) {
-	sym := &Symbol{Name: name, FQN: name, Kind: KindFunction, Source: SourceBuiltin, URI: "builtin", ReturnType: ret, DocComment: doc, Params: params}
-	idx.symbols[sym.FQN] = sym
-	idx.nameIndex[sym.Name] = appendUnique(idx.nameIndex[sym.Name], sym.FQN)
-	idx.fileSymbols[sym.URI] = appendUniqueSymbol(idx.fileSymbols[sym.URI], sym)
-	idx.sortedNamesDirty = true
-	idx.sortedFQNsDirty = true
-	idx.namespaceIndex[namespaceForFQN(sym.FQN)] = appendUnique(idx.namespaceIndex[namespaceForFQN(sym.FQN)], sym.FQN)
-	idx.addFoldLocked(sym.FQN)
+	idx.storeBuiltinLocked(&Symbol{Name: name, FQN: name, Kind: KindFunction, Source: SourceBuiltin, URI: "builtin", ReturnType: ret, DocComment: doc, Params: params})
 }
 
 func (idx *Index) addBuiltinClassLikeLocked(name string, doc string) {
-	sym := &Symbol{Name: name, FQN: name, Kind: KindClass, Source: SourceBuiltin, URI: "builtin", DocComment: doc}
-	idx.symbols[sym.FQN] = sym
-	idx.nameIndex[sym.Name] = appendUnique(idx.nameIndex[sym.Name], sym.FQN)
-	idx.fileSymbols[sym.URI] = appendUniqueSymbol(idx.fileSymbols[sym.URI], sym)
-	idx.sortedNamesDirty = true
-	idx.sortedFQNsDirty = true
-	idx.namespaceIndex[namespaceForFQN(sym.FQN)] = appendUnique(idx.namespaceIndex[namespaceForFQN(sym.FQN)], sym.FQN)
-	idx.addFoldLocked(sym.FQN)
+	idx.storeBuiltinLocked(&Symbol{Name: name, FQN: name, Kind: KindClass, Source: SourceBuiltin, URI: "builtin", DocComment: doc})
 }
 
-func appendUniqueSymbol(symbols []*Symbol, sym *Symbol) []*Symbol {
-	for i, existing := range symbols {
-		if existing.FQN == sym.FQN {
-			symbols[i] = sym
-			return symbols
-		}
+func (idx *Index) storeBuiltinLocked(sym *Symbol) {
+	prev := idx.symbols[sym.FQN]
+	switch {
+	case prev == nil:
+		idx.storeSymbolLocked(sym, pendingRemovals{})
+		idx.fileSymbols[sym.URI] = append(idx.fileSymbols[sym.URI], sym)
+	case prev.URI == sym.URI:
+		idx.symbols[sym.FQN] = sym
+		idx.fileSymbols[sym.URI] = withSymbolReplaced(idx.fileSymbols[sym.URI], prev, sym)
+	default:
+		idx.shadowBuiltinLocked(sym)
 	}
-	return append(symbols, sym)
+}
+
+func (idx *Index) shadowBuiltinLocked(sym *Symbol) {
+	defs := idx.shadowed[sym.FQN]
+	if i := slices.IndexFunc(defs, func(def *Symbol) bool { return def.Source == SourceBuiltin }); i >= 0 {
+		if defs[i].URI == sym.URI {
+			idx.fileSymbols[sym.URI] = withSymbolReplaced(idx.fileSymbols[sym.URI], defs[i], sym)
+		} else {
+			idx.fileSymbols[sym.URI] = append(idx.fileSymbols[sym.URI], sym)
+		}
+		defs[i] = sym
+		return
+	}
+	if idx.shadowed == nil {
+		idx.shadowed = make(map[string][]*Symbol)
+	}
+	idx.shadowed[sym.FQN] = append([]*Symbol{sym}, defs...)
+	idx.fileSymbols[sym.URI] = append(idx.fileSymbols[sym.URI], sym)
 }

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"unicode"
 
+	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
 	"github.com/Tusk-PHP/lsp/internal/parser"
+	"github.com/Tusk-PHP/lsp/internal/protocol"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 )
-
-const eloquentModelFQN = "Illuminate\\Database\\Eloquent\\Model"
 
 // Eloquent relation types grouped by cardinality.
 var singularRelations = map[string]bool{
@@ -55,14 +55,14 @@ var eloquentStaticForwards = []struct {
 	returnType string
 	params     []symbols.ParamInfo
 }{
-	{"withTrashed", "Illuminate\\Database\\Eloquent\\Builder<{MODEL}>", nil},
-	{"onlyTrashed", "Illuminate\\Database\\Eloquent\\Builder<{MODEL}>", nil},
+	{"withTrashed", frameworklaravel.EloquentBuilder + "<{MODEL}>", nil},
+	{"onlyTrashed", frameworklaravel.EloquentBuilder + "<{MODEL}>", nil},
 }
 
 // AnalyzeEloquentModels scans all classes extending Eloquent Model and injects
 // virtual properties for relations and accessors/mutators.
 func AnalyzeEloquentModels(index *symbols.Index, rootPath string) {
-	models := index.GetDescendants(eloquentModelFQN)
+	models := index.GetDescendants(frameworklaravel.EloquentModel)
 	for _, model := range models {
 		injectEloquentStaticMethods(index, model)
 		analyzeModel(index, model)
@@ -145,7 +145,7 @@ func analyzeModelSource(index *symbols.Index, model *symbols.Symbol, source stri
 		returnShort := shortClassName(method.ReturnType.Name)
 		if allRelationTypes[returnShort] {
 			body := extractMethodBody(lines, method.StartLine, method.EndLine)
-			injectRelation(index, model, method.Name, returnShort, body, resolve)
+			injectRelation(index, model, method.Name, methodNameRange(method), returnShort, body, resolve)
 			continue
 		}
 
@@ -155,7 +155,7 @@ func analyzeModelSource(index *symbols.Index, model *symbols.Symbol, source stri
 			if match := relationCallRe.FindStringSubmatch(body); match != nil {
 				relType := match[1]
 				relShort := ucFirst(relType)
-				injectRelation(index, model, method.Name, relShort, body, resolve)
+				injectRelation(index, model, method.Name, methodNameRange(method), relShort, body, resolve)
 				continue
 			}
 		}
@@ -178,6 +178,7 @@ func analyzeModelSource(index *symbols.Index, model *symbols.Symbol, source stri
 				Type:       resolve(retType),
 				IsVirtual:  true,
 				DocComment: "Accessor from " + method.Name + "()",
+				Range:      methodNameRange(method),
 			})
 			continue
 		}
@@ -205,13 +206,14 @@ func analyzeModelSource(index *symbols.Index, model *symbols.Symbol, source stri
 				Type:       resolve(retType),
 				IsVirtual:  true,
 				DocComment: "Accessor from " + method.Name + "()",
+				Range:      methodNameRange(method),
 			})
 		}
 	}
 }
 
 // injectRelation creates virtual property and ensures the method also has the right return type.
-func injectRelation(index *symbols.Index, model *symbols.Symbol, methodName, relType, body string, resolve func(string) string) {
+func injectRelation(index *symbols.Index, model *symbols.Symbol, methodName string, methodRange protocol.Range, relType, body string, resolve func(string) string) {
 	// Extract related model from body: $this->hasMany(Post::class)
 	relatedModel := ""
 	if match := relationCallRe.FindStringSubmatch(body); match != nil {
@@ -239,7 +241,18 @@ func injectRelation(index *symbols.Index, model *symbols.Symbol, methodName, rel
 		Type:       propType,
 		IsVirtual:  true,
 		DocComment: relType + " relation",
+		Range:      methodRange,
 	})
+}
+
+// methodNameRange is where the index puts the method's own symbol. A
+// property made from a method (a relation, an accessor) points there, so go
+// to definition on $user->posts opens posts() instead of the top of the file.
+func methodNameRange(m parser.MethodNode) protocol.Range {
+	return protocol.Range{
+		Start: protocol.Position{Line: m.StartLine, Character: m.StartCol},
+		End:   protocol.Position{Line: m.StartLine, Character: m.StartCol + len(m.Name)},
+	}
 }
 
 // extractMethodBody returns the source text between startLine and endLine (0-indexed lines array).

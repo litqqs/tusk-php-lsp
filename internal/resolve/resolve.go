@@ -6,13 +6,11 @@ package resolve
 
 import (
 	"regexp"
-	"runtime"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 
 	"github.com/Tusk-PHP/lsp/internal/parser"
 	"github.com/Tusk-PHP/lsp/internal/phparray"
@@ -29,33 +27,24 @@ import (
 // are 2–8 hops) but safely below the goroutine stack limit.
 const maxResolveDepth = 32
 
-type resolutionState struct {
-	depth  int
-	active map[string]int
-}
-
-// Resolver provides shared resolution methods that depend on the symbol index.
-type Resolver struct {
+// Engine holds what resolution keeps between requests: the index, the hooks
+// that wire it to other providers, and the caches. A provider builds one
+// Engine and starts each request with Engine.Resolver. It is safe for
+// concurrent use.
+type Engine struct {
 	Index *symbols.Index
 	// ChainResolver is an optional callback to resolve method chain expressions
 	// like "Category::first()" or "$foo->bar()->baz()". Set by the completion/hover
 	// provider that has access to the full chain resolution logic.
-	ChainResolver func(expr string, source string, pos protocol.Position, file *parser.FileNode) string
+	ChainResolver func(r *Resolver, expr string, source string, pos protocol.Position, file *parser.FileNode) string
 	// TypedChainResolver is like ChainResolver but returns a ResolvedType
 	// preserving generic parameters. Used for variable type inference that
 	// needs to carry generic context through assignments.
-	TypedChainResolver func(expr string, source string, pos protocol.Position, file *parser.FileNode) ResolvedType
+	TypedChainResolver func(r *Resolver, expr string, source string, pos protocol.Position, file *parser.FileNode) ResolvedType
 	// ContainerCall, when set, gives the class a container call such as
 	// app('request') or $container->get(Foo::class) resolves to, "-" for one
 	// that gives a value rather than an object, or "" when it isn't one.
-	ContainerCall func(callExpr, source string, file *parser.FileNode) string
-	// Resolution state is tracked per goroutine so recursive chains are guarded
-	// without unrelated concurrent requests sharing the same depth budget.
-	stateMu sync.Mutex
-	states  map[uint64]*resolutionState
-	// guardCuts counts the times a guard stopped a resolution, so a cached
-	// answer is never one that was cut short.
-	guardCuts atomic.Uint64
+	ContainerCall func(r *Resolver, callExpr, source string, file *parser.FileNode) string
 
 	// The last source's scopes, since one request asks about many variables.
 	scopeMu     sync.Mutex
@@ -75,69 +64,71 @@ type Resolver struct {
 	parsed parseCache
 }
 
-// NewResolver creates a resolver with the given symbol index.
-func NewResolver(index *symbols.Index) *Resolver {
-	return &Resolver{Index: index, states: make(map[uint64]*resolutionState)}
+// Resolver resolves types for one request. It carries that request's
+// recursion guard (depth, the keys in progress and the count of cuts) without
+// locks, so it belongs to the goroutine that runs the request and is never
+// shared or kept after it.
+type Resolver struct {
+	*Engine
+	depth  int
+	active map[string]bool
+	cuts   int
 }
 
-func currentGID() uint64 {
-	var buf [64]byte
-	n := runtime.Stack(buf[:], false)
-	parts := strings.Fields(string(buf[:n]))
-	if len(parts) < 2 {
-		return 0
+// NewEngine returns an Engine over index with no hooks set.
+func NewEngine(index *symbols.Index) *Engine {
+	return &Engine{Index: index}
+}
+
+// Resolver starts a request: a Resolver sharing e's index, hooks and caches,
+// with a guard of its own.
+func (e *Engine) Resolver() *Resolver {
+	return &Resolver{Engine: e}
+}
+
+// NewResolver returns a Resolver for one request over a new Engine on index,
+// for callers that resolve once and keep no caches.
+func NewResolver(index *symbols.Index) *Resolver {
+	return NewEngine(index).Resolver()
+}
+
+// DelegateChains sets e's ChainResolver to fn, another provider's chain
+// resolution, which starts its own request: the calling Resolver is not
+// passed on, so fn must not call back into e.
+func (e *Engine) DelegateChains(fn func(expr string, source string, pos protocol.Position, file *parser.FileNode) string) {
+	e.ChainResolver = func(_ *Resolver, expr string, source string, pos protocol.Position, file *parser.FileNode) string {
+		return fn(expr, source, pos, file)
 	}
-	gid, err := strconv.ParseUint(parts[1], 10, 64)
-	if err != nil {
-		return 0
+}
+
+// DelegateTypedChains is DelegateChains for TypedChainResolver.
+func (e *Engine) DelegateTypedChains(fn func(expr string, source string, pos protocol.Position, file *parser.FileNode) ResolvedType) {
+	e.TypedChainResolver = func(_ *Resolver, expr string, source string, pos protocol.Position, file *parser.FileNode) ResolvedType {
+		return fn(expr, source, pos, file)
 	}
-	return gid
 }
 
 func (r *Resolver) enterResolution(key string) (func(), bool) {
 	return r.enterGuard(key, true)
 }
 
-// enterGuard is enterResolution; a cut counts as one (guardCuts) only when
+// enterGuard is enterResolution; a cut counts as one (cuts) only when
 // counted is set, for a caller that expects the cycle and handles it.
 func (r *Resolver) enterGuard(key string, counted bool) (func(), bool) {
-	gid := currentGID()
-
-	r.stateMu.Lock()
-	st := r.states[gid]
-	if st == nil {
-		st = &resolutionState{active: make(map[string]int)}
-		r.states[gid] = st
-	}
-	if st.depth >= maxResolveDepth || st.active[key] > 0 {
-		// Running out of depth always counts: the answer was cut short.
-		depthCut := st.active[key] == 0
-		r.stateMu.Unlock()
-		if counted || depthCut {
-			r.guardCuts.Add(1)
+	if r.depth >= maxResolveDepth || r.active[key] {
+		if counted || !r.active[key] {
+			r.cuts++
 		}
 		return nil, false
 	}
-	st.depth++
-	st.active[key]++
-	r.stateMu.Unlock()
-
+	if r.active == nil {
+		r.active = make(map[string]bool)
+	}
+	r.depth++
+	r.active[key] = true
 	return func() {
-		r.stateMu.Lock()
-		defer r.stateMu.Unlock()
-		st := r.states[gid]
-		if st == nil {
-			return
-		}
-		if st.active[key] > 1 {
-			st.active[key]--
-		} else {
-			delete(st.active, key)
-		}
-		st.depth--
-		if st.depth <= 0 {
-			delete(r.states, gid)
-		}
+		delete(r.active, key)
+		r.depth--
 	}, true
 }
 
@@ -276,16 +267,45 @@ func (r *Resolver) FindMember(classFQN, memberName string) *symbols.Symbol {
 	return nil
 }
 
-// FindAccessedMember looks up a member the way it is used: a call finds a
-// method before a property of the same name, as with a `$timezone` property
-// and a `timezone()` method, and a plain access finds the property first.
-func (r *Resolver) FindAccessedMember(classFQN, memberName string, call bool) *symbols.Symbol {
+type MemberAccess uint8
+
+const (
+	PropertyAccess MemberAccess = iota
+	ConstantAccess
+	CallAccess
+)
+
+func MemberAccessOf(called, static bool, name string) MemberAccess {
+	switch {
+	case called:
+		return CallAccess
+	case static && !strings.HasPrefix(name, "$"):
+		return ConstantAccess
+	}
+	return PropertyAccess
+}
+
+func (a MemberAccess) names(m *symbols.Symbol) bool {
+	switch a {
+	case CallAccess:
+		return m.Kind == symbols.KindMethod
+	case ConstantAccess:
+		return m.Kind == symbols.KindConstant || m.Kind == symbols.KindEnumCase
+	}
+	return m.Kind == symbols.KindProperty
+}
+
+func (a MemberAccess) reachesMagic() bool {
+	return a != ConstantAccess
+}
+
+func (r *Resolver) FindAccessedMember(classFQN, memberName string, access MemberAccess) *symbols.Symbol {
 	var fallback *symbols.Symbol
 	for _, m := range r.Index.ClassMembersNamed(classFQN, memberName) {
-		if (m.Kind == symbols.KindMethod) == call {
+		if access.names(m) {
 			return m
 		}
-		if fallback == nil {
+		if fallback == nil && access.reachesMagic() {
 			fallback = m
 		}
 	}
@@ -529,9 +549,10 @@ func extractLeadingVariable(expr string) string {
 	return expr[:end]
 }
 
-// extractFunctionCallName returns the short function name if expr starts with
-// a (optionally namespace-qualified) identifier followed by `(`, otherwise "".
-// e.g. "get_class($x)" → "get_class", "\Some\ns\fn($x)" → "fn".
+// extractFunctionCallName returns the function name as written, qualification
+// included, if expr starts with a (optionally namespace-qualified) identifier
+// followed by `(`, otherwise "".
+// e.g. "get_class($x)" → "get_class", "\Some\ns\fn($x)" → "\Some\ns\fn".
 func extractFunctionCallName(expr string) string {
 	if expr == "" {
 		return ""
@@ -559,11 +580,7 @@ func extractFunctionCallName(expr string) string {
 	if end >= len(expr) || expr[end] != '(' {
 		return ""
 	}
-	name := expr[start:end]
-	if idx := strings.LastIndexByte(name, '\\'); idx >= 0 {
-		name = name[idx+1:]
-	}
-	return name
+	return expr[:end]
 }
 
 func (r *Resolver) resolveMethodParamTypeTyped(method *parser.MethodNode, varName string, file *parser.FileNode) ResolvedType {
@@ -745,7 +762,7 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 	key, memo := r.varMemoKeyAt(vs, varName, lines, pos)
 	// An answer a guard against cycles cut short isn't kept. Guards tripped
 	// by other requests at the same time only cost a missed cache entry.
-	cutsBefore := r.guardCuts.Load()
+	cutsBefore := r.cuts
 	if memo {
 		if rt, ok := r.varMemoGet(key); ok {
 			return rt
@@ -755,7 +772,7 @@ func (r *Resolver) ResolveVariableTypeTyped(varName string, lines []string, pos 
 	// What asserting calls, @param-out and self-out since its last
 	// assignment say about it.
 	rt = r.narrowVariable(varName, rt, lines, pos, file)
-	if memo && r.guardCuts.Load() == cutsBefore {
+	if memo && r.cuts == cutsBefore {
 		r.varMemoPut(key, rt)
 	}
 	return rt
@@ -974,18 +991,10 @@ func (r *Resolver) resolveVariableTypeTypedBase(varName string, lines []string, 
 		// A call followed by ->member, ::member or [offset] is a chain: what the
 		// function returns is only its start, so the chain resolvers below
 		// decide it.
-		if funcName := extractFunctionCallName(rhs); funcName != "" && r.Index != nil {
-			steps, origin, ok := parseChain(strings.TrimSuffix(rhs, ";"))
-			if !ok || len(steps) == 0 {
-				if ok && origin.kind == 'f' {
-					if rt := r.FunctionCallType(origin.text, origin.args, exprCtx); !rt.IsEmpty() {
-						return rt
-					}
-				}
-				for _, sym := range r.Index.LookupByName(funcName) {
-					if sym.Kind == symbols.KindFunction && sym.ReturnType != "" {
-						return ResolvedType{FQN: sym.ReturnType}
-					}
+		if extractFunctionCallName(rhs) != "" && r.Index != nil {
+			if steps, origin, ok := parseChain(strings.TrimSuffix(rhs, ";")); ok && len(steps) == 0 && origin.kind == 'f' {
+				if rt := r.FunctionCallType(origin.text, origin.args, exprCtx); !rt.IsEmpty() {
+					return rt
 				}
 			}
 		}
@@ -1008,7 +1017,7 @@ func (r *Resolver) resolveVariableTypeTypedBase(varName string, lines []string, 
 
 		// Fall back to standard chain resolver
 		if r.ChainResolver != nil && (strings.Contains(rhs, "->") || strings.Contains(rhs, "::")) {
-			if t := r.ChainResolver(rhs, r.JoinLines(lines), pos, file); t != "" {
+			if t := r.ChainResolver(r, rhs, r.JoinLines(lines), pos, file); t != "" {
 				return ResolvedType{FQN: t}
 			}
 		}
@@ -1019,50 +1028,6 @@ func (r *Resolver) resolveVariableTypeTypedBase(varName string, lines []string, 
 	// Fall back to standard resolution
 	fqn := r.resolveVariableTypePlain(varName, lines, pos, file, vs)
 	return ResolvedType{FQN: fqn}
-}
-
-// resolveFunctionCallReturnType resolves the return type of a named function,
-// preferring PHPDoc @return over the bare native type hint.
-func (r *Resolver) resolveFunctionCallReturnType(funcName string, file *parser.FileNode) ResolvedType {
-	if r.Index == nil {
-		return ResolvedType{}
-	}
-	// Check file-local functions first for PHPDoc annotations
-	if file != nil {
-		for i := range file.Functions {
-			fn := &file.Functions[i]
-			if fn.Name != funcName {
-				continue
-			}
-			doc := parser.ParseDocBlock(fn.DocComment)
-			if doc != nil && doc.Return.Type != "" {
-				if rt := r.resolveDocType(doc.Return.Type, file); !rt.IsEmpty() {
-					return rt
-				}
-			}
-			if fn.ReturnType.Name != "" && fn.ReturnType.Name != "array" && fn.ReturnType.Name != "mixed" {
-				return ResolvedType{FQN: r.ResolveClassName(fn.ReturnType.Name, file)}
-			}
-			break
-		}
-	}
-	// Fall back to symbol index
-	for _, sym := range r.Index.LookupByName(funcName) {
-		if sym.Kind != symbols.KindFunction {
-			continue
-		}
-		if sym.DocComment != "" {
-			if doc := parser.ParseDocBlock(sym.DocComment); doc != nil && doc.Return.Type != "" {
-				if rt := r.resolveDocType(doc.Return.Type, file); !rt.IsEmpty() {
-					return rt
-				}
-			}
-		}
-		if sym.ReturnType != "" {
-			return ResolvedType{FQN: sym.ReturnType}
-		}
-	}
-	return ResolvedType{}
 }
 
 // arrayElementType extracts the value element type from an array ResolvedType.
@@ -1192,15 +1157,13 @@ func (r *Resolver) resolveVariableTypePlain(varName string, lines []string, pos 
 			if IsFirstClassCallable(rhs) || isPartialApplicationCall(rhs) {
 				return "Closure" // strlen(...) and f(?, 1) make a Closure, they don't call
 			}
-			for _, sym := range r.Index.LookupByName(funcName) {
-				if sym.Kind == symbols.KindFunction && sym.ReturnType != "" {
-					return sym.ReturnType
-				}
+			if fn := r.CalledFunction(funcName, file); fn != nil && fn.ReturnType != "" {
+				return fn.ReturnType
 			}
 		}
 		// $var = ClassName::method() or $var = $foo->bar()->baz()
 		if r.ChainResolver != nil && (strings.Contains(rhs, "->") || strings.Contains(rhs, "::")) {
-			if t := r.ChainResolver(rhs, r.JoinLines(lines), pos, file); t != "" {
+			if t := r.ChainResolver(r, rhs, r.JoinLines(lines), pos, file); t != "" {
 				return t
 			}
 			break
@@ -1318,7 +1281,7 @@ func BuildFQN(namespace, name string) string {
 // --- Text helpers ---
 
 // IsWordChar returns true if the byte is a valid PHP identifier character
-// (letters, digits, underscore, backslash).
+// (letters, digits, underscore, bytes 0x80-0xff, backslash).
 func IsWordChar(ch byte) bool {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '\\' || ch >= 0x80
 }

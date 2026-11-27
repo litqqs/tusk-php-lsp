@@ -3,6 +3,7 @@ package completion
 import (
 	"strings"
 
+	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
 	"github.com/Tusk-PHP/lsp/internal/parser"
 	"github.com/Tusk-PHP/lsp/internal/protocol"
 	"github.com/Tusk-PHP/lsp/internal/resolve"
@@ -241,8 +242,8 @@ func extractStringAtEnd(inner string) (string, string, bool) {
 }
 
 // completeBuilderArg dispatches to column or relation completion based on the method.
-func (p *Provider) completeBuilderArg(method, partial, quote, prefix, source string, pos protocol.Position, file *parser.FileNode) []protocol.CompletionItem {
-	modelFQN := p.resolveBuilderModel(prefix, method, source, pos, file)
+func (p *Provider) completeBuilderArg(r *resolve.Resolver, method, partial, quote, prefix, source string, pos protocol.Position, file *parser.FileNode) []protocol.CompletionItem {
+	modelFQN := p.resolveBuilderModel(r, prefix, method, source, pos, file).FQN
 	if modelFQN == "" {
 		return nil
 	}
@@ -258,16 +259,15 @@ func (p *Provider) completeBuilderArg(method, partial, quote, prefix, source str
 
 // ResolveBuilderModel returns the Eloquent model a builder call on line is
 // made on, for the unknown-column and unknown-relation diagnostics: prefix is
-// the line up to the call, method the called method. It returns "" when the
-// model can't be worked out.
-func (p *Provider) ResolveBuilderModel(prefix, method, source string, line int, file *parser.FileNode) string {
-	return p.resolveBuilderModel(prefix, method, source, protocol.Position{Line: line, Character: len(prefix)}, file)
+// the line up to the call, method the called method.
+func (p *Provider) ResolveBuilderModel(prefix, method, source string, line int, file *parser.FileNode) frameworklaravel.QueriedModel {
+	return p.resolveBuilderModel(p.engine.Resolver(), prefix, method, source, protocol.Position{Line: line, Character: len(prefix)}, file)
 }
 
 // resolveBuilderModel finds the Eloquent model FQN from the expression before
 // the Builder method call. Works for both static calls (Category::where) and
 // chained calls (Category::query()->where, $query->where).
-func (p *Provider) resolveBuilderModel(prefix, method, source string, pos protocol.Position, file *parser.FileNode) string {
+func (p *Provider) resolveBuilderModel(r *resolve.Resolver, prefix, method, source string, pos protocol.Position, file *parser.FileNode) frameworklaravel.QueriedModel {
 	// Find the method call in the prefix to get everything before it
 	// We need to find ->method( or ::method( and resolve the chain before it
 	trimmed := strings.TrimSpace(prefix)
@@ -288,103 +288,29 @@ func (p *Provider) resolveBuilderModel(prefix, method, source string, pos protoc
 		}
 	}
 	if bestIdx < 0 {
-		return ""
+		return frameworklaravel.QueriedModel{}
 	}
 
 	// Get the expression before the method call
 	beforeMethod := trimmed[:bestIdx]
 
-	// Resolve the type of the expression before the method call
-	var typeFQN string
-	if bestOp == "::" {
-		// Static call: Category::where( — resolve the class directly
-		// Extract the class name right before ::
-		end := len(beforeMethod)
-		i := end - 1
-		for i >= 0 && (resolve.IsWordChar(beforeMethod[i]) || beforeMethod[i] == '\\') {
-			i--
-		}
-		className := beforeMethod[i+1 : end]
-		if className == "" {
-			return ""
-		}
-		typeFQN = p.resolver.ResolveClassNameLoose(className, file)
-	} else {
-		// Instance/chain call: Category::query()->where( or $query->where(
-		// Use resolveAccessChain to walk the chain
-		// We need to create a dummy line that ends at the -> before our method
-		chainLine := beforeMethod + "->__dummy__"
-		wordStart := len(beforeMethod) + 2
-		typeFQN = p.resolveAccessChain(chainLine, wordStart, source, pos, file)
+	if bestOp == "->" {
+		return frameworklaravel.ModelQueriedBy(p.index, r.ChainType(beforeMethod, source, pos, file))
 	}
 
-	if typeFQN == "" {
-		return ""
+	end := len(beforeMethod)
+	i := end - 1
+	for i >= 0 && (resolve.IsWordChar(beforeMethod[i]) || beforeMethod[i] == '\\') {
+		i--
 	}
-
-	// If the type is already a Model subclass, use it directly
-	if p.isEloquentModel(typeFQN) {
-		return typeFQN
+	className := beforeMethod[i+1 : end]
+	if className == "" {
+		return frameworklaravel.QueriedModel{}
 	}
-
-	// If the type is Builder, try to find the model from the chain origin
-	// For now, walk the chain backward looking for a Model class
-	if typeFQN == "Illuminate\\Database\\Eloquent\\Builder" {
-		// Try resolving the full chain to find the originating model
-		// The static call origin (e.g., Category::query()) tells us the model
-		if bestOp == "->" {
-			return p.findModelInChain(beforeMethod, source, pos, file)
-		}
+	if fqn := r.ResolveClassNameLoose(className, file); frameworklaravel.IsModel(p.index, fqn) {
+		return frameworklaravel.QueriedModel{FQN: fqn}
 	}
-
-	return ""
-}
-
-// isEloquentModel checks if the FQN is an Eloquent Model subclass.
-func (p *Provider) isEloquentModel(fqn string) bool {
-	chain := p.index.GetInheritanceChain(fqn)
-	for _, parent := range chain {
-		if parent == "Illuminate\\Database\\Eloquent\\Model" {
-			return true
-		}
-	}
-	return false
-}
-
-// findModelInChain walks backward through a chain expression to find
-// the originating Model class. For "Category::query()" it returns
-// the FQN for Category.
-func (p *Provider) findModelInChain(expr, source string, pos protocol.Position, file *parser.FileNode) string {
-	trimmed := strings.TrimSpace(expr)
-
-	// Look for ClassName:: pattern at the start of the chain
-	if idx := strings.Index(trimmed, "::"); idx > 0 {
-		className := trimmed[:idx]
-		// Strip any prefix before the class name (e.g., whitespace, assignment)
-		for i := len(className) - 1; i >= 0; i-- {
-			if !resolve.IsWordChar(className[i]) && className[i] != '\\' {
-				className = className[i+1:]
-				break
-			}
-		}
-		if className != "" {
-			fqn := p.resolver.ResolveClassNameLoose(className, file)
-			if p.isEloquentModel(fqn) {
-				return fqn
-			}
-		}
-	}
-
-	// Try resolving variables: $query = Category::query()
-	// The chain resolver handles this via variable type resolution
-	if strings.HasPrefix(trimmed, "$") || strings.Contains(trimmed, "->") {
-		resolved := p.ResolveExpressionType(trimmed, source, pos, file)
-		if resolved != "" && p.isEloquentModel(resolved) {
-			return resolved
-		}
-	}
-
-	return ""
+	return frameworklaravel.QueriedModel{}
 }
 
 // isDBColumn returns true if the symbol represents an actual database column

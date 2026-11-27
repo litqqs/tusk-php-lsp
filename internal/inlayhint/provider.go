@@ -20,7 +20,7 @@ import (
 type Provider struct {
 	index     *symbols.Index
 	container *container.ContainerAnalyzer
-	resolver  *resolve.Resolver
+	engine    *resolve.Engine
 }
 
 // NewProvider creates a Provider backed by the shared symbol index and optional
@@ -30,7 +30,7 @@ func NewProvider(index *symbols.Index, ca *container.ContainerAnalyzer) *Provide
 	return &Provider{
 		index:     index,
 		container: ca,
-		resolver:  resolve.NewResolver(index),
+		engine:    resolve.NewEngine(index),
 	}
 }
 
@@ -41,10 +41,10 @@ func NewProvider(index *symbols.Index, ca *container.ContainerAnalyzer) *Provide
 func (p *Provider) SetTypedChainResolver(
 	fn func(expr, source string, pos protocol.Position, file *parser.FileNode) resolve.ResolvedType,
 ) {
-	p.resolver.TypedChainResolver = fn
-	p.resolver.ChainResolver = func(expr, source string, pos protocol.Position, file *parser.FileNode) string {
+	p.engine.DelegateTypedChains(fn)
+	p.engine.DelegateChains(func(expr, source string, pos protocol.Position, file *parser.FileNode) string {
 		return fn(expr, source, pos, file).String()
-	}
+	})
 }
 
 // GetInlayHints returns all inlay hints for the given source file, filtered by
@@ -59,23 +59,24 @@ func (p *Provider) GetInlayHints(uri, source string, cfg *config.InlayHintsConfi
 	file := parser.ParseFile(source)
 	result := parser.New().Parse(source)
 	lines := resolve.SplitLines(source)
+	r := p.engine.Resolver()
 
 	var hints []protocol.InlayHint
 
 	if cfg.VariableTypes {
-		hints = append(hints, p.collectVarTypeHints(result, lines, file, source)...)
+		hints = append(hints, p.collectVarTypeHints(r, result, lines, file, source)...)
 	}
 	if cfg.ForeachTypes {
-		hints = append(hints, p.collectForeachHints(result, lines, file, source)...)
+		hints = append(hints, p.collectForeachHints(r, result, lines, file, source)...)
 	}
 	if cfg.ClosureReturnTypes {
-		hints = append(hints, p.collectClosureReturnHints(result, lines, file, source)...)
+		hints = append(hints, p.collectClosureReturnHints(r, result, lines, file, source)...)
 	}
 	if cfg.ReturnTypes {
 		hints = append(hints, p.collectMethodReturnHints(result, file)...)
 	}
 	if cfg.ParameterNames {
-		hints = append(hints, p.collectParamNameHints(result, lines, file, source, cfg)...)
+		hints = append(hints, p.collectParamNameHints(r, result, lines, file, source, cfg)...)
 	}
 
 	sort.SliceStable(hints, func(i, j int) bool {

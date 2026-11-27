@@ -43,22 +43,39 @@ type Scope struct {
 	EndLine    int
 }
 
-type CursorContext struct {
+type NameContext struct {
 	URI             string
 	Position        protocol.Position
-	Namespace       string
-	Uses            []parser.UseNode
 	SymbolText      string
 	SymbolKind      ContextSymbolKind
 	AccessKind      AccessKind
 	SubjectExpr     string
 	EnclosingFQN    string
-	Scope           *Scope
 	WordRange       protocol.Range
 	Line            string
 	JoinedLine      string
 	JoinedWordStart int
 	File            *parser.FileNode
+	Called          bool
+	FunctionCall    bool
+}
+
+type CursorContext struct {
+	NameContext
+	Namespace string
+	Uses      []parser.UseNode
+	Scope     *Scope
+}
+
+func (c *CursorContext) Name() *NameContext {
+	if c == nil {
+		return nil
+	}
+	return &c.NameContext
+}
+
+func (c *NameContext) MemberAccess() resolve.MemberAccess {
+	return resolve.MemberAccessOf(c.Called, c.AccessKind == AccessStatic, c.SymbolText)
 }
 
 type MemberContext struct {
@@ -67,39 +84,66 @@ type MemberContext struct {
 	AccessKind AccessKind
 }
 
+type Document struct {
+	uri    string
+	lines  []string
+	result *parser.ParseResult
+	file   *parser.FileNode
+}
+
+func NewDocument(uri, source string) *Document {
+	result := parser.New().Parse(source)
+	return &Document{uri: uri, lines: result.Lines, result: result, file: parser.FileNodeOf(result)}
+}
+
+func (d *Document) Tokens() []parser.Token {
+	return d.result.Tokens
+}
+
+func (d *Document) File() *parser.FileNode {
+	return d.file
+}
+
 func Analyze(uri, source string, pos protocol.Position) *CursorContext {
-	lines := strings.Split(source, "\n")
-	if pos.Line < 0 || pos.Line >= len(lines) {
+	return NewDocument(uri, source).At(pos)
+}
+
+func (d *Document) At(pos protocol.Position) *CursorContext {
+	name := d.NameAt(pos)
+	if name == nil {
 		return nil
 	}
+	ctx := &CursorContext{NameContext: *name}
+	ctx.Namespace, ctx.Uses = namespaceUsesAt(d.result, pos)
+	ctx.Scope = scopeAt(d.result, pos, ctx.EnclosingFQN)
+	return ctx
+}
 
-	result := parser.New().Parse(source)
-	file := parser.ParseFile(source)
-	word, wordRange := WordAt(source, pos)
-	line := lines[pos.Line]
-	joinedLine, joinedWordStart := resolve.JoinChainLines(lines, pos.Line, wordRange.Start.Character)
+func (d *Document) NameAt(pos protocol.Position) *NameContext {
+	if pos.Line < 0 || pos.Line >= len(d.lines) {
+		return nil
+	}
+	line := d.lines[pos.Line]
+	word, wordRange := wordAtLine(line, pos)
+	joinedLine, joinedWordStart := resolve.JoinChainLines(d.lines, pos.Line, wordRange.Start.Character)
 	accessKind, subjectExpr := detectAccess(joinedLine, joinedWordStart)
-	namespace, uses := namespaceUsesAt(result, pos)
-	enclosingFQN := enclosingClassAt(result, file, pos)
-
-	ctx := &CursorContext{
-		URI:             uri,
+	called := isCalled(d.result.Tokens, wordRange)
+	return &NameContext{
+		URI:             d.uri,
 		Position:        pos,
-		Namespace:       namespace,
-		Uses:            uses,
 		SymbolText:      word,
 		SymbolKind:      classifySymbolKind(word),
 		AccessKind:      accessKind,
 		SubjectExpr:     subjectExpr,
-		EnclosingFQN:    enclosingFQN,
+		EnclosingFQN:    enclosingClassAt(d.result, d.file, pos),
 		WordRange:       wordRange,
 		Line:            line,
 		JoinedLine:      joinedLine,
 		JoinedWordStart: joinedWordStart,
-		File:            file,
+		File:            d.file,
+		Called:          called,
+		FunctionCall:    called && accessKind == AccessNone,
 	}
-	ctx.Scope = scopeAt(result, pos, ctx.EnclosingFQN)
-	return ctx
 }
 
 func WordAt(source string, pos protocol.Position) (string, protocol.Range) {
@@ -107,7 +151,10 @@ func WordAt(source string, pos protocol.Position) (string, protocol.Range) {
 	if pos.Line < 0 || pos.Line >= len(lines) {
 		return "", protocol.Range{}
 	}
-	lineByte := lines[pos.Line]
+	return wordAtLine(lines[pos.Line], pos)
+}
+
+func wordAtLine(lineByte string, pos protocol.Position) (string, protocol.Range) {
 	line := []rune(lineByte)
 	if pos.Character > len(line) {
 		return "", protocol.Range{}
@@ -298,7 +345,7 @@ func closureScopeAt(result *parser.ParseResult, pos protocol.Position, classFQN 
 		if result.Tokens[i].Kind != parser.TokenFunction {
 			continue
 		}
-		next := nextSignificantToken(result.Tokens, i+1)
+		next := parser.NextSignificant(result.Tokens, i+1)
 		if next < 0 || result.Tokens[next].Kind == parser.TokenIdentifier {
 			continue
 		}
@@ -311,26 +358,26 @@ func closureScopeAt(result *parser.ParseResult, pos protocol.Position, classFQN 
 			continue
 		}
 
-		body := nextSignificantToken(result.Tokens, closeParen+1)
+		body := parser.NextSignificant(result.Tokens, closeParen+1)
 		if body >= 0 && result.Tokens[body].Kind == parser.TokenUse {
-			useOpen := nextSignificantToken(result.Tokens, body+1)
+			useOpen := parser.NextSignificant(result.Tokens, body+1)
 			if useOpen >= 0 && result.Tokens[useOpen].Kind == parser.TokenOpenParen {
 				useClose := parser.MatchingClose(result.Tokens, useOpen)
 				if useClose < 0 {
 					continue
 				}
-				body = nextSignificantToken(result.Tokens, useClose+1)
+				body = parser.NextSignificant(result.Tokens, useClose+1)
 			}
 		}
 		for body >= 0 && body < len(result.Tokens) &&
 			result.Tokens[body].Kind != parser.TokenOpenBrace &&
 			result.Tokens[body].Kind != parser.TokenDoubleArrow &&
 			result.Tokens[body].Kind != parser.TokenSemicolon {
-			body = nextSignificantToken(result.Tokens, body+1)
+			body = parser.NextSignificant(result.Tokens, body+1)
 		}
 		if body >= 0 && result.Tokens[body].Kind == parser.TokenDoubleArrow {
-			bodyStart := nextSignificantToken(result.Tokens, body+1)
-			bodyEnd := arrowExpressionEnd(result.Tokens, bodyStart)
+			bodyStart := parser.NextSignificant(result.Tokens, body+1)
+			bodyEnd := parser.ArrowExpressionEnd(result.Tokens, bodyStart)
 			if bodyStart < 0 || bodyEnd < 0 {
 				continue
 			}
@@ -474,7 +521,7 @@ func parseNamespaceState(tokens []parser.Token, start int) (string, bool, bool) 
 			parts = append(parts, tokens[i].Value)
 		case parser.TokenBackslash:
 			parts = append(parts, "\\")
-		case parser.TokenWhitespace, parser.TokenComment, parser.TokenDocComment:
+		case parser.TokenComment, parser.TokenDocComment:
 			continue
 		case parser.TokenOpenBrace:
 			return strings.Join(parts, ""), true, true
@@ -489,16 +536,16 @@ func parseNamespaceState(tokens []parser.Token, start int) (string, bool, bool) 
 
 func parseUseNode(tokens []parser.Token, start int) (parser.UseNode, bool) {
 	kind := "class"
-	i := nextSignificantToken(tokens, start+1)
+	i := parser.NextSignificant(tokens, start+1)
 	if i < 0 {
 		return parser.UseNode{}, false
 	}
 	if tokens[i].Kind == parser.TokenFunction {
 		kind = "function"
-		i = nextSignificantToken(tokens, i+1)
+		i = parser.NextSignificant(tokens, i+1)
 	} else if tokens[i].Kind == parser.TokenConst {
 		kind = "const"
-		i = nextSignificantToken(tokens, i+1)
+		i = parser.NextSignificant(tokens, i+1)
 	}
 
 	if i < 0 {
@@ -512,7 +559,7 @@ func parseUseNode(tokens []parser.Token, start int) (parser.UseNode, bool) {
 		switch tokens[i].Kind {
 		case parser.TokenIdentifier:
 			if tokens[i].Value == "as" {
-				aliasIdx := nextSignificantToken(tokens, i+1)
+				aliasIdx := parser.NextSignificant(tokens, i+1)
 				if aliasIdx >= 0 && tokens[aliasIdx].Kind == parser.TokenIdentifier {
 					alias = tokens[aliasIdx].Value
 				}
@@ -522,7 +569,7 @@ func parseUseNode(tokens []parser.Token, start int) (parser.UseNode, bool) {
 			parts = append(parts, tokens[i].Value)
 		case parser.TokenBackslash:
 			parts = append(parts, "\\")
-		case parser.TokenWhitespace, parser.TokenComment, parser.TokenDocComment:
+		case parser.TokenComment, parser.TokenDocComment:
 			continue
 		case parser.TokenSemicolon:
 			fullName := strings.Join(parts, "")
@@ -546,7 +593,7 @@ func isTopLevelImportUse(tokens []parser.Token, idx, braceDepth, namespaceDepth 
 	if braceDepth != namespaceDepth {
 		return false
 	}
-	prev := prevSignificantToken(tokens, idx-1)
+	prev := parser.PrevSignificant(tokens, idx-1)
 	if prev < 0 {
 		return true
 	}
@@ -556,75 +603,6 @@ func isTopLevelImportUse(tokens []parser.Token, idx, braceDepth, namespaceDepth 
 	default:
 		return false
 	}
-}
-
-func nextSignificantToken(tokens []parser.Token, i int) int {
-	for i < len(tokens) {
-		switch tokens[i].Kind {
-		case parser.TokenWhitespace, parser.TokenComment, parser.TokenDocComment:
-			i++
-		default:
-			return i
-		}
-	}
-	return -1
-}
-
-func prevSignificantToken(tokens []parser.Token, i int) int {
-	for i >= 0 {
-		switch tokens[i].Kind {
-		case parser.TokenWhitespace, parser.TokenComment, parser.TokenDocComment:
-			i--
-		default:
-			return i
-		}
-	}
-	return -1
-}
-
-func arrowExpressionEnd(tokens []parser.Token, start int) int {
-	if start < 0 {
-		return -1
-	}
-	parenDepth := 0
-	bracketDepth := 0
-	braceDepth := 0
-	for i := start; i < len(tokens); i++ {
-		switch tokens[i].Kind {
-		case parser.TokenOpenParen:
-			parenDepth++
-		case parser.TokenCloseParen:
-			if parenDepth == 0 && bracketDepth == 0 && braceDepth == 0 {
-				return prevSignificantToken(tokens, i-1)
-			}
-			if parenDepth > 0 {
-				parenDepth--
-			}
-		case parser.TokenOpenBracket:
-			bracketDepth++
-		case parser.TokenCloseBracket:
-			if bracketDepth == 0 && parenDepth == 0 && braceDepth == 0 {
-				return prevSignificantToken(tokens, i-1)
-			}
-			if bracketDepth > 0 {
-				bracketDepth--
-			}
-		case parser.TokenOpenBrace:
-			braceDepth++
-		case parser.TokenCloseBrace:
-			if braceDepth == 0 && parenDepth == 0 && bracketDepth == 0 {
-				return prevSignificantToken(tokens, i-1)
-			}
-			if braceDepth > 0 {
-				braceDepth--
-			}
-		case parser.TokenComma, parser.TokenSemicolon:
-			if parenDepth == 0 && bracketDepth == 0 && braceDepth == 0 {
-				return prevSignificantToken(tokens, i-1)
-			}
-		}
-	}
-	return prevSignificantToken(tokens, len(tokens)-1)
 }
 
 func posInTokenRange(pos protocol.Position, start, end parser.Token) bool {

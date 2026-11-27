@@ -1,8 +1,11 @@
 package sourcectx
 
 import (
+	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/Tusk-PHP/lsp/internal/parser"
 	"github.com/Tusk-PHP/lsp/internal/protocol"
 )
 
@@ -256,8 +259,8 @@ use App\Later\Thing;
 }
 func TestWordAt(t *testing.T) {
 	source := `<?php
-$jjk涓枃 ="鏋湪";
-$jjk涓枃 ="鏋湪4324".$jjk涓枃;
+$jjk中文 ="枯在";
+$jjk中文 ="枯在4324".$jjk中文;
 
 `
 
@@ -268,8 +271,8 @@ $jjk涓枃 ="鏋湪4324".$jjk涓枃;
 	if ctx.End.Character != 23 {
 		t.Errorf("position start should 6. but %d", ctx.End.Character)
 	}
-	if s != "$jjk涓枃" {
-		t.Errorf("position word  $jjk涓枃. but %s", s)
+	if s != "$jjk中文" {
+		t.Errorf("position word  $jjk中文. but %s", s)
 	}
 
 	s, ctx = WordAt(source, protocol.Position{Line: 2, Character: 12})
@@ -279,8 +282,111 @@ $jjk涓枃 ="鏋湪4324".$jjk涓枃;
 	if ctx.End.Character != 15 {
 		t.Errorf("position start should 6. but %d", ctx.End.Character)
 	}
-	if s != "鏋湪4324" {
-		t.Errorf("position word  鏋湪4324. but %s", s)
+	if s != "枯在4324" {
+		t.Errorf("position word  枯在4324. but %s", s)
 	}
 
+}
+
+func positionAfter(t *testing.T, source, needle string) protocol.Position {
+	t.Helper()
+	for i, line := range strings.Split(source, "\n") {
+		if col := strings.Index(line, needle); col >= 0 {
+			return protocol.Position{Line: i, Character: col + len(needle)}
+		}
+	}
+	t.Fatalf("%q is not in the source", needle)
+	return protocol.Position{}
+}
+
+func TestAnalyzeBuildsClosureScopeWithUseClause(t *testing.T) {
+	source := `<?php
+$f = function ($a) use ($b) {
+    return $a . $b;
+};
+$after = 1;
+`
+	if ctx := Analyze("file:///c.php", source, positionAfter(t, source, "return $")); ctx.Scope == nil || ctx.Scope.Kind != ScopeClosure || ctx.Scope.StartLine != 1 || ctx.Scope.EndLine != 3 {
+		t.Errorf("inside the closure body: Scope = %#v, want a closure on lines 1-3", ctx.Scope)
+	}
+	if ctx := Analyze("file:///c.php", source, positionAfter(t, source, "$aft")); ctx.Scope != nil {
+		t.Errorf("after the closure: Scope = %#v, want none", ctx.Scope)
+	}
+}
+
+func TestAnalyzeArrowFunctionScopeEndsWhereItsExpressionDoes(t *testing.T) {
+	for _, tc := range []struct {
+		name, source, inside, outside string
+	}{
+		{"closed by the call's parenthesis", "<?php\nmap(fn($x) => $x + 1); $later;\n", "+ ", "$lat"},
+		{"closed by an array's bracket", "<?php\n$fs = [fn($x) => $x * 2]; $later;\n", "* ", "$lat"},
+		{"closed by a block's brace", "<?php\nif (true) { $f = fn($x) => $x - 3 } $later;\n", "- ", "$lat"},
+		{"running to the end of the file", "<?php\n$f = fn($x) => $x / 4", "/ ", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if ctx := Analyze("file:///a.php", tc.source, positionAfter(t, tc.source, tc.inside)); ctx.Scope == nil || ctx.Scope.Kind != ScopeClosure {
+				t.Errorf("inside the arrow function: Scope = %#v, want a closure", ctx.Scope)
+			}
+			if tc.outside == "" {
+				return
+			}
+			if ctx := Analyze("file:///a.php", tc.source, positionAfter(t, tc.source, tc.outside)); ctx.Scope != nil && ctx.Scope.Kind == ScopeClosure {
+				t.Errorf("after the arrow function: Scope = %#v, want no closure", ctx.Scope)
+			}
+		})
+	}
+}
+
+func TestAnalyzeReadsFunctionConstAndAliasedImports(t *testing.T) {
+	source := `<?php
+namespace App;
+use function App\Support\helper;
+use const App\Support\LIMIT;
+use App\Models\User as Account;
+$x = 1;
+`
+	ctx := Analyze("file:///u.php", source, positionAfter(t, source, "$x"))
+	want := []parser.UseNode{
+		{FullName: "App\\Support\\helper", Alias: "helper", Kind: "function", StartLine: 2},
+		{FullName: "App\\Support\\LIMIT", Alias: "LIMIT", Kind: "const", StartLine: 3},
+		{FullName: "App\\Models\\User", Alias: "Account", Kind: "class", StartLine: 4},
+	}
+	if !reflect.DeepEqual(ctx.Uses, want) {
+		t.Errorf("Uses = %#v, want %#v", ctx.Uses, want)
+	}
+}
+
+func BenchmarkNewDocument(b *testing.B) {
+	var src strings.Builder
+	src.WriteString("<?php\nnamespace App;\nclass Big {\n")
+	for range 300 {
+		src.WriteString("    public function m(array $a): int { return count($a) + $this->n(); }\n")
+	}
+	src.WriteString("}\n")
+	source := src.String()
+	b.ReportAllocs()
+	for b.Loop() {
+		if NewDocument("file:///a.php", source).File() == nil {
+			b.Fatal("the file parses")
+		}
+	}
+}
+
+func TestDocumentOutsideItsLines(t *testing.T) {
+	source := "<?php\nnamespace App;\nclass Shop {}\n"
+	doc := NewDocument("file:///a.php", source)
+	if file := doc.File(); file == nil || len(file.Classes) != 1 || file.Classes[0].Name != "Shop" {
+		t.Fatalf("the document's declarations are the parsed file's: %+v", file)
+	}
+	if name := Analyze("file:///a.php", source, protocol.Position{Line: 2, Character: 7}).Name(); name == nil || name.SymbolText != "Shop" {
+		t.Errorf("the name under the cursor is Shop, got %+v", name)
+	}
+	for _, pos := range []protocol.Position{{Line: -1}, {Line: 10}} {
+		if ctx := doc.At(pos); ctx != nil {
+			t.Errorf("At(%v) = %+v, want nil", pos, ctx)
+		}
+		if name := Analyze("file:///a.php", source, pos).Name(); name != nil {
+			t.Errorf("Analyze(%v).Name() = %+v, want nil", pos, name)
+		}
+	}
 }

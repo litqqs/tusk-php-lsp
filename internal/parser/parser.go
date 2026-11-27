@@ -196,6 +196,7 @@ type ConstantDef struct {
 	Type       string
 	Visibility string
 	Attributes []AttributeDef
+	DocComment string
 	Line       int
 }
 
@@ -269,7 +270,6 @@ const (
 	TokenHash
 	TokenDocComment
 	TokenComment
-	TokenWhitespace
 	TokenStringLiteral
 	TokenEOF
 	TokenUnknown
@@ -402,7 +402,7 @@ func OpenTagLen(s string, i int) int {
 		return 0
 	}
 	rest := s[i+2:]
-	if len(rest) >= 3 && strings.EqualFold(rest[:3], "php") && (len(rest) == 3 || !isIdentByte(rest[3])) {
+	if len(rest) >= 3 && strings.EqualFold(rest[:3], "php") && (len(rest) == 3 || !IsIdentByte(rest[3])) {
 		return 5
 	}
 	if len(rest) >= 1 && rest[0] == '=' {
@@ -437,7 +437,7 @@ func nextOpenTag(source string, from int) (int, int) {
 	return len(source), 0
 }
 
-func isIdentByte(b byte) bool {
+func IsIdentByte(b byte) bool {
 	return b == '_' || (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9') || b >= 0x80
 }
 
@@ -664,10 +664,10 @@ func tokenize(source string) ([]Token, []ParseError) {
 		}
 
 		// Identifiers and keywords
-		if isIdentChar(ch) {
+		if IsIdentByte(ch) {
 			start := offset
 			startCol := col
-			for offset < len(source) && isIdentChar(source[offset]) {
+			for offset < len(source) && IsIdentByte(source[offset]) {
 				offset++
 				if source[offset] < 0x80 || source[offset] >= 0xC0 { //utf8 first byte
 					col++
@@ -1062,7 +1062,7 @@ func (p *structParser) parse() {
 		case TokenFunction:
 			p.parseFunction(lastDocComment)
 		case TokenConst:
-			p.parseConst()
+			p.parseConst(lastDocComment)
 		case TokenOpenBrace:
 			p.blocks = append(p.blocks, false)
 			p.advance()
@@ -1538,9 +1538,9 @@ func (p *structParser) collectNestedFunctions(start, end int) {
 	}
 }
 
-func (p *structParser) parseConst() {
+func (p *structParser) parseConst(docComment string) {
 	p.advance()
-	c := ConstantDef{Line: p.peek().Line}
+	c := ConstantDef{DocComment: docComment, Line: p.peek().Line}
 	if t, ok := p.expect(TokenIdentifier); ok {
 		c.Name = t.Value
 	}
@@ -1748,7 +1748,7 @@ func (p *structParser) parseClassBody() (methods []MethodDef, props []PropertyDe
 
 		case TokenConst:
 			p.advance()
-			consts = append(consts, p.parseClassConstants(visibility, attributes)...)
+			consts = append(consts, p.parseClassConstants(visibility, attributes, docComment)...)
 
 		case TokenVariable:
 			prop := PropertyDef{
@@ -1823,14 +1823,14 @@ func (p *structParser) parseClassBody() (methods []MethodDef, props []PropertyDe
 
 // parseClassConstants reads the rest of a `const` statement, which may give a
 // PHP 8.3 type and declare several constants: `const string A = 'a', B = 'b';`.
-func (p *structParser) parseClassConstants(visibility string, attributes []AttributeDef) []ConstantDef {
+func (p *structParser) parseClassConstants(visibility string, attributes []AttributeDef, docComment string) []ConstantDef {
 	typeName := ""
 	if !isNameToken(p.peek()) || (p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Kind != TokenEquals) {
 		typeName = p.readTypeName()
 	}
 	var consts []ConstantDef
 	for isNameToken(p.peek()) {
-		c := ConstantDef{Name: p.peek().Value, Type: typeName, Visibility: visibility, Attributes: attributes, Line: p.peek().Line}
+		c := ConstantDef{Name: p.peek().Value, Type: typeName, Visibility: visibility, Attributes: attributes, DocComment: docComment, Line: p.peek().Line}
 		p.advance()
 		if p.peek().Kind == TokenEquals {
 			p.advance()

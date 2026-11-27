@@ -21,7 +21,7 @@ import (
 type Analyzer struct {
 	index               *symbols.Index
 	container           *container.ContainerAnalyzer
-	resolver            *resolve.Resolver
+	engine              *resolve.Engine
 	framework           string
 	routes              *frameworklaravel.RouteIndex
 	views               *frameworklaravel.Views
@@ -52,19 +52,19 @@ func NewAnalyzer(index *symbols.Index, ca *container.ContainerAnalyzer) *Analyze
 	if ca != nil {
 		framework = ca.Framework()
 	}
-	a := &Analyzer{index: index, container: ca, resolver: resolve.NewResolver(index), framework: framework}
+	a := &Analyzer{index: index, container: ca, engine: resolve.NewEngine(index), framework: framework}
 	if ca != nil {
-		a.resolver.ContainerCall = a.resolveContainerCallType
+		a.engine.ContainerCall = a.resolveContainerCallType
 	}
 	return a
 }
 
 func (a *Analyzer) SetChainResolver(fn func(expr string, source string, pos protocol.Position, file *parser.FileNode) string) {
-	a.resolver.ChainResolver = fn
+	a.engine.DelegateChains(fn)
 }
 
 func (a *Analyzer) SetTypedChainResolver(fn func(expr string, source string, pos protocol.Position, file *parser.FileNode) resolve.ResolvedType) {
-	a.resolver.TypedChainResolver = fn
+	a.engine.DelegateTypedChains(fn)
 }
 
 func (a *Analyzer) SetTranslationResolver(resolver *frameworklaravel.TranslationResolver) {
@@ -98,7 +98,23 @@ func (a *Analyzer) SetViewResolver(resolver *frameworklaravel.Views) {
 }
 
 func (a *Analyzer) FindDefinition(uri, source string, pos protocol.Position) *protocol.Location {
-	return a.resolveDefinitionSymbol(uri, source, pos).loc
+	return a.resolveDefinitionSymbol(a.engine.Resolver(), uri, source, pos).loc
+}
+
+// declaredInSource swaps a property that has no position of its own for the
+// method of the same name, if the class has one. An ide-helper
+// @property-read $tags in a class docblock declares an Eloquent relation's
+// property without saying where; tags() is what declares it in the code.
+// Only go to definition does this: hover and types keep the property, whose
+// type is the one the access has.
+func declaredInSource(r *resolve.Resolver, owner resolve.ResolvedType, word string, member *symbols.Symbol) *symbols.Symbol {
+	if member.Kind != symbols.KindProperty || member.Range != (protocol.Range{}) {
+		return member
+	}
+	if method := r.FindAccessedMember(owner.BaseFQN(), word, resolve.CallAccess); method != nil && method.Kind == symbols.KindMethod {
+		return method
+	}
+	return member
 }
 
 // classKeywordFQN returns the class that self, static or parent stands for at
@@ -129,7 +145,7 @@ func (a *Analyzer) classKeywordFQN(word string, ctx *sourcectx.CursorContext) st
 // locale is forwarded to symbols.PHPManualURL. Empty string is fine —
 // the URL builder falls back to "en".
 func (a *Analyzer) FindDefinitionWithManual(uri, source string, pos protocol.Position, openManualEnabled bool, locale string) DefinitionResult {
-	target := a.resolveDefinitionSymbol(uri, source, pos)
+	target := a.resolveDefinitionSymbol(a.engine.Resolver(), uri, source, pos)
 	if !openManualEnabled || target.sym == nil || !symbols.IsBuiltin(target.sym) {
 		return DefinitionResult{Location: target.loc}
 	}
@@ -142,7 +158,8 @@ func (a *Analyzer) FindDefinitionWithManual(uri, source string, pos protocol.Pos
 // (symbols.Index.Prototype); for anything else, or a member nothing above
 // declares, its definition.
 func (a *Analyzer) FindDeclaration(uri, source string, pos protocol.Position) *protocol.Location {
-	target := a.resolveDefinitionSymbol(uri, source, pos)
+	r := a.engine.Resolver()
+	target := a.resolveDefinitionSymbol(r, uri, source, pos)
 	if target.receiver == "" {
 		return target.loc
 	}
@@ -166,7 +183,7 @@ type definitionTarget struct {
 }
 
 // resolveDefinitionSymbol resolves the symbol at the cursor position.
-func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Position) definitionTarget {
+func (a *Analyzer) resolveDefinitionSymbol(r *resolve.Resolver, uri, source string, pos protocol.Position) definitionTarget {
 	if a.framework == "symfony" {
 		if routeName, _, ok := frameworksymfony.RouteNameAtPosition(source, pos); ok {
 			if route := frameworksymfony.FindRoute(a.index, routeName); route != nil {
@@ -174,7 +191,7 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 			}
 		}
 		if a.symfonyCommands != nil {
-			if l := a.definitionForSymfonyCommand(uri, source, pos); l != nil {
+			if l := a.definitionForSymfonyCommand(r, uri, source, pos); l != nil {
 				return definitionTarget{loc: l}
 			}
 		}
@@ -188,30 +205,39 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 	if ctx == nil {
 		return definitionTarget{}
 	}
-	line := ctx.Line
-	file := ctx.File
+	if l := a.frameworkDefinition(r, source, ctx); l != nil {
+		return definitionTarget{loc: l}
+	}
+	return a.symbolTarget(r, uri, source, ctx)
+}
 
+func (a *Analyzer) frameworkDefinition(r *resolve.Resolver, source string, ctx *sourcectx.CursorContext) *protocol.Location {
+	line, pos := ctx.Line, ctx.Position
 	if a.container != nil {
-		if l := a.definitionForContainerArg(line, pos, source, file, false); l != nil {
-			return definitionTarget{loc: l}
+		if l := a.definitionForContainerArg(r, line, pos, source, ctx.File, false); l != nil {
+			return l
 		}
 	}
 	if a.framework == "laravel" && a.views != nil {
 		if l := a.definitionForLaravelView(line, pos.Character); l != nil {
-			return definitionTarget{loc: l}
+			return l
 		}
 	}
 	if a.translations != nil {
 		if l := a.definitionForTranslationKey(line, pos.Character); l != nil {
-			return definitionTarget{loc: l}
+			return l
 		}
 	}
 	if a.framework == "laravel" && a.routes != nil {
 		if l := a.definitionForRouteName(line, pos.Character); l != nil {
-			return definitionTarget{loc: l}
+			return l
 		}
 	}
+	return nil
+}
 
+func (a *Analyzer) symbolTarget(r *resolve.Resolver, uri, source string, ctx *sourcectx.CursorContext) definitionTarget {
+	pos, file := ctx.Position, ctx.File
 	word := ctx.SymbolText
 	if word == "" {
 		return definitionTarget{}
@@ -220,7 +246,7 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 	// Handle $variable → go to its type definition. After `::` a $name is a
 	// static property (self::$cache), found with the other members below.
 	if strings.HasPrefix(word, "$") && ctx.AccessKind != sourcectx.AccessStatic {
-		return definitionTarget{loc: a.definitionForVariable(word, source, pos, file)}
+		return definitionTarget{loc: a.definitionForVariable(r, word, source, pos, file)}
 	}
 
 	// self, static and parent go to the class they stand for.
@@ -233,18 +259,13 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 
 	// Check for -> or :: access (method/property on a class)
 	if ctx.AccessKind != sourcectx.AccessNone {
-		owner := a.resolver.AccessOwnerType(ctx.JoinedLine, ctx.JoinedWordStart, source, pos, file)
+		owner := r.AccessOwnerType(ctx.JoinedLine, ctx.JoinedWordStart, source, pos, file)
 		classFQN := owner.BaseFQN()
 		if classFQN == "" {
 			return definitionTarget{}
 		}
-		member := a.resolver.FindMemberAnywhere(classFQN, word)
-		if member == nil {
-			// With the receiver's type arguments and every class of a union:
-			// a local scope on Builder<Post> is found on Post.
-			member = a.resolver.FindMemberAnywhereOn(owner, word)
-		}
-		if member != nil {
+		if member := r.AccessedMemberOn(owner, word, ctx.MemberAccess()); member != nil {
+			member = declaredInSource(r, owner, word, member)
 			// Owner is the *declaring* class (member.ParentFQN), not the
 			// receiver — that's how php.net documents methods/properties:
 			// ReflectionMethod::getParameters lives at
@@ -262,6 +283,10 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 	if member := a.index.MemberDeclaredAt(uri, pos, word); member != nil {
 		return definitionTarget{sym: member, owner: a.index.Lookup(member.ParentFQN), receiver: member.ParentFQN, loc: symbolLocation(member)}
 	}
+	if ctx.FunctionCall {
+		fn := r.CalledFunction(word, file)
+		return definitionTarget{sym: fn, loc: symbolLocation(fn)}
+	}
 
 	// Resolve via use statements
 	if file != nil {
@@ -273,7 +298,7 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 			}
 		}
 		// Try as class name in current namespace
-		fqn := a.resolver.ResolveClassName(word, file)
+		fqn := r.ResolveClassName(word, file)
 		if fqn != word {
 			if s := a.index.Lookup(fqn); s != nil {
 				return definitionTarget{sym: s, loc: symbolLocation(s)}
@@ -288,18 +313,8 @@ func (a *Analyzer) resolveDefinitionSymbol(uri, source string, pos protocol.Posi
 		}
 	}
 
-	// Fallback: lookup by short name — prefer standalone-appropriate symbols
-	// (functions/classes over methods/properties) since we have no access chain.
-	lookupName := word
-	if idx := strings.LastIndex(word, "\\"); idx >= 0 {
-		lookupName = word[idx+1:]
-	}
-	syms := a.index.LookupByName(lookupName)
-	if best := symbols.PickBestStandalone(syms, word); best != nil {
-		return definitionTarget{sym: best, loc: symbolLocation(best)}
-	}
-
-	return definitionTarget{}
+	best := a.index.LookupStandalone(word, ctx.EnclosingFQN)
+	return definitionTarget{sym: best, loc: symbolLocation(best)}
 }
 
 func (a *Analyzer) definitionForTranslationKey(line string, character int) *protocol.Location {
@@ -344,9 +359,9 @@ func (a *Analyzer) definitionForLaravelView(line string, character int) *protoco
 // when the cursor is inside a Symfony translation call.
 // definitionForSymfonyCommand returns the command a console application's
 // find(), get() or has() names at pos.
-func (a *Analyzer) definitionForSymfonyCommand(uri, source string, pos protocol.Position) *protocol.Location {
+func (a *Analyzer) definitionForSymfonyCommand(r *resolve.Resolver, uri, source string, pos protocol.Position) *protocol.Location {
 	line, ok := sourceLine(source, pos.Line)
-	if !ok || a.resolver.ChainResolver == nil {
+	if !ok || a.engine.ChainResolver == nil {
 		return nil
 	}
 	receiver, name, ok := frameworksymfony.CommandNameAt(line, pos.Character)
@@ -358,7 +373,7 @@ func (a *Analyzer) definitionForSymfonyCommand(uri, source string, pos protocol.
 		return nil
 	}
 	file := parser.ParseFile(source)
-	if !frameworksymfony.IsConsoleApplication(a.index, a.resolver.ChainResolver(receiver, source, pos, file)) {
+	if !frameworksymfony.IsConsoleApplication(a.index, a.engine.ChainResolver(r, receiver, source, pos, file)) {
 		return nil
 	}
 	return &protocol.Location{URI: cmd.URI, Range: cmd.Range}
@@ -399,11 +414,11 @@ func (a *Analyzer) definitionForSymfonyTranslationKey(source string, pos protoco
 }
 
 // definitionForVariable resolves a $variable to its type's definition.
-func (a *Analyzer) definitionForVariable(varName string, source string, pos protocol.Position, file *parser.FileNode) *protocol.Location {
+func (a *Analyzer) definitionForVariable(r *resolve.Resolver, varName string, source string, pos protocol.Position, file *parser.FileNode) *protocol.Location {
 	if file == nil {
 		return nil
 	}
-	typeName := a.resolver.ResolveVariableType(varName, a.resolver.Lines(source), pos, file)
+	typeName := r.ResolveVariableType(varName, r.Lines(source), pos, file)
 	if typeName == "" {
 		return nil
 	}
@@ -419,7 +434,7 @@ func (a *Analyzer) definitionForVariable(varName string, source string, pos prot
 // definitionForContainerArg checks if the cursor is inside a container resolution
 // call argument (e.g. app('request'), app(Request::class)) and returns the
 // definition of the concrete class.
-func (a *Analyzer) definitionForContainerArg(line string, pos protocol.Position, source string, file *parser.FileNode, preferType bool) *protocol.Location {
+func (a *Analyzer) definitionForContainerArg(r *resolve.Resolver, line string, pos protocol.Position, source string, file *parser.FileNode, preferType bool) *protocol.Location {
 	prefix := line[:min(pos.Character, len(line))]
 	// Check if we're inside a container call
 	patterns := []string{"app(", "resolve(", "->get(", "->make("}
@@ -464,7 +479,7 @@ func (a *Analyzer) definitionForContainerArg(line string, pos protocol.Position,
 	if strings.HasSuffix(arg, "::class") {
 		wasClassConst = true
 		className := strings.TrimSuffix(arg, "::class")
-		arg = a.resolver.ResolveClassName(className, file)
+		arg = r.ResolveClassName(className, file)
 	}
 
 	if !preferType && !wasClassConst {
@@ -488,14 +503,14 @@ func (a *Analyzer) definitionForContainerArg(line string, pos protocol.Position,
 
 // resolveContainerCallType resolves a container call expression to a concrete FQN.
 // Uses the shared ExtractContainerCallArg helper from the resolve package.
-func (a *Analyzer) resolveContainerCallType(expr string, source string, file *parser.FileNode) string {
+func (a *Analyzer) resolveContainerCallType(r *resolve.Resolver, expr string, source string, file *parser.FileNode) string {
 	arg := resolve.ExtractContainerCallArg(expr)
 	if arg == "" {
 		return ""
 	}
 	if strings.HasSuffix(arg, "::class") {
 		className := strings.TrimSuffix(arg, "::class")
-		arg = a.resolver.ResolveClassName(className, file)
+		arg = r.ResolveClassName(className, file)
 	}
 	if binding := a.container.ResolveDependency(arg); binding != nil {
 		return binding.Concrete
@@ -521,6 +536,7 @@ func singleLocation(loc *protocol.Location) []protocol.Location {
 }
 
 func (a *Analyzer) FindTypeDefinition(uri, source string, pos protocol.Position) []protocol.Location {
+	r := a.engine.Resolver()
 	ctx := sourcectx.Analyze(uri, source, pos)
 	if ctx == nil {
 		return nil
@@ -533,34 +549,34 @@ func (a *Analyzer) FindTypeDefinition(uri, source string, pos protocol.Position)
 	file := ctx.File
 
 	if a.container != nil {
-		if loc := a.definitionForContainerArg(ctx.Line, pos, source, file, true); loc != nil {
+		if loc := a.definitionForContainerArg(r, ctx.Line, pos, source, file, true); loc != nil {
 			return singleLocation(loc)
 		}
 	}
 
 	if strings.HasPrefix(word, "$") {
-		return a.locationsForTypeName(a.resolver.ResolveVariableType(word, a.resolver.Lines(source), pos, file), file)
+		return a.locationsForTypeName(r, r.ResolveVariableType(word, r.Lines(source), pos, file), file)
 	}
 
 	if ctx.AccessKind != sourcectx.AccessNone {
-		classFQN := a.resolver.AccessOwnerType(ctx.JoinedLine, ctx.JoinedWordStart, source, pos, file).BaseFQN()
+		classFQN := r.AccessOwnerType(ctx.JoinedLine, ctx.JoinedWordStart, source, pos, file).BaseFQN()
 		if classFQN == "" {
 			return nil
 		}
-		if member := a.resolver.FindMemberAnywhere(classFQN, word); member != nil {
-			return a.locationsForMemberType(member, file)
+		if member := r.FindMemberAnywhere(classFQN, word); member != nil {
+			return a.locationsForMemberType(r, member, file)
 		}
 		return nil
 	}
 
-	sym := a.resolveSymbolAtCursor(uri, source, pos, word, file)
+	sym := a.resolveSymbolAt(r, ctx.Name(), source)
 	if sym == nil {
 		return nil
 	}
 
 	switch sym.Kind {
 	case symbols.KindProperty, symbols.KindMethod:
-		return a.locationsForMemberType(sym, file)
+		return a.locationsForMemberType(r, sym, file)
 	case symbols.KindClass, symbols.KindInterface, symbols.KindTrait, symbols.KindEnum:
 		return singleLocation(symbolLocation(sym))
 	default:
@@ -569,13 +585,13 @@ func (a *Analyzer) FindTypeDefinition(uri, source string, pos protocol.Position)
 }
 
 func (a *Analyzer) FindImplementation(uri, source string, pos protocol.Position) []protocol.Location {
+	r := a.engine.Resolver()
 	word, _ := sourcectx.WordAt(source, pos)
 	if word == "" {
 		return nil
 	}
 
-	file := parser.ParseFile(source)
-	sym := a.resolveSymbolAtCursor(uri, source, pos, word, file)
+	sym := a.resolveSymbolAt(r, sourcectx.Analyze(uri, source, pos).Name(), source)
 	if sym == nil {
 		return nil
 	}
@@ -594,20 +610,20 @@ func (a *Analyzer) FindImplementation(uri, source string, pos protocol.Position)
 		}
 		switch {
 		case parent.Kind == symbols.KindInterface:
-			return a.findMemberImplementations(sym, a.index.GetImplementors(parent.FQN))
+			return a.findMemberImplementations(r, sym, a.index.GetImplementors(parent.FQN))
 		case parent.Kind == symbols.KindClass && parent.IsAbstract && sym.IsAbstract:
-			return a.findMemberImplementations(sym, a.index.GetDescendants(parent.FQN))
+			return a.findMemberImplementations(r, sym, a.index.GetDescendants(parent.FQN))
 		}
 	}
 
 	return nil
 }
 
-func (a *Analyzer) locationsForMemberType(member *symbols.Symbol, file *parser.FileNode) []protocol.Location {
-	return a.locationsForTypeName(a.resolver.MemberType(member, file), file)
+func (a *Analyzer) locationsForMemberType(r *resolve.Resolver, member *symbols.Symbol, file *parser.FileNode) []protocol.Location {
+	return a.locationsForTypeName(r, r.MemberType(member, file), file)
 }
 
-func (a *Analyzer) locationsForTypeName(typeName string, file *parser.FileNode) []protocol.Location {
+func (a *Analyzer) locationsForTypeName(r *resolve.Resolver, typeName string, file *parser.FileNode) []protocol.Location {
 	typeName = strings.TrimSpace(typeName)
 	typeName = strings.TrimPrefix(typeName, "?")
 	if typeName == "" || symbols.IsPHPBuiltinType(typeName) {
@@ -619,7 +635,7 @@ func (a *Analyzer) locationsForTypeName(typeName string, file *parser.FileNode) 
 	if idx := strings.IndexByte(typeName, '<'); idx > 0 {
 		typeName = typeName[:idx]
 	}
-	typeName = a.resolver.ResolveClassName(typeName, file)
+	typeName = r.ResolveClassName(typeName, file)
 	return singleLocation(symbolLocation(a.index.Lookup(typeName)))
 }
 
@@ -631,13 +647,13 @@ func (a *Analyzer) findAbstractClassImplementations(sym *symbols.Symbol) []proto
 	return a.classSymbolsToLocations(a.index.GetDescendants(sym.FQN), true)
 }
 
-func (a *Analyzer) findMemberImplementations(sym *symbols.Symbol, owners []*symbols.Symbol) []protocol.Location {
+func (a *Analyzer) findMemberImplementations(r *resolve.Resolver, sym *symbols.Symbol, owners []*symbols.Symbol) []protocol.Location {
 	var locs []protocol.Location
 	for _, owner := range owners {
 		if owner == nil || (owner.Kind != symbols.KindClass && owner.Kind != symbols.KindEnum) || owner.IsAbstract {
 			continue
 		}
-		member := a.resolver.FindMember(owner.FQN, sym.Name)
+		member := r.FindMember(owner.FQN, sym.Name)
 		if member == nil || member.IsAbstract {
 			continue
 		}
@@ -672,6 +688,7 @@ func (a *Analyzer) FindReferences(uri, source string, pos protocol.Position) []p
 // the workspace. readDocument is used to read file contents; if nil, falls back
 // to reading from the index's stored file URIs via disk.
 func (a *Analyzer) FindAllReferences(uri, source string, pos protocol.Position, readDocument func(string) string) []protocol.Location {
+	r := a.engine.Resolver()
 	word, _ := sourcectx.WordAt(source, pos)
 	if word == "" {
 		return nil
@@ -682,7 +699,7 @@ func (a *Analyzer) FindAllReferences(uri, source string, pos protocol.Position, 
 	// Try to resolve as a symbol first — this handles properties ($name in declarations)
 	// and member access contexts before falling back to variable scope
 	ctx := sourcectx.Analyze(uri, source, pos)
-	sym := a.resolveSymbolAtCursor(uri, source, pos, word, file)
+	sym := a.resolveSymbolAt(r, ctx.Name(), source)
 
 	// Built-in symbols are opaque to navigation: do not scan the workspace for refs.
 	if symbols.IsBuiltin(sym) {
@@ -691,7 +708,7 @@ func (a *Analyzer) FindAllReferences(uri, source string, pos protocol.Position, 
 
 	// W1 guard: if we were in a member access chain and the receiver/member couldn't
 	// be resolved, do not fall through to name-based lookups.
-	if sym == nil && ctx != nil && ctx.AccessKind != sourcectx.AccessNone {
+	if sym == nil && ctx != nil && (ctx.AccessKind != sourcectx.AccessNone || ctx.FunctionCall) {
 		return nil
 	}
 
@@ -715,21 +732,25 @@ func (a *Analyzer) FindAllReferences(uri, source string, pos protocol.Position, 
 
 // resolveSymbolAtCursor resolves the word at cursor to a Symbol, handling
 // member access chains, use imports, and namespace resolution.
-func (a *Analyzer) resolveSymbolAtCursor(uri, source string, pos protocol.Position, word string, file *parser.FileNode) *symbols.Symbol {
-	ctx := sourcectx.Analyze(uri, source, pos)
+func (a *Analyzer) resolveSymbolAt(r *resolve.Resolver, ctx *sourcectx.NameContext, source string) *symbols.Symbol {
+	if ctx == nil || ctx.SymbolText == "" {
+		return nil
+	}
+	word, file, pos := ctx.SymbolText, ctx.File, ctx.Position
 
 	// Check for member access context (->method or ::method).
 	// W1 guard: if we're in an access chain but can't resolve the receiver or
 	// the member, return nil — do not fall through to name-based lookups that
 	// would match unrelated symbols across the project.
-	if ctx != nil && ctx.AccessKind != sourcectx.AccessNone {
-		classFQN := a.resolver.AccessOwnerType(ctx.JoinedLine, ctx.JoinedWordStart, source, pos, file).BaseFQN()
-		if classFQN != "" {
-			if member := a.resolver.FindMemberAnywhere(classFQN, word); member != nil {
-				return member
-			}
+	if ctx.AccessKind != sourcectx.AccessNone {
+		owner := r.AccessOwnerType(ctx.JoinedLine, ctx.JoinedWordStart, source, pos, file)
+		if owner.BaseFQN() == "" {
+			return nil
 		}
-		return nil
+		return r.AccessedMemberOn(owner, word, ctx.MemberAccess())
+	}
+	if ctx.FunctionCall {
+		return r.CalledFunction(word, file)
 	}
 
 	// Check if it's a class property declaration ($name on a property line)
@@ -737,20 +758,17 @@ func (a *Analyzer) resolveSymbolAtCursor(uri, source string, pos protocol.Positi
 		bare := strings.TrimPrefix(word, "$")
 		classFQN := resolve.FindEnclosingClass(file, pos)
 		if classFQN != "" {
-			propFQN := classFQN + "::" + bare
-			if sym := a.index.Lookup(propFQN); sym != nil {
+			if sym := a.index.Lookup(classFQN + "::" + word); sym != nil {
 				return sym
 			}
-			// Also try with $ prefix (some indexes store it with $)
-			propFQN = classFQN + "::" + word
-			if sym := a.index.Lookup(propFQN); sym != nil {
+			if sym := a.index.Lookup(classFQN + "::" + bare); sym != nil && sym.Kind == symbols.KindProperty {
 				return sym
 			}
 		}
 	}
 
 	// Check if we're on a member declaration inside the enclosing type.
-	if ctx != nil && ctx.EnclosingFQN != "" {
+	if ctx.EnclosingFQN != "" {
 		if sym := a.index.Lookup(ctx.EnclosingFQN + "::" + word); sym != nil {
 			return sym
 		}
@@ -764,7 +782,7 @@ func (a *Analyzer) resolveSymbolAtCursor(uri, source string, pos protocol.Positi
 	// Try resolving as a class/interface/enum/trait name
 	fqn := ""
 	if file != nil {
-		fqn = a.resolver.ResolveClassName(word, file)
+		fqn = r.ResolveClassName(word, file)
 	}
 	if fqn != "" {
 		if sym := a.index.Lookup(fqn); sym != nil {
@@ -777,9 +795,7 @@ func (a *Analyzer) resolveSymbolAtCursor(uri, source string, pos protocol.Positi
 		return sym
 	}
 
-	// Fallback by short name
-	syms := a.index.LookupByName(word)
-	return symbols.PickBestStandalone(syms, word)
+	return a.index.LookupStandalone(word, ctx.EnclosingFQN)
 }
 
 // findVariableReferences finds all occurrences of a variable within its enclosing function scope.
@@ -904,17 +920,6 @@ func symbolContainerName(sym *symbols.Symbol) string {
 		}
 	}
 	return ""
-}
-
-func highlightKindForRange(rng protocol.Range, declRange protocol.Range, cursorRange protocol.Range) protocol.DocumentHighlightKind {
-	switch {
-	case sameRange(rng, declRange):
-		return protocol.DocumentHighlightKindWrite
-	case sameRange(rng, cursorRange):
-		return protocol.DocumentHighlightKindText
-	default:
-		return protocol.DocumentHighlightKindRead
-	}
 }
 
 func sameRange(a, b protocol.Range) bool {
@@ -1070,72 +1075,12 @@ func (a *Analyzer) GetWorkspaceSymbols(query string) []protocol.SymbolInformatio
 	return results
 }
 
-func (a *Analyzer) GetDocumentHighlights(uri, source string, pos protocol.Position) []protocol.DocumentHighlight {
-	word, wordRange := sourcectx.WordAt(source, pos)
-	if word == "" {
-		return nil
-	}
-
-	file := parser.ParseFile(source)
-	sym := a.resolveSymbolAtCursor(uri, source, pos, word, file)
-	if sym == nil && strings.HasPrefix(word, "$") && word != "$this" {
-		return highlightVariableOccurrences(source, pos, word)
-	}
-
-	lines := strings.Split(source, "\n")
-	if sym == nil {
-		var highlights []protocol.DocumentHighlight
-		for i, line := range lines {
-			for _, loc := range findWordLocations(uri, line, i, word) {
-				highlights = append(highlights, protocol.DocumentHighlight{Range: loc.Range, Kind: protocol.DocumentHighlightKindText})
-			}
-		}
-		return deduplicateHighlights(highlights)
-	}
-
-	var highlights []protocol.DocumentHighlight
-	for i, line := range lines {
-		switch sym.Kind {
-		case symbols.KindClass, symbols.KindInterface, symbols.KindEnum, symbols.KindTrait:
-			for _, loc := range findWordLocations(uri, line, i, sym.Name) {
-				highlights = append(highlights, protocol.DocumentHighlight{Range: loc.Range, Kind: highlightKindForRange(loc.Range, sym.Range, wordRange)})
-			}
-			for _, loc := range findAccessLocations(uri, line, i, "\\"+sym.Name, 1, sym.Name) {
-				highlights = append(highlights, protocol.DocumentHighlight{Range: loc.Range, Kind: protocol.DocumentHighlightKindRead})
-			}
-		case symbols.KindMethod, symbols.KindFunction, symbols.KindConstant, symbols.KindEnumCase:
-			for _, loc := range findWordLocations(uri, line, i, sym.Name) {
-				highlights = append(highlights, protocol.DocumentHighlight{Range: loc.Range, Kind: highlightKindForRange(loc.Range, sym.Range, wordRange)})
-			}
-		case symbols.KindProperty:
-			bareName := strings.TrimPrefix(sym.Name, "$")
-			for _, loc := range findWordLocations(uri, line, i, "$"+bareName) {
-				highlights = append(highlights, protocol.DocumentHighlight{Range: loc.Range, Kind: highlightKindForRange(loc.Range, sym.Range, wordRange)})
-			}
-			for _, loc := range findAccessLocations(uri, line, i, "->"+bareName, 2, bareName) {
-				highlights = append(highlights, protocol.DocumentHighlight{Range: loc.Range, Kind: protocol.DocumentHighlightKindRead})
-			}
-		}
-	}
-
-	return deduplicateHighlights(highlights)
-}
-
 func (a *Analyzer) GetSignatureHelp(uri, source string, pos protocol.Position) *protocol.SignatureHelp {
-	line := resolve.GetLineAt(source, pos.Line)
-	if line == "" {
+	callee, activeParam, ok := sourcectx.CallAt(uri, source, pos)
+	if !ok {
 		return nil
 	}
-	prefix := line[:min(pos.Character, len(line))]
-	funcName, activeParam := extractCallInfo(prefix)
-	if funcName == "" {
-		return nil
-	}
-	syms := a.index.LookupByName(funcName)
-	if len(syms) == 0 {
-		return nil
-	}
-	sym := symbols.PickBestStandalone(syms, funcName)
+	sym := a.symbolTarget(a.engine.Resolver(), uri, source, callee).sym
 	if sym == nil {
 		return nil
 	}
@@ -1156,43 +1101,6 @@ func (a *Analyzer) GetSignatureHelp(uri, source string, pos protocol.Position) *
 		activeParam = maxParam
 	}
 	return &protocol.SignatureHelp{Signatures: []protocol.SignatureInformation{sig}, ActiveParameter: activeParam}
-}
-
-func extractCallInfo(prefix string) (string, int) {
-	activeParam := 0
-	depth := 0
-	parenPos := -1
-	for i := len(prefix) - 1; i >= 0; i-- {
-		switch prefix[i] {
-		case ')':
-			depth++
-		case '(':
-			if depth == 0 {
-				parenPos = i
-				goto found
-			}
-			depth--
-		case ',':
-			if depth == 0 {
-				activeParam++
-			}
-		}
-	}
-	return "", 0
-found:
-	if parenPos <= 0 {
-		return "", 0
-	}
-	end := parenPos
-	start := end - 1
-	for start >= 0 && resolve.IsWordChar(prefix[start]) {
-		start--
-	}
-	start++
-	if start >= end {
-		return "", 0
-	}
-	return prefix[start:end], activeParam
 }
 
 // formatParams returns the parenthesized parameter list for a symbol, e.g.
@@ -1230,14 +1138,9 @@ type ReferenceVariant struct {
 // the editor to present and copy. Returns nil when the cursor is not on a
 // resolvable named symbol.
 func (a *Analyzer) CopyReference(uri, source string, pos protocol.Position) []ReferenceVariant {
+	r := a.engine.Resolver()
 	ctx := sourcectx.Analyze(uri, source, pos)
-	if ctx == nil || ctx.SymbolText == "" {
-		return nil
-	}
-	word := ctx.SymbolText
-	file := ctx.File
-
-	sym := a.resolveSymbolAtCursor(uri, source, pos, word, file)
+	sym := a.resolveSymbolAt(r, ctx.Name(), source)
 	if sym == nil {
 		return nil
 	}
@@ -1332,6 +1235,7 @@ func getWordRangeAt(source string, pos protocol.Position) (string, protocol.Rang
 // PrepareRename checks if the symbol at the cursor can be renamed and returns
 // the range and current name as a placeholder.
 func (a *Analyzer) PrepareRename(uri, source string, pos protocol.Position) *protocol.PrepareRenameResult {
+	r := a.engine.Resolver()
 	ctx := sourcectx.Analyze(uri, source, pos)
 	if ctx == nil {
 		return nil
@@ -1344,7 +1248,7 @@ func (a *Analyzer) PrepareRename(uri, source string, pos protocol.Position) *pro
 	file := ctx.File
 
 	// Try resolving as a symbol (class, method, property, function, etc.)
-	sym := a.resolveSymbolAtCursor(uri, source, pos, word, file)
+	sym := a.resolveSymbolAt(r, ctx.Name(), source)
 
 	// Reject built-ins
 	if sym != nil && symbols.IsBuiltin(sym) {
@@ -1384,7 +1288,7 @@ func (a *Analyzer) PrepareRename(uri, source string, pos protocol.Position) *pro
 	// Check for member access context (method/property on -> or ::).
 	// If we reach here with an access kind set, the receiver was unresolvable;
 	// return nil rather than allowing a rename that could affect wrong symbols.
-	if ctx.AccessKind != sourcectx.AccessNone {
+	if ctx.AccessKind != sourcectx.AccessNone || ctx.FunctionCall {
 		return nil
 	}
 
@@ -1441,6 +1345,7 @@ func isPrepareRenameVariableBindingSupported(binding *scope.Binding, word string
 // Rename performs a rename of the symbol at the given position.
 // readDocument is used to read file contents for files not open in the editor.
 func (a *Analyzer) Rename(uri, source string, pos protocol.Position, newName string, readDocument func(string) string) *protocol.WorkspaceEdit {
+	r := a.engine.Resolver()
 	ctx := sourcectx.Analyze(uri, source, pos)
 	if ctx == nil {
 		return nil
@@ -1453,7 +1358,7 @@ func (a *Analyzer) Rename(uri, source string, pos protocol.Position, newName str
 	file := ctx.File
 
 	// Try resolving as a symbol first (handles properties, methods, classes, etc.)
-	sym := a.resolveSymbolAtCursor(uri, source, pos, word, file)
+	sym := a.resolveSymbolAt(r, ctx.Name(), source)
 
 	// If it's a known symbol, rename it across the workspace
 	if sym != nil {

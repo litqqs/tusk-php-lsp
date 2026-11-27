@@ -123,7 +123,7 @@ func TestChainTypeWithoutFile(t *testing.T) {
 // A container call answers through the ContainerCall hook.
 func TestChainTypeContainerCall(t *testing.T) {
 	r, file, pos := chainFixture(t)
-	r.ContainerCall = func(callExpr, source string, file *parser.FileNode) string {
+	r.ContainerCall = func(_ *Resolver, callExpr, source string, file *parser.FileNode) string {
 		switch callExpr {
 		case "app('log')":
 			return `App\Logger`
@@ -148,7 +148,7 @@ func TestChainTypeContainerCall(t *testing.T) {
 func TestChainTypeWired(t *testing.T) {
 	r, file, pos := chainFixture(t)
 	var asked []string
-	r.TypedChainResolver = func(expr, source string, pos protocol.Position, file *parser.FileNode) ResolvedType {
+	r.TypedChainResolver = func(_ *Resolver, expr, source string, pos protocol.Position, file *parser.FileNode) ResolvedType {
 		asked = append(asked, expr)
 		return ResolvedType{FQN: `App\Logger`}
 	}
@@ -203,6 +203,21 @@ func TestResolveClassNameLoose(t *testing.T) {
 	global := parser.ParseFile("<?php\nnamespace Other;\n")
 	if got := r.ResolveClassNameLoose(`App\Person`, global); got != `App\Person` {
 		t.Errorf("a full name as written = %q", got)
+	}
+}
+
+func TestResolveClassNameLooseFindsOnlyClasses(t *testing.T) {
+	idx := symbols.NewIndex()
+	idx.IndexFile("file:///h.php", "<?php\nnamespace Helper;\nfunction person() {}\nclass Box { public function person() {} }\n")
+	r := NewResolver(idx)
+	file := parser.ParseFile("<?php\nnamespace App;\n")
+	for _, f := range []*parser.FileNode{nil, file} {
+		if got := r.ResolveClassNameLoose("person", f); got != "person" {
+			t.Errorf("a function or method named like the class is not a class, got %q", got)
+		}
+		if got := r.ResolveClassNameLoose("Box", f); got != `Helper\Box` {
+			t.Errorf("a class by its short name, got %q", got)
+		}
 	}
 }
 

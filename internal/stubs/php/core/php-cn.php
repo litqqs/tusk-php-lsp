@@ -9012,10740 +9012,10870 @@ function zlib_get_coding_type(): string|false {}
 /**
  * AddressInfo 类
  */
- final class AddressInfo {
-}
+final class AddressInfo {}
 
 /**
  * AllowDynamicProperties 注解 (PHP 8 >= 8.2.0)
  */
- final class AllowDynamicProperties {
-    /**
-     * 构造新的 AllowDynamicProperties 注解实例 (PHP 8 >= 8.2.0)
-     */
-     public function __construct() {}
+final class AllowDynamicProperties
+{
+   /**
+    * 构造新的 AllowDynamicProperties 注解实例 (PHP 8 >= 8.2.0)
+    */
+   public function __construct() {}
 }
 
 /**
  * AppendIterator 类
  */
- class AppendIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable {
-    /**
-     * Constructs an AppendIterator
-     */
-     public function __construct() {}
-    /**
-     * Appends an iterator
-     */
-     public function append(\Iterator $iterator): void {}
-    /**
-     * Gets the current value
-     */
-     public function current(): mixed {}
-    /**
-     * Gets the ArrayIterator
-     */
-     public function getArrayIterator(): \ArrayIterator {}
-    /**
-     * Gets an index of iterators
-     */
-     public function getIteratorIndex(): ?int {}
-    /**
-     * Moves to the next element
-     */
-     public function next(): void {}
-    /**
-     * Rewinds the Iterator
-     */
-     public function rewind(): void {}
-    /**
-     * Checks validity of the current element
-     */
-     public function valid(): bool {}
+class AppendIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   /**
+    * Constructs an AppendIterator
+    */
+   public function __construct() {}
+   /**
+    * Appends an iterator
+    */
+   public function append(\Iterator $iterator): void {}
+   /**
+    * Gets the current value
+    */
+   public function current(): mixed {}
+   /**
+    * Gets the ArrayIterator
+    */
+   public function getArrayIterator(): \ArrayIterator {}
+   /**
+    * Gets an index of iterators
+    */
+   public function getIteratorIndex(): ?int {}
+   /**
+    * Moves to the next element
+    */
+   public function next(): void {}
+   /**
+    * Rewinds the Iterator
+    */
+   public function rewind(): void {}
+   /**
+    * Checks validity of the current element
+    */
+   public function valid(): bool {}
 }
 
 /**
  * ArgumentCountError
  */
- class ArgumentCountError extends \TypeError implements \Stringable, \Throwable {
-}
+class ArgumentCountError extends \TypeError implements \Stringable, \Throwable {}
 
 /**
  * ArithmeticError
  */
- class ArithmeticError extends \Error implements \Stringable, \Throwable {
-}
+class ArithmeticError extends \Error implements \Stringable, \Throwable {}
 
 /**
  * ArrayAccess（数组式访问）接口
  */
- interface ArrayAccess {
-    /**
-     * 检查一个偏移位置是否存在
-     */
-     public abstract function offsetExists(mixed $offset): bool;
-    /**
-     * 获取一个偏移位置的值
-     */
-     public abstract function offsetGet(mixed $offset): mixed;
-    /**
-     * 设置一个偏移位置的值
-     */
-     public abstract function offsetSet(mixed $offset, mixed $value): void;
-    /**
-     * 复位一个偏移位置的值
-     */
-     public abstract function offsetUnset(mixed $offset): void;
+interface ArrayAccess
+{
+   /**
+    * 检查一个偏移位置是否存在
+    */
+   public abstract function offsetExists(mixed $offset): bool;
+   /**
+    * 获取一个偏移位置的值
+    */
+   public abstract function offsetGet(mixed $offset): mixed;
+   /**
+    * 设置一个偏移位置的值
+    */
+   public abstract function offsetSet(mixed $offset, mixed $value): void;
+   /**
+    * 复位一个偏移位置的值
+    */
+   public abstract function offsetUnset(mixed $offset): void;
 }
 
 /**
  * ArrayIterator 类
  */
- class ArrayIterator implements \ArrayAccess, \Countable, \Iterator, \SeekableIterator, \Serializable, \Traversable {
-    public const ARRAY_AS_PROPS = 2;
-    public const STD_PROP_LIST = 1;
-    /**
-     * Construct an ArrayIterator
-     */
-     public function __construct(object|array $array = [], int $flags = 0) {}
-    public function __debugInfo(): array {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
-    /**
-     * Append an element
-     */
-     public function append(mixed $value): void {}
-    /**
-     * Sort entries by values
-     */
-     public function asort(int $flags = SORT_REGULAR): true {}
-    /**
-     * Count elements
-     */
-     public function count(): int {}
-    /**
-     * Return current array entry
-     */
-     public function current(): mixed {}
-    /**
-     * Get array copy
-     */
-     public function getArrayCopy(): array {}
-    /**
-     * Get behavior flags
-     */
-     public function getFlags(): int {}
-    /**
-     * Return current array key
-     */
-     public function key(): string|int|null {}
-    /**
-     * Sort entries by keys
-     */
-     public function ksort(int $flags = SORT_REGULAR): true {}
-    /**
-     * Sort entries naturally, case insensitive
-     */
-     public function natcasesort(): true {}
-    /**
-     * Sort entries naturally
-     */
-     public function natsort(): true {}
-    /**
-     * Move to next entry
-     */
-     public function next(): void {}
-    /**
-     * Check if offset exists
-     */
-     public function offsetExists(mixed $key): bool {}
-    /**
-     * Get value for an offset
-     */
-     public function offsetGet(mixed $key): mixed {}
-    /**
-     * Set value for an offset
-     */
-     public function offsetSet(mixed $key, mixed $value): void {}
-    /**
-     * Unset value for an offset
-     */
-     public function offsetUnset(mixed $key): void {}
-    /**
-     * Rewind array back to the start
-     */
-     public function rewind(): void {}
-    /**
-     * Seeks to a position
-     */
-     public function seek(int $offset): void {}
-    /**
-     * Serialize
-     */
-     public function serialize(): string {}
-    /**
-     * Set behaviour flags
-     */
-     public function setFlags(int $flags): void {}
-    /**
-     * Sort with a user-defined comparison function and maintain index association
-     */
-     public function uasort(callable $callback): true {}
-    /**
-     * Sort by keys using a user-defined comparison function
-     */
-     public function uksort(callable $callback): true {}
-    /**
-     * Unserialize
-     */
-     public function unserialize(string $data): void {}
-    /**
-     * Check whether array contains more entries
-     */
-     public function valid(): bool {}
+class ArrayIterator implements \ArrayAccess, \Countable, \Iterator, \SeekableIterator, \Serializable, \Traversable
+{
+   public const ARRAY_AS_PROPS = 2;
+   public const STD_PROP_LIST = 1;
+   /**
+    * Construct an ArrayIterator
+    */
+   public function __construct(object|array $array = [], int $flags = 0) {}
+   public function __debugInfo(): array {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
+   /**
+    * Append an element
+    */
+   public function append(mixed $value): void {}
+   /**
+    * Sort entries by values
+    */
+   public function asort(int $flags = SORT_REGULAR): true {}
+   /**
+    * Count elements
+    */
+   public function count(): int {}
+   /**
+    * Return current array entry
+    */
+   public function current(): mixed {}
+   /**
+    * Get array copy
+    */
+   public function getArrayCopy(): array {}
+   /**
+    * Get behavior flags
+    */
+   public function getFlags(): int {}
+   /**
+    * Return current array key
+    */
+   public function key(): string|int|null {}
+   /**
+    * Sort entries by keys
+    */
+   public function ksort(int $flags = SORT_REGULAR): true {}
+   /**
+    * Sort entries naturally, case insensitive
+    */
+   public function natcasesort(): true {}
+   /**
+    * Sort entries naturally
+    */
+   public function natsort(): true {}
+   /**
+    * Move to next entry
+    */
+   public function next(): void {}
+   /**
+    * Check if offset exists
+    */
+   public function offsetExists(mixed $key): bool {}
+   /**
+    * Get value for an offset
+    */
+   public function offsetGet(mixed $key): mixed {}
+   /**
+    * Set value for an offset
+    */
+   public function offsetSet(mixed $key, mixed $value): void {}
+   /**
+    * Unset value for an offset
+    */
+   public function offsetUnset(mixed $key): void {}
+   /**
+    * Rewind array back to the start
+    */
+   public function rewind(): void {}
+   /**
+    * Seeks to a position
+    */
+   public function seek(int $offset): void {}
+   /**
+    * Serialize
+    */
+   public function serialize(): string {}
+   /**
+    * Set behaviour flags
+    */
+   public function setFlags(int $flags): void {}
+   /**
+    * Sort with a user-defined comparison function and maintain index association
+    */
+   public function uasort(callable $callback): true {}
+   /**
+    * Sort by keys using a user-defined comparison function
+    */
+   public function uksort(callable $callback): true {}
+   /**
+    * Unserialize
+    */
+   public function unserialize(string $data): void {}
+   /**
+    * Check whether array contains more entries
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The ArrayObject class
  */
- class ArrayObject implements \ArrayAccess, \Countable, \IteratorAggregate, \Serializable, \Traversable {
-    public const ARRAY_AS_PROPS = 2;
-    public const STD_PROP_LIST = 1;
-    /**
-     * Construct a new array object
-     */
-     public function __construct(object|array $array = [], int $flags = 0, string $iteratorClass = "ArrayIterator") {}
-    public function __debugInfo(): array {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
-    /**
-     * 追加新的值作为最后一个元素。
-     */
-     public function append(mixed $value): void {}
-    /**
-     * Sort the entries by value
-     */
-     public function asort(int $flags = SORT_REGULAR): true {}
-    /**
-     * 统计 ArrayObject 内 public 属性的数量
-     */
-     public function count(): int {}
-    /**
-     * Exchange the array for another one
-     */
-     public function exchangeArray(object|array $array): array {}
-    /**
-     * Creates a copy of the ArrayObject
-     */
-     public function getArrayCopy(): array {}
-    /**
-     * Gets the behavior flags
-     */
-     public function getFlags(): int {}
-    /**
-     * Create a new iterator from an ArrayObject instance
-     */
-     public function getIterator(): \Iterator {}
-    /**
-     * Gets the iterator classname for the ArrayObject
-     */
-     public function getIteratorClass(): string {}
-    /**
-     * Sort the entries by key
-     */
-     public function ksort(int $flags = SORT_REGULAR): true {}
-    /**
-     * Sort an array using a case insensitive &quot;natural order&quot; algorithm
-     */
-     public function natcasesort(): true {}
-    /**
-     * Sort entries using a &quot;natural order&quot; algorithm
-     */
-     public function natsort(): true {}
-    /**
-     * Returns whether the requested index exists
-     */
-     public function offsetExists(mixed $key): bool {}
-    /**
-     * Returns the value at the specified index
-     */
-     public function offsetGet(mixed $key): mixed {}
-    /**
-     * 为指定索引设定新值
-     */
-     public function offsetSet(mixed $key, mixed $value): void {}
-    /**
-     * Unsets the value at the specified index
-     */
-     public function offsetUnset(mixed $key): void {}
-    /**
-     * Serialize an ArrayObject
-     */
-     public function serialize(): string {}
-    /**
-     * Sets the behavior flags
-     */
-     public function setFlags(int $flags): void {}
-    /**
-     * Sets the iterator classname for the ArrayObject
-     */
-     public function setIteratorClass(string $iteratorClass): void {}
-    /**
-     * Sort the entries with a user-defined comparison function and maintain key association
-     */
-     public function uasort(callable $callback): true {}
-    /**
-     * Sort the entries by keys using a user-defined comparison function
-     */
-     public function uksort(callable $callback): true {}
-    /**
-     * Unserialize an ArrayObject
-     */
-     public function unserialize(string $data): void {}
+class ArrayObject implements \ArrayAccess, \Countable, \IteratorAggregate, \Serializable, \Traversable
+{
+   public const ARRAY_AS_PROPS = 2;
+   public const STD_PROP_LIST = 1;
+   /**
+    * Construct a new array object
+    */
+   public function __construct(object|array $array = [], int $flags = 0, string $iteratorClass = "ArrayIterator") {}
+   public function __debugInfo(): array {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
+   /**
+    * 追加新的值作为最后一个元素。
+    */
+   public function append(mixed $value): void {}
+   /**
+    * Sort the entries by value
+    */
+   public function asort(int $flags = SORT_REGULAR): true {}
+   /**
+    * 统计 ArrayObject 内 public 属性的数量
+    */
+   public function count(): int {}
+   /**
+    * Exchange the array for another one
+    */
+   public function exchangeArray(object|array $array): array {}
+   /**
+    * Creates a copy of the ArrayObject
+    */
+   public function getArrayCopy(): array {}
+   /**
+    * Gets the behavior flags
+    */
+   public function getFlags(): int {}
+   /**
+    * Create a new iterator from an ArrayObject instance
+    */
+   public function getIterator(): \Iterator {}
+   /**
+    * Gets the iterator classname for the ArrayObject
+    */
+   public function getIteratorClass(): string {}
+   /**
+    * Sort the entries by key
+    */
+   public function ksort(int $flags = SORT_REGULAR): true {}
+   /**
+    * Sort an array using a case insensitive &quot;natural order&quot; algorithm
+    */
+   public function natcasesort(): true {}
+   /**
+    * Sort entries using a &quot;natural order&quot; algorithm
+    */
+   public function natsort(): true {}
+   /**
+    * Returns whether the requested index exists
+    */
+   public function offsetExists(mixed $key): bool {}
+   /**
+    * Returns the value at the specified index
+    */
+   public function offsetGet(mixed $key): mixed {}
+   /**
+    * 为指定索引设定新值
+    */
+   public function offsetSet(mixed $key, mixed $value): void {}
+   /**
+    * Unsets the value at the specified index
+    */
+   public function offsetUnset(mixed $key): void {}
+   /**
+    * Serialize an ArrayObject
+    */
+   public function serialize(): string {}
+   /**
+    * Sets the behavior flags
+    */
+   public function setFlags(int $flags): void {}
+   /**
+    * Sets the iterator classname for the ArrayObject
+    */
+   public function setIteratorClass(string $iteratorClass): void {}
+   /**
+    * Sort the entries with a user-defined comparison function and maintain key association
+    */
+   public function uasort(callable $callback): true {}
+   /**
+    * Sort the entries by keys using a user-defined comparison function
+    */
+   public function uksort(callable $callback): true {}
+   /**
+    * Unserialize an ArrayObject
+    */
+   public function unserialize(string $data): void {}
 }
 
 /**
  * AssertionError
  */
- class AssertionError extends \Error implements \Stringable, \Throwable {
-}
+class AssertionError extends \Error implements \Stringable, \Throwable {}
 
 /**
  * Attribute 属性
  */
- final class Attribute {
-    public const IS_REPEATABLE = 128;
-    public const TARGET_ALL = 127;
-    public const TARGET_CLASS = 1;
-    public const TARGET_CLASS_CONSTANT = 16;
-    public const TARGET_CONSTANT = 64;
-    public const TARGET_FUNCTION = 2;
-    public const TARGET_METHOD = 4;
-    public const TARGET_PARAMETER = 32;
-    public const TARGET_PROPERTY = 8;
-    public int $flags;
-    /**
-     * 构造新的 Attribute 实例
-     */
-     public function __construct(int $flags = Attribute::TARGET_ALL) {}
+final class Attribute
+{
+   public const IS_REPEATABLE = 128;
+   public const TARGET_ALL = 127;
+   public const TARGET_CLASS = 1;
+   public const TARGET_CLASS_CONSTANT = 16;
+   public const TARGET_CONSTANT = 64;
+   public const TARGET_FUNCTION = 2;
+   public const TARGET_METHOD = 4;
+   public const TARGET_PARAMETER = 32;
+   public const TARGET_PROPERTY = 8;
+   public int $flags;
+   /**
+    * 构造新的 Attribute 实例
+    */
+   public function __construct(int $flags = Attribute::TARGET_ALL) {}
 }
 
 /**
  * BackedEnum 接口 (PHP 8 >= 8.1.0)
  */
- interface BackedEnum extends \UnitEnum {
-    /**
-     * 映射标量为 enum 实例 (PHP 8 >= 8.1.0)
-     */
-     public abstract static function from(string|int $value): static;
-    /**
-     * 映射标量为 enum 实例或 null (PHP 8 >= 8.1.0)
-     */
-     public abstract static function tryFrom(string|int $value): ?static;
+interface BackedEnum extends \UnitEnum
+{
+   /**
+    * 映射标量为 enum 实例 (PHP 8 >= 8.1.0)
+    */
+   public abstract static function from(string|int $value): static;
+   /**
+    * 映射标量为 enum 实例或 null (PHP 8 >= 8.1.0)
+    */
+   public abstract static function tryFrom(string|int $value): ?static;
 }
 
 /**
  * The BadFunctionCallException class
  */
- class BadFunctionCallException extends \LogicException implements \Stringable, \Throwable {
-}
+class BadFunctionCallException extends \LogicException implements \Stringable, \Throwable {}
 
 /**
  * BadMethodCallException 类
  */
- class BadMethodCallException extends \BadFunctionCallException implements \Stringable, \Throwable {
-}
+class BadMethodCallException extends \BadFunctionCallException implements \Stringable, \Throwable {}
 
 /**
  * CURLFile 类
  */
- class CURLFile {
-    public string $mime;
-    public string $name;
-    public string $postname;
-    /**
-     * 创建 CURLFile 对象
-     */
-     public function __construct(string $filename, ?string $mime_type = NULL, ?string $posted_filename = NULL) {}
-    /**
-     * 获取文件名
-     */
-     public function getFilename(): string {}
-    /**
-     * 获取 MIME 类型
-     */
-     public function getMimeType(): string {}
-    /**
-     * 获取 POST 请求时的文件名
-     */
-     public function getPostFilename(): string {}
-    /**
-     * 设置 MIME 类型
-     */
-     public function setMimeType(string $mime_type): void {}
-    /**
-     * 设置 POST 请求时的文件名
-     */
-     public function setPostFilename(string $posted_filename): void {}
+class CURLFile
+{
+   public string $mime;
+   public string $name;
+   public string $postname;
+   /**
+    * 创建 CURLFile 对象
+    */
+   public function __construct(string $filename, ?string $mime_type = NULL, ?string $posted_filename = NULL) {}
+   /**
+    * 获取文件名
+    */
+   public function getFilename(): string {}
+   /**
+    * 获取 MIME 类型
+    */
+   public function getMimeType(): string {}
+   /**
+    * 获取 POST 请求时的文件名
+    */
+   public function getPostFilename(): string {}
+   /**
+    * 设置 MIME 类型
+    */
+   public function setMimeType(string $mime_type): void {}
+   /**
+    * 设置 POST 请求时的文件名
+    */
+   public function setPostFilename(string $posted_filename): void {}
 }
 
 /**
  * CURLStringFile 类 (PHP 8 >= 8.1.0)
  */
- class CURLStringFile {
-    public string $data;
-    public string $mime;
-    public string $postname;
-    /**
-     * 创建 CURLStringFile 对象 (PHP 8 >= 8.1.0)
-     */
-     public function __construct(string $data, string $postname, string $mime = "application/octet-stream") {}
+class CURLStringFile
+{
+   public string $data;
+   public string $mime;
+   public string $postname;
+   /**
+    * 创建 CURLStringFile 对象 (PHP 8 >= 8.1.0)
+    */
+   public function __construct(string $data, string $postname, string $mime = "application/octet-stream") {}
 }
 
 /**
  * CachingIterator 类
  */
- class CachingIterator extends \IteratorIterator implements \ArrayAccess, \Countable, \Iterator, \OuterIterator, \Stringable, \Traversable {
-    public const CALL_TOSTRING = 1;
-    public const CATCH_GET_CHILD = 16;
-    public const FULL_CACHE = 256;
-    public const TOSTRING_USE_CURRENT = 4;
-    public const TOSTRING_USE_INNER = 8;
-    public const TOSTRING_USE_KEY = 2;
-    /**
-     * Construct a new CachingIterator object for the iterator
-     */
-     public function __construct(\Iterator $iterator, int $flags = CachingIterator::CALL_TOSTRING) {}
-    public function __toString(): string {}
-    /**
-     * The number of elements in the iterator
-     */
-     public function count(): int {}
-    /**
-     * Retrieve the contents of the cache
-     */
-     public function getCache(): array {}
-    /**
-     * Get flags used
-     */
-     public function getFlags(): int {}
-    /**
-     * Check whether the inner iterator has a valid next element
-     */
-     public function hasNext(): bool {}
-    /**
-     * Move the iterator forward
-     */
-     public function next(): void {}
-    /**
-     * The offsetExists purpose
-     */
-     public function offsetExists(mixed $key): bool {}
-    /**
-     * The offsetGet purpose
-     */
-     public function offsetGet(mixed $key): mixed {}
-    /**
-     * The offsetSet purpose
-     */
-     public function offsetSet(mixed $key, mixed $value): void {}
-    /**
-     * The offsetUnset purpose
-     */
-     public function offsetUnset(mixed $key): void {}
-    /**
-     * Rewind the iterator
-     */
-     public function rewind(): void {}
-    /**
-     * The setFlags purpose
-     */
-     public function setFlags(int $flags): void {}
-    /**
-     * Check whether the current element is valid
-     */
-     public function valid(): bool {}
+class CachingIterator extends \IteratorIterator implements \ArrayAccess, \Countable, \Iterator, \OuterIterator, \Stringable, \Traversable
+{
+   public const CALL_TOSTRING = 1;
+   public const CATCH_GET_CHILD = 16;
+   public const FULL_CACHE = 256;
+   public const TOSTRING_USE_CURRENT = 4;
+   public const TOSTRING_USE_INNER = 8;
+   public const TOSTRING_USE_KEY = 2;
+   /**
+    * Construct a new CachingIterator object for the iterator
+    */
+   public function __construct(\Iterator $iterator, int $flags = CachingIterator::CALL_TOSTRING) {}
+   public function __toString(): string {}
+   /**
+    * The number of elements in the iterator
+    */
+   public function count(): int {}
+   /**
+    * Retrieve the contents of the cache
+    */
+   public function getCache(): array {}
+   /**
+    * Get flags used
+    */
+   public function getFlags(): int {}
+   /**
+    * Check whether the inner iterator has a valid next element
+    */
+   public function hasNext(): bool {}
+   /**
+    * Move the iterator forward
+    */
+   public function next(): void {}
+   /**
+    * The offsetExists purpose
+    */
+   public function offsetExists(mixed $key): bool {}
+   /**
+    * The offsetGet purpose
+    */
+   public function offsetGet(mixed $key): mixed {}
+   /**
+    * The offsetSet purpose
+    */
+   public function offsetSet(mixed $key, mixed $value): void {}
+   /**
+    * The offsetUnset purpose
+    */
+   public function offsetUnset(mixed $key): void {}
+   /**
+    * Rewind the iterator
+    */
+   public function rewind(): void {}
+   /**
+    * The setFlags purpose
+    */
+   public function setFlags(int $flags): void {}
+   /**
+    * Check whether the current element is valid
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The CallbackFilterIterator class
  */
- class CallbackFilterIterator extends \FilterIterator implements \Iterator, \OuterIterator, \Traversable {
-    /**
-     * Create a filtered iterator from another iterator
-     */
-     public function __construct(\Iterator $iterator, callable $callback) {}
-    /**
-     * Calls the callback with the current value, the current key and the inner iterator as arguments
-     */
-     public function accept(): bool {}
+class CallbackFilterIterator extends \FilterIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   /**
+    * Create a filtered iterator from another iterator
+    */
+   public function __construct(\Iterator $iterator, callable $callback) {}
+   /**
+    * Calls the callback with the current value, the current key and the inner iterator as arguments
+    */
+   public function accept(): bool {}
 }
 
 /**
  * ClosedGeneratorException 类
  */
- class ClosedGeneratorException extends \Exception implements \Stringable, \Throwable {
-}
+class ClosedGeneratorException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * Closure 类
  */
- final class Closure {
-    /**
-     * 用于禁止实例化的构造函数
-     */
-     private function __construct() {}
-    public function __invoke() {}
-    /**
-     * 用特定的绑定对象和类作用域复制闭包。
-     */
-     public static function bind(\Closure $closure, ?object $newThis, object|string|null $newScope = "static"): ?\Closure {}
-    /**
-     * 用特定的绑定对象和类作用域复制闭包。
-     */
-     public function bindTo(?object $newThis, object|string|null $newScope = "static"): ?\Closure {}
-    /**
-     * 绑定并调用闭包
-     */
-     public function call(object $newThis, mixed ...$args): mixed {}
-    /**
-     * 将 callable 转换为闭包
-     */
-     public static function fromCallable(callable $callback): \Closure {}
-    /**
-     * 返回当前正在执行的闭包 (PHP 8 >= 8.5.0)
-     */
-     public static function getCurrent(): \Closure {}
+final class Closure
+{
+   /**
+    * 用于禁止实例化的构造函数
+    */
+   private function __construct() {}
+   public function __invoke() {}
+   /**
+    * 用特定的绑定对象和类作用域复制闭包。
+    */
+   public static function bind(\Closure $closure, ?object $newThis, object|string|null $newScope = "static"): ?\Closure {}
+   /**
+    * 用特定的绑定对象和类作用域复制闭包。
+    */
+   public function bindTo(?object $newThis, object|string|null $newScope = "static"): ?\Closure {}
+   /**
+    * 绑定并调用闭包
+    */
+   public function call(object $newThis, mixed ...$args): mixed {}
+   /**
+    * 将 callable 转换为闭包
+    */
+   public static function fromCallable(callable $callback): \Closure {}
+   /**
+    * 返回当前正在执行的闭包 (PHP 8 >= 8.5.0)
+    */
+   public static function getCurrent(): \Closure {}
 }
 
 /**
  * The Collator class
  */
- class Collator {
-    public const ALTERNATE_HANDLING = 1;
-    public const CASE_FIRST = 2;
-    public const CASE_LEVEL = 3;
-    public const DEFAULT_STRENGTH = 2;
-    public const DEFAULT_VALUE = -1;
-    public const FRENCH_COLLATION = 0;
-    public const HIRAGANA_QUATERNARY_MODE = 6;
-    public const IDENTICAL = 15;
-    public const LOWER_FIRST = 24;
-    public const NON_IGNORABLE = 21;
-    public const NORMALIZATION_MODE = 4;
-    public const NUMERIC_COLLATION = 7;
-    public const OFF = 16;
-    public const ON = 17;
-    public const PRIMARY = 0;
-    public const QUATERNARY = 3;
-    public const SECONDARY = 1;
-    public const SHIFTED = 20;
-    public const SORT_NUMERIC = 2;
-    public const SORT_REGULAR = 0;
-    public const SORT_STRING = 1;
-    public const STRENGTH = 5;
-    public const TERTIARY = 2;
-    public const UPPER_FIRST = 25;
-    /**
-     * Create a collator
-     */
-     public function __construct(string $locale) {}
-    /**
-     * Sort array maintaining index association
-     */
-     public function asort(array &$array, int $flags = Collator::SORT_REGULAR): bool {}
-    /**
-     * Compare two Unicode strings
-     */
-     public function compare(string $string1, string $string2): int|false {}
-    /**
-     * Create a collator
-     */
-     public static function create(string $locale): ?\Collator {}
-    /**
-     * Get collation attribute value
-     */
-     public function getAttribute(int $attribute): int|false {}
-    /**
-     * Get collator's last error code
-     */
-     public function getErrorCode(): int|false {}
-    /**
-     * Get text for collator's last error code
-     */
-     public function getErrorMessage(): string|false {}
-    /**
-     * Get the locale name of the collator
-     */
-     public function getLocale(int $type): string|false {}
-    /**
-     * Get sorting key for a string
-     */
-     public function getSortKey(string $string): string|false {}
-    /**
-     * Get current collation strength
-     */
-     public function getStrength(): int {}
-    /**
-     * Set collation attribute
-     */
-     public function setAttribute(int $attribute, int $value): bool {}
-    /**
-     * Set collation strength
-     */
-     public function setStrength(int $strength): true {}
-    /**
-     * Sort array using specified collator
-     */
-     public function sort(array &$array, int $flags = Collator::SORT_REGULAR): bool {}
-    /**
-     * Sort array using specified collator and sort keys
-     */
-     public function sortWithSortKeys(array &$array): bool {}
+class Collator
+{
+   public const ALTERNATE_HANDLING = 1;
+   public const CASE_FIRST = 2;
+   public const CASE_LEVEL = 3;
+   public const DEFAULT_STRENGTH = 2;
+   public const DEFAULT_VALUE = -1;
+   public const FRENCH_COLLATION = 0;
+   public const HIRAGANA_QUATERNARY_MODE = 6;
+   public const IDENTICAL = 15;
+   public const LOWER_FIRST = 24;
+   public const NON_IGNORABLE = 21;
+   public const NORMALIZATION_MODE = 4;
+   public const NUMERIC_COLLATION = 7;
+   public const OFF = 16;
+   public const ON = 17;
+   public const PRIMARY = 0;
+   public const QUATERNARY = 3;
+   public const SECONDARY = 1;
+   public const SHIFTED = 20;
+   public const SORT_NUMERIC = 2;
+   public const SORT_REGULAR = 0;
+   public const SORT_STRING = 1;
+   public const STRENGTH = 5;
+   public const TERTIARY = 2;
+   public const UPPER_FIRST = 25;
+   /**
+    * Create a collator
+    */
+   public function __construct(string $locale) {}
+   /**
+    * Sort array maintaining index association
+    */
+   public function asort(array &$array, int $flags = Collator::SORT_REGULAR): bool {}
+   /**
+    * Compare two Unicode strings
+    */
+   public function compare(string $string1, string $string2): int|false {}
+   /**
+    * Create a collator
+    */
+   public static function create(string $locale): ?\Collator {}
+   /**
+    * Get collation attribute value
+    */
+   public function getAttribute(int $attribute): int|false {}
+   /**
+    * Get collator's last error code
+    */
+   public function getErrorCode(): int|false {}
+   /**
+    * Get text for collator's last error code
+    */
+   public function getErrorMessage(): string|false {}
+   /**
+    * Get the locale name of the collator
+    */
+   public function getLocale(int $type): string|false {}
+   /**
+    * Get sorting key for a string
+    */
+   public function getSortKey(string $string): string|false {}
+   /**
+    * Get current collation strength
+    */
+   public function getStrength(): int {}
+   /**
+    * Set collation attribute
+    */
+   public function setAttribute(int $attribute, int $value): bool {}
+   /**
+    * Set collation strength
+    */
+   public function setStrength(int $strength): true {}
+   /**
+    * Sort array using specified collator
+    */
+   public function sort(array &$array, int $flags = Collator::SORT_REGULAR): bool {}
+   /**
+    * Sort array using specified collator and sort keys
+    */
+   public function sortWithSortKeys(array &$array): bool {}
 }
 
 /**
  * CompileError
  */
- class CompileError extends \Error implements \Stringable, \Throwable {
-}
+class CompileError extends \Error implements \Stringable, \Throwable {}
 
 /**
  * Countable 接口
  */
- interface Countable {
-    /**
-     * 统计对象的元素个数
-     */
-     public abstract function count(): int;
+interface Countable
+{
+   /**
+    * 统计对象的元素个数
+    */
+   public abstract function count(): int;
 }
 
 /**
  * CurlHandle 类
  */
- final class CurlHandle {
-}
+final class CurlHandle {}
 
 /**
  * CurlMultiHandle 类
  */
- final class CurlMultiHandle {
-}
+final class CurlMultiHandle {}
 
 /**
  * CurlShareHandle 类
  */
- final class CurlShareHandle {
-}
+final class CurlShareHandle {}
 
 /**
  * CurlSharePersistentHandle 类 (PHP 8 >= 8.5.0)
  */
- final class CurlSharePersistentHandle {
-    public readonly array $options;
+final class CurlSharePersistentHandle
+{
+   public readonly array $options;
 }
 
 /**
  * The DOMAttr class
  */
- class DOMAttr extends \DOMNode {
-    public string $name;
-    public ?\DOMElement $ownerElement;
-    public mixed $schemaTypeInfo;
-    public bool $specified;
-    public string $value;
-    /**
-     * Creates a new DOMAttr object
-     */
-     public function __construct(string $name, string $value = "") {}
-    /**
-     * Checks if attribute is a defined ID
-     */
-     public function isId(): bool {}
+class DOMAttr extends \DOMNode
+{
+   public string $name;
+   public ?\DOMElement $ownerElement;
+   public mixed $schemaTypeInfo;
+   public bool $specified;
+   public string $value;
+   /**
+    * Creates a new DOMAttr object
+    */
+   public function __construct(string $name, string $value = "") {}
+   /**
+    * Checks if attribute is a defined ID
+    */
+   public function isId(): bool {}
 }
 
 /**
  * The DOMCdataSection class
  */
- class DOMCdataSection extends \DOMText implements \DOMChildNode {
-    /**
-     * Constructs a new DOMCdataSection object
-     */
-     public function __construct(string $data) {}
+class DOMCdataSection extends \DOMText implements \DOMChildNode
+{
+   /**
+    * Constructs a new DOMCdataSection object
+    */
+   public function __construct(string $data) {}
 }
 
 /**
  * The DOMCharacterData class
  */
- class DOMCharacterData extends \DOMNode implements \DOMChildNode {
-    public string $data;
-    public int $length;
-    public ?\DOMElement $nextElementSibling;
-    public ?\DOMElement $previousElementSibling;
-    /**
-     * Adds nodes after the character data
-     */
-     public function after(...$nodes): void {}
-    /**
-     * Append the string to the end of the character data of the node
-     */
-     public function appendData(string $data): true {}
-    /**
-     * Adds nodes before the character data
-     */
-     public function before(...$nodes): void {}
-    /**
-     * Remove a range of characters from the character data
-     */
-     public function deleteData(int $offset, int $count): bool {}
-    /**
-     * Insert a string at the specified UTF-8 codepoint offset
-     */
-     public function insertData(int $offset, string $data): bool {}
-    /**
-     * Removes the character data node
-     */
-     public function remove(): void {}
-    /**
-     * Replace a substring within the character data
-     */
-     public function replaceData(int $offset, int $count, string $data): bool {}
-    /**
-     * Replaces the character data with new nodes
-     */
-     public function replaceWith(...$nodes): void {}
-    /**
-     * Extracts a range of data from the character data
-     */
-     public function substringData(int $offset, int $count) {}
+class DOMCharacterData extends \DOMNode implements \DOMChildNode
+{
+   public string $data;
+   public int $length;
+   public ?\DOMElement $nextElementSibling;
+   public ?\DOMElement $previousElementSibling;
+   /**
+    * Adds nodes after the character data
+    */
+   public function after(...$nodes): void {}
+   /**
+    * Append the string to the end of the character data of the node
+    */
+   public function appendData(string $data): true {}
+   /**
+    * Adds nodes before the character data
+    */
+   public function before(...$nodes): void {}
+   /**
+    * Remove a range of characters from the character data
+    */
+   public function deleteData(int $offset, int $count): bool {}
+   /**
+    * Insert a string at the specified UTF-8 codepoint offset
+    */
+   public function insertData(int $offset, string $data): bool {}
+   /**
+    * Removes the character data node
+    */
+   public function remove(): void {}
+   /**
+    * Replace a substring within the character data
+    */
+   public function replaceData(int $offset, int $count, string $data): bool {}
+   /**
+    * Replaces the character data with new nodes
+    */
+   public function replaceWith(...$nodes): void {}
+   /**
+    * Extracts a range of data from the character data
+    */
+   public function substringData(int $offset, int $count) {}
 }
 
 /**
  * The DOMChildNode interface
  */
- interface DOMChildNode {
-    /**
-     * Adds nodes after the node
-     */
-     public abstract function after(...$nodes): void;
-    /**
-     * Adds nodes before the node
-     */
-     public abstract function before(...$nodes): void;
-    /**
-     * Removes the node
-     */
-     public abstract function remove(): void;
-    /**
-     * Replaces the node with new nodes
-     */
-     public abstract function replaceWith(...$nodes): void;
+interface DOMChildNode
+{
+   /**
+    * Adds nodes after the node
+    */
+   public abstract function after(...$nodes): void;
+   /**
+    * Adds nodes before the node
+    */
+   public abstract function before(...$nodes): void;
+   /**
+    * Removes the node
+    */
+   public abstract function remove(): void;
+   /**
+    * Replaces the node with new nodes
+    */
+   public abstract function replaceWith(...$nodes): void;
 }
 
 /**
  * The DOMComment class
  */
- class DOMComment extends \DOMCharacterData implements \DOMChildNode {
-    /**
-     * Creates a new DOMComment object
-     */
-     public function __construct(string $data = "") {}
+class DOMComment extends \DOMCharacterData implements \DOMChildNode
+{
+   /**
+    * Creates a new DOMComment object
+    */
+   public function __construct(string $data = "") {}
 }
 
 /**
  * The DOMDocument class
  */
- class DOMDocument extends \DOMNode implements \DOMParentNode {
-    public ?string $actualEncoding;
-    public int $childElementCount;
-    public mixed $config;
-    public ?\DOMDocumentType $doctype;
-    public ?\DOMElement $documentElement;
-    public ?string $documentURI;
-    public ?string $encoding;
-    public ?\DOMElement $firstElementChild;
-    public bool $formatOutput;
-    public \DOMImplementation $implementation;
-    public ?\DOMElement $lastElementChild;
-    public bool $preserveWhiteSpace;
-    public bool $recover;
-    public bool $resolveExternals;
-    public bool $standalone;
-    public bool $strictErrorChecking;
-    public bool $substituteEntities;
-    public bool $validateOnParse;
-    public ?string $version;
-    public ?string $xmlEncoding;
-    public bool $xmlStandalone;
-    public ?string $xmlVersion;
-    /**
-     * Creates a new DOMDocument object
-     */
-     public function __construct(string $version = "1.0", string $encoding = "") {}
-    /**
-     * Transfer a node from another document
-     */
-     public function adoptNode(\DOMNode $node): \DOMNode|false {}
-    /**
-     * Appends nodes after the last child node
-     */
-     public function append(...$nodes): void {}
-    /**
-     * Create new attribute
-     */
-     public function createAttribute(string $localName) {}
-    /**
-     * Create new attribute node with an associated namespace
-     */
-     public function createAttributeNS(?string $namespace, string $qualifiedName) {}
-    /**
-     * Create new cdata node
-     */
-     public function createCDATASection(string $data) {}
-    /**
-     * Create new comment node
-     */
-     public function createComment(string $data): \DOMComment {}
-    /**
-     * Create new document fragment
-     */
-     public function createDocumentFragment(): \DOMDocumentFragment {}
-    /**
-     * Create new element node
-     */
-     public function createElement(string $localName, string $value = "") {}
-    /**
-     * Create new element node with an associated namespace
-     */
-     public function createElementNS(?string $namespace, string $qualifiedName, string $value = "") {}
-    /**
-     * Create new entity reference node
-     */
-     public function createEntityReference(string $name) {}
-    /**
-     * Creates new PI node
-     */
-     public function createProcessingInstruction(string $target, string $data = "") {}
-    /**
-     * Create new text node
-     */
-     public function createTextNode(string $data): \DOMText {}
-    /**
-     * Searches for an element with a certain id
-     */
-     public function getElementById(string $elementId): ?\DOMElement {}
-    /**
-     * Searches for all elements with given local tag name
-     */
-     public function getElementsByTagName(string $qualifiedName): \DOMNodeList {}
-    /**
-     * Searches for all elements with given tag name in specified namespace
-     */
-     public function getElementsByTagNameNS(?string $namespace, string $localName): \DOMNodeList {}
-    /**
-     * Import node into current document
-     */
-     public function importNode(\DOMNode $node, bool $deep = false) {}
-    /**
-     * Load XML from a file
-     */
-     public function load(string $filename, int $options = 0): bool {}
-    /**
-     * Load HTML from a string
-     */
-     public function loadHTML(string $source, int $options = 0): bool {}
-    /**
-     * Load HTML from a file
-     */
-     public function loadHTMLFile(string $filename, int $options = 0): bool {}
-    /**
-     * Load XML from a string
-     */
-     public function loadXML(string $source, int $options = 0): bool {}
-    /**
-     * Normalizes the document
-     */
-     public function normalizeDocument(): void {}
-    /**
-     * Prepends nodes before the first child node
-     */
-     public function prepend(...$nodes): void {}
-    /**
-     * Register extended class used to create base node type
-     */
-     public function registerNodeClass(string $baseClass, ?string $extendedClass): true {}
-    /**
-     * Performs relaxNG validation on the document
-     */
-     public function relaxNGValidate(string $filename): bool {}
-    /**
-     * Performs relaxNG validation on the document
-     */
-     public function relaxNGValidateSource(string $source): bool {}
-    /**
-     * Replace children in document (PHP 8 >= 8.3.0)
-     */
-     public function replaceChildren(...$nodes): void {}
-    /**
-     * Dumps the internal XML tree back into a file
-     */
-     public function save(string $filename, int $options = 0): int|false {}
-    /**
-     * Dumps the internal document into a string using HTML formatting
-     */
-     public function saveHTML(?\DOMNode $node = NULL): string|false {}
-    /**
-     * Dumps the internal document into a file using HTML formatting
-     */
-     public function saveHTMLFile(string $filename): int|false {}
-    /**
-     * Dumps the internal XML tree back into a string
-     */
-     public function saveXML(?\DOMNode $node = NULL, int $options = 0): string|false {}
-    /**
-     * Validates a document based on a schema. Only XML Schema 1.0 is supported.
-     */
-     public function schemaValidate(string $filename, int $flags = 0): bool {}
-    /**
-     * Validates a document based on a schema
-     */
-     public function schemaValidateSource(string $source, int $flags = 0): bool {}
-    /**
-     * Validates the document based on its DTD
-     */
-     public function validate(): bool {}
-    /**
-     * Substitutes XIncludes in a DOMDocument Object
-     */
-     public function xinclude(int $options = 0): int|false {}
+class DOMDocument extends \DOMNode implements \DOMParentNode
+{
+   public ?string $actualEncoding;
+   public int $childElementCount;
+   public mixed $config;
+   public ?\DOMDocumentType $doctype;
+   public ?\DOMElement $documentElement;
+   public ?string $documentURI;
+   public ?string $encoding;
+   public ?\DOMElement $firstElementChild;
+   public bool $formatOutput;
+   public \DOMImplementation $implementation;
+   public ?\DOMElement $lastElementChild;
+   public bool $preserveWhiteSpace;
+   public bool $recover;
+   public bool $resolveExternals;
+   public bool $standalone;
+   public bool $strictErrorChecking;
+   public bool $substituteEntities;
+   public bool $validateOnParse;
+   public ?string $version;
+   public ?string $xmlEncoding;
+   public bool $xmlStandalone;
+   public ?string $xmlVersion;
+   /**
+    * Creates a new DOMDocument object
+    */
+   public function __construct(string $version = "1.0", string $encoding = "") {}
+   /**
+    * Transfer a node from another document
+    */
+   public function adoptNode(\DOMNode $node): \DOMNode|false {}
+   /**
+    * Appends nodes after the last child node
+    */
+   public function append(...$nodes): void {}
+   /**
+    * Create new attribute
+    */
+   public function createAttribute(string $localName) {}
+   /**
+    * Create new attribute node with an associated namespace
+    */
+   public function createAttributeNS(?string $namespace, string $qualifiedName) {}
+   /**
+    * Create new cdata node
+    */
+   public function createCDATASection(string $data) {}
+   /**
+    * Create new comment node
+    */
+   public function createComment(string $data): \DOMComment {}
+   /**
+    * Create new document fragment
+    */
+   public function createDocumentFragment(): \DOMDocumentFragment {}
+   /**
+    * Create new element node
+    */
+   public function createElement(string $localName, string $value = "") {}
+   /**
+    * Create new element node with an associated namespace
+    */
+   public function createElementNS(?string $namespace, string $qualifiedName, string $value = "") {}
+   /**
+    * Create new entity reference node
+    */
+   public function createEntityReference(string $name) {}
+   /**
+    * Creates new PI node
+    */
+   public function createProcessingInstruction(string $target, string $data = "") {}
+   /**
+    * Create new text node
+    */
+   public function createTextNode(string $data): \DOMText {}
+   /**
+    * Searches for an element with a certain id
+    */
+   public function getElementById(string $elementId): ?\DOMElement {}
+   /**
+    * Searches for all elements with given local tag name
+    */
+   public function getElementsByTagName(string $qualifiedName): \DOMNodeList {}
+   /**
+    * Searches for all elements with given tag name in specified namespace
+    */
+   public function getElementsByTagNameNS(?string $namespace, string $localName): \DOMNodeList {}
+   /**
+    * Import node into current document
+    */
+   public function importNode(\DOMNode $node, bool $deep = false) {}
+   /**
+    * Load XML from a file
+    */
+   public function load(string $filename, int $options = 0): bool {}
+   /**
+    * Load HTML from a string
+    */
+   public function loadHTML(string $source, int $options = 0): bool {}
+   /**
+    * Load HTML from a file
+    */
+   public function loadHTMLFile(string $filename, int $options = 0): bool {}
+   /**
+    * Load XML from a string
+    */
+   public function loadXML(string $source, int $options = 0): bool {}
+   /**
+    * Normalizes the document
+    */
+   public function normalizeDocument(): void {}
+   /**
+    * Prepends nodes before the first child node
+    */
+   public function prepend(...$nodes): void {}
+   /**
+    * Register extended class used to create base node type
+    */
+   public function registerNodeClass(string $baseClass, ?string $extendedClass): true {}
+   /**
+    * Performs relaxNG validation on the document
+    */
+   public function relaxNGValidate(string $filename): bool {}
+   /**
+    * Performs relaxNG validation on the document
+    */
+   public function relaxNGValidateSource(string $source): bool {}
+   /**
+    * Replace children in document (PHP 8 >= 8.3.0)
+    */
+   public function replaceChildren(...$nodes): void {}
+   /**
+    * Dumps the internal XML tree back into a file
+    */
+   public function save(string $filename, int $options = 0): int|false {}
+   /**
+    * Dumps the internal document into a string using HTML formatting
+    */
+   public function saveHTML(?\DOMNode $node = NULL): string|false {}
+   /**
+    * Dumps the internal document into a file using HTML formatting
+    */
+   public function saveHTMLFile(string $filename): int|false {}
+   /**
+    * Dumps the internal XML tree back into a string
+    */
+   public function saveXML(?\DOMNode $node = NULL, int $options = 0): string|false {}
+   /**
+    * Validates a document based on a schema. Only XML Schema 1.0 is supported.
+    */
+   public function schemaValidate(string $filename, int $flags = 0): bool {}
+   /**
+    * Validates a document based on a schema
+    */
+   public function schemaValidateSource(string $source, int $flags = 0): bool {}
+   /**
+    * Validates the document based on its DTD
+    */
+   public function validate(): bool {}
+   /**
+    * Substitutes XIncludes in a DOMDocument Object
+    */
+   public function xinclude(int $options = 0): int|false {}
 }
 
 /**
  * The DOMDocumentFragment class
  */
- class DOMDocumentFragment extends \DOMNode implements \DOMParentNode {
-    public int $childElementCount;
-    public ?\DOMElement $firstElementChild;
-    public ?\DOMElement $lastElementChild;
-    /**
-     * Constructs a DOMDocumentFragment object
-     */
-     public function __construct() {}
-    /**
-     * Appends nodes after the last child node
-     */
-     public function append(...$nodes): void {}
-    /**
-     * Append raw XML data
-     */
-     public function appendXML(string $data): bool {}
-    /**
-     * Prepends nodes before the first child node
-     */
-     public function prepend(...$nodes): void {}
-    /**
-     * Replace children in fragment (PHP 8 >= 8.3.0)
-     */
-     public function replaceChildren(...$nodes): void {}
+class DOMDocumentFragment extends \DOMNode implements \DOMParentNode
+{
+   public int $childElementCount;
+   public ?\DOMElement $firstElementChild;
+   public ?\DOMElement $lastElementChild;
+   /**
+    * Constructs a DOMDocumentFragment object
+    */
+   public function __construct() {}
+   /**
+    * Appends nodes after the last child node
+    */
+   public function append(...$nodes): void {}
+   /**
+    * Append raw XML data
+    */
+   public function appendXML(string $data): bool {}
+   /**
+    * Prepends nodes before the first child node
+    */
+   public function prepend(...$nodes): void {}
+   /**
+    * Replace children in fragment (PHP 8 >= 8.3.0)
+    */
+   public function replaceChildren(...$nodes): void {}
 }
 
 /**
  * The DOMDocumentType class
  */
- class DOMDocumentType extends \DOMNode {
-    public \DOMNamedNodeMap $entities;
-    public ?string $internalSubset;
-    public string $name;
-    public \DOMNamedNodeMap $notations;
-    public string $publicId;
-    public string $systemId;
+class DOMDocumentType extends \DOMNode
+{
+   public \DOMNamedNodeMap $entities;
+   public ?string $internalSubset;
+   public string $name;
+   public \DOMNamedNodeMap $notations;
+   public string $publicId;
+   public string $systemId;
 }
 
 /**
  * The DOMElement class
  */
- class DOMElement extends \DOMNode implements \DOMChildNode, \DOMParentNode {
-    public int $childElementCount;
-    public string $className;
-    public ?\DOMElement $firstElementChild;
-    public string $id;
-    public ?\DOMElement $lastElementChild;
-    public ?\DOMElement $nextElementSibling;
-    public ?\DOMElement $previousElementSibling;
-    public mixed $schemaTypeInfo;
-    public string $tagName;
-    /**
-     * Creates a new DOMElement object
-     */
-     public function __construct(string $qualifiedName, ?string $value = NULL, string $namespace = "") {}
-    /**
-     * Adds nodes after the element
-     */
-     public function after(...$nodes): void {}
-    /**
-     * Appends nodes after the last child node
-     */
-     public function append(...$nodes): void {}
-    /**
-     * Adds nodes before the element
-     */
-     public function before(...$nodes): void {}
-    /**
-     * Returns value of attribute
-     */
-     public function getAttribute(string $qualifiedName): string {}
-    /**
-     * Returns value of attribute
-     */
-     public function getAttributeNS(?string $namespace, string $localName): string {}
-    /**
-     * Get attribute names (PHP 8 >= 8.3.0)
-     */
-     public function getAttributeNames(): array {}
-    /**
-     * Returns attribute node
-     */
-     public function getAttributeNode(string $qualifiedName) {}
-    /**
-     * Returns attribute node
-     */
-     public function getAttributeNodeNS(?string $namespace, string $localName) {}
-    /**
-     * Gets elements by tagname
-     */
-     public function getElementsByTagName(string $qualifiedName): \DOMNodeList {}
-    /**
-     * Get elements by namespaceURI and localName
-     */
-     public function getElementsByTagNameNS(?string $namespace, string $localName): \DOMNodeList {}
-    /**
-     * Checks to see if attribute exists
-     */
-     public function hasAttribute(string $qualifiedName): bool {}
-    /**
-     * Checks to see if attribute exists
-     */
-     public function hasAttributeNS(?string $namespace, string $localName): bool {}
-    /**
-     * Insert adjacent element (PHP 8 >= 8.3.0)
-     */
-     public function insertAdjacentElement(string $where, \DOMElement $element): ?\DOMElement {}
-    /**
-     * Insert adjacent text (PHP 8 >= 8.3.0)
-     */
-     public function insertAdjacentText(string $where, string $data): void {}
-    /**
-     * Prepends nodes before the first child node
-     */
-     public function prepend(...$nodes): void {}
-    /**
-     * Removes the element
-     */
-     public function remove(): void {}
-    /**
-     * Removes attribute
-     */
-     public function removeAttribute(string $qualifiedName): bool {}
-    /**
-     * Removes attribute
-     */
-     public function removeAttributeNS(?string $namespace, string $localName): void {}
-    /**
-     * Removes attribute
-     */
-     public function removeAttributeNode(\DOMAttr $attr) {}
-    /**
-     * Replace children in element (PHP 8 >= 8.3.0)
-     */
-     public function replaceChildren(...$nodes): void {}
-    /**
-     * Replaces the element with new nodes
-     */
-     public function replaceWith(...$nodes): void {}
-    /**
-     * Adds new or modifies existing attribute
-     */
-     public function setAttribute(string $qualifiedName, string $value) {}
-    /**
-     * Adds new attribute
-     */
-     public function setAttributeNS(?string $namespace, string $qualifiedName, string $value): void {}
-    /**
-     * Adds new attribute node to element
-     */
-     public function setAttributeNode(\DOMAttr $attr) {}
-    /**
-     * Adds new attribute node to element
-     */
-     public function setAttributeNodeNS(\DOMAttr $attr) {}
-    /**
-     * Declares the attribute specified by name to be of type ID
-     */
-     public function setIdAttribute(string $qualifiedName, bool $isId): void {}
-    /**
-     * Declares the attribute specified by local name and namespace URI to be of type ID
-     */
-     public function setIdAttributeNS(string $namespace, string $qualifiedName, bool $isId): void {}
-    /**
-     * Declares the attribute specified by node to be of type ID
-     */
-     public function setIdAttributeNode(\DOMAttr $attr, bool $isId): void {}
-    /**
-     * Toggle attribute (PHP 8 >= 8.3.0)
-     */
-     public function toggleAttribute(string $qualifiedName, ?bool $force = NULL): bool {}
+class DOMElement extends \DOMNode implements \DOMChildNode, \DOMParentNode
+{
+   public int $childElementCount;
+   public string $className;
+   public ?\DOMElement $firstElementChild;
+   public string $id;
+   public ?\DOMElement $lastElementChild;
+   public ?\DOMElement $nextElementSibling;
+   public ?\DOMElement $previousElementSibling;
+   public mixed $schemaTypeInfo;
+   public string $tagName;
+   /**
+    * Creates a new DOMElement object
+    */
+   public function __construct(string $qualifiedName, ?string $value = NULL, string $namespace = "") {}
+   /**
+    * Adds nodes after the element
+    */
+   public function after(...$nodes): void {}
+   /**
+    * Appends nodes after the last child node
+    */
+   public function append(...$nodes): void {}
+   /**
+    * Adds nodes before the element
+    */
+   public function before(...$nodes): void {}
+   /**
+    * Returns value of attribute
+    */
+   public function getAttribute(string $qualifiedName): string {}
+   /**
+    * Returns value of attribute
+    */
+   public function getAttributeNS(?string $namespace, string $localName): string {}
+   /**
+    * Get attribute names (PHP 8 >= 8.3.0)
+    */
+   public function getAttributeNames(): array {}
+   /**
+    * Returns attribute node
+    */
+   public function getAttributeNode(string $qualifiedName) {}
+   /**
+    * Returns attribute node
+    */
+   public function getAttributeNodeNS(?string $namespace, string $localName) {}
+   /**
+    * Gets elements by tagname
+    */
+   public function getElementsByTagName(string $qualifiedName): \DOMNodeList {}
+   /**
+    * Get elements by namespaceURI and localName
+    */
+   public function getElementsByTagNameNS(?string $namespace, string $localName): \DOMNodeList {}
+   /**
+    * Checks to see if attribute exists
+    */
+   public function hasAttribute(string $qualifiedName): bool {}
+   /**
+    * Checks to see if attribute exists
+    */
+   public function hasAttributeNS(?string $namespace, string $localName): bool {}
+   /**
+    * Insert adjacent element (PHP 8 >= 8.3.0)
+    */
+   public function insertAdjacentElement(string $where, \DOMElement $element): ?\DOMElement {}
+   /**
+    * Insert adjacent text (PHP 8 >= 8.3.0)
+    */
+   public function insertAdjacentText(string $where, string $data): void {}
+   /**
+    * Prepends nodes before the first child node
+    */
+   public function prepend(...$nodes): void {}
+   /**
+    * Removes the element
+    */
+   public function remove(): void {}
+   /**
+    * Removes attribute
+    */
+   public function removeAttribute(string $qualifiedName): bool {}
+   /**
+    * Removes attribute
+    */
+   public function removeAttributeNS(?string $namespace, string $localName): void {}
+   /**
+    * Removes attribute
+    */
+   public function removeAttributeNode(\DOMAttr $attr) {}
+   /**
+    * Replace children in element (PHP 8 >= 8.3.0)
+    */
+   public function replaceChildren(...$nodes): void {}
+   /**
+    * Replaces the element with new nodes
+    */
+   public function replaceWith(...$nodes): void {}
+   /**
+    * Adds new or modifies existing attribute
+    */
+   public function setAttribute(string $qualifiedName, string $value) {}
+   /**
+    * Adds new attribute
+    */
+   public function setAttributeNS(?string $namespace, string $qualifiedName, string $value): void {}
+   /**
+    * Adds new attribute node to element
+    */
+   public function setAttributeNode(\DOMAttr $attr) {}
+   /**
+    * Adds new attribute node to element
+    */
+   public function setAttributeNodeNS(\DOMAttr $attr) {}
+   /**
+    * Declares the attribute specified by name to be of type ID
+    */
+   public function setIdAttribute(string $qualifiedName, bool $isId): void {}
+   /**
+    * Declares the attribute specified by local name and namespace URI to be of type ID
+    */
+   public function setIdAttributeNS(string $namespace, string $qualifiedName, bool $isId): void {}
+   /**
+    * Declares the attribute specified by node to be of type ID
+    */
+   public function setIdAttributeNode(\DOMAttr $attr, bool $isId): void {}
+   /**
+    * Toggle attribute (PHP 8 >= 8.3.0)
+    */
+   public function toggleAttribute(string $qualifiedName, ?bool $force = NULL): bool {}
 }
 
 /**
  * The DOMEntity class
  */
- class DOMEntity extends \DOMNode {
-    public ?string $actualEncoding;
-    public ?string $encoding;
-    public ?string $notationName;
-    public ?string $publicId;
-    public ?string $systemId;
-    public ?string $version;
+class DOMEntity extends \DOMNode
+{
+   public ?string $actualEncoding;
+   public ?string $encoding;
+   public ?string $notationName;
+   public ?string $publicId;
+   public ?string $systemId;
+   public ?string $version;
 }
 
 /**
  * The DOMEntityReference class
  */
- class DOMEntityReference extends \DOMNode {
-    /**
-     * Creates a new DOMEntityReference object
-     */
-     public function __construct(string $name) {}
+class DOMEntityReference extends \DOMNode
+{
+   /**
+    * Creates a new DOMEntityReference object
+    */
+   public function __construct(string $name) {}
 }
 
 /**
  * The DOMException / Dom\Exception class
  */
- final class DOMException extends \Exception implements \Stringable, \Throwable {
-    public $code;
+final class DOMException extends \Exception implements \Stringable, \Throwable
+{
+   public $code;
 }
 
 /**
  * The DOMImplementation class
  */
- class DOMImplementation {
-    /**
-     * Creates a DOMDocument object of the specified type with its document element
-     */
-     public function createDocument(?string $namespace = NULL, string $qualifiedName = "", ?\DOMDocumentType $doctype = NULL): \DOMDocument {}
-    /**
-     * Creates an empty DOMDocumentType object
-     */
-     public function createDocumentType(string $qualifiedName, string $publicId = "", string $systemId = "") {}
-    /**
-     * Test if the DOM implementation implements a specific feature
-     */
-     public function hasFeature(string $feature, string $version): bool {}
+class DOMImplementation
+{
+   /**
+    * Creates a DOMDocument object of the specified type with its document element
+    */
+   public function createDocument(?string $namespace = NULL, string $qualifiedName = "", ?\DOMDocumentType $doctype = NULL): \DOMDocument {}
+   /**
+    * Creates an empty DOMDocumentType object
+    */
+   public function createDocumentType(string $qualifiedName, string $publicId = "", string $systemId = "") {}
+   /**
+    * Test if the DOM implementation implements a specific feature
+    */
+   public function hasFeature(string $feature, string $version): bool {}
 }
 
 /**
  * The DOMNameSpaceNode class
  */
- class DOMNameSpaceNode {
-    public bool $isConnected;
-    public ?string $localName;
-    public ?string $namespaceURI;
-    public string $nodeName;
-    public int $nodeType;
-    public ?string $nodeValue;
-    public ?\DOMDocument $ownerDocument;
-    public ?\DOMElement $parentElement;
-    public ?\DOMNode $parentNode;
-    public string $prefix;
-    public function __sleep(): array {}
-    public function __wakeup(): void {}
+class DOMNameSpaceNode
+{
+   public bool $isConnected;
+   public ?string $localName;
+   public ?string $namespaceURI;
+   public string $nodeName;
+   public int $nodeType;
+   public ?string $nodeValue;
+   public ?\DOMDocument $ownerDocument;
+   public ?\DOMElement $parentElement;
+   public ?\DOMNode $parentNode;
+   public string $prefix;
+   public function __sleep(): array {}
+   public function __wakeup(): void {}
 }
 
 /**
  * The DOMNamedNodeMap class
  */
- class DOMNamedNodeMap implements \Countable, \IteratorAggregate, \Traversable {
-    public int $length;
-    /**
-     * Get number of nodes in the map
-     */
-     public function count(): int {}
-    /**
-     * Retrieve an external iterator
-     */
-     public function getIterator(): \Iterator {}
-    /**
-     * Retrieves a node specified by name
-     */
-     public function getNamedItem(string $qualifiedName): ?\DOMNode {}
-    /**
-     * Retrieves a node specified by local name and namespace URI
-     */
-     public function getNamedItemNS(?string $namespace, string $localName): ?\DOMNode {}
-    /**
-     * Retrieves a node specified by index
-     */
-     public function item(int $index): ?\DOMNode {}
+class DOMNamedNodeMap implements \Countable, \IteratorAggregate, \Traversable
+{
+   public int $length;
+   /**
+    * Get number of nodes in the map
+    */
+   public function count(): int {}
+   /**
+    * Retrieve an external iterator
+    */
+   public function getIterator(): \Iterator {}
+   /**
+    * Retrieves a node specified by name
+    */
+   public function getNamedItem(string $qualifiedName): ?\DOMNode {}
+   /**
+    * Retrieves a node specified by local name and namespace URI
+    */
+   public function getNamedItemNS(?string $namespace, string $localName): ?\DOMNode {}
+   /**
+    * Retrieves a node specified by index
+    */
+   public function item(int $index): ?\DOMNode {}
 }
 
 /**
  * The DOMNode class
  */
- class DOMNode {
-    public const DOCUMENT_POSITION_CONTAINED_BY = 16;
-    public const DOCUMENT_POSITION_CONTAINS = 8;
-    public const DOCUMENT_POSITION_DISCONNECTED = 1;
-    public const DOCUMENT_POSITION_FOLLOWING = 4;
-    public const DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
-    public const DOCUMENT_POSITION_PRECEDING = 2;
-    public ?\DOMNamedNodeMap $attributes;
-    public ?string $baseURI;
-    public \DOMNodeList $childNodes;
-    public ?\DOMNode $firstChild;
-    public bool $isConnected;
-    public ?\DOMNode $lastChild;
-    public ?string $localName;
-    public ?string $namespaceURI;
-    public ?\DOMNode $nextSibling;
-    public string $nodeName;
-    public int $nodeType;
-    public ?string $nodeValue;
-    public ?\DOMDocument $ownerDocument;
-    public ?\DOMElement $parentElement;
-    public ?\DOMNode $parentNode;
-    public string $prefix;
-    public ?\DOMNode $previousSibling;
-    public string $textContent;
-    /**
-     * Canonicalize nodes to a string
-     */
-     public function C14N(bool $exclusive = false, bool $withComments = false, ?array $xpath = NULL, ?array $nsPrefixes = NULL): string|false {}
-    /**
-     * Canonicalize nodes to a file
-     */
-     public function C14NFile(string $uri, bool $exclusive = false, bool $withComments = false, ?array $xpath = NULL, ?array $nsPrefixes = NULL): int|false {}
-    public function __sleep(): array {}
-    public function __wakeup(): void {}
-    /**
-     * Adds new child at the end of the children
-     */
-     public function appendChild(\DOMNode $node) {}
-    /**
-     * Clones a node
-     */
-     public function cloneNode(bool $deep = false) {}
-    /**
-     * Compares the position of two nodes (PHP 8 >= 8.4.0)
-     */
-     public function compareDocumentPosition(\DOMNode $other): int {}
-    /**
-     * Checks if node contains other node (PHP 8 >= 8.3.0)
-     */
-     public function contains(\DOMNode|\DOMNameSpaceNode|null $other): bool {}
-    /**
-     * Get line number for a node
-     */
-     public function getLineNo(): int {}
-    /**
-     * Get an XPath for a node
-     */
-     public function getNodePath(): ?string {}
-    /**
-     * Get root node (PHP 8 >= 8.3.0)
-     */
-     public function getRootNode(?array $options = NULL): \DOMNode {}
-    /**
-     * Checks if node has attributes
-     */
-     public function hasAttributes(): bool {}
-    /**
-     * Checks if node has children
-     */
-     public function hasChildNodes(): bool {}
-    /**
-     * Adds a new child before a reference node
-     */
-     public function insertBefore(\DOMNode $node, ?\DOMNode $child = NULL) {}
-    /**
-     * Checks if the specified namespaceURI is the default namespace or not
-     */
-     public function isDefaultNamespace(string $namespace): bool {}
-    /**
-     * Checks that both nodes are equal (PHP 8 >= 8.3.0)
-     */
-     public function isEqualNode(?\DOMNode $otherNode): bool {}
-    /**
-     * Indicates if two nodes are the same node
-     */
-     public function isSameNode(\DOMNode $otherNode): bool {}
-    /**
-     * Checks if feature is supported for specified version
-     */
-     public function isSupported(string $feature, string $version): bool {}
-    /**
-     * Gets the namespace URI of the node based on the prefix
-     */
-     public function lookupNamespaceURI(?string $prefix): ?string {}
-    /**
-     * Gets the namespace prefix of the node based on the namespace URI
-     */
-     public function lookupPrefix(string $namespace): ?string {}
-    /**
-     * Normalizes the node
-     */
-     public function normalize(): void {}
-    /**
-     * Removes child from list of children
-     */
-     public function removeChild(\DOMNode $child) {}
-    /**
-     * Replaces a child
-     */
-     public function replaceChild(\DOMNode $node, \DOMNode $child) {}
+class DOMNode
+{
+   public const DOCUMENT_POSITION_CONTAINED_BY = 16;
+   public const DOCUMENT_POSITION_CONTAINS = 8;
+   public const DOCUMENT_POSITION_DISCONNECTED = 1;
+   public const DOCUMENT_POSITION_FOLLOWING = 4;
+   public const DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
+   public const DOCUMENT_POSITION_PRECEDING = 2;
+   public ?\DOMNamedNodeMap $attributes;
+   public ?string $baseURI;
+   public \DOMNodeList $childNodes;
+   public ?\DOMNode $firstChild;
+   public bool $isConnected;
+   public ?\DOMNode $lastChild;
+   public ?string $localName;
+   public ?string $namespaceURI;
+   public ?\DOMNode $nextSibling;
+   public string $nodeName;
+   public int $nodeType;
+   public ?string $nodeValue;
+   public ?\DOMDocument $ownerDocument;
+   public ?\DOMElement $parentElement;
+   public ?\DOMNode $parentNode;
+   public string $prefix;
+   public ?\DOMNode $previousSibling;
+   public string $textContent;
+   /**
+    * Canonicalize nodes to a string
+    */
+   public function C14N(bool $exclusive = false, bool $withComments = false, ?array $xpath = NULL, ?array $nsPrefixes = NULL): string|false {}
+   /**
+    * Canonicalize nodes to a file
+    */
+   public function C14NFile(string $uri, bool $exclusive = false, bool $withComments = false, ?array $xpath = NULL, ?array $nsPrefixes = NULL): int|false {}
+   public function __sleep(): array {}
+   public function __wakeup(): void {}
+   /**
+    * Adds new child at the end of the children
+    */
+   public function appendChild(\DOMNode $node) {}
+   /**
+    * Clones a node
+    */
+   public function cloneNode(bool $deep = false) {}
+   /**
+    * Compares the position of two nodes (PHP 8 >= 8.4.0)
+    */
+   public function compareDocumentPosition(\DOMNode $other): int {}
+   /**
+    * Checks if node contains other node (PHP 8 >= 8.3.0)
+    */
+   public function contains(\DOMNode|\DOMNameSpaceNode|null $other): bool {}
+   /**
+    * Get line number for a node
+    */
+   public function getLineNo(): int {}
+   /**
+    * Get an XPath for a node
+    */
+   public function getNodePath(): ?string {}
+   /**
+    * Get root node (PHP 8 >= 8.3.0)
+    */
+   public function getRootNode(?array $options = NULL): \DOMNode {}
+   /**
+    * Checks if node has attributes
+    */
+   public function hasAttributes(): bool {}
+   /**
+    * Checks if node has children
+    */
+   public function hasChildNodes(): bool {}
+   /**
+    * Adds a new child before a reference node
+    */
+   public function insertBefore(\DOMNode $node, ?\DOMNode $child = NULL) {}
+   /**
+    * Checks if the specified namespaceURI is the default namespace or not
+    */
+   public function isDefaultNamespace(string $namespace): bool {}
+   /**
+    * Checks that both nodes are equal (PHP 8 >= 8.3.0)
+    */
+   public function isEqualNode(?\DOMNode $otherNode): bool {}
+   /**
+    * Indicates if two nodes are the same node
+    */
+   public function isSameNode(\DOMNode $otherNode): bool {}
+   /**
+    * Checks if feature is supported for specified version
+    */
+   public function isSupported(string $feature, string $version): bool {}
+   /**
+    * Gets the namespace URI of the node based on the prefix
+    */
+   public function lookupNamespaceURI(?string $prefix): ?string {}
+   /**
+    * Gets the namespace prefix of the node based on the namespace URI
+    */
+   public function lookupPrefix(string $namespace): ?string {}
+   /**
+    * Normalizes the node
+    */
+   public function normalize(): void {}
+   /**
+    * Removes child from list of children
+    */
+   public function removeChild(\DOMNode $child) {}
+   /**
+    * Replaces a child
+    */
+   public function replaceChild(\DOMNode $node, \DOMNode $child) {}
 }
 
 /**
  * The DOMNodeList class
  */
- class DOMNodeList implements \Countable, \IteratorAggregate, \Traversable {
-    public int $length;
-    /**
-     * Get number of nodes in the list
-     */
-     public function count(): int {}
-    /**
-     * Retrieve an external iterator
-     */
-     public function getIterator(): \Iterator {}
-    /**
-     * Retrieves a node specified by index
-     */
-     public function item(int $index) {}
+class DOMNodeList implements \Countable, \IteratorAggregate, \Traversable
+{
+   public int $length;
+   /**
+    * Get number of nodes in the list
+    */
+   public function count(): int {}
+   /**
+    * Retrieve an external iterator
+    */
+   public function getIterator(): \Iterator {}
+   /**
+    * Retrieves a node specified by index
+    */
+   public function item(int $index) {}
 }
 
 /**
  * The DOMNotation class
  */
- class DOMNotation extends \DOMNode {
-    public string $publicId;
-    public string $systemId;
+class DOMNotation extends \DOMNode
+{
+   public string $publicId;
+   public string $systemId;
 }
 
 /**
  * The DOMParentNode interface
  */
- interface DOMParentNode {
-    /**
-     * Appends nodes after the last child node
-     */
-     public abstract function append(...$nodes): void;
-    /**
-     * Prepends nodes before the first child node
-     */
-     public abstract function prepend(...$nodes): void;
-    /**
-     * Replace children in node (PHP 8 >= 8.3.0)
-     */
-     public abstract function replaceChildren(...$nodes): void;
+interface DOMParentNode
+{
+   /**
+    * Appends nodes after the last child node
+    */
+   public abstract function append(...$nodes): void;
+   /**
+    * Prepends nodes before the first child node
+    */
+   public abstract function prepend(...$nodes): void;
+   /**
+    * Replace children in node (PHP 8 >= 8.3.0)
+    */
+   public abstract function replaceChildren(...$nodes): void;
 }
 
 /**
  * The DOMProcessingInstruction class
  */
- class DOMProcessingInstruction extends \DOMNode {
-    public string $data;
-    public string $target;
-    /**
-     * Creates a new DOMProcessingInstruction object
-     */
-     public function __construct(string $name, string $value = "") {}
+class DOMProcessingInstruction extends \DOMNode
+{
+   public string $data;
+   public string $target;
+   /**
+    * Creates a new DOMProcessingInstruction object
+    */
+   public function __construct(string $name, string $value = "") {}
 }
 
 /**
  * The DOMText class
  */
- class DOMText extends \DOMCharacterData implements \DOMChildNode {
-    public string $wholeText;
-    /**
-     * Creates a new DOMText object
-     */
-     public function __construct(string $data = "") {}
-    /**
-     * Returns whether this text node contains whitespace in element content
-     */
-     public function isElementContentWhitespace(): bool {}
-    /**
-     * Indicates whether this text node contains whitespace
-     */
-     public function isWhitespaceInElementContent(): bool {}
-    /**
-     * Breaks this node into two nodes at the specified offset
-     */
-     public function splitText(int $offset) {}
+class DOMText extends \DOMCharacterData implements \DOMChildNode
+{
+   public string $wholeText;
+   /**
+    * Creates a new DOMText object
+    */
+   public function __construct(string $data = "") {}
+   /**
+    * Returns whether this text node contains whitespace in element content
+    */
+   public function isElementContentWhitespace(): bool {}
+   /**
+    * Indicates whether this text node contains whitespace
+    */
+   public function isWhitespaceInElementContent(): bool {}
+   /**
+    * Breaks this node into two nodes at the specified offset
+    */
+   public function splitText(int $offset) {}
 }
 
 /**
  * The DOMXPath class
  */
- class DOMXPath {
-    public \DOMDocument $document;
-    public bool $registerNodeNamespaces;
-    /**
-     * Creates a new DOMXPath object
-     */
-     public function __construct(\DOMDocument $document, bool $registerNodeNS = true) {}
-    /**
-     * Evaluates the given XPath expression and returns a typed result if possible
-     */
-     public function evaluate(string $expression, ?\DOMNode $contextNode = NULL, bool $registerNodeNS = true): mixed {}
-    /**
-     * Evaluates the given XPath expression
-     */
-     public function query(string $expression, ?\DOMNode $contextNode = NULL, bool $registerNodeNS = true): mixed {}
-    /**
-     * Quotes a string for use in an XPath expression (PHP 8 >= 8.4.0)
-     */
-     public static function quote(string $str): string {}
-    /**
-     * Registers the namespace with the DOMXPath object
-     */
-     public function registerNamespace(string $prefix, string $namespace): bool {}
-    /**
-     * Register a PHP functions as namespaced XPath function
-     */
-     public function registerPhpFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
-    /**
-     * Register PHP functions as XPath functions
-     */
-     public function registerPhpFunctions(array|string|null $restrict = NULL): void {}
+class DOMXPath
+{
+   public \DOMDocument $document;
+   public bool $registerNodeNamespaces;
+   /**
+    * Creates a new DOMXPath object
+    */
+   public function __construct(\DOMDocument $document, bool $registerNodeNS = true) {}
+   /**
+    * Evaluates the given XPath expression and returns a typed result if possible
+    */
+   public function evaluate(string $expression, ?\DOMNode $contextNode = NULL, bool $registerNodeNS = true): mixed {}
+   /**
+    * Evaluates the given XPath expression
+    */
+   public function query(string $expression, ?\DOMNode $contextNode = NULL, bool $registerNodeNS = true): mixed {}
+   /**
+    * Quotes a string for use in an XPath expression (PHP 8 >= 8.4.0)
+    */
+   public static function quote(string $str): string {}
+   /**
+    * Registers the namespace with the DOMXPath object
+    */
+   public function registerNamespace(string $prefix, string $namespace): bool {}
+   /**
+    * Register a PHP functions as namespaced XPath function
+    */
+   public function registerPhpFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
+   /**
+    * Register PHP functions as XPath functions
+    */
+   public function registerPhpFunctions(array|string|null $restrict = NULL): void {}
 }
 
 /**
  * DateError 类 (PHP 8 >= 8.3.0)
  */
- class DateError extends \Error implements \Stringable, \Throwable {
-}
+class DateError extends \Error implements \Stringable, \Throwable {}
 
 /**
  * DateException 类 (PHP 8 >= 8.3.0)
  */
- class DateException extends \Exception implements \Stringable, \Throwable {
-}
+class DateException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * DateInterval 类
  */
- class DateInterval {
-    /**
-     * Creates a new DateInterval object
-     */
-     public function __construct(string $duration) {}
-    public function __serialize(): array {}
-    public static function __set_state(array $array): \DateInterval {}
-    public function __unserialize(array $data): void {}
-    public function __wakeup(): void {}
-    /**
-     * Sets up a DateInterval from the relative parts of the string
-     */
-     public static function createFromDateString(string $datetime): \DateInterval {}
-    /**
-     * Formats the interval
-     */
-     public function format(string $format): string {}
+class DateInterval
+{
+   /**
+    * Creates a new DateInterval object
+    */
+   public function __construct(string $duration) {}
+   public function __serialize(): array {}
+   public static function __set_state(array $array): \DateInterval {}
+   public function __unserialize(array $data): void {}
+   public function __wakeup(): void {}
+   /**
+    * Sets up a DateInterval from the relative parts of the string
+    */
+   public static function createFromDateString(string $datetime): \DateInterval {}
+   /**
+    * Formats the interval
+    */
+   public function format(string $format): string {}
 }
 
 /**
  * The DateInvalidOperationException class (PHP 8 >= 8.3.0)
  */
- class DateInvalidOperationException extends \DateException implements \Stringable, \Throwable {
-}
+class DateInvalidOperationException extends \DateException implements \Stringable, \Throwable {}
 
 /**
  * The DateInvalidTimeZoneException class (PHP 8 >= 8.3.0)
  */
- class DateInvalidTimeZoneException extends \DateException implements \Stringable, \Throwable {
-}
+class DateInvalidTimeZoneException extends \DateException implements \Stringable, \Throwable {}
 
 /**
  * The DateMalformedIntervalStringException class (PHP 8 >= 8.3.0)
  */
- class DateMalformedIntervalStringException extends \DateException implements \Stringable, \Throwable {
-}
+class DateMalformedIntervalStringException extends \DateException implements \Stringable, \Throwable {}
 
 /**
  * The DateMalformedPeriodStringException class (PHP 8 >= 8.3.0)
  */
- class DateMalformedPeriodStringException extends \DateException implements \Stringable, \Throwable {
-}
+class DateMalformedPeriodStringException extends \DateException implements \Stringable, \Throwable {}
 
 /**
  * The DateMalformedStringException class (PHP 8 >= 8.3.0)
  */
- class DateMalformedStringException extends \DateException implements \Stringable, \Throwable {
-}
+class DateMalformedStringException extends \DateException implements \Stringable, \Throwable {}
 
 /**
  * The DateObjectError class (PHP 8 >= 8.3.0)
  */
- class DateObjectError extends \DateError implements \Stringable, \Throwable {
-}
+class DateObjectError extends \DateError implements \Stringable, \Throwable {}
 
 /**
  * DatePeriod 类
  */
- class DatePeriod implements \IteratorAggregate, \Traversable {
-    public const EXCLUDE_START_DATE = 1;
-    public const INCLUDE_END_DATE = 2;
-    public ?\DateTimeInterface $current;
-    public ?\DateTimeInterface $end;
-    public bool $include_end_date;
-    public bool $include_start_date;
-    public ?\DateInterval $interval;
-    public int $recurrences;
-    public ?\DateTimeInterface $start;
-    /**
-     * Creates a new DatePeriod object
-     */
-     public function __construct(mixed $start, ?mixed $interval = null, ?mixed $end = null, ?mixed $options = null) {}
-    public function __serialize(): array {}
-    public static function __set_state(array $array): \DatePeriod {}
-    public function __unserialize(array $data): void {}
-    public function __wakeup(): void {}
-    /**
-     * Creates a new DatePeriod object from an ISO8601 string (PHP 8 >= 8.3.0)
-     */
-     public static function createFromISO8601String(string $specification, int $options = 0): static {}
-    /**
-     * Gets the interval
-     */
-     public function getDateInterval(): \DateInterval {}
-    /**
-     * Gets the end date
-     */
-     public function getEndDate(): ?\DateTimeInterface {}
-    public function getIterator(): \Iterator {}
-    /**
-     * Gets the number of recurrences
-     */
-     public function getRecurrences(): ?int {}
-    /**
-     * Gets the start date
-     */
-     public function getStartDate(): \DateTimeInterface {}
+class DatePeriod implements \IteratorAggregate, \Traversable
+{
+   public const EXCLUDE_START_DATE = 1;
+   public const INCLUDE_END_DATE = 2;
+   public ?\DateTimeInterface $current;
+   public ?\DateTimeInterface $end;
+   public bool $include_end_date;
+   public bool $include_start_date;
+   public ?\DateInterval $interval;
+   public int $recurrences;
+   public ?\DateTimeInterface $start;
+   /**
+    * Creates a new DatePeriod object
+    */
+   public function __construct(mixed $start, ?mixed $interval = null, ?mixed $end = null, ?mixed $options = null) {}
+   public function __serialize(): array {}
+   public static function __set_state(array $array): \DatePeriod {}
+   public function __unserialize(array $data): void {}
+   public function __wakeup(): void {}
+   /**
+    * Creates a new DatePeriod object from an ISO8601 string (PHP 8 >= 8.3.0)
+    */
+   public static function createFromISO8601String(string $specification, int $options = 0): static {}
+   /**
+    * Gets the interval
+    */
+   public function getDateInterval(): \DateInterval {}
+   /**
+    * Gets the end date
+    */
+   public function getEndDate(): ?\DateTimeInterface {}
+   public function getIterator(): \Iterator {}
+   /**
+    * Gets the number of recurrences
+    */
+   public function getRecurrences(): ?int {}
+   /**
+    * Gets the start date
+    */
+   public function getStartDate(): \DateTimeInterface {}
 }
 
 /**
  * The DateRangeError class (PHP 8 >= 8.3.0)
  */
- class DateRangeError extends \DateError implements \Stringable, \Throwable {
-}
+class DateRangeError extends \DateError implements \Stringable, \Throwable {}
 
 /**
  * DateTime 类
  */
- class DateTime implements \DateTimeInterface {
-    /**
-     * 返回新的 DateTime 对象
-     */
-     public function __construct(string $datetime = "now", ?\DateTimeZone $timezone = NULL) {}
-    public function __serialize(): array {}
-    public static function __set_state(array $array): \DateTime {}
-    public function __unserialize(array $data): void {}
-    public function __wakeup(): void {}
-    /**
-     * 修改 DateTime 对象，增加天、月、年、小时、分钟以及秒的数量。
-     */
-     public function add(\DateInterval $interval): \DateTime {}
-    /**
-     * 根据指定格式解析时间字符串
-     */
-     public static function createFromFormat(string $format, string $datetime, ?\DateTimeZone $timezone = NULL): \DateTime|false {}
-    /**
-     * Returns new DateTime instance encapsulating the given DateTimeImmutable object
-     */
-     public static function createFromImmutable(\DateTimeImmutable $object): static {}
-    /**
-     * Returns new DateTime object encapsulating the given DateTimeInterface object
-     */
-     public static function createFromInterface(\DateTimeInterface $object): \DateTime {}
-    /**
-     * Creates an instance from a Unix timestamp (PHP 8 >= 8.4.0)
-     */
-     public static function createFromTimestamp(int|float $timestamp): static {}
-    /**
-     * 返回两个 DateTime 之间的差值
-     */
-     public function diff(\DateTimeInterface $targetObject, bool $absolute = false): \DateInterval {}
-    /**
-     * 按照指定格式返回格式化后的日期
-     */
-     public function format(string $format): string {}
-    /**
-     * 别名 DateTimeImmutable::getLastErrors
-     */
-     public static function getLastErrors(): array|false {}
-    public function getMicrosecond(): int {}
-    /**
-     * 返回时差
-     */
-     public function getOffset(): int {}
-    /**
-     * 获取 Unix 时间戳
-     */
-     public function getTimestamp(): int {}
-    /**
-     * 返回相对于指定 DateTime 的时区
-     */
-     public function getTimezone(): \DateTimeZone|false {}
-    /**
-     * 修改日期时间对象的值
-     */
-     public function modify(string $modifier): \DateTime {}
-    /**
-     * 设置日期
-     */
-     public function setDate(int $year, int $month, int $day): \DateTime {}
-    /**
-     * 设置 ISO 日期
-     */
-     public function setISODate(int $year, int $week, int $dayOfWeek = 1): \DateTime {}
-    /**
-     * Sets microsecond part of the time (PHP 8 >= 8.4.0)
-     */
-     public function setMicrosecond(int $microsecond): static {}
-    /**
-     * 设置时间
-     */
-     public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): \DateTime {}
-    /**
-     * 以 Unix 时间戳的方式设置日期和时间
-     */
-     public function setTimestamp(int $timestamp): \DateTime {}
-    /**
-     * 设置 DateTime 对象的时区
-     */
-     public function setTimezone(\DateTimeZone $timezone): \DateTime {}
-    /**
-     * 对 DateTime 对象减去一定量的日、月、年、小时、分钟和秒。
-     */
-     public function sub(\DateInterval $interval): \DateTime {}
+class DateTime implements \DateTimeInterface
+{
+   /**
+    * 返回新的 DateTime 对象
+    */
+   public function __construct(string $datetime = "now", ?\DateTimeZone $timezone = NULL) {}
+   public function __serialize(): array {}
+   public static function __set_state(array $array): \DateTime {}
+   public function __unserialize(array $data): void {}
+   public function __wakeup(): void {}
+   /**
+    * 修改 DateTime 对象，增加天、月、年、小时、分钟以及秒的数量。
+    */
+   public function add(\DateInterval $interval): \DateTime {}
+   /**
+    * 根据指定格式解析时间字符串
+    */
+   public static function createFromFormat(string $format, string $datetime, ?\DateTimeZone $timezone = NULL): \DateTime|false {}
+   /**
+    * Returns new DateTime instance encapsulating the given DateTimeImmutable object
+    */
+   public static function createFromImmutable(\DateTimeImmutable $object): static {}
+   /**
+    * Returns new DateTime object encapsulating the given DateTimeInterface object
+    */
+   public static function createFromInterface(\DateTimeInterface $object): \DateTime {}
+   /**
+    * Creates an instance from a Unix timestamp (PHP 8 >= 8.4.0)
+    */
+   public static function createFromTimestamp(int|float $timestamp): static {}
+   /**
+    * 返回两个 DateTime 之间的差值
+    */
+   public function diff(\DateTimeInterface $targetObject, bool $absolute = false): \DateInterval {}
+   /**
+    * 按照指定格式返回格式化后的日期
+    */
+   public function format(string $format): string {}
+   /**
+    * 别名 DateTimeImmutable::getLastErrors
+    */
+   public static function getLastErrors(): array|false {}
+   public function getMicrosecond(): int {}
+   /**
+    * 返回时差
+    */
+   public function getOffset(): int {}
+   /**
+    * 获取 Unix 时间戳
+    */
+   public function getTimestamp(): int {}
+   /**
+    * 返回相对于指定 DateTime 的时区
+    */
+   public function getTimezone(): \DateTimeZone|false {}
+   /**
+    * 修改日期时间对象的值
+    */
+   public function modify(string $modifier): \DateTime {}
+   /**
+    * 设置日期
+    */
+   public function setDate(int $year, int $month, int $day): \DateTime {}
+   /**
+    * 设置 ISO 日期
+    */
+   public function setISODate(int $year, int $week, int $dayOfWeek = 1): \DateTime {}
+   /**
+    * Sets microsecond part of the time (PHP 8 >= 8.4.0)
+    */
+   public function setMicrosecond(int $microsecond): static {}
+   /**
+    * 设置时间
+    */
+   public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): \DateTime {}
+   /**
+    * 以 Unix 时间戳的方式设置日期和时间
+    */
+   public function setTimestamp(int $timestamp): \DateTime {}
+   /**
+    * 设置 DateTime 对象的时区
+    */
+   public function setTimezone(\DateTimeZone $timezone): \DateTime {}
+   /**
+    * 对 DateTime 对象减去一定量的日、月、年、小时、分钟和秒。
+    */
+   public function sub(\DateInterval $interval): \DateTime {}
 }
 
 /**
  * The DateTimeImmutable class
  */
- class DateTimeImmutable implements \DateTimeInterface {
-    /**
-     * Returns new DateTimeImmutable object
-     */
-     public function __construct(string $datetime = "now", ?\DateTimeZone $timezone = NULL) {}
-    public function __serialize(): array {}
-    public static function __set_state(array $array): \DateTimeImmutable {}
-    public function __unserialize(array $data): void {}
-    public function __wakeup(): void {}
-    /**
-     * Returns a new object, with added amount of days, months, years, hours, minutes and seconds
-     */
-     public function add(\DateInterval $interval): \DateTimeImmutable {}
-    /**
-     * Parses a time string according to a specified format
-     */
-     public static function createFromFormat(string $format, string $datetime, ?\DateTimeZone $timezone = NULL): \DateTimeImmutable|false {}
-    /**
-     * Returns new DateTimeImmutable object encapsulating the given DateTimeInterface object
-     */
-     public static function createFromInterface(\DateTimeInterface $object): \DateTimeImmutable {}
-    /**
-     * Returns new DateTimeImmutable instance encapsulating the given DateTime object
-     */
-     public static function createFromMutable(\DateTime $object): static {}
-    /**
-     * Creates an instance from a Unix timestamp (PHP 8 >= 8.4.0)
-     */
-     public static function createFromTimestamp(int|float $timestamp): static {}
-    public function diff(\DateTimeInterface $targetObject, bool $absolute = false): \DateInterval {}
-    public function format(string $format): string {}
-    /**
-     * Returns the warnings and errors
-     */
-     public static function getLastErrors(): array|false {}
-    public function getMicrosecond(): int {}
-    public function getOffset(): int {}
-    public function getTimestamp(): int {}
-    public function getTimezone(): \DateTimeZone|false {}
-    /**
-     * Creates a new object with modified timestamp
-     */
-     public function modify(string $modifier): \DateTimeImmutable {}
-    /**
-     * Sets the date
-     */
-     public function setDate(int $year, int $month, int $day): \DateTimeImmutable {}
-    /**
-     * Sets the ISO date
-     */
-     public function setISODate(int $year, int $week, int $dayOfWeek = 1): \DateTimeImmutable {}
-    /**
-     * Sets microsecond part of the time (PHP 8 >= 8.4.0)
-     */
-     public function setMicrosecond(int $microsecond): static {}
-    /**
-     * Sets the time
-     */
-     public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): \DateTimeImmutable {}
-    /**
-     * Sets the date and time based on a Unix timestamp
-     */
-     public function setTimestamp(int $timestamp): \DateTimeImmutable {}
-    /**
-     * Sets the time zone
-     */
-     public function setTimezone(\DateTimeZone $timezone): \DateTimeImmutable {}
-    /**
-     * Subtracts an amount of days, months, years, hours, minutes and seconds
-     */
-     public function sub(\DateInterval $interval): \DateTimeImmutable {}
+class DateTimeImmutable implements \DateTimeInterface
+{
+   /**
+    * Returns new DateTimeImmutable object
+    */
+   public function __construct(string $datetime = "now", ?\DateTimeZone $timezone = NULL) {}
+   public function __serialize(): array {}
+   public static function __set_state(array $array): \DateTimeImmutable {}
+   public function __unserialize(array $data): void {}
+   public function __wakeup(): void {}
+   /**
+    * Returns a new object, with added amount of days, months, years, hours, minutes and seconds
+    */
+   public function add(\DateInterval $interval): \DateTimeImmutable {}
+   /**
+    * Parses a time string according to a specified format
+    */
+   public static function createFromFormat(string $format, string $datetime, ?\DateTimeZone $timezone = NULL): \DateTimeImmutable|false {}
+   /**
+    * Returns new DateTimeImmutable object encapsulating the given DateTimeInterface object
+    */
+   public static function createFromInterface(\DateTimeInterface $object): \DateTimeImmutable {}
+   /**
+    * Returns new DateTimeImmutable instance encapsulating the given DateTime object
+    */
+   public static function createFromMutable(\DateTime $object): static {}
+   /**
+    * Creates an instance from a Unix timestamp (PHP 8 >= 8.4.0)
+    */
+   public static function createFromTimestamp(int|float $timestamp): static {}
+   public function diff(\DateTimeInterface $targetObject, bool $absolute = false): \DateInterval {}
+   public function format(string $format): string {}
+   /**
+    * Returns the warnings and errors
+    */
+   public static function getLastErrors(): array|false {}
+   public function getMicrosecond(): int {}
+   public function getOffset(): int {}
+   public function getTimestamp(): int {}
+   public function getTimezone(): \DateTimeZone|false {}
+   /**
+    * Creates a new object with modified timestamp
+    */
+   public function modify(string $modifier): \DateTimeImmutable {}
+   /**
+    * Sets the date
+    */
+   public function setDate(int $year, int $month, int $day): \DateTimeImmutable {}
+   /**
+    * Sets the ISO date
+    */
+   public function setISODate(int $year, int $week, int $dayOfWeek = 1): \DateTimeImmutable {}
+   /**
+    * Sets microsecond part of the time (PHP 8 >= 8.4.0)
+    */
+   public function setMicrosecond(int $microsecond): static {}
+   /**
+    * Sets the time
+    */
+   public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): \DateTimeImmutable {}
+   /**
+    * Sets the date and time based on a Unix timestamp
+    */
+   public function setTimestamp(int $timestamp): \DateTimeImmutable {}
+   /**
+    * Sets the time zone
+    */
+   public function setTimezone(\DateTimeZone $timezone): \DateTimeImmutable {}
+   /**
+    * Subtracts an amount of days, months, years, hours, minutes and seconds
+    */
+   public function sub(\DateInterval $interval): \DateTimeImmutable {}
 }
 
 /**
  * The DateTimeInterface interface
  */
- interface DateTimeInterface {
-    const ATOM = "Y-m-d\\TH:i:sP";
-    const COOKIE = "l, d-M-Y H:i:s T";
-    const ISO8601 = "Y-m-d\\TH:i:sO";
-    const ISO8601_EXPANDED = "X-m-d\\TH:i:sP";
-    const RFC1036 = "D, d M y H:i:s O";
-    const RFC1123 = "D, d M Y H:i:s O";
-    const RFC2822 = "D, d M Y H:i:s O";
-    const RFC3339 = "Y-m-d\\TH:i:sP";
-    const RFC3339_EXTENDED = "Y-m-d\\TH:i:s.vP";
-    const RFC7231 = "D, d M Y H:i:s \\G\\M\\T";
-    const RFC822 = "D, d M y H:i:s O";
-    const RFC850 = "l, d-M-y H:i:s T";
-    const RSS = "D, d M Y H:i:s O";
-    const W3C = "Y-m-d\\TH:i:sP";
-    public abstract function __serialize(): array;
-    public abstract function __unserialize(array $data): void;
-    public abstract function __wakeup(): void;
-    public abstract function diff(\DateTimeInterface $targetObject, bool $absolute = false): \DateInterval;
-    public abstract function format(string $format): string;
-    /**
-     * Gets the microsecond part of the Unix timestamp (PHP 8 >= 8.4.0)
-     */
-     public abstract function getMicrosecond(): int;
-    public abstract function getOffset(): int;
-    public abstract function getTimestamp(): int;
-    public abstract function getTimezone(): \DateTimeZone|false;
+interface DateTimeInterface
+{
+   const ATOM = "Y-m-d\\TH:i:sP";
+   const COOKIE = "l, d-M-Y H:i:s T";
+   const ISO8601 = "Y-m-d\\TH:i:sO";
+   const ISO8601_EXPANDED = "X-m-d\\TH:i:sP";
+   const RFC1036 = "D, d M y H:i:s O";
+   const RFC1123 = "D, d M Y H:i:s O";
+   const RFC2822 = "D, d M Y H:i:s O";
+   const RFC3339 = "Y-m-d\\TH:i:sP";
+   const RFC3339_EXTENDED = "Y-m-d\\TH:i:s.vP";
+   const RFC7231 = "D, d M Y H:i:s \\G\\M\\T";
+   const RFC822 = "D, d M y H:i:s O";
+   const RFC850 = "l, d-M-y H:i:s T";
+   const RSS = "D, d M Y H:i:s O";
+   const W3C = "Y-m-d\\TH:i:sP";
+   public abstract function __serialize(): array;
+   public abstract function __unserialize(array $data): void;
+   public abstract function __wakeup(): void;
+   public abstract function diff(\DateTimeInterface $targetObject, bool $absolute = false): \DateInterval;
+   public abstract function format(string $format): string;
+   /**
+    * Gets the microsecond part of the Unix timestamp (PHP 8 >= 8.4.0)
+    */
+   public abstract function getMicrosecond(): int;
+   public abstract function getOffset(): int;
+   public abstract function getTimestamp(): int;
+   public abstract function getTimezone(): \DateTimeZone|false;
 }
 
 /**
  * DateTimeZone 类
  */
- class DateTimeZone {
-    public const AFRICA = 1;
-    public const ALL = 2047;
-    public const ALL_WITH_BC = 4095;
-    public const AMERICA = 2;
-    public const ANTARCTICA = 4;
-    public const ARCTIC = 8;
-    public const ASIA = 16;
-    public const ATLANTIC = 32;
-    public const AUSTRALIA = 64;
-    public const EUROPE = 128;
-    public const INDIAN = 256;
-    public const PACIFIC = 512;
-    public const PER_COUNTRY = 4096;
-    public const UTC = 1024;
-    /**
-     * 创建新的DateTimeZone对象
-     */
-     public function __construct(string $timezone) {}
-    public function __serialize(): array {}
-    public static function __set_state(array $array): \DateTimeZone {}
-    public function __unserialize(array $data): void {}
-    public function __wakeup(): void {}
-    /**
-     * 返回与时区相关的定位信息
-     */
-     public function getLocation(): array|false {}
-    /**
-     * 返回时区名称
-     */
-     public function getName(): string {}
-    /**
-     * 返回相对于 GMT 的时差
-     */
-     public function getOffset(\DateTimeInterface $datetime): int {}
-    /**
-     * Returns all transitions for the timezone
-     */
-     public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = 2147483647): array|false {}
-    /**
-     * 返回一个包含 dst (夏令时)，时差和时区信息的关联数组。
-     */
-     public static function listAbbreviations(): array {}
-    /**
-     * 返回包含了所有时区标识符的数字索引数组
-     */
-     public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = NULL): array {}
+class DateTimeZone
+{
+   public const AFRICA = 1;
+   public const ALL = 2047;
+   public const ALL_WITH_BC = 4095;
+   public const AMERICA = 2;
+   public const ANTARCTICA = 4;
+   public const ARCTIC = 8;
+   public const ASIA = 16;
+   public const ATLANTIC = 32;
+   public const AUSTRALIA = 64;
+   public const EUROPE = 128;
+   public const INDIAN = 256;
+   public const PACIFIC = 512;
+   public const PER_COUNTRY = 4096;
+   public const UTC = 1024;
+   /**
+    * 创建新的DateTimeZone对象
+    */
+   public function __construct(string $timezone) {}
+   public function __serialize(): array {}
+   public static function __set_state(array $array): \DateTimeZone {}
+   public function __unserialize(array $data): void {}
+   public function __wakeup(): void {}
+   /**
+    * 返回与时区相关的定位信息
+    */
+   public function getLocation(): array|false {}
+   /**
+    * 返回时区名称
+    */
+   public function getName(): string {}
+   /**
+    * 返回相对于 GMT 的时差
+    */
+   public function getOffset(\DateTimeInterface $datetime): int {}
+   /**
+    * Returns all transitions for the timezone
+    */
+   public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = 2147483647): array|false {}
+   /**
+    * 返回一个包含 dst (夏令时)，时差和时区信息的关联数组。
+    */
+   public static function listAbbreviations(): array {}
+   /**
+    * 返回包含了所有时区标识符的数字索引数组
+    */
+   public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = NULL): array {}
 }
 
 /**
  * The DeflateContext class
  */
- final class DeflateContext {
-}
+final class DeflateContext {}
 
-final class DelayedTargetValidation {
-}
+final class DelayedTargetValidation {}
 
 /**
  * Deprecated 属性 (PHP 8 >= 8.4.0)
  */
- final class Deprecated {
-    public readonly ?string $message;
-    public readonly ?string $since;
-    /**
-     * 构造新的 Deprecated 属性实例 (PHP 8 >= 8.4.0)
-     */
-     public function __construct(?string $message = NULL, ?string $since = NULL) {}
+final class Deprecated
+{
+   public readonly ?string $message;
+   public readonly ?string $since;
+   /**
+    * 构造新的 Deprecated 属性实例 (PHP 8 >= 8.4.0)
+    */
+   public function __construct(?string $message = NULL, ?string $since = NULL) {}
 }
 
 /**
  * Directory 类
  */
- final class Directory {
-    public readonly mixed $handle;
-    public readonly string $path;
-    /**
-     * 关闭目录句柄
-     */
-     public function close(): void {}
-    /**
-     * 从目录句柄中读取条目
-     */
-     public function read(): string|false {}
-    /**
-     * 倒回目录句柄
-     */
-     public function rewind(): void {}
+final class Directory
+{
+   public readonly mixed $handle;
+   public readonly string $path;
+   /**
+    * 关闭目录句柄
+    */
+   public function close(): void {}
+   /**
+    * 从目录句柄中读取条目
+    */
+   public function read(): string|false {}
+   /**
+    * 倒回目录句柄
+    */
+   public function rewind(): void {}
 }
 
 /**
  * The DirectoryIterator class
  */
- class DirectoryIterator extends \SplFileInfo implements \Iterator, \SeekableIterator, \Stringable, \Traversable {
-    /**
-     * Constructs a new directory iterator from a path
-     */
-     public function __construct(string $directory) {}
-    public function __toString(): string {}
-    /**
-     * Return the current DirectoryIterator item
-     */
-     public function current(): mixed {}
-    /**
-     * Get base name of current DirectoryIterator item
-     */
-     public function getBasename(string $suffix = ""): string {}
-    /**
-     * Gets the file extension
-     */
-     public function getExtension(): string {}
-    /**
-     * Return file name of current DirectoryIterator item
-     */
-     public function getFilename(): string {}
-    /**
-     * Determine if current DirectoryIterator item is '.' or '..'
-     */
-     public function isDot(): bool {}
-    /**
-     * Return the key for the current DirectoryIterator item
-     */
-     public function key(): mixed {}
-    /**
-     * Move forward to next DirectoryIterator item
-     */
-     public function next(): void {}
-    /**
-     * Rewind the DirectoryIterator back to the start
-     */
-     public function rewind(): void {}
-    /**
-     * Seek to a DirectoryIterator item
-     */
-     public function seek(int $offset): void {}
-    /**
-     * Check whether current DirectoryIterator position is a valid file
-     */
-     public function valid(): bool {}
+class DirectoryIterator extends \SplFileInfo implements \Iterator, \SeekableIterator, \Stringable, \Traversable
+{
+   /**
+    * Constructs a new directory iterator from a path
+    */
+   public function __construct(string $directory) {}
+   public function __toString(): string {}
+   /**
+    * Return the current DirectoryIterator item
+    */
+   public function current(): mixed {}
+   /**
+    * Get base name of current DirectoryIterator item
+    */
+   public function getBasename(string $suffix = ""): string {}
+   /**
+    * Gets the file extension
+    */
+   public function getExtension(): string {}
+   /**
+    * Return file name of current DirectoryIterator item
+    */
+   public function getFilename(): string {}
+   /**
+    * Determine if current DirectoryIterator item is '.' or '..'
+    */
+   public function isDot(): bool {}
+   /**
+    * Return the key for the current DirectoryIterator item
+    */
+   public function key(): mixed {}
+   /**
+    * Move forward to next DirectoryIterator item
+    */
+   public function next(): void {}
+   /**
+    * Rewind the DirectoryIterator back to the start
+    */
+   public function rewind(): void {}
+   /**
+    * Seek to a DirectoryIterator item
+    */
+   public function seek(int $offset): void {}
+   /**
+    * Check whether current DirectoryIterator position is a valid file
+    */
+   public function valid(): bool {}
 }
 
 /**
  * DivisionByZeroError
  */
- class DivisionByZeroError extends \ArithmeticError implements \Stringable, \Throwable {
-}
+class DivisionByZeroError extends \ArithmeticError implements \Stringable, \Throwable {}
 
 /**
  * The DomainException class
  */
- class DomainException extends \LogicException implements \Stringable, \Throwable {
-}
+class DomainException extends \LogicException implements \Stringable, \Throwable {}
 
 /**
  * The EmptyIterator class
  */
- class EmptyIterator implements \Iterator, \Traversable {
-    /**
-     * The current() method
-     */
-     public function current(): never {}
-    /**
-     * The key() method
-     */
-     public function key(): never {}
-    /**
-     * The next() method
-     */
-     public function next(): void {}
-    /**
-     * The rewind() method
-     */
-     public function rewind(): void {}
-    /**
-     * Checks whether the current element is valid
-     */
-     public function valid(): false {}
+class EmptyIterator implements \Iterator, \Traversable
+{
+   /**
+    * The current() method
+    */
+   public function current(): never {}
+   /**
+    * The key() method
+    */
+   public function key(): never {}
+   /**
+    * The next() method
+    */
+   public function next(): void {}
+   /**
+    * The rewind() method
+    */
+   public function rewind(): void {}
+   /**
+    * Checks whether the current element is valid
+    */
+   public function valid(): false {}
 }
 
 /**
  * Error
  */
- class Error implements \Stringable, \Throwable {
-    protected $code;
-    protected string $file;
-    protected int $line;
-    protected $message;
-    private ?\Throwable $previous;
-    private string $string;
-    private array $trace;
-    private function __clone(): void {}
-    /**
-     * 初始化 error 对象
-     */
-     public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = NULL) {}
-    public function __toString(): string {}
-    public function __wakeup(): void {}
-    /**
-     * 获取错误代码
-     */
-     public final function getCode() {}
-    /**
-     * 获取错误发生时的文件
-     */
-     public final function getFile(): string {}
-    /**
-     * 获取错误发生时的行号
-     */
-     public final function getLine(): int {}
-    /**
-     * 获取错误信息
-     */
-     public final function getMessage(): string {}
-    /**
-     * 返回先前的 Throwable
-     */
-     public final function getPrevious(): ?\Throwable {}
-    /**
-     * 获取调用栈（stack trace）
-     */
-     public final function getTrace(): array {}
-    /**
-     * 获取字符串形式的调用栈（stack trace）
-     */
-     public final function getTraceAsString(): string {}
+class Error implements \Stringable, \Throwable
+{
+   protected $code;
+   protected string $file;
+   protected int $line;
+   protected $message;
+   private ?\Throwable $previous;
+   private string $string;
+   private array $trace;
+   private function __clone(): void {}
+   /**
+    * 初始化 error 对象
+    */
+   public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = NULL) {}
+   public function __toString(): string {}
+   public function __wakeup(): void {}
+   /**
+    * 获取错误代码
+    */
+   public final function getCode() {}
+   /**
+    * 获取错误发生时的文件
+    */
+   public final function getFile(): string {}
+   /**
+    * 获取错误发生时的行号
+    */
+   public final function getLine(): int {}
+   /**
+    * 获取错误信息
+    */
+   public final function getMessage(): string {}
+   /**
+    * 返回先前的 Throwable
+    */
+   public final function getPrevious(): ?\Throwable {}
+   /**
+    * 获取调用栈（stack trace）
+    */
+   public final function getTrace(): array {}
+   /**
+    * 获取字符串形式的调用栈（stack trace）
+    */
+   public final function getTraceAsString(): string {}
 }
 
 /**
  * ErrorException
  */
- class ErrorException extends \Exception implements \Stringable, \Throwable {
-    protected int $severity;
-    /**
-     * 构造一个异常（Exception）
-     */
-     public function __construct(string $message = "", int $code = 0, int $severity = E_ERROR, ?string $filename = NULL, ?int $line = NULL, ?\Throwable $previous = NULL) {}
-    /**
-     * 获取异常的严重程度
-     */
-     public final function getSeverity(): int {}
+class ErrorException extends \Exception implements \Stringable, \Throwable
+{
+   protected int $severity;
+   /**
+    * 构造一个异常（Exception）
+    */
+   public function __construct(string $message = "", int $code = 0, int $severity = E_ERROR, ?string $filename = NULL, ?int $line = NULL, ?\Throwable $previous = NULL) {}
+   /**
+    * 获取异常的严重程度
+    */
+   public final function getSeverity(): int {}
 }
 
 /**
  * Exception
  */
- class Exception implements \Stringable, \Throwable {
-    protected $code;
-    protected string $file;
-    protected int $line;
-    protected $message;
-    private ?\Throwable $previous;
-    private string $string;
-    private array $trace;
-    private function __clone(): void {}
-    /**
-     * 异常构造函数
-     */
-     public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = NULL) {}
-    public function __toString(): string {}
-    public function __wakeup(): void {}
-    /**
-     * 获取异常代码
-     */
-     public final function getCode() {}
-    /**
-     * 创建异常时的程序文件名称
-     */
-     public final function getFile(): string {}
-    /**
-     * 获取创建的异常所在文件中的行号
-     */
-     public final function getLine(): int {}
-    /**
-     * 获取异常消息内容
-     */
-     public final function getMessage(): string {}
-    /**
-     * 返回前一个 Throwable
-     */
-     public final function getPrevious(): ?\Throwable {}
-    /**
-     * 获取异常追踪信息
-     */
-     public final function getTrace(): array {}
-    /**
-     * 获取字符串类型的异常追踪信息
-     */
-     public final function getTraceAsString(): string {}
+class Exception implements \Stringable, \Throwable
+{
+   protected $code;
+   protected string $file;
+   protected int $line;
+   protected $message;
+   private ?\Throwable $previous;
+   private string $string;
+   private array $trace;
+   private function __clone(): void {}
+   /**
+    * 异常构造函数
+    */
+   public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = NULL) {}
+   public function __toString(): string {}
+   public function __wakeup(): void {}
+   /**
+    * 获取异常代码
+    */
+   public final function getCode() {}
+   /**
+    * 创建异常时的程序文件名称
+    */
+   public final function getFile(): string {}
+   /**
+    * 获取创建的异常所在文件中的行号
+    */
+   public final function getLine(): int {}
+   /**
+    * 获取异常消息内容
+    */
+   public final function getMessage(): string {}
+   /**
+    * 返回前一个 Throwable
+    */
+   public final function getPrevious(): ?\Throwable {}
+   /**
+    * 获取异常追踪信息
+    */
+   public final function getTrace(): array {}
+   /**
+    * 获取字符串类型的异常追踪信息
+    */
+   public final function getTraceAsString(): string {}
 }
 
 /**
  * C 代码和数据的主接口
  */
- final class FFI {
-    public const __BIGGEST_ALIGNMENT__ = 8;
-    /**
-     * Creates an unmanaged pointer to C data
-     */
-     public static function addr(\FFI\CData &$ptr): \FFI\CData {}
-    /**
-     * Gets the alignment
-     */
-     public static function alignof(\FFI\CData|\FFI\CType &$ptr): int {}
-    /**
-     * Dynamically constructs a new C array type
-     */
-     public static function arrayType(\FFI\CType $type, array $dimensions): \FFI\CType {}
-    /**
-     * Performs a C type cast
-     */
-     public static function cast(\FFI\CType|string $type, mixed &$ptr): \FFI\CData {}
-    /**
-     * Creates a new FFI object
-     */
-     public static function cdef(string $code = "", ?string $lib = NULL): \FFI {}
-    /**
-     * Releases an unmanaged data structure
-     */
-     public static function free(\FFI\CData &$ptr): void {}
-    /**
-     * Checks whether a FFI\CData is a null pointer
-     */
-     public static function isNull(\FFI\CData &$ptr): bool {}
-    /**
-     * Loads C declarations from a C header file
-     */
-     public static function load(string $filename): ?\FFI {}
-    /**
-     * Compares memory areas
-     */
-     public static function memcmp(mixed &$ptr1, mixed &$ptr2, int $size): int {}
-    /**
-     * Copies one memory area to another
-     */
-     public static function memcpy(\FFI\CData &$to, mixed &$from, int $size): void {}
-    /**
-     * Fills a memory area
-     */
-     public static function memset(\FFI\CData &$ptr, int $value, int $size): void {}
-    /**
-     * Creates a C data structure
-     */
-     public static function new(\FFI\CType|string $type, bool $owned = true, bool $persistent = false): \FFI\CData {}
-    /**
-     * Instantiates an FFI object with C declarations parsed during preloading
-     */
-     public static function scope(string $name): \FFI {}
-    /**
-     * Gets the size of C data or types
-     */
-     public static function sizeof(\FFI\CData|\FFI\CType &$ptr): int {}
-    /**
-     * Creates a PHP string from a memory area
-     */
-     public static function string(\FFI\CData &$ptr, ?int $size = NULL): string {}
-    /**
-     * Creates an FFI\CType object from a C declaration
-     */
-     public static function type(string $type): \FFI\CType {}
-    /**
-     * Gets the FFI\CType of FFI\CData
-     */
-     public static function typeof(\FFI\CData &$ptr): \FFI\CType {}
+final class FFI
+{
+   public const __BIGGEST_ALIGNMENT__ = 8;
+   /**
+    * Creates an unmanaged pointer to C data
+    */
+   public static function addr(\FFI\CData &$ptr): \FFI\CData {}
+   /**
+    * Gets the alignment
+    */
+   public static function alignof(\FFI\CData|\FFI\CType &$ptr): int {}
+   /**
+    * Dynamically constructs a new C array type
+    */
+   public static function arrayType(\FFI\CType $type, array $dimensions): \FFI\CType {}
+   /**
+    * Performs a C type cast
+    */
+   public static function cast(\FFI\CType|string $type, mixed &$ptr): \FFI\CData {}
+   /**
+    * Creates a new FFI object
+    */
+   public static function cdef(string $code = "", ?string $lib = NULL): \FFI {}
+   /**
+    * Releases an unmanaged data structure
+    */
+   public static function free(\FFI\CData &$ptr): void {}
+   /**
+    * Checks whether a FFI\CData is a null pointer
+    */
+   public static function isNull(\FFI\CData &$ptr): bool {}
+   /**
+    * Loads C declarations from a C header file
+    */
+   public static function load(string $filename): ?\FFI {}
+   /**
+    * Compares memory areas
+    */
+   public static function memcmp(mixed &$ptr1, mixed &$ptr2, int $size): int {}
+   /**
+    * Copies one memory area to another
+    */
+   public static function memcpy(\FFI\CData &$to, mixed &$from, int $size): void {}
+   /**
+    * Fills a memory area
+    */
+   public static function memset(\FFI\CData &$ptr, int $value, int $size): void {}
+   /**
+    * Creates a C data structure
+    */
+   public static function new(\FFI\CType|string $type, bool $owned = true, bool $persistent = false): \FFI\CData {}
+   /**
+    * Instantiates an FFI object with C declarations parsed during preloading
+    */
+   public static function scope(string $name): \FFI {}
+   /**
+    * Gets the size of C data or types
+    */
+   public static function sizeof(\FFI\CData|\FFI\CType &$ptr): int {}
+   /**
+    * Creates a PHP string from a memory area
+    */
+   public static function string(\FFI\CData &$ptr, ?int $size = NULL): string {}
+   /**
+    * Creates an FFI\CType object from a C declaration
+    */
+   public static function type(string $type): \FFI\CType {}
+   /**
+    * Gets the FFI\CType of FFI\CData
+    */
+   public static function typeof(\FFI\CData &$ptr): \FFI\CType {}
 }
 
 /**
  * 纤程（Fiber）类 (PHP 8 >= 8.1.0)
  */
- final class Fiber {
-    /**
-     * 创建新的 Fiber 实例 (PHP 8 >= 8.1.0)
-     */
-     public function __construct(callable $callback) {}
-    /**
-     * 获取当前正在执行的 Fiber 实例 (PHP 8 >= 8.1.0)
-     */
-     public static function getCurrent(): ?\Fiber {}
-    /**
-     * 获取 Fiber 的返回值 (PHP 8 >= 8.1.0)
-     */
-     public function getReturn(): mixed {}
-    /**
-     * 确认 fiber 是否正在运行 (PHP 8 >= 8.1.0)
-     */
-     public function isRunning(): bool {}
-    /**
-     * 确定 fiber 是否启动 (PHP 8 >= 8.1.0)
-     */
-     public function isStarted(): bool {}
-    /**
-     * 确认 fiber 是否挂起 (PHP 8 >= 8.1.0)
-     */
-     public function isSuspended(): bool {}
-    /**
-     * 确认 fiber 是否终止 (PHP 8 >= 8.1.0)
-     */
-     public function isTerminated(): bool {}
-    /**
-     * 使用值恢复 fiber 的执行 (PHP 8 >= 8.1.0)
-     */
-     public function resume(mixed $value = NULL): mixed {}
-    /**
-     * 启动 fiber 的执行 (PHP 8 >= 8.1.0)
-     */
-     public function start(mixed ...$args): mixed {}
-    /**
-     * 暂停当前 fiber 的执行 (PHP 8 >= 8.1.0)
-     */
-     public static function suspend(mixed $value = NULL): mixed {}
-    /**
-     * 用一个异常来恢复 fiber 的执行 (PHP 8 >= 8.1.0)
-     */
-     public function throw(\Throwable $exception): mixed {}
+final class Fiber
+{
+   /**
+    * 创建新的 Fiber 实例 (PHP 8 >= 8.1.0)
+    */
+   public function __construct(callable $callback) {}
+   /**
+    * 获取当前正在执行的 Fiber 实例 (PHP 8 >= 8.1.0)
+    */
+   public static function getCurrent(): ?\Fiber {}
+   /**
+    * 获取 Fiber 的返回值 (PHP 8 >= 8.1.0)
+    */
+   public function getReturn(): mixed {}
+   /**
+    * 确认 fiber 是否正在运行 (PHP 8 >= 8.1.0)
+    */
+   public function isRunning(): bool {}
+   /**
+    * 确定 fiber 是否启动 (PHP 8 >= 8.1.0)
+    */
+   public function isStarted(): bool {}
+   /**
+    * 确认 fiber 是否挂起 (PHP 8 >= 8.1.0)
+    */
+   public function isSuspended(): bool {}
+   /**
+    * 确认 fiber 是否终止 (PHP 8 >= 8.1.0)
+    */
+   public function isTerminated(): bool {}
+   /**
+    * 使用值恢复 fiber 的执行 (PHP 8 >= 8.1.0)
+    */
+   public function resume(mixed $value = NULL): mixed {}
+   /**
+    * 启动 fiber 的执行 (PHP 8 >= 8.1.0)
+    */
+   public function start(mixed ...$args): mixed {}
+   /**
+    * 暂停当前 fiber 的执行 (PHP 8 >= 8.1.0)
+    */
+   public static function suspend(mixed $value = NULL): mixed {}
+   /**
+    * 用一个异常来恢复 fiber 的执行 (PHP 8 >= 8.1.0)
+    */
+   public function throw(\Throwable $exception): mixed {}
 }
 
 /**
  * FiberError (PHP 8 >= 8.1.0)
  */
- final class FiberError extends \Error implements \Stringable, \Throwable {
-    /**
-     * 不允许直接实例化的构造函数 (PHP 8 >= 8.1.0)
-     */
-     public function __construct() {}
+final class FiberError extends \Error implements \Stringable, \Throwable
+{
+   /**
+    * 不允许直接实例化的构造函数 (PHP 8 >= 8.1.0)
+    */
+   public function __construct() {}
 }
 
 /**
  * The FilesystemIterator class
  */
- class FilesystemIterator extends \DirectoryIterator implements \Iterator, \SeekableIterator, \Stringable, \Traversable {
-    public const CURRENT_AS_FILEINFO = 0;
-    public const CURRENT_AS_PATHNAME = 32;
-    public const CURRENT_AS_SELF = 16;
-    public const CURRENT_MODE_MASK = 240;
-    public const FOLLOW_SYMLINKS = 16384;
-    public const KEY_AS_FILENAME = 256;
-    public const KEY_AS_PATHNAME = 0;
-    public const KEY_MODE_MASK = 3840;
-    public const NEW_CURRENT_AND_KEY = 256;
-    public const OTHER_MODE_MASK = 28672;
-    public const SKIP_DOTS = 4096;
-    public const UNIX_PATHS = 8192;
-    /**
-     * Constructs a new filesystem iterator
-     */
-     public function __construct(string $directory, int $flags = 4096) {}
-    /**
-     * The current file
-     */
-     public function current(): \SplFileInfo|\FilesystemIterator|string {}
-    /**
-     * Get the handling flags
-     */
-     public function getFlags(): int {}
-    /**
-     * Retrieve the key for the current file
-     */
-     public function key(): string {}
-    /**
-     * Rewinds back to the beginning
-     */
-     public function rewind(): void {}
-    /**
-     * Sets handling flags
-     */
-     public function setFlags(int $flags): void {}
+class FilesystemIterator extends \DirectoryIterator implements \Iterator, \SeekableIterator, \Stringable, \Traversable
+{
+   public const CURRENT_AS_FILEINFO = 0;
+   public const CURRENT_AS_PATHNAME = 32;
+   public const CURRENT_AS_SELF = 16;
+   public const CURRENT_MODE_MASK = 240;
+   public const FOLLOW_SYMLINKS = 16384;
+   public const KEY_AS_FILENAME = 256;
+   public const KEY_AS_PATHNAME = 0;
+   public const KEY_MODE_MASK = 3840;
+   public const NEW_CURRENT_AND_KEY = 256;
+   public const OTHER_MODE_MASK = 28672;
+   public const SKIP_DOTS = 4096;
+   public const UNIX_PATHS = 8192;
+   /**
+    * Constructs a new filesystem iterator
+    */
+   public function __construct(string $directory, int $flags = 4096) {}
+   /**
+    * The current file
+    */
+   public function current(): \SplFileInfo|\FilesystemIterator|string {}
+   /**
+    * Get the handling flags
+    */
+   public function getFlags(): int {}
+   /**
+    * Retrieve the key for the current file
+    */
+   public function key(): string {}
+   /**
+    * Rewinds back to the beginning
+    */
+   public function rewind(): void {}
+   /**
+    * Sets handling flags
+    */
+   public function setFlags(int $flags): void {}
 }
 
 /**
  * FilterIterator 类
  */
- abstract class FilterIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable {
-    /**
-     * Construct a filterIterator
-     */
-     public function __construct(\Iterator $iterator) {}
-    /**
-     * Check whether the current element of the iterator is acceptable
-     */
-     public abstract function accept(): bool;
-    /**
-     * Move the iterator forward
-     */
-     public function next(): void {}
-    /**
-     * Rewind the iterator
-     */
-     public function rewind(): void {}
+abstract class FilterIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   /**
+    * Construct a filterIterator
+    */
+   public function __construct(\Iterator $iterator) {}
+   /**
+    * Check whether the current element of the iterator is acceptable
+    */
+   public abstract function accept(): bool;
+   /**
+    * Move the iterator forward
+    */
+   public function next(): void {}
+   /**
+    * Rewind the iterator
+    */
+   public function rewind(): void {}
 }
 
 /**
  * The GMP class
  */
- final class GMP {
-    /**
-     * Create GMP number (PHP 8 >= 8.2.4)
-     */
-     public function __construct(string|int $num = 0, int $base = 0) {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
+final class GMP
+{
+   /**
+    * Create GMP number (PHP 8 >= 8.2.4)
+    */
+   public function __construct(string|int $num = 0, int $base = 0) {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
 }
 
 /**
  * The GdFont class (PHP 8 >= 8.1.0)
  */
- final class GdFont {
-}
+final class GdFont {}
 
 /**
  * GdImage 类
  */
- final class GdImage {
-}
+final class GdImage {}
 
 /**
  * 生成器类
  */
- final class Generator implements \Iterator, \Traversable {
-    public function __debugInfo(): array {}
-    /**
-     * 返回当前产生的值
-     */
-     public function current(): mixed {}
-    /**
-     * 获取生成器的返回值
-     */
-     public function getReturn(): mixed {}
-    /**
-     * 返回当前产生的键
-     */
-     public function key(): mixed {}
-    /**
-     * 生成器继续执行
-     */
-     public function next(): void {}
-    /**
-     * 执行生成器，直至并包含第一个 yield 语句
-     */
-     public function rewind(): void {}
-    /**
-     * 向生成器中传入一个值
-     */
-     public function send(mixed $value): mixed {}
-    /**
-     * 向生成器中抛入一个异常
-     */
-     public function throw(\Throwable $exception): mixed {}
-    /**
-     * 检查迭代器是否被关闭
-     */
-     public function valid(): bool {}
+final class Generator implements \Iterator, \Traversable
+{
+   public function __debugInfo(): array {}
+   /**
+    * 返回当前产生的值
+    */
+   public function current(): mixed {}
+   /**
+    * 获取生成器的返回值
+    */
+   public function getReturn(): mixed {}
+   /**
+    * 返回当前产生的键
+    */
+   public function key(): mixed {}
+   /**
+    * 生成器继续执行
+    */
+   public function next(): void {}
+   /**
+    * 执行生成器，直至并包含第一个 yield 语句
+    */
+   public function rewind(): void {}
+   /**
+    * 向生成器中传入一个值
+    */
+   public function send(mixed $value): mixed {}
+   /**
+    * 向生成器中抛入一个异常
+    */
+   public function throw(\Throwable $exception): mixed {}
+   /**
+    * 检查迭代器是否被关闭
+    */
+   public function valid(): bool {}
 }
 
 /**
  * GlobIterator 类
  */
- class GlobIterator extends \FilesystemIterator implements \Countable, \Iterator, \SeekableIterator, \Stringable, \Traversable {
-    /**
-     * Construct a directory using glob
-     */
-     public function __construct(string $pattern, int $flags = 0) {}
-    /**
-     * Get the number of directories and files
-     */
-     public function count(): int {}
+class GlobIterator extends \FilesystemIterator implements \Countable, \Iterator, \SeekableIterator, \Stringable, \Traversable
+{
+   /**
+    * Construct a directory using glob
+    */
+   public function __construct(string $pattern, int $flags = 0) {}
+   /**
+    * Get the number of directories and files
+    */
+   public function count(): int {}
 }
 
 /**
  * HashContext 类
  */
- final class HashContext {
-    /**
-     * 私有构造方法以禁止直接实例化
-     */
-     private function __construct() {}
-    public function __debugInfo(): array {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
+final class HashContext
+{
+   /**
+    * 私有构造方法以禁止直接实例化
+    */
+   private function __construct() {}
+   public function __debugInfo(): array {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
 }
 
 /**
  * The InfiniteIterator class
  */
- class InfiniteIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable {
-    /**
-     * Constructs an InfiniteIterator
-     */
-     public function __construct(\Iterator $iterator) {}
-    /**
-     * Moves the inner Iterator forward or rewinds it
-     */
-     public function next(): void {}
+class InfiniteIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   /**
+    * Constructs an InfiniteIterator
+    */
+   public function __construct(\Iterator $iterator) {}
+   /**
+    * Moves the inner Iterator forward or rewinds it
+    */
+   public function next(): void {}
 }
 
 /**
  * The InflateContext class
  */
- final class InflateContext {
-}
+final class InflateContext {}
 
 /**
  * InternalIterator 类
  */
- final class InternalIterator implements \Iterator, \Traversable {
-    /**
-     * 禁止直接实例化私有构造方法
-     */
-     private function __construct() {}
-    /**
-     * 返回当前元素
-     */
-     public function current(): mixed {}
-    /**
-     * 返回当前元素的键
-     */
-     public function key(): mixed {}
-    /**
-     * 向前移动到下一个元素
-     */
-     public function next(): void {}
-    /**
-     * 迭代器返回到第一个元素
-     */
-     public function rewind(): void {}
-    /**
-     * 检测当前位置是否有效
-     */
-     public function valid(): bool {}
+final class InternalIterator implements \Iterator, \Traversable
+{
+   /**
+    * 禁止直接实例化私有构造方法
+    */
+   private function __construct() {}
+   /**
+    * 返回当前元素
+    */
+   public function current(): mixed {}
+   /**
+    * 返回当前元素的键
+    */
+   public function key(): mixed {}
+   /**
+    * 向前移动到下一个元素
+    */
+   public function next(): void {}
+   /**
+    * 迭代器返回到第一个元素
+    */
+   public function rewind(): void {}
+   /**
+    * 检测当前位置是否有效
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The IntlBreakIterator class
  */
- class IntlBreakIterator implements \IteratorAggregate, \Traversable {
-    public const DONE = -1;
-    public const LINE_HARD = 100;
-    public const LINE_HARD_LIMIT = 200;
-    public const LINE_SOFT = 0;
-    public const LINE_SOFT_LIMIT = 100;
-    public const SENTENCE_SEP = 100;
-    public const SENTENCE_SEP_LIMIT = 200;
-    public const SENTENCE_TERM = 0;
-    public const SENTENCE_TERM_LIMIT = 100;
-    public const WORD_IDEO = 400;
-    public const WORD_IDEO_LIMIT = 500;
-    public const WORD_KANA = 300;
-    public const WORD_KANA_LIMIT = 400;
-    public const WORD_LETTER = 200;
-    public const WORD_LETTER_LIMIT = 300;
-    public const WORD_NONE = 0;
-    public const WORD_NONE_LIMIT = 100;
-    public const WORD_NUMBER = 100;
-    public const WORD_NUMBER_LIMIT = 200;
-    /**
-     * Private constructor for disallowing instantiation
-     */
-     private function __construct() {}
-    /**
-     * Create break iterator for boundaries of combining character sequences
-     */
-     public static function createCharacterInstance(?string $locale = NULL): ?\IntlBreakIterator {}
-    /**
-     * Create break iterator for boundaries of code points
-     */
-     public static function createCodePointInstance(): \IntlCodePointBreakIterator {}
-    /**
-     * Create break iterator for logically possible line breaks
-     */
-     public static function createLineInstance(?string $locale = NULL): ?\IntlBreakIterator {}
-    /**
-     * Create break iterator for sentence breaks
-     */
-     public static function createSentenceInstance(?string $locale = NULL): ?\IntlBreakIterator {}
-    /**
-     * Create break iterator for title-casing breaks
-     */
-     public static function createTitleInstance(?string $locale = NULL): ?\IntlBreakIterator {}
-    /**
-     * Create break iterator for word breaks
-     */
-     public static function createWordInstance(?string $locale = NULL): ?\IntlBreakIterator {}
-    /**
-     * Get index of current position
-     */
-     public function current(): int {}
-    /**
-     * Set position to the first character in the text
-     */
-     public function first(): int {}
-    /**
-     * Advance the iterator to the first boundary following specified offset
-     */
-     public function following(int $offset): int {}
-    /**
-     * Get last error code on the object
-     */
-     public function getErrorCode(): int {}
-    /**
-     * Get last error message on the object
-     */
-     public function getErrorMessage(): string {}
-    public function getIterator(): \Iterator {}
-    /**
-     * Get the locale associated with the object
-     */
-     public function getLocale(int $type): string|false {}
-    /**
-     * Create iterator for navigating fragments between boundaries
-     */
-     public function getPartsIterator(string $type = IntlPartsIterator::KEY_SEQUENTIAL): \IntlPartsIterator {}
-    /**
-     * Get the text being scanned
-     */
-     public function getText(): ?string {}
-    /**
-     * Tell whether an offset is a boundaryʼs offset
-     */
-     public function isBoundary(int $offset): bool {}
-    /**
-     * Set the iterator position to index beyond the last character
-     */
-     public function last(): int {}
-    /**
-     * Advance the iterator the next boundary
-     */
-     public function next(?int $offset = NULL): int {}
-    /**
-     * Set the iterator position to the first boundary before an offset
-     */
-     public function preceding(int $offset): int {}
-    /**
-     * Set the iterator position to the boundary immediately before the current
-     */
-     public function previous(): int {}
-    /**
-     * Set the text being scanned
-     */
-     public function setText(string $text): bool {}
+class IntlBreakIterator implements \IteratorAggregate, \Traversable
+{
+   public const DONE = -1;
+   public const LINE_HARD = 100;
+   public const LINE_HARD_LIMIT = 200;
+   public const LINE_SOFT = 0;
+   public const LINE_SOFT_LIMIT = 100;
+   public const SENTENCE_SEP = 100;
+   public const SENTENCE_SEP_LIMIT = 200;
+   public const SENTENCE_TERM = 0;
+   public const SENTENCE_TERM_LIMIT = 100;
+   public const WORD_IDEO = 400;
+   public const WORD_IDEO_LIMIT = 500;
+   public const WORD_KANA = 300;
+   public const WORD_KANA_LIMIT = 400;
+   public const WORD_LETTER = 200;
+   public const WORD_LETTER_LIMIT = 300;
+   public const WORD_NONE = 0;
+   public const WORD_NONE_LIMIT = 100;
+   public const WORD_NUMBER = 100;
+   public const WORD_NUMBER_LIMIT = 200;
+   /**
+    * Private constructor for disallowing instantiation
+    */
+   private function __construct() {}
+   /**
+    * Create break iterator for boundaries of combining character sequences
+    */
+   public static function createCharacterInstance(?string $locale = NULL): ?\IntlBreakIterator {}
+   /**
+    * Create break iterator for boundaries of code points
+    */
+   public static function createCodePointInstance(): \IntlCodePointBreakIterator {}
+   /**
+    * Create break iterator for logically possible line breaks
+    */
+   public static function createLineInstance(?string $locale = NULL): ?\IntlBreakIterator {}
+   /**
+    * Create break iterator for sentence breaks
+    */
+   public static function createSentenceInstance(?string $locale = NULL): ?\IntlBreakIterator {}
+   /**
+    * Create break iterator for title-casing breaks
+    */
+   public static function createTitleInstance(?string $locale = NULL): ?\IntlBreakIterator {}
+   /**
+    * Create break iterator for word breaks
+    */
+   public static function createWordInstance(?string $locale = NULL): ?\IntlBreakIterator {}
+   /**
+    * Get index of current position
+    */
+   public function current(): int {}
+   /**
+    * Set position to the first character in the text
+    */
+   public function first(): int {}
+   /**
+    * Advance the iterator to the first boundary following specified offset
+    */
+   public function following(int $offset): int {}
+   /**
+    * Get last error code on the object
+    */
+   public function getErrorCode(): int {}
+   /**
+    * Get last error message on the object
+    */
+   public function getErrorMessage(): string {}
+   public function getIterator(): \Iterator {}
+   /**
+    * Get the locale associated with the object
+    */
+   public function getLocale(int $type): string|false {}
+   /**
+    * Create iterator for navigating fragments between boundaries
+    */
+   public function getPartsIterator(string $type = IntlPartsIterator::KEY_SEQUENTIAL): \IntlPartsIterator {}
+   /**
+    * Get the text being scanned
+    */
+   public function getText(): ?string {}
+   /**
+    * Tell whether an offset is a boundaryʼs offset
+    */
+   public function isBoundary(int $offset): bool {}
+   /**
+    * Set the iterator position to index beyond the last character
+    */
+   public function last(): int {}
+   /**
+    * Advance the iterator the next boundary
+    */
+   public function next(?int $offset = NULL): int {}
+   /**
+    * Set the iterator position to the first boundary before an offset
+    */
+   public function preceding(int $offset): int {}
+   /**
+    * Set the iterator position to the boundary immediately before the current
+    */
+   public function previous(): int {}
+   /**
+    * Set the text being scanned
+    */
+   public function setText(string $text): bool {}
 }
 
 /**
  * The IntlCalendar class
  */
- class IntlCalendar {
-    public const DOW_FRIDAY = 6;
-    public const DOW_MONDAY = 2;
-    public const DOW_SATURDAY = 7;
-    public const DOW_SUNDAY = 1;
-    public const DOW_THURSDAY = 5;
-    public const DOW_TUESDAY = 3;
-    public const DOW_TYPE_WEEKDAY = 0;
-    public const DOW_TYPE_WEEKEND = 1;
-    public const DOW_TYPE_WEEKEND_CEASE = 3;
-    public const DOW_TYPE_WEEKEND_OFFSET = 2;
-    public const DOW_WEDNESDAY = 4;
-    public const FIELD_AM_PM = 9;
-    public const FIELD_DATE = 5;
-    public const FIELD_DAY_OF_MONTH = 5;
-    public const FIELD_DAY_OF_WEEK = 7;
-    public const FIELD_DAY_OF_WEEK_IN_MONTH = 8;
-    public const FIELD_DAY_OF_YEAR = 6;
-    public const FIELD_DOW_LOCAL = 18;
-    public const FIELD_DST_OFFSET = 16;
-    public const FIELD_ERA = 0;
-    public const FIELD_EXTENDED_YEAR = 19;
-    public const FIELD_FIELD_COUNT = 24;
-    public const FIELD_HOUR = 10;
-    public const FIELD_HOUR_OF_DAY = 11;
-    public const FIELD_IS_LEAP_MONTH = 22;
-    public const FIELD_JULIAN_DAY = 20;
-    public const FIELD_MILLISECOND = 14;
-    public const FIELD_MILLISECONDS_IN_DAY = 21;
-    public const FIELD_MINUTE = 12;
-    public const FIELD_MONTH = 2;
-    public const FIELD_SECOND = 13;
-    public const FIELD_WEEK_OF_MONTH = 4;
-    public const FIELD_WEEK_OF_YEAR = 3;
-    public const FIELD_YEAR = 1;
-    public const FIELD_YEAR_WOY = 17;
-    public const FIELD_ZONE_OFFSET = 15;
-    public const WALLTIME_FIRST = 1;
-    public const WALLTIME_LAST = 0;
-    public const WALLTIME_NEXT_VALID = 2;
-    /**
-     * Private constructor for disallowing instantiation
-     */
-     private function __construct() {}
-    /**
-     * Add a (signed) amount of time to a field
-     */
-     public function add(int $field, int $value): bool {}
-    /**
-     * Whether this objectʼs time is after that of the passed object
-     */
-     public function after(\IntlCalendar $other): bool {}
-    /**
-     * Whether this objectʼs time is before that of the passed object
-     */
-     public function before(\IntlCalendar $other): bool {}
-    /**
-     * Clear a field or all fields
-     */
-     public function clear(?int $field = NULL): true {}
-    /**
-     * Create a new IntlCalendar
-     */
-     public static function createInstance(\IntlTimeZone|\DateTimeZone|string|null $timezone = NULL, ?string $locale = NULL): ?\IntlCalendar {}
-    /**
-     * Compare time of two IntlCalendar objects for equality
-     */
-     public function equals(\IntlCalendar $other): bool {}
-    /**
-     * Calculate difference between given time and this objectʼs time
-     */
-     public function fieldDifference(float $timestamp, int $field): int|false {}
-    /**
-     * Create an IntlCalendar from a DateTime object or string
-     */
-     public static function fromDateTime(\DateTime|string $datetime, ?string $locale = NULL): ?\IntlCalendar {}
-    /**
-     * Get the value for a field
-     */
-     public function get(int $field): int|false {}
-    /**
-     * The maximum value for a field, considering the objectʼs current time
-     */
-     public function getActualMaximum(int $field): int|false {}
-    /**
-     * The minimum value for a field, considering the objectʼs current time
-     */
-     public function getActualMinimum(int $field): int|false {}
-    /**
-     * Get array of locales for which there is data
-     */
-     public static function getAvailableLocales(): array {}
-    /**
-     * Tell whether a day is a weekday, weekend or a day that has a transition between the two
-     */
-     public function getDayOfWeekType(int $dayOfWeek): int|false {}
-    /**
-     * Get last error code on the object
-     */
-     public function getErrorCode(): int|false {}
-    /**
-     * Get last error message on the object
-     */
-     public function getErrorMessage(): string|false {}
-    /**
-     * Get the first day of the week for the calendarʼs locale
-     */
-     public function getFirstDayOfWeek(): int|false {}
-    /**
-     * Get the largest local minimum value for a field
-     */
-     public function getGreatestMinimum(int $field): int|false {}
-    /**
-     * Get set of locale keyword values
-     */
-     public static function getKeywordValuesForLocale(string $keyword, string $locale, bool $onlyCommon): \IntlIterator|false {}
-    /**
-     * Get the smallest local maximum for a field
-     */
-     public function getLeastMaximum(int $field): int|false {}
-    /**
-     * Get the locale associated with the object
-     */
-     public function getLocale(int $type): string|false {}
-    /**
-     * Get the global maximum value for a field
-     */
-     public function getMaximum(int $field): int|false {}
-    /**
-     * Get minimal number of days the first week in a year or month can have
-     */
-     public function getMinimalDaysInFirstWeek(): int|false {}
-    /**
-     * Get the global minimum value for a field
-     */
-     public function getMinimum(int $field): int|false {}
-    /**
-     * Get number representing the current time
-     */
-     public static function getNow(): float {}
-    /**
-     * Get behavior for handling repeating wall time
-     */
-     public function getRepeatedWallTimeOption(): int {}
-    /**
-     * Get behavior for handling skipped wall time
-     */
-     public function getSkippedWallTimeOption(): int {}
-    /**
-     * Get time currently represented by the object
-     */
-     public function getTime(): float|false {}
-    /**
-     * Get the objectʼs timezone
-     */
-     public function getTimeZone(): \IntlTimeZone|false {}
-    /**
-     * Get the calendar type
-     */
-     public function getType(): string {}
-    /**
-     * Get time of the day at which weekend begins or ends
-     */
-     public function getWeekendTransition(int $dayOfWeek): int|false {}
-    /**
-     * Whether the objectʼs time is in Daylight Savings Time
-     */
-     public function inDaylightTime(): bool {}
-    /**
-     * Whether another calendar is equal but for a different time
-     */
-     public function isEquivalentTo(\IntlCalendar $other): bool {}
-    /**
-     * Whether date/time interpretation is in lenient mode
-     */
-     public function isLenient(): bool {}
-    /**
-     * Whether a field is set
-     */
-     public function isSet(int $field): bool {}
-    /**
-     * Whether a certain date/time is in the weekend
-     */
-     public function isWeekend(?float $timestamp = NULL): bool {}
-    /**
-     * Add value to field without carrying into more significant fields
-     */
-     public function roll(int $field, mixed $value): bool {}
-    /**
-     * Set a time field or several common fields at once
-     */
-     public function set(int $year, int $month, int $dayOfMonth = null, int $hour = null, int $minute = null, int $second = null): true {}
-    /**
-     * Set a date fields (PHP 8 >= 8.3.0)
-     */
-     public function setDate(int $year, int $month, int $dayOfMonth): void {}
-    /**
-     * Set a date and time fields (PHP 8 >= 8.3.0)
-     */
-     public function setDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = NULL): void {}
-    /**
-     * Set the day on which the week is deemed to start
-     */
-     public function setFirstDayOfWeek(int $dayOfWeek): true {}
-    /**
-     * Set whether date/time interpretation is to be lenient
-     */
-     public function setLenient(bool $lenient): true {}
-    /**
-     * Set minimal number of days the first week in a year or month can have
-     */
-     public function setMinimalDaysInFirstWeek(int $days): true {}
-    /**
-     * Set behavior for handling repeating wall times at negative timezone offset transitions
-     */
-     public function setRepeatedWallTimeOption(int $option): true {}
-    /**
-     * Set behavior for handling skipped wall times at positive timezone offset transitions
-     */
-     public function setSkippedWallTimeOption(int $option): true {}
-    /**
-     * Set the calendar time in milliseconds since the epoch
-     */
-     public function setTime(float $timestamp): bool {}
-    /**
-     * Set the timezone used by this calendar
-     */
-     public function setTimeZone(\IntlTimeZone|\DateTimeZone|string|null $timezone): bool {}
-    /**
-     * Convert an IntlCalendar into a DateTime object
-     */
-     public function toDateTime(): \DateTime|false {}
+class IntlCalendar
+{
+   public const DOW_FRIDAY = 6;
+   public const DOW_MONDAY = 2;
+   public const DOW_SATURDAY = 7;
+   public const DOW_SUNDAY = 1;
+   public const DOW_THURSDAY = 5;
+   public const DOW_TUESDAY = 3;
+   public const DOW_TYPE_WEEKDAY = 0;
+   public const DOW_TYPE_WEEKEND = 1;
+   public const DOW_TYPE_WEEKEND_CEASE = 3;
+   public const DOW_TYPE_WEEKEND_OFFSET = 2;
+   public const DOW_WEDNESDAY = 4;
+   public const FIELD_AM_PM = 9;
+   public const FIELD_DATE = 5;
+   public const FIELD_DAY_OF_MONTH = 5;
+   public const FIELD_DAY_OF_WEEK = 7;
+   public const FIELD_DAY_OF_WEEK_IN_MONTH = 8;
+   public const FIELD_DAY_OF_YEAR = 6;
+   public const FIELD_DOW_LOCAL = 18;
+   public const FIELD_DST_OFFSET = 16;
+   public const FIELD_ERA = 0;
+   public const FIELD_EXTENDED_YEAR = 19;
+   public const FIELD_FIELD_COUNT = 24;
+   public const FIELD_HOUR = 10;
+   public const FIELD_HOUR_OF_DAY = 11;
+   public const FIELD_IS_LEAP_MONTH = 22;
+   public const FIELD_JULIAN_DAY = 20;
+   public const FIELD_MILLISECOND = 14;
+   public const FIELD_MILLISECONDS_IN_DAY = 21;
+   public const FIELD_MINUTE = 12;
+   public const FIELD_MONTH = 2;
+   public const FIELD_SECOND = 13;
+   public const FIELD_WEEK_OF_MONTH = 4;
+   public const FIELD_WEEK_OF_YEAR = 3;
+   public const FIELD_YEAR = 1;
+   public const FIELD_YEAR_WOY = 17;
+   public const FIELD_ZONE_OFFSET = 15;
+   public const WALLTIME_FIRST = 1;
+   public const WALLTIME_LAST = 0;
+   public const WALLTIME_NEXT_VALID = 2;
+   /**
+    * Private constructor for disallowing instantiation
+    */
+   private function __construct() {}
+   /**
+    * Add a (signed) amount of time to a field
+    */
+   public function add(int $field, int $value): bool {}
+   /**
+    * Whether this objectʼs time is after that of the passed object
+    */
+   public function after(\IntlCalendar $other): bool {}
+   /**
+    * Whether this objectʼs time is before that of the passed object
+    */
+   public function before(\IntlCalendar $other): bool {}
+   /**
+    * Clear a field or all fields
+    */
+   public function clear(?int $field = NULL): true {}
+   /**
+    * Create a new IntlCalendar
+    */
+   public static function createInstance(\IntlTimeZone|\DateTimeZone|string|null $timezone = NULL, ?string $locale = NULL): ?\IntlCalendar {}
+   /**
+    * Compare time of two IntlCalendar objects for equality
+    */
+   public function equals(\IntlCalendar $other): bool {}
+   /**
+    * Calculate difference between given time and this objectʼs time
+    */
+   public function fieldDifference(float $timestamp, int $field): int|false {}
+   /**
+    * Create an IntlCalendar from a DateTime object or string
+    */
+   public static function fromDateTime(\DateTime|string $datetime, ?string $locale = NULL): ?\IntlCalendar {}
+   /**
+    * Get the value for a field
+    */
+   public function get(int $field): int|false {}
+   /**
+    * The maximum value for a field, considering the objectʼs current time
+    */
+   public function getActualMaximum(int $field): int|false {}
+   /**
+    * The minimum value for a field, considering the objectʼs current time
+    */
+   public function getActualMinimum(int $field): int|false {}
+   /**
+    * Get array of locales for which there is data
+    */
+   public static function getAvailableLocales(): array {}
+   /**
+    * Tell whether a day is a weekday, weekend or a day that has a transition between the two
+    */
+   public function getDayOfWeekType(int $dayOfWeek): int|false {}
+   /**
+    * Get last error code on the object
+    */
+   public function getErrorCode(): int|false {}
+   /**
+    * Get last error message on the object
+    */
+   public function getErrorMessage(): string|false {}
+   /**
+    * Get the first day of the week for the calendarʼs locale
+    */
+   public function getFirstDayOfWeek(): int|false {}
+   /**
+    * Get the largest local minimum value for a field
+    */
+   public function getGreatestMinimum(int $field): int|false {}
+   /**
+    * Get set of locale keyword values
+    */
+   public static function getKeywordValuesForLocale(string $keyword, string $locale, bool $onlyCommon): \IntlIterator|false {}
+   /**
+    * Get the smallest local maximum for a field
+    */
+   public function getLeastMaximum(int $field): int|false {}
+   /**
+    * Get the locale associated with the object
+    */
+   public function getLocale(int $type): string|false {}
+   /**
+    * Get the global maximum value for a field
+    */
+   public function getMaximum(int $field): int|false {}
+   /**
+    * Get minimal number of days the first week in a year or month can have
+    */
+   public function getMinimalDaysInFirstWeek(): int|false {}
+   /**
+    * Get the global minimum value for a field
+    */
+   public function getMinimum(int $field): int|false {}
+   /**
+    * Get number representing the current time
+    */
+   public static function getNow(): float {}
+   /**
+    * Get behavior for handling repeating wall time
+    */
+   public function getRepeatedWallTimeOption(): int {}
+   /**
+    * Get behavior for handling skipped wall time
+    */
+   public function getSkippedWallTimeOption(): int {}
+   /**
+    * Get time currently represented by the object
+    */
+   public function getTime(): float|false {}
+   /**
+    * Get the objectʼs timezone
+    */
+   public function getTimeZone(): \IntlTimeZone|false {}
+   /**
+    * Get the calendar type
+    */
+   public function getType(): string {}
+   /**
+    * Get time of the day at which weekend begins or ends
+    */
+   public function getWeekendTransition(int $dayOfWeek): int|false {}
+   /**
+    * Whether the objectʼs time is in Daylight Savings Time
+    */
+   public function inDaylightTime(): bool {}
+   /**
+    * Whether another calendar is equal but for a different time
+    */
+   public function isEquivalentTo(\IntlCalendar $other): bool {}
+   /**
+    * Whether date/time interpretation is in lenient mode
+    */
+   public function isLenient(): bool {}
+   /**
+    * Whether a field is set
+    */
+   public function isSet(int $field): bool {}
+   /**
+    * Whether a certain date/time is in the weekend
+    */
+   public function isWeekend(?float $timestamp = NULL): bool {}
+   /**
+    * Add value to field without carrying into more significant fields
+    */
+   public function roll(int $field, mixed $value): bool {}
+   /**
+    * Set a time field or several common fields at once
+    */
+   public function set(int $year, int $month, int $dayOfMonth = null, int $hour = null, int $minute = null, int $second = null): true {}
+   /**
+    * Set a date fields (PHP 8 >= 8.3.0)
+    */
+   public function setDate(int $year, int $month, int $dayOfMonth): void {}
+   /**
+    * Set a date and time fields (PHP 8 >= 8.3.0)
+    */
+   public function setDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = NULL): void {}
+   /**
+    * Set the day on which the week is deemed to start
+    */
+   public function setFirstDayOfWeek(int $dayOfWeek): true {}
+   /**
+    * Set whether date/time interpretation is to be lenient
+    */
+   public function setLenient(bool $lenient): true {}
+   /**
+    * Set minimal number of days the first week in a year or month can have
+    */
+   public function setMinimalDaysInFirstWeek(int $days): true {}
+   /**
+    * Set behavior for handling repeating wall times at negative timezone offset transitions
+    */
+   public function setRepeatedWallTimeOption(int $option): true {}
+   /**
+    * Set behavior for handling skipped wall times at positive timezone offset transitions
+    */
+   public function setSkippedWallTimeOption(int $option): true {}
+   /**
+    * Set the calendar time in milliseconds since the epoch
+    */
+   public function setTime(float $timestamp): bool {}
+   /**
+    * Set the timezone used by this calendar
+    */
+   public function setTimeZone(\IntlTimeZone|\DateTimeZone|string|null $timezone): bool {}
+   /**
+    * Convert an IntlCalendar into a DateTime object
+    */
+   public function toDateTime(): \DateTime|false {}
 }
 
 /**
  * IntlChar
  */
- class IntlChar {
-    public const BLOCK_CODE_AEGEAN_NUMBERS = 119;
-    public const BLOCK_CODE_ALCHEMICAL_SYMBOLS = 208;
-    public const BLOCK_CODE_ALPHABETIC_PRESENTATION_FORMS = 80;
-    public const BLOCK_CODE_ANCIENT_GREEK_MUSICAL_NOTATION = 126;
-    public const BLOCK_CODE_ANCIENT_GREEK_NUMBERS = 127;
-    public const BLOCK_CODE_ANCIENT_SYMBOLS = 165;
-    public const BLOCK_CODE_ARABIC = 12;
-    public const BLOCK_CODE_ARABIC_EXTENDED_A = 210;
-    public const BLOCK_CODE_ARABIC_MATHEMATICAL_ALPHABETIC_SYMBOLS = 211;
-    public const BLOCK_CODE_ARABIC_PRESENTATION_FORMS_A = 81;
-    public const BLOCK_CODE_ARABIC_PRESENTATION_FORMS_B = 85;
-    public const BLOCK_CODE_ARABIC_SUPPLEMENT = 128;
-    public const BLOCK_CODE_ARMENIAN = 10;
-    public const BLOCK_CODE_ARROWS = 46;
-    public const BLOCK_CODE_AVESTAN = 188;
-    public const BLOCK_CODE_BALINESE = 147;
-    public const BLOCK_CODE_BAMUM = 177;
-    public const BLOCK_CODE_BAMUM_SUPPLEMENT = 202;
-    public const BLOCK_CODE_BASIC_LATIN = 1;
-    public const BLOCK_CODE_BASSA_VAH = 221;
-    public const BLOCK_CODE_BATAK = 199;
-    public const BLOCK_CODE_BENGALI = 16;
-    public const BLOCK_CODE_BLOCK_ELEMENTS = 53;
-    public const BLOCK_CODE_BOPOMOFO = 64;
-    public const BLOCK_CODE_BOPOMOFO_EXTENDED = 67;
-    public const BLOCK_CODE_BOX_DRAWING = 52;
-    public const BLOCK_CODE_BRAHMI = 201;
-    public const BLOCK_CODE_BRAILLE_PATTERNS = 57;
-    public const BLOCK_CODE_BUGINESE = 129;
-    public const BLOCK_CODE_BUHID = 100;
-    public const BLOCK_CODE_BYZANTINE_MUSICAL_SYMBOLS = 91;
-    public const BLOCK_CODE_CARIAN = 168;
-    public const BLOCK_CODE_CAUCASIAN_ALBANIAN = 222;
-    public const BLOCK_CODE_CHAKMA = 212;
-    public const BLOCK_CODE_CHAM = 164;
-    public const BLOCK_CODE_CHEROKEE = 32;
-    public const BLOCK_CODE_CJK_COMPATIBILITY = 69;
-    public const BLOCK_CODE_CJK_COMPATIBILITY_FORMS = 83;
-    public const BLOCK_CODE_CJK_COMPATIBILITY_IDEOGRAPHS = 79;
-    public const BLOCK_CODE_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT = 95;
-    public const BLOCK_CODE_CJK_RADICALS_SUPPLEMENT = 58;
-    public const BLOCK_CODE_CJK_STROKES = 130;
-    public const BLOCK_CODE_CJK_SYMBOLS_AND_PUNCTUATION = 61;
-    public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS = 71;
-    public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A = 70;
-    public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B = 94;
-    public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C = 197;
-    public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D = 209;
-    public const BLOCK_CODE_COMBINING_DIACRITICAL_MARKS = 7;
-    public const BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED = 224;
-    public const BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_SUPPLEMENT = 131;
-    public const BLOCK_CODE_COMBINING_HALF_MARKS = 82;
-    public const BLOCK_CODE_COMBINING_MARKS_FOR_SYMBOLS = 43;
-    public const BLOCK_CODE_COMMON_INDIC_NUMBER_FORMS = 178;
-    public const BLOCK_CODE_CONTROL_PICTURES = 49;
-    public const BLOCK_CODE_COPTIC = 132;
-    public const BLOCK_CODE_COPTIC_EPACT_NUMBERS = 223;
-    public const BLOCK_CODE_COUNT = 339;
-    public const BLOCK_CODE_COUNTING_ROD_NUMERALS = 154;
-    public const BLOCK_CODE_CUNEIFORM = 152;
-    public const BLOCK_CODE_CUNEIFORM_NUMBERS_AND_PUNCTUATION = 153;
-    public const BLOCK_CODE_CURRENCY_SYMBOLS = 42;
-    public const BLOCK_CODE_CYPRIOT_SYLLABARY = 123;
-    public const BLOCK_CODE_CYRILLIC = 9;
-    public const BLOCK_CODE_CYRILLIC_EXTENDED_A = 158;
-    public const BLOCK_CODE_CYRILLIC_EXTENDED_B = 160;
-    public const BLOCK_CODE_CYRILLIC_SUPPLEMENT = 97;
-    public const BLOCK_CODE_CYRILLIC_SUPPLEMENTARY = 97;
-    public const BLOCK_CODE_DESERET = 90;
-    public const BLOCK_CODE_DEVANAGARI = 15;
-    public const BLOCK_CODE_DEVANAGARI_EXTENDED = 179;
-    public const BLOCK_CODE_DINGBATS = 56;
-    public const BLOCK_CODE_DOMINO_TILES = 171;
-    public const BLOCK_CODE_DUPLOYAN = 225;
-    public const BLOCK_CODE_EGYPTIAN_HIEROGLYPHS = 194;
-    public const BLOCK_CODE_ELBASAN = 226;
-    public const BLOCK_CODE_EMOTICONS = 206;
-    public const BLOCK_CODE_ENCLOSED_ALPHANUMERICS = 51;
-    public const BLOCK_CODE_ENCLOSED_ALPHANUMERIC_SUPPLEMENT = 195;
-    public const BLOCK_CODE_ENCLOSED_CJK_LETTERS_AND_MONTHS = 68;
-    public const BLOCK_CODE_ENCLOSED_IDEOGRAPHIC_SUPPLEMENT = 196;
-    public const BLOCK_CODE_ETHIOPIC = 31;
-    public const BLOCK_CODE_ETHIOPIC_EXTENDED = 133;
-    public const BLOCK_CODE_ETHIOPIC_EXTENDED_A = 200;
-    public const BLOCK_CODE_ETHIOPIC_SUPPLEMENT = 134;
-    public const BLOCK_CODE_GENERAL_PUNCTUATION = 40;
-    public const BLOCK_CODE_GEOMETRIC_SHAPES = 54;
-    public const BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED = 227;
-    public const BLOCK_CODE_GEORGIAN = 29;
-    public const BLOCK_CODE_GEORGIAN_SUPPLEMENT = 135;
-    public const BLOCK_CODE_GLAGOLITIC = 136;
-    public const BLOCK_CODE_GOTHIC = 89;
-    public const BLOCK_CODE_GRANTHA = 228;
-    public const BLOCK_CODE_GREEK = 8;
-    public const BLOCK_CODE_GREEK_EXTENDED = 39;
-    public const BLOCK_CODE_GUJARATI = 18;
-    public const BLOCK_CODE_GURMUKHI = 17;
-    public const BLOCK_CODE_HALFWIDTH_AND_FULLWIDTH_FORMS = 87;
-    public const BLOCK_CODE_HANGUL_COMPATIBILITY_JAMO = 65;
-    public const BLOCK_CODE_HANGUL_JAMO = 30;
-    public const BLOCK_CODE_HANGUL_JAMO_EXTENDED_A = 180;
-    public const BLOCK_CODE_HANGUL_JAMO_EXTENDED_B = 185;
-    public const BLOCK_CODE_HANGUL_SYLLABLES = 74;
-    public const BLOCK_CODE_HANUNOO = 99;
-    public const BLOCK_CODE_HEBREW = 11;
-    public const BLOCK_CODE_HIGH_PRIVATE_USE_SURROGATES = 76;
-    public const BLOCK_CODE_HIGH_SURROGATES = 75;
-    public const BLOCK_CODE_HIRAGANA = 62;
-    public const BLOCK_CODE_IDEOGRAPHIC_DESCRIPTION_CHARACTERS = 60;
-    public const BLOCK_CODE_IMPERIAL_ARAMAIC = 186;
-    public const BLOCK_CODE_INSCRIPTIONAL_PAHLAVI = 190;
-    public const BLOCK_CODE_INSCRIPTIONAL_PARTHIAN = 189;
-    public const BLOCK_CODE_INVALID_CODE = -1;
-    public const BLOCK_CODE_IPA_EXTENSIONS = 5;
-    public const BLOCK_CODE_JAVANESE = 181;
-    public const BLOCK_CODE_KAITHI = 193;
-    public const BLOCK_CODE_KANA_SUPPLEMENT = 203;
-    public const BLOCK_CODE_KANBUN = 66;
-    public const BLOCK_CODE_KANGXI_RADICALS = 59;
-    public const BLOCK_CODE_KANNADA = 22;
-    public const BLOCK_CODE_KATAKANA = 63;
-    public const BLOCK_CODE_KATAKANA_PHONETIC_EXTENSIONS = 107;
-    public const BLOCK_CODE_KAYAH_LI = 162;
-    public const BLOCK_CODE_KHAROSHTHI = 137;
-    public const BLOCK_CODE_KHMER = 36;
-    public const BLOCK_CODE_KHMER_SYMBOLS = 113;
-    public const BLOCK_CODE_KHOJKI = 229;
-    public const BLOCK_CODE_KHUDAWADI = 230;
-    public const BLOCK_CODE_LAO = 26;
-    public const BLOCK_CODE_LATIN_1_SUPPLEMENT = 2;
-    public const BLOCK_CODE_LATIN_EXTENDED_A = 3;
-    public const BLOCK_CODE_LATIN_EXTENDED_ADDITIONAL = 38;
-    public const BLOCK_CODE_LATIN_EXTENDED_B = 4;
-    public const BLOCK_CODE_LATIN_EXTENDED_C = 148;
-    public const BLOCK_CODE_LATIN_EXTENDED_D = 149;
-    public const BLOCK_CODE_LATIN_EXTENDED_E = 231;
-    public const BLOCK_CODE_LEPCHA = 156;
-    public const BLOCK_CODE_LETTERLIKE_SYMBOLS = 44;
-    public const BLOCK_CODE_LIMBU = 111;
-    public const BLOCK_CODE_LINEAR_A = 232;
-    public const BLOCK_CODE_LINEAR_B_IDEOGRAMS = 118;
-    public const BLOCK_CODE_LINEAR_B_SYLLABARY = 117;
-    public const BLOCK_CODE_LISU = 176;
-    public const BLOCK_CODE_LOW_SURROGATES = 77;
-    public const BLOCK_CODE_LYCIAN = 167;
-    public const BLOCK_CODE_LYDIAN = 169;
-    public const BLOCK_CODE_MAHAJANI = 233;
-    public const BLOCK_CODE_MAHJONG_TILES = 170;
-    public const BLOCK_CODE_MALAYALAM = 23;
-    public const BLOCK_CODE_MANDAIC = 198;
-    public const BLOCK_CODE_MANICHAEAN = 234;
-    public const BLOCK_CODE_MATHEMATICAL_ALPHANUMERIC_SYMBOLS = 93;
-    public const BLOCK_CODE_MATHEMATICAL_OPERATORS = 47;
-    public const BLOCK_CODE_MEETEI_MAYEK = 184;
-    public const BLOCK_CODE_MEETEI_MAYEK_EXTENSIONS = 213;
-    public const BLOCK_CODE_MENDE_KIKAKUI = 235;
-    public const BLOCK_CODE_MEROITIC_CURSIVE = 214;
-    public const BLOCK_CODE_MEROITIC_HIEROGLYPHS = 215;
-    public const BLOCK_CODE_MIAO = 216;
-    public const BLOCK_CODE_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A = 102;
-    public const BLOCK_CODE_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B = 105;
-    public const BLOCK_CODE_MISCELLANEOUS_SYMBOLS = 55;
-    public const BLOCK_CODE_MISCELLANEOUS_SYMBOLS_AND_ARROWS = 115;
-    public const BLOCK_CODE_MISCELLANEOUS_SYMBOLS_AND_PICTOGRAPHS = 205;
-    public const BLOCK_CODE_MISCELLANEOUS_TECHNICAL = 48;
-    public const BLOCK_CODE_MODI = 236;
-    public const BLOCK_CODE_MODIFIER_TONE_LETTERS = 138;
-    public const BLOCK_CODE_MONGOLIAN = 37;
-    public const BLOCK_CODE_MRO = 237;
-    public const BLOCK_CODE_MUSICAL_SYMBOLS = 92;
-    public const BLOCK_CODE_MYANMAR = 28;
-    public const BLOCK_CODE_MYANMAR_EXTENDED_A = 182;
-    public const BLOCK_CODE_MYANMAR_EXTENDED_B = 238;
-    public const BLOCK_CODE_NABATAEAN = 239;
-    public const BLOCK_CODE_NEW_TAI_LUE = 139;
-    public const BLOCK_CODE_NKO = 146;
-    public const BLOCK_CODE_NO_BLOCK = 0;
-    public const BLOCK_CODE_NUMBER_FORMS = 45;
-    public const BLOCK_CODE_OGHAM = 34;
-    public const BLOCK_CODE_OLD_ITALIC = 88;
-    public const BLOCK_CODE_OLD_NORTH_ARABIAN = 240;
-    public const BLOCK_CODE_OLD_PERMIC = 241;
-    public const BLOCK_CODE_OLD_PERSIAN = 140;
-    public const BLOCK_CODE_OLD_SOUTH_ARABIAN = 187;
-    public const BLOCK_CODE_OLD_TURKIC = 191;
-    public const BLOCK_CODE_OL_CHIKI = 157;
-    public const BLOCK_CODE_OPTICAL_CHARACTER_RECOGNITION = 50;
-    public const BLOCK_CODE_ORIYA = 19;
-    public const BLOCK_CODE_ORNAMENTAL_DINGBATS = 242;
-    public const BLOCK_CODE_OSMANYA = 122;
-    public const BLOCK_CODE_PAHAWH_HMONG = 243;
-    public const BLOCK_CODE_PALMYRENE = 244;
-    public const BLOCK_CODE_PAU_CIN_HAU = 245;
-    public const BLOCK_CODE_PHAGS_PA = 150;
-    public const BLOCK_CODE_PHAISTOS_DISC = 166;
-    public const BLOCK_CODE_PHOENICIAN = 151;
-    public const BLOCK_CODE_PHONETIC_EXTENSIONS = 114;
-    public const BLOCK_CODE_PHONETIC_EXTENSIONS_SUPPLEMENT = 141;
-    public const BLOCK_CODE_PLAYING_CARDS = 204;
-    public const BLOCK_CODE_PRIVATE_USE = 78;
-    public const BLOCK_CODE_PRIVATE_USE_AREA = 78;
-    public const BLOCK_CODE_PSALTER_PAHLAVI = 246;
-    public const BLOCK_CODE_REJANG = 163;
-    public const BLOCK_CODE_RUMI_NUMERAL_SYMBOLS = 192;
-    public const BLOCK_CODE_RUNIC = 35;
-    public const BLOCK_CODE_SAMARITAN = 172;
-    public const BLOCK_CODE_SAURASHTRA = 161;
-    public const BLOCK_CODE_SHARADA = 217;
-    public const BLOCK_CODE_SHAVIAN = 121;
-    public const BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS = 247;
-    public const BLOCK_CODE_SIDDHAM = 248;
-    public const BLOCK_CODE_SINHALA = 24;
-    public const BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS = 249;
-    public const BLOCK_CODE_SMALL_FORM_VARIANTS = 84;
-    public const BLOCK_CODE_SORA_SOMPENG = 218;
-    public const BLOCK_CODE_SPACING_MODIFIER_LETTERS = 6;
-    public const BLOCK_CODE_SPECIALS = 86;
-    public const BLOCK_CODE_SUNDANESE = 155;
-    public const BLOCK_CODE_SUNDANESE_SUPPLEMENT = 219;
-    public const BLOCK_CODE_SUPERSCRIPTS_AND_SUBSCRIPTS = 41;
-    public const BLOCK_CODE_SUPPLEMENTAL_ARROWS_A = 103;
-    public const BLOCK_CODE_SUPPLEMENTAL_ARROWS_B = 104;
-    public const BLOCK_CODE_SUPPLEMENTAL_ARROWS_C = 250;
-    public const BLOCK_CODE_SUPPLEMENTAL_MATHEMATICAL_OPERATORS = 106;
-    public const BLOCK_CODE_SUPPLEMENTAL_PUNCTUATION = 142;
-    public const BLOCK_CODE_SUPPLEMENTARY_PRIVATE_USE_AREA_A = 109;
-    public const BLOCK_CODE_SUPPLEMENTARY_PRIVATE_USE_AREA_B = 110;
-    public const BLOCK_CODE_SYLOTI_NAGRI = 143;
-    public const BLOCK_CODE_SYRIAC = 13;
-    public const BLOCK_CODE_TAGALOG = 98;
-    public const BLOCK_CODE_TAGBANWA = 101;
-    public const BLOCK_CODE_TAGS = 96;
-    public const BLOCK_CODE_TAI_LE = 112;
-    public const BLOCK_CODE_TAI_THAM = 174;
-    public const BLOCK_CODE_TAI_VIET = 183;
-    public const BLOCK_CODE_TAI_XUAN_JING_SYMBOLS = 124;
-    public const BLOCK_CODE_TAKRI = 220;
-    public const BLOCK_CODE_TAMIL = 20;
-    public const BLOCK_CODE_TELUGU = 21;
-    public const BLOCK_CODE_THAANA = 14;
-    public const BLOCK_CODE_THAI = 25;
-    public const BLOCK_CODE_TIBETAN = 27;
-    public const BLOCK_CODE_TIFINAGH = 144;
-    public const BLOCK_CODE_TIRHUTA = 251;
-    public const BLOCK_CODE_TRANSPORT_AND_MAP_SYMBOLS = 207;
-    public const BLOCK_CODE_UGARITIC = 120;
-    public const BLOCK_CODE_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS = 33;
-    public const BLOCK_CODE_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED = 173;
-    public const BLOCK_CODE_VAI = 159;
-    public const BLOCK_CODE_VARIATION_SELECTORS = 108;
-    public const BLOCK_CODE_VARIATION_SELECTORS_SUPPLEMENT = 125;
-    public const BLOCK_CODE_VEDIC_EXTENSIONS = 175;
-    public const BLOCK_CODE_VERTICAL_FORMS = 145;
-    public const BLOCK_CODE_WARANG_CITI = 252;
-    public const BLOCK_CODE_YIJING_HEXAGRAM_SYMBOLS = 116;
-    public const BLOCK_CODE_YI_RADICALS = 73;
-    public const BLOCK_CODE_YI_SYLLABLES = 72;
-    public const BPT_CLOSE = 2;
-    public const BPT_COUNT = 3;
-    public const BPT_NONE = 0;
-    public const BPT_OPEN = 1;
-    public const CHAR_CATEGORY_CHAR_CATEGORY_COUNT = 30;
-    public const CHAR_CATEGORY_COMBINING_SPACING_MARK = 8;
-    public const CHAR_CATEGORY_CONNECTOR_PUNCTUATION = 22;
-    public const CHAR_CATEGORY_CONTROL_CHAR = 15;
-    public const CHAR_CATEGORY_CURRENCY_SYMBOL = 25;
-    public const CHAR_CATEGORY_DASH_PUNCTUATION = 19;
-    public const CHAR_CATEGORY_DECIMAL_DIGIT_NUMBER = 9;
-    public const CHAR_CATEGORY_ENCLOSING_MARK = 7;
-    public const CHAR_CATEGORY_END_PUNCTUATION = 21;
-    public const CHAR_CATEGORY_FINAL_PUNCTUATION = 29;
-    public const CHAR_CATEGORY_FORMAT_CHAR = 16;
-    public const CHAR_CATEGORY_GENERAL_OTHER_TYPES = 0;
-    public const CHAR_CATEGORY_INITIAL_PUNCTUATION = 28;
-    public const CHAR_CATEGORY_LETTER_NUMBER = 10;
-    public const CHAR_CATEGORY_LINE_SEPARATOR = 13;
-    public const CHAR_CATEGORY_LOWERCASE_LETTER = 2;
-    public const CHAR_CATEGORY_MATH_SYMBOL = 24;
-    public const CHAR_CATEGORY_MODIFIER_LETTER = 4;
-    public const CHAR_CATEGORY_MODIFIER_SYMBOL = 26;
-    public const CHAR_CATEGORY_NON_SPACING_MARK = 6;
-    public const CHAR_CATEGORY_OTHER_LETTER = 5;
-    public const CHAR_CATEGORY_OTHER_NUMBER = 11;
-    public const CHAR_CATEGORY_OTHER_PUNCTUATION = 23;
-    public const CHAR_CATEGORY_OTHER_SYMBOL = 27;
-    public const CHAR_CATEGORY_PARAGRAPH_SEPARATOR = 14;
-    public const CHAR_CATEGORY_PRIVATE_USE_CHAR = 17;
-    public const CHAR_CATEGORY_SPACE_SEPARATOR = 12;
-    public const CHAR_CATEGORY_START_PUNCTUATION = 20;
-    public const CHAR_CATEGORY_SURROGATE = 18;
-    public const CHAR_CATEGORY_TITLECASE_LETTER = 3;
-    public const CHAR_CATEGORY_UNASSIGNED = 0;
-    public const CHAR_CATEGORY_UPPERCASE_LETTER = 1;
-    public const CHAR_DIRECTION_ARABIC_NUMBER = 5;
-    public const CHAR_DIRECTION_BLOCK_SEPARATOR = 7;
-    public const CHAR_DIRECTION_BOUNDARY_NEUTRAL = 18;
-    public const CHAR_DIRECTION_CHAR_DIRECTION_COUNT = 23;
-    public const CHAR_DIRECTION_COMMON_NUMBER_SEPARATOR = 6;
-    public const CHAR_DIRECTION_DIR_NON_SPACING_MARK = 17;
-    public const CHAR_DIRECTION_EUROPEAN_NUMBER = 2;
-    public const CHAR_DIRECTION_EUROPEAN_NUMBER_SEPARATOR = 3;
-    public const CHAR_DIRECTION_EUROPEAN_NUMBER_TERMINATOR = 4;
-    public const CHAR_DIRECTION_FIRST_STRONG_ISOLATE = 19;
-    public const CHAR_DIRECTION_LEFT_TO_RIGHT = 0;
-    public const CHAR_DIRECTION_LEFT_TO_RIGHT_EMBEDDING = 11;
-    public const CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE = 20;
-    public const CHAR_DIRECTION_LEFT_TO_RIGHT_OVERRIDE = 12;
-    public const CHAR_DIRECTION_OTHER_NEUTRAL = 10;
-    public const CHAR_DIRECTION_POP_DIRECTIONAL_FORMAT = 16;
-    public const CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE = 22;
-    public const CHAR_DIRECTION_RIGHT_TO_LEFT = 1;
-    public const CHAR_DIRECTION_RIGHT_TO_LEFT_ARABIC = 13;
-    public const CHAR_DIRECTION_RIGHT_TO_LEFT_EMBEDDING = 14;
-    public const CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE = 21;
-    public const CHAR_DIRECTION_RIGHT_TO_LEFT_OVERRIDE = 15;
-    public const CHAR_DIRECTION_SEGMENT_SEPARATOR = 8;
-    public const CHAR_DIRECTION_WHITE_SPACE_NEUTRAL = 9;
-    public const CHAR_NAME_ALIAS = 3;
-    public const CHAR_NAME_CHOICE_COUNT = 4;
-    public const CODEPOINT_MAX = 1114111;
-    public const CODEPOINT_MIN = 0;
-    public const DT_CANONICAL = 1;
-    public const DT_CIRCLE = 3;
-    public const DT_COMPAT = 2;
-    public const DT_COUNT = 18;
-    public const DT_FINAL = 4;
-    public const DT_FONT = 5;
-    public const DT_FRACTION = 6;
-    public const DT_INITIAL = 7;
-    public const DT_ISOLATED = 8;
-    public const DT_MEDIAL = 9;
-    public const DT_NARROW = 10;
-    public const DT_NOBREAK = 11;
-    public const DT_NONE = 0;
-    public const DT_SMALL = 12;
-    public const DT_SQUARE = 13;
-    public const DT_SUB = 14;
-    public const DT_SUPER = 15;
-    public const DT_VERTICAL = 16;
-    public const DT_WIDE = 17;
-    public const EA_AMBIGUOUS = 1;
-    public const EA_COUNT = 6;
-    public const EA_FULLWIDTH = 3;
-    public const EA_HALFWIDTH = 2;
-    public const EA_NARROW = 4;
-    public const EA_NEUTRAL = 0;
-    public const EA_WIDE = 5;
-    public const EXTENDED_CHAR_NAME = 2;
-    public const FOLD_CASE_DEFAULT = 0;
-    public const FOLD_CASE_EXCLUDE_SPECIAL_I = 1;
-    public const GCB_CONTROL = 1;
-    public const GCB_COUNT = 18;
-    public const GCB_CR = 2;
-    public const GCB_EXTEND = 3;
-    public const GCB_L = 4;
-    public const GCB_LF = 5;
-    public const GCB_LV = 6;
-    public const GCB_LVT = 7;
-    public const GCB_OTHER = 0;
-    public const GCB_PREPEND = 11;
-    public const GCB_REGIONAL_INDICATOR = 12;
-    public const GCB_SPACING_MARK = 10;
-    public const GCB_T = 8;
-    public const GCB_V = 9;
-    public const HST_COUNT = 6;
-    public const HST_LEADING_JAMO = 1;
-    public const HST_LVT_SYLLABLE = 5;
-    public const HST_LV_SYLLABLE = 4;
-    public const HST_NOT_APPLICABLE = 0;
-    public const HST_TRAILING_JAMO = 3;
-    public const HST_VOWEL_JAMO = 2;
-    public const JG_AIN = 1;
-    public const JG_ALAPH = 2;
-    public const JG_ALEF = 3;
-    public const JG_BEH = 4;
-    public const JG_BETH = 5;
-    public const JG_BURUSHASKI_YEH_BARREE = 54;
-    public const JG_COUNT = 105;
-    public const JG_DAL = 6;
-    public const JG_DALATH_RISH = 7;
-    public const JG_E = 8;
-    public const JG_FARSI_YEH = 55;
-    public const JG_FE = 51;
-    public const JG_FEH = 9;
-    public const JG_FINAL_SEMKATH = 10;
-    public const JG_GAF = 11;
-    public const JG_GAMAL = 12;
-    public const JG_HAH = 13;
-    public const JG_HAMZA_ON_HEH_GOAL = 14;
-    public const JG_HE = 15;
-    public const JG_HEH = 16;
-    public const JG_HEH_GOAL = 17;
-    public const JG_HETH = 18;
-    public const JG_KAF = 19;
-    public const JG_KAPH = 20;
-    public const JG_KHAPH = 52;
-    public const JG_KNOTTED_HEH = 21;
-    public const JG_LAM = 22;
-    public const JG_LAMADH = 23;
-    public const JG_MANICHAEAN_ALEPH = 58;
-    public const JG_MANICHAEAN_AYIN = 59;
-    public const JG_MANICHAEAN_BETH = 60;
-    public const JG_MANICHAEAN_DALETH = 61;
-    public const JG_MANICHAEAN_DHAMEDH = 62;
-    public const JG_MANICHAEAN_FIVE = 63;
-    public const JG_MANICHAEAN_GIMEL = 64;
-    public const JG_MANICHAEAN_HETH = 65;
-    public const JG_MANICHAEAN_HUNDRED = 66;
-    public const JG_MANICHAEAN_KAPH = 67;
-    public const JG_MANICHAEAN_LAMEDH = 68;
-    public const JG_MANICHAEAN_MEM = 69;
-    public const JG_MANICHAEAN_NUN = 70;
-    public const JG_MANICHAEAN_ONE = 71;
-    public const JG_MANICHAEAN_PE = 72;
-    public const JG_MANICHAEAN_QOPH = 73;
-    public const JG_MANICHAEAN_RESH = 74;
-    public const JG_MANICHAEAN_SADHE = 75;
-    public const JG_MANICHAEAN_SAMEKH = 76;
-    public const JG_MANICHAEAN_TAW = 77;
-    public const JG_MANICHAEAN_TEN = 78;
-    public const JG_MANICHAEAN_TETH = 79;
-    public const JG_MANICHAEAN_THAMEDH = 80;
-    public const JG_MANICHAEAN_TWENTY = 81;
-    public const JG_MANICHAEAN_WAW = 82;
-    public const JG_MANICHAEAN_YODH = 83;
-    public const JG_MANICHAEAN_ZAYIN = 84;
-    public const JG_MEEM = 24;
-    public const JG_MIM = 25;
-    public const JG_NOON = 26;
-    public const JG_NO_JOINING_GROUP = 0;
-    public const JG_NUN = 27;
-    public const JG_NYA = 56;
-    public const JG_PE = 28;
-    public const JG_QAF = 29;
-    public const JG_QAPH = 30;
-    public const JG_REH = 31;
-    public const JG_REVERSED_PE = 32;
-    public const JG_ROHINGYA_YEH = 57;
-    public const JG_SAD = 33;
-    public const JG_SADHE = 34;
-    public const JG_SEEN = 35;
-    public const JG_SEMKATH = 36;
-    public const JG_SHIN = 37;
-    public const JG_STRAIGHT_WAW = 85;
-    public const JG_SWASH_KAF = 38;
-    public const JG_SYRIAC_WAW = 39;
-    public const JG_TAH = 40;
-    public const JG_TAW = 41;
-    public const JG_TEH_MARBUTA = 42;
-    public const JG_TEH_MARBUTA_GOAL = 14;
-    public const JG_TETH = 43;
-    public const JG_WAW = 44;
-    public const JG_YEH = 45;
-    public const JG_YEH_BARREE = 46;
-    public const JG_YEH_WITH_TAIL = 47;
-    public const JG_YUDH = 48;
-    public const JG_YUDH_HE = 49;
-    public const JG_ZAIN = 50;
-    public const JG_ZHAIN = 53;
-    public const JT_COUNT = 6;
-    public const JT_DUAL_JOINING = 2;
-    public const JT_JOIN_CAUSING = 1;
-    public const JT_LEFT_JOINING = 3;
-    public const JT_NON_JOINING = 0;
-    public const JT_RIGHT_JOINING = 4;
-    public const JT_TRANSPARENT = 5;
-    public const LB_ALPHABETIC = 2;
-    public const LB_AMBIGUOUS = 1;
-    public const LB_BREAK_AFTER = 4;
-    public const LB_BREAK_BEFORE = 5;
-    public const LB_BREAK_BOTH = 3;
-    public const LB_BREAK_SYMBOLS = 27;
-    public const LB_CARRIAGE_RETURN = 10;
-    public const LB_CLOSE_PARENTHESIS = 36;
-    public const LB_CLOSE_PUNCTUATION = 8;
-    public const LB_COMBINING_MARK = 9;
-    public const LB_COMPLEX_CONTEXT = 24;
-    public const LB_CONDITIONAL_JAPANESE_STARTER = 37;
-    public const LB_CONTINGENT_BREAK = 7;
-    public const LB_COUNT = 48;
-    public const LB_EXCLAMATION = 11;
-    public const LB_GLUE = 12;
-    public const LB_H2 = 31;
-    public const LB_H3 = 32;
-    public const LB_HEBREW_LETTER = 38;
-    public const LB_HYPHEN = 13;
-    public const LB_IDEOGRAPHIC = 14;
-    public const LB_INFIX_NUMERIC = 16;
-    public const LB_INSEPARABLE = 15;
-    public const LB_INSEPERABLE = 15;
-    public const LB_JL = 33;
-    public const LB_JT = 34;
-    public const LB_JV = 35;
-    public const LB_LINE_FEED = 17;
-    public const LB_MANDATORY_BREAK = 6;
-    public const LB_NEXT_LINE = 29;
-    public const LB_NONSTARTER = 18;
-    public const LB_NUMERIC = 19;
-    public const LB_OPEN_PUNCTUATION = 20;
-    public const LB_POSTFIX_NUMERIC = 21;
-    public const LB_PREFIX_NUMERIC = 22;
-    public const LB_QUOTATION = 23;
-    public const LB_REGIONAL_INDICATOR = 39;
-    public const LB_SPACE = 26;
-    public const LB_SURROGATE = 25;
-    public const LB_UNKNOWN = 0;
-    public const LB_WORD_JOINER = 30;
-    public const LB_ZWSPACE = 28;
-    public const LONG_PROPERTY_NAME = 1;
-    public const NO_NUMERIC_VALUE = -123456789.0;
-    public const NT_COUNT = 4;
-    public const NT_DECIMAL = 1;
-    public const NT_DIGIT = 2;
-    public const NT_NONE = 0;
-    public const NT_NUMERIC = 3;
-    public const PROPERTY_AGE = 16384;
-    public const PROPERTY_ALPHABETIC = 0;
-    public const PROPERTY_ASCII_HEX_DIGIT = 1;
-    public const PROPERTY_BIDI_CLASS = 4096;
-    public const PROPERTY_BIDI_CONTROL = 2;
-    public const PROPERTY_BIDI_MIRRORED = 3;
-    public const PROPERTY_BIDI_MIRRORING_GLYPH = 16385;
-    public const PROPERTY_BIDI_PAIRED_BRACKET = 16397;
-    public const PROPERTY_BIDI_PAIRED_BRACKET_TYPE = 4117;
-    public const PROPERTY_BINARY_LIMIT = 76;
-    public const PROPERTY_BINARY_START = 0;
-    public const PROPERTY_BLOCK = 4097;
-    public const PROPERTY_CANONICAL_COMBINING_CLASS = 4098;
-    public const PROPERTY_CASED = 49;
-    public const PROPERTY_CASE_FOLDING = 16386;
-    public const PROPERTY_CASE_IGNORABLE = 50;
-    public const PROPERTY_CASE_SENSITIVE = 34;
-    public const PROPERTY_CHANGES_WHEN_CASEFOLDED = 54;
-    public const PROPERTY_CHANGES_WHEN_CASEMAPPED = 55;
-    public const PROPERTY_CHANGES_WHEN_LOWERCASED = 51;
-    public const PROPERTY_CHANGES_WHEN_NFKC_CASEFOLDED = 56;
-    public const PROPERTY_CHANGES_WHEN_TITLECASED = 53;
-    public const PROPERTY_CHANGES_WHEN_UPPERCASED = 52;
-    public const PROPERTY_DASH = 4;
-    public const PROPERTY_DECOMPOSITION_TYPE = 4099;
-    public const PROPERTY_DEFAULT_IGNORABLE_CODE_POINT = 5;
-    public const PROPERTY_DEPRECATED = 6;
-    public const PROPERTY_DIACRITIC = 7;
-    public const PROPERTY_DOUBLE_LIMIT = 12289;
-    public const PROPERTY_DOUBLE_START = 12288;
-    public const PROPERTY_EAST_ASIAN_WIDTH = 4100;
-    public const PROPERTY_EXTENDER = 8;
-    public const PROPERTY_FULL_COMPOSITION_EXCLUSION = 9;
-    public const PROPERTY_GENERAL_CATEGORY = 4101;
-    public const PROPERTY_GENERAL_CATEGORY_MASK = 8192;
-    public const PROPERTY_GRAPHEME_BASE = 10;
-    public const PROPERTY_GRAPHEME_CLUSTER_BREAK = 4114;
-    public const PROPERTY_GRAPHEME_EXTEND = 11;
-    public const PROPERTY_GRAPHEME_LINK = 12;
-    public const PROPERTY_HANGUL_SYLLABLE_TYPE = 4107;
-    public const PROPERTY_HEX_DIGIT = 13;
-    public const PROPERTY_HYPHEN = 14;
-    public const PROPERTY_IDEOGRAPHIC = 17;
-    public const PROPERTY_IDS_BINARY_OPERATOR = 18;
-    public const PROPERTY_IDS_TRINARY_OPERATOR = 19;
-    public const PROPERTY_IDS_UNARY_OPERATOR = 72;
-    public const PROPERTY_ID_COMPAT_MATH_CONTINUE = 74;
-    public const PROPERTY_ID_COMPAT_MATH_START = 73;
-    public const PROPERTY_ID_CONTINUE = 15;
-    public const PROPERTY_ID_START = 16;
-    public const PROPERTY_INT_LIMIT = 4123;
-    public const PROPERTY_INT_START = 4096;
-    public const PROPERTY_INVALID_CODE = -1;
-    public const PROPERTY_ISO_COMMENT = 16387;
-    public const PROPERTY_JOINING_GROUP = 4102;
-    public const PROPERTY_JOINING_TYPE = 4103;
-    public const PROPERTY_JOIN_CONTROL = 20;
-    public const PROPERTY_LEAD_CANONICAL_COMBINING_CLASS = 4112;
-    public const PROPERTY_LINE_BREAK = 4104;
-    public const PROPERTY_LOGICAL_ORDER_EXCEPTION = 21;
-    public const PROPERTY_LOWERCASE = 22;
-    public const PROPERTY_LOWERCASE_MAPPING = 16388;
-    public const PROPERTY_MASK_LIMIT = 8193;
-    public const PROPERTY_MASK_START = 8192;
-    public const PROPERTY_MATH = 23;
-    public const PROPERTY_NAME = 16389;
-    public const PROPERTY_NAME_CHOICE_COUNT = 2;
-    public const PROPERTY_NFC_INERT = 39;
-    public const PROPERTY_NFC_QUICK_CHECK = 4110;
-    public const PROPERTY_NFD_INERT = 37;
-    public const PROPERTY_NFD_QUICK_CHECK = 4108;
-    public const PROPERTY_NFKC_INERT = 40;
-    public const PROPERTY_NFKC_QUICK_CHECK = 4111;
-    public const PROPERTY_NFKD_INERT = 38;
-    public const PROPERTY_NFKD_QUICK_CHECK = 4109;
-    public const PROPERTY_NONCHARACTER_CODE_POINT = 24;
-    public const PROPERTY_NUMERIC_TYPE = 4105;
-    public const PROPERTY_NUMERIC_VALUE = 12288;
-    public const PROPERTY_OTHER_PROPERTY_LIMIT = 28674;
-    public const PROPERTY_OTHER_PROPERTY_START = 28672;
-    public const PROPERTY_PATTERN_SYNTAX = 42;
-    public const PROPERTY_PATTERN_WHITE_SPACE = 43;
-    public const PROPERTY_POSIX_ALNUM = 44;
-    public const PROPERTY_POSIX_BLANK = 45;
-    public const PROPERTY_POSIX_GRAPH = 46;
-    public const PROPERTY_POSIX_PRINT = 47;
-    public const PROPERTY_POSIX_XDIGIT = 48;
-    public const PROPERTY_QUOTATION_MARK = 25;
-    public const PROPERTY_RADICAL = 26;
-    public const PROPERTY_SCRIPT = 4106;
-    public const PROPERTY_SCRIPT_EXTENSIONS = 28672;
-    public const PROPERTY_SEGMENT_STARTER = 41;
-    public const PROPERTY_SENTENCE_BREAK = 4115;
-    public const PROPERTY_SIMPLE_CASE_FOLDING = 16390;
-    public const PROPERTY_SIMPLE_LOWERCASE_MAPPING = 16391;
-    public const PROPERTY_SIMPLE_TITLECASE_MAPPING = 16392;
-    public const PROPERTY_SIMPLE_UPPERCASE_MAPPING = 16393;
-    public const PROPERTY_SOFT_DOTTED = 27;
-    public const PROPERTY_STRING_LIMIT = 16398;
-    public const PROPERTY_STRING_START = 16384;
-    public const PROPERTY_S_TERM = 35;
-    public const PROPERTY_TERMINAL_PUNCTUATION = 28;
-    public const PROPERTY_TITLECASE_MAPPING = 16394;
-    public const PROPERTY_TRAIL_CANONICAL_COMBINING_CLASS = 4113;
-    public const PROPERTY_UNICODE_1_NAME = 16395;
-    public const PROPERTY_UNIFIED_IDEOGRAPH = 29;
-    public const PROPERTY_UPPERCASE = 30;
-    public const PROPERTY_UPPERCASE_MAPPING = 16396;
-    public const PROPERTY_VARIATION_SELECTOR = 36;
-    public const PROPERTY_WHITE_SPACE = 31;
-    public const PROPERTY_WORD_BREAK = 4116;
-    public const PROPERTY_XID_CONTINUE = 32;
-    public const PROPERTY_XID_START = 33;
-    public const SB_ATERM = 1;
-    public const SB_CLOSE = 2;
-    public const SB_COUNT = 15;
-    public const SB_CR = 11;
-    public const SB_EXTEND = 12;
-    public const SB_FORMAT = 3;
-    public const SB_LF = 13;
-    public const SB_LOWER = 4;
-    public const SB_NUMERIC = 5;
-    public const SB_OLETTER = 6;
-    public const SB_OTHER = 0;
-    public const SB_SCONTINUE = 14;
-    public const SB_SEP = 7;
-    public const SB_SP = 8;
-    public const SB_STERM = 9;
-    public const SB_UPPER = 10;
-    public const SHORT_PROPERTY_NAME = 0;
-    public const UNICODE_10_CHAR_NAME = 1;
-    public const UNICODE_CHAR_NAME = 0;
-    public const UNICODE_VERSION = "16.0";
-    public const WB_ALETTER = 1;
-    public const WB_COUNT = 23;
-    public const WB_CR = 8;
-    public const WB_DOUBLE_QUOTE = 16;
-    public const WB_EXTEND = 9;
-    public const WB_EXTENDNUMLET = 7;
-    public const WB_FORMAT = 2;
-    public const WB_HEBREW_LETTER = 14;
-    public const WB_KATAKANA = 3;
-    public const WB_LF = 10;
-    public const WB_MIDLETTER = 4;
-    public const WB_MIDNUM = 5;
-    public const WB_MIDNUMLET = 11;
-    public const WB_NEWLINE = 12;
-    public const WB_NUMERIC = 6;
-    public const WB_OTHER = 0;
-    public const WB_REGIONAL_INDICATOR = 13;
-    public const WB_SINGLE_QUOTE = 15;
-    /**
-     * Get the &quot;age&quot; of the code point
-     */
-     public static function charAge(string|int $codepoint): ?array {}
-    /**
-     * Get the decimal digit value of a decimal digit character
-     */
-     public static function charDigitValue(string|int $codepoint): ?int {}
-    /**
-     * Get bidirectional category value for a code point
-     */
-     public static function charDirection(string|int $codepoint): ?int {}
-    /**
-     * Find Unicode character by name and return its code point value
-     */
-     public static function charFromName(string $name, int $type = IntlChar::UNICODE_CHAR_NAME): ?int {}
-    /**
-     * Get the &quot;mirror-image&quot; character for a code point
-     */
-     public static function charMirror(string|int $codepoint): string|int|null {}
-    /**
-     * Retrieve the name of a Unicode character
-     */
-     public static function charName(string|int $codepoint, int $type = IntlChar::UNICODE_CHAR_NAME): ?string {}
-    /**
-     * Get the general category value for a code point
-     */
-     public static function charType(string|int $codepoint): ?int {}
-    /**
-     * Return Unicode character by code point value
-     */
-     public static function chr(string|int $codepoint): ?string {}
-    /**
-     * Get the decimal digit value of a code point for a given radix
-     */
-     public static function digit(string|int $codepoint, int $base = 10): int|false|null {}
-    /**
-     * Enumerate all assigned Unicode characters within a range
-     */
-     public static function enumCharNames(string|int $start, string|int $end, callable $callback, int $type = IntlChar::UNICODE_CHAR_NAME): bool {}
-    /**
-     * Enumerate all code points with their Unicode general categories
-     */
-     public static function enumCharTypes(callable $callback): void {}
-    /**
-     * Perform case folding on a code point
-     */
-     public static function foldCase(string|int $codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT): string|int|null {}
-    /**
-     * Get character representation for a given digit and radix
-     */
-     public static function forDigit(int $digit, int $base = 10): int {}
-    /**
-     * Get the paired bracket character for a code point
-     */
-     public static function getBidiPairedBracket(string|int $codepoint): string|int|null {}
-    /**
-     * Get the Unicode allocation block containing a code point
-     */
-     public static function getBlockCode(string|int $codepoint): ?int {}
-    /**
-     * Get the combining class of a code point
-     */
-     public static function getCombiningClass(string|int $codepoint): ?int {}
-    /**
-     * Get the FC_NFKC_Closure property for a code point
-     */
-     public static function getFC_NFKC_Closure(string|int $codepoint): string|false|null {}
-    /**
-     * Get the max value for a Unicode property
-     */
-     public static function getIntPropertyMaxValue(int $property): int {}
-    /**
-     * Get the min value for a Unicode property
-     */
-     public static function getIntPropertyMinValue(int $property): int {}
-    /**
-     * Get the value for a Unicode property for a code point
-     */
-     public static function getIntPropertyValue(string|int $codepoint, int $property): ?int {}
-    /**
-     * Get the numeric value for a Unicode code point
-     */
-     public static function getNumericValue(string|int $codepoint): ?float {}
-    /**
-     * Get the property constant value for a given property name
-     */
-     public static function getPropertyEnum(string $alias): int {}
-    /**
-     * Get the Unicode name for a property
-     */
-     public static function getPropertyName(int $property, int $type = IntlChar::LONG_PROPERTY_NAME): string|false {}
-    /**
-     * Get the property value for a given value name
-     */
-     public static function getPropertyValueEnum(int $property, string $name): int {}
-    /**
-     * Get the Unicode name for a property value
-     */
-     public static function getPropertyValueName(int $property, int $value, int $type = IntlChar::LONG_PROPERTY_NAME): string|false {}
-    /**
-     * Get the Unicode version
-     */
-     public static function getUnicodeVersion(): array {}
-    /**
-     * Check a binary Unicode property for a code point
-     */
-     public static function hasBinaryProperty(string|int $codepoint, int $property): ?bool {}
-    /**
-     * Check if code point is an ignorable character
-     */
-     public static function isIDIgnorable(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is permissible in an identifier
-     */
-     public static function isIDPart(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is permissible as the first character in an identifier
-     */
-     public static function isIDStart(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is an ISO control code
-     */
-     public static function isISOControl(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is permissible in a Java identifier
-     */
-     public static function isJavaIDPart(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is permissible as the first character in a Java identifier
-     */
-     public static function isJavaIDStart(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a space character according to Java
-     */
-     public static function isJavaSpaceChar(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point has the Bidi_Mirrored property
-     */
-     public static function isMirrored(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point has the Alphabetic Unicode property
-     */
-     public static function isUAlphabetic(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point has the Lowercase Unicode property
-     */
-     public static function isULowercase(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point has the Uppercase Unicode property
-     */
-     public static function isUUppercase(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point has the White_Space Unicode property
-     */
-     public static function isUWhiteSpace(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a whitespace character according to ICU
-     */
-     public static function isWhitespace(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is an alphanumeric character
-     */
-     public static function isalnum(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a letter character
-     */
-     public static function isalpha(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a base character
-     */
-     public static function isbase(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a &quot;blank&quot; or &quot;horizontal space&quot; character
-     */
-     public static function isblank(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a control character
-     */
-     public static function iscntrl(string|int $codepoint): ?bool {}
-    /**
-     * Check whether the code point is defined
-     */
-     public static function isdefined(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a digit character
-     */
-     public static function isdigit(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a graphic character
-     */
-     public static function isgraph(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a lowercase letter
-     */
-     public static function islower(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a printable character
-     */
-     public static function isprint(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is punctuation character
-     */
-     public static function ispunct(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a space character
-     */
-     public static function isspace(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a titlecase letter
-     */
-     public static function istitle(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point has the general category &quot;Lu&quot; (uppercase letter)
-     */
-     public static function isupper(string|int $codepoint): ?bool {}
-    /**
-     * Check if code point is a hexadecimal digit
-     */
-     public static function isxdigit(string|int $codepoint): ?bool {}
-    /**
-     * Return Unicode code point value of character
-     */
-     public static function ord(string|int $character): ?int {}
-    /**
-     * Make Unicode character lowercase
-     */
-     public static function tolower(string|int $codepoint): string|int|null {}
-    /**
-     * Make Unicode character titlecase
-     */
-     public static function totitle(string|int $codepoint): string|int|null {}
-    /**
-     * Make Unicode character uppercase
-     */
-     public static function toupper(string|int $codepoint): string|int|null {}
+class IntlChar
+{
+   public const BLOCK_CODE_AEGEAN_NUMBERS = 119;
+   public const BLOCK_CODE_ALCHEMICAL_SYMBOLS = 208;
+   public const BLOCK_CODE_ALPHABETIC_PRESENTATION_FORMS = 80;
+   public const BLOCK_CODE_ANCIENT_GREEK_MUSICAL_NOTATION = 126;
+   public const BLOCK_CODE_ANCIENT_GREEK_NUMBERS = 127;
+   public const BLOCK_CODE_ANCIENT_SYMBOLS = 165;
+   public const BLOCK_CODE_ARABIC = 12;
+   public const BLOCK_CODE_ARABIC_EXTENDED_A = 210;
+   public const BLOCK_CODE_ARABIC_MATHEMATICAL_ALPHABETIC_SYMBOLS = 211;
+   public const BLOCK_CODE_ARABIC_PRESENTATION_FORMS_A = 81;
+   public const BLOCK_CODE_ARABIC_PRESENTATION_FORMS_B = 85;
+   public const BLOCK_CODE_ARABIC_SUPPLEMENT = 128;
+   public const BLOCK_CODE_ARMENIAN = 10;
+   public const BLOCK_CODE_ARROWS = 46;
+   public const BLOCK_CODE_AVESTAN = 188;
+   public const BLOCK_CODE_BALINESE = 147;
+   public const BLOCK_CODE_BAMUM = 177;
+   public const BLOCK_CODE_BAMUM_SUPPLEMENT = 202;
+   public const BLOCK_CODE_BASIC_LATIN = 1;
+   public const BLOCK_CODE_BASSA_VAH = 221;
+   public const BLOCK_CODE_BATAK = 199;
+   public const BLOCK_CODE_BENGALI = 16;
+   public const BLOCK_CODE_BLOCK_ELEMENTS = 53;
+   public const BLOCK_CODE_BOPOMOFO = 64;
+   public const BLOCK_CODE_BOPOMOFO_EXTENDED = 67;
+   public const BLOCK_CODE_BOX_DRAWING = 52;
+   public const BLOCK_CODE_BRAHMI = 201;
+   public const BLOCK_CODE_BRAILLE_PATTERNS = 57;
+   public const BLOCK_CODE_BUGINESE = 129;
+   public const BLOCK_CODE_BUHID = 100;
+   public const BLOCK_CODE_BYZANTINE_MUSICAL_SYMBOLS = 91;
+   public const BLOCK_CODE_CARIAN = 168;
+   public const BLOCK_CODE_CAUCASIAN_ALBANIAN = 222;
+   public const BLOCK_CODE_CHAKMA = 212;
+   public const BLOCK_CODE_CHAM = 164;
+   public const BLOCK_CODE_CHEROKEE = 32;
+   public const BLOCK_CODE_CJK_COMPATIBILITY = 69;
+   public const BLOCK_CODE_CJK_COMPATIBILITY_FORMS = 83;
+   public const BLOCK_CODE_CJK_COMPATIBILITY_IDEOGRAPHS = 79;
+   public const BLOCK_CODE_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT = 95;
+   public const BLOCK_CODE_CJK_RADICALS_SUPPLEMENT = 58;
+   public const BLOCK_CODE_CJK_STROKES = 130;
+   public const BLOCK_CODE_CJK_SYMBOLS_AND_PUNCTUATION = 61;
+   public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS = 71;
+   public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A = 70;
+   public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B = 94;
+   public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C = 197;
+   public const BLOCK_CODE_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D = 209;
+   public const BLOCK_CODE_COMBINING_DIACRITICAL_MARKS = 7;
+   public const BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_EXTENDED = 224;
+   public const BLOCK_CODE_COMBINING_DIACRITICAL_MARKS_SUPPLEMENT = 131;
+   public const BLOCK_CODE_COMBINING_HALF_MARKS = 82;
+   public const BLOCK_CODE_COMBINING_MARKS_FOR_SYMBOLS = 43;
+   public const BLOCK_CODE_COMMON_INDIC_NUMBER_FORMS = 178;
+   public const BLOCK_CODE_CONTROL_PICTURES = 49;
+   public const BLOCK_CODE_COPTIC = 132;
+   public const BLOCK_CODE_COPTIC_EPACT_NUMBERS = 223;
+   public const BLOCK_CODE_COUNT = 339;
+   public const BLOCK_CODE_COUNTING_ROD_NUMERALS = 154;
+   public const BLOCK_CODE_CUNEIFORM = 152;
+   public const BLOCK_CODE_CUNEIFORM_NUMBERS_AND_PUNCTUATION = 153;
+   public const BLOCK_CODE_CURRENCY_SYMBOLS = 42;
+   public const BLOCK_CODE_CYPRIOT_SYLLABARY = 123;
+   public const BLOCK_CODE_CYRILLIC = 9;
+   public const BLOCK_CODE_CYRILLIC_EXTENDED_A = 158;
+   public const BLOCK_CODE_CYRILLIC_EXTENDED_B = 160;
+   public const BLOCK_CODE_CYRILLIC_SUPPLEMENT = 97;
+   public const BLOCK_CODE_CYRILLIC_SUPPLEMENTARY = 97;
+   public const BLOCK_CODE_DESERET = 90;
+   public const BLOCK_CODE_DEVANAGARI = 15;
+   public const BLOCK_CODE_DEVANAGARI_EXTENDED = 179;
+   public const BLOCK_CODE_DINGBATS = 56;
+   public const BLOCK_CODE_DOMINO_TILES = 171;
+   public const BLOCK_CODE_DUPLOYAN = 225;
+   public const BLOCK_CODE_EGYPTIAN_HIEROGLYPHS = 194;
+   public const BLOCK_CODE_ELBASAN = 226;
+   public const BLOCK_CODE_EMOTICONS = 206;
+   public const BLOCK_CODE_ENCLOSED_ALPHANUMERICS = 51;
+   public const BLOCK_CODE_ENCLOSED_ALPHANUMERIC_SUPPLEMENT = 195;
+   public const BLOCK_CODE_ENCLOSED_CJK_LETTERS_AND_MONTHS = 68;
+   public const BLOCK_CODE_ENCLOSED_IDEOGRAPHIC_SUPPLEMENT = 196;
+   public const BLOCK_CODE_ETHIOPIC = 31;
+   public const BLOCK_CODE_ETHIOPIC_EXTENDED = 133;
+   public const BLOCK_CODE_ETHIOPIC_EXTENDED_A = 200;
+   public const BLOCK_CODE_ETHIOPIC_SUPPLEMENT = 134;
+   public const BLOCK_CODE_GENERAL_PUNCTUATION = 40;
+   public const BLOCK_CODE_GEOMETRIC_SHAPES = 54;
+   public const BLOCK_CODE_GEOMETRIC_SHAPES_EXTENDED = 227;
+   public const BLOCK_CODE_GEORGIAN = 29;
+   public const BLOCK_CODE_GEORGIAN_SUPPLEMENT = 135;
+   public const BLOCK_CODE_GLAGOLITIC = 136;
+   public const BLOCK_CODE_GOTHIC = 89;
+   public const BLOCK_CODE_GRANTHA = 228;
+   public const BLOCK_CODE_GREEK = 8;
+   public const BLOCK_CODE_GREEK_EXTENDED = 39;
+   public const BLOCK_CODE_GUJARATI = 18;
+   public const BLOCK_CODE_GURMUKHI = 17;
+   public const BLOCK_CODE_HALFWIDTH_AND_FULLWIDTH_FORMS = 87;
+   public const BLOCK_CODE_HANGUL_COMPATIBILITY_JAMO = 65;
+   public const BLOCK_CODE_HANGUL_JAMO = 30;
+   public const BLOCK_CODE_HANGUL_JAMO_EXTENDED_A = 180;
+   public const BLOCK_CODE_HANGUL_JAMO_EXTENDED_B = 185;
+   public const BLOCK_CODE_HANGUL_SYLLABLES = 74;
+   public const BLOCK_CODE_HANUNOO = 99;
+   public const BLOCK_CODE_HEBREW = 11;
+   public const BLOCK_CODE_HIGH_PRIVATE_USE_SURROGATES = 76;
+   public const BLOCK_CODE_HIGH_SURROGATES = 75;
+   public const BLOCK_CODE_HIRAGANA = 62;
+   public const BLOCK_CODE_IDEOGRAPHIC_DESCRIPTION_CHARACTERS = 60;
+   public const BLOCK_CODE_IMPERIAL_ARAMAIC = 186;
+   public const BLOCK_CODE_INSCRIPTIONAL_PAHLAVI = 190;
+   public const BLOCK_CODE_INSCRIPTIONAL_PARTHIAN = 189;
+   public const BLOCK_CODE_INVALID_CODE = -1;
+   public const BLOCK_CODE_IPA_EXTENSIONS = 5;
+   public const BLOCK_CODE_JAVANESE = 181;
+   public const BLOCK_CODE_KAITHI = 193;
+   public const BLOCK_CODE_KANA_SUPPLEMENT = 203;
+   public const BLOCK_CODE_KANBUN = 66;
+   public const BLOCK_CODE_KANGXI_RADICALS = 59;
+   public const BLOCK_CODE_KANNADA = 22;
+   public const BLOCK_CODE_KATAKANA = 63;
+   public const BLOCK_CODE_KATAKANA_PHONETIC_EXTENSIONS = 107;
+   public const BLOCK_CODE_KAYAH_LI = 162;
+   public const BLOCK_CODE_KHAROSHTHI = 137;
+   public const BLOCK_CODE_KHMER = 36;
+   public const BLOCK_CODE_KHMER_SYMBOLS = 113;
+   public const BLOCK_CODE_KHOJKI = 229;
+   public const BLOCK_CODE_KHUDAWADI = 230;
+   public const BLOCK_CODE_LAO = 26;
+   public const BLOCK_CODE_LATIN_1_SUPPLEMENT = 2;
+   public const BLOCK_CODE_LATIN_EXTENDED_A = 3;
+   public const BLOCK_CODE_LATIN_EXTENDED_ADDITIONAL = 38;
+   public const BLOCK_CODE_LATIN_EXTENDED_B = 4;
+   public const BLOCK_CODE_LATIN_EXTENDED_C = 148;
+   public const BLOCK_CODE_LATIN_EXTENDED_D = 149;
+   public const BLOCK_CODE_LATIN_EXTENDED_E = 231;
+   public const BLOCK_CODE_LEPCHA = 156;
+   public const BLOCK_CODE_LETTERLIKE_SYMBOLS = 44;
+   public const BLOCK_CODE_LIMBU = 111;
+   public const BLOCK_CODE_LINEAR_A = 232;
+   public const BLOCK_CODE_LINEAR_B_IDEOGRAMS = 118;
+   public const BLOCK_CODE_LINEAR_B_SYLLABARY = 117;
+   public const BLOCK_CODE_LISU = 176;
+   public const BLOCK_CODE_LOW_SURROGATES = 77;
+   public const BLOCK_CODE_LYCIAN = 167;
+   public const BLOCK_CODE_LYDIAN = 169;
+   public const BLOCK_CODE_MAHAJANI = 233;
+   public const BLOCK_CODE_MAHJONG_TILES = 170;
+   public const BLOCK_CODE_MALAYALAM = 23;
+   public const BLOCK_CODE_MANDAIC = 198;
+   public const BLOCK_CODE_MANICHAEAN = 234;
+   public const BLOCK_CODE_MATHEMATICAL_ALPHANUMERIC_SYMBOLS = 93;
+   public const BLOCK_CODE_MATHEMATICAL_OPERATORS = 47;
+   public const BLOCK_CODE_MEETEI_MAYEK = 184;
+   public const BLOCK_CODE_MEETEI_MAYEK_EXTENSIONS = 213;
+   public const BLOCK_CODE_MENDE_KIKAKUI = 235;
+   public const BLOCK_CODE_MEROITIC_CURSIVE = 214;
+   public const BLOCK_CODE_MEROITIC_HIEROGLYPHS = 215;
+   public const BLOCK_CODE_MIAO = 216;
+   public const BLOCK_CODE_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A = 102;
+   public const BLOCK_CODE_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B = 105;
+   public const BLOCK_CODE_MISCELLANEOUS_SYMBOLS = 55;
+   public const BLOCK_CODE_MISCELLANEOUS_SYMBOLS_AND_ARROWS = 115;
+   public const BLOCK_CODE_MISCELLANEOUS_SYMBOLS_AND_PICTOGRAPHS = 205;
+   public const BLOCK_CODE_MISCELLANEOUS_TECHNICAL = 48;
+   public const BLOCK_CODE_MODI = 236;
+   public const BLOCK_CODE_MODIFIER_TONE_LETTERS = 138;
+   public const BLOCK_CODE_MONGOLIAN = 37;
+   public const BLOCK_CODE_MRO = 237;
+   public const BLOCK_CODE_MUSICAL_SYMBOLS = 92;
+   public const BLOCK_CODE_MYANMAR = 28;
+   public const BLOCK_CODE_MYANMAR_EXTENDED_A = 182;
+   public const BLOCK_CODE_MYANMAR_EXTENDED_B = 238;
+   public const BLOCK_CODE_NABATAEAN = 239;
+   public const BLOCK_CODE_NEW_TAI_LUE = 139;
+   public const BLOCK_CODE_NKO = 146;
+   public const BLOCK_CODE_NO_BLOCK = 0;
+   public const BLOCK_CODE_NUMBER_FORMS = 45;
+   public const BLOCK_CODE_OGHAM = 34;
+   public const BLOCK_CODE_OLD_ITALIC = 88;
+   public const BLOCK_CODE_OLD_NORTH_ARABIAN = 240;
+   public const BLOCK_CODE_OLD_PERMIC = 241;
+   public const BLOCK_CODE_OLD_PERSIAN = 140;
+   public const BLOCK_CODE_OLD_SOUTH_ARABIAN = 187;
+   public const BLOCK_CODE_OLD_TURKIC = 191;
+   public const BLOCK_CODE_OL_CHIKI = 157;
+   public const BLOCK_CODE_OPTICAL_CHARACTER_RECOGNITION = 50;
+   public const BLOCK_CODE_ORIYA = 19;
+   public const BLOCK_CODE_ORNAMENTAL_DINGBATS = 242;
+   public const BLOCK_CODE_OSMANYA = 122;
+   public const BLOCK_CODE_PAHAWH_HMONG = 243;
+   public const BLOCK_CODE_PALMYRENE = 244;
+   public const BLOCK_CODE_PAU_CIN_HAU = 245;
+   public const BLOCK_CODE_PHAGS_PA = 150;
+   public const BLOCK_CODE_PHAISTOS_DISC = 166;
+   public const BLOCK_CODE_PHOENICIAN = 151;
+   public const BLOCK_CODE_PHONETIC_EXTENSIONS = 114;
+   public const BLOCK_CODE_PHONETIC_EXTENSIONS_SUPPLEMENT = 141;
+   public const BLOCK_CODE_PLAYING_CARDS = 204;
+   public const BLOCK_CODE_PRIVATE_USE = 78;
+   public const BLOCK_CODE_PRIVATE_USE_AREA = 78;
+   public const BLOCK_CODE_PSALTER_PAHLAVI = 246;
+   public const BLOCK_CODE_REJANG = 163;
+   public const BLOCK_CODE_RUMI_NUMERAL_SYMBOLS = 192;
+   public const BLOCK_CODE_RUNIC = 35;
+   public const BLOCK_CODE_SAMARITAN = 172;
+   public const BLOCK_CODE_SAURASHTRA = 161;
+   public const BLOCK_CODE_SHARADA = 217;
+   public const BLOCK_CODE_SHAVIAN = 121;
+   public const BLOCK_CODE_SHORTHAND_FORMAT_CONTROLS = 247;
+   public const BLOCK_CODE_SIDDHAM = 248;
+   public const BLOCK_CODE_SINHALA = 24;
+   public const BLOCK_CODE_SINHALA_ARCHAIC_NUMBERS = 249;
+   public const BLOCK_CODE_SMALL_FORM_VARIANTS = 84;
+   public const BLOCK_CODE_SORA_SOMPENG = 218;
+   public const BLOCK_CODE_SPACING_MODIFIER_LETTERS = 6;
+   public const BLOCK_CODE_SPECIALS = 86;
+   public const BLOCK_CODE_SUNDANESE = 155;
+   public const BLOCK_CODE_SUNDANESE_SUPPLEMENT = 219;
+   public const BLOCK_CODE_SUPERSCRIPTS_AND_SUBSCRIPTS = 41;
+   public const BLOCK_CODE_SUPPLEMENTAL_ARROWS_A = 103;
+   public const BLOCK_CODE_SUPPLEMENTAL_ARROWS_B = 104;
+   public const BLOCK_CODE_SUPPLEMENTAL_ARROWS_C = 250;
+   public const BLOCK_CODE_SUPPLEMENTAL_MATHEMATICAL_OPERATORS = 106;
+   public const BLOCK_CODE_SUPPLEMENTAL_PUNCTUATION = 142;
+   public const BLOCK_CODE_SUPPLEMENTARY_PRIVATE_USE_AREA_A = 109;
+   public const BLOCK_CODE_SUPPLEMENTARY_PRIVATE_USE_AREA_B = 110;
+   public const BLOCK_CODE_SYLOTI_NAGRI = 143;
+   public const BLOCK_CODE_SYRIAC = 13;
+   public const BLOCK_CODE_TAGALOG = 98;
+   public const BLOCK_CODE_TAGBANWA = 101;
+   public const BLOCK_CODE_TAGS = 96;
+   public const BLOCK_CODE_TAI_LE = 112;
+   public const BLOCK_CODE_TAI_THAM = 174;
+   public const BLOCK_CODE_TAI_VIET = 183;
+   public const BLOCK_CODE_TAI_XUAN_JING_SYMBOLS = 124;
+   public const BLOCK_CODE_TAKRI = 220;
+   public const BLOCK_CODE_TAMIL = 20;
+   public const BLOCK_CODE_TELUGU = 21;
+   public const BLOCK_CODE_THAANA = 14;
+   public const BLOCK_CODE_THAI = 25;
+   public const BLOCK_CODE_TIBETAN = 27;
+   public const BLOCK_CODE_TIFINAGH = 144;
+   public const BLOCK_CODE_TIRHUTA = 251;
+   public const BLOCK_CODE_TRANSPORT_AND_MAP_SYMBOLS = 207;
+   public const BLOCK_CODE_UGARITIC = 120;
+   public const BLOCK_CODE_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS = 33;
+   public const BLOCK_CODE_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED = 173;
+   public const BLOCK_CODE_VAI = 159;
+   public const BLOCK_CODE_VARIATION_SELECTORS = 108;
+   public const BLOCK_CODE_VARIATION_SELECTORS_SUPPLEMENT = 125;
+   public const BLOCK_CODE_VEDIC_EXTENSIONS = 175;
+   public const BLOCK_CODE_VERTICAL_FORMS = 145;
+   public const BLOCK_CODE_WARANG_CITI = 252;
+   public const BLOCK_CODE_YIJING_HEXAGRAM_SYMBOLS = 116;
+   public const BLOCK_CODE_YI_RADICALS = 73;
+   public const BLOCK_CODE_YI_SYLLABLES = 72;
+   public const BPT_CLOSE = 2;
+   public const BPT_COUNT = 3;
+   public const BPT_NONE = 0;
+   public const BPT_OPEN = 1;
+   public const CHAR_CATEGORY_CHAR_CATEGORY_COUNT = 30;
+   public const CHAR_CATEGORY_COMBINING_SPACING_MARK = 8;
+   public const CHAR_CATEGORY_CONNECTOR_PUNCTUATION = 22;
+   public const CHAR_CATEGORY_CONTROL_CHAR = 15;
+   public const CHAR_CATEGORY_CURRENCY_SYMBOL = 25;
+   public const CHAR_CATEGORY_DASH_PUNCTUATION = 19;
+   public const CHAR_CATEGORY_DECIMAL_DIGIT_NUMBER = 9;
+   public const CHAR_CATEGORY_ENCLOSING_MARK = 7;
+   public const CHAR_CATEGORY_END_PUNCTUATION = 21;
+   public const CHAR_CATEGORY_FINAL_PUNCTUATION = 29;
+   public const CHAR_CATEGORY_FORMAT_CHAR = 16;
+   public const CHAR_CATEGORY_GENERAL_OTHER_TYPES = 0;
+   public const CHAR_CATEGORY_INITIAL_PUNCTUATION = 28;
+   public const CHAR_CATEGORY_LETTER_NUMBER = 10;
+   public const CHAR_CATEGORY_LINE_SEPARATOR = 13;
+   public const CHAR_CATEGORY_LOWERCASE_LETTER = 2;
+   public const CHAR_CATEGORY_MATH_SYMBOL = 24;
+   public const CHAR_CATEGORY_MODIFIER_LETTER = 4;
+   public const CHAR_CATEGORY_MODIFIER_SYMBOL = 26;
+   public const CHAR_CATEGORY_NON_SPACING_MARK = 6;
+   public const CHAR_CATEGORY_OTHER_LETTER = 5;
+   public const CHAR_CATEGORY_OTHER_NUMBER = 11;
+   public const CHAR_CATEGORY_OTHER_PUNCTUATION = 23;
+   public const CHAR_CATEGORY_OTHER_SYMBOL = 27;
+   public const CHAR_CATEGORY_PARAGRAPH_SEPARATOR = 14;
+   public const CHAR_CATEGORY_PRIVATE_USE_CHAR = 17;
+   public const CHAR_CATEGORY_SPACE_SEPARATOR = 12;
+   public const CHAR_CATEGORY_START_PUNCTUATION = 20;
+   public const CHAR_CATEGORY_SURROGATE = 18;
+   public const CHAR_CATEGORY_TITLECASE_LETTER = 3;
+   public const CHAR_CATEGORY_UNASSIGNED = 0;
+   public const CHAR_CATEGORY_UPPERCASE_LETTER = 1;
+   public const CHAR_DIRECTION_ARABIC_NUMBER = 5;
+   public const CHAR_DIRECTION_BLOCK_SEPARATOR = 7;
+   public const CHAR_DIRECTION_BOUNDARY_NEUTRAL = 18;
+   public const CHAR_DIRECTION_CHAR_DIRECTION_COUNT = 23;
+   public const CHAR_DIRECTION_COMMON_NUMBER_SEPARATOR = 6;
+   public const CHAR_DIRECTION_DIR_NON_SPACING_MARK = 17;
+   public const CHAR_DIRECTION_EUROPEAN_NUMBER = 2;
+   public const CHAR_DIRECTION_EUROPEAN_NUMBER_SEPARATOR = 3;
+   public const CHAR_DIRECTION_EUROPEAN_NUMBER_TERMINATOR = 4;
+   public const CHAR_DIRECTION_FIRST_STRONG_ISOLATE = 19;
+   public const CHAR_DIRECTION_LEFT_TO_RIGHT = 0;
+   public const CHAR_DIRECTION_LEFT_TO_RIGHT_EMBEDDING = 11;
+   public const CHAR_DIRECTION_LEFT_TO_RIGHT_ISOLATE = 20;
+   public const CHAR_DIRECTION_LEFT_TO_RIGHT_OVERRIDE = 12;
+   public const CHAR_DIRECTION_OTHER_NEUTRAL = 10;
+   public const CHAR_DIRECTION_POP_DIRECTIONAL_FORMAT = 16;
+   public const CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE = 22;
+   public const CHAR_DIRECTION_RIGHT_TO_LEFT = 1;
+   public const CHAR_DIRECTION_RIGHT_TO_LEFT_ARABIC = 13;
+   public const CHAR_DIRECTION_RIGHT_TO_LEFT_EMBEDDING = 14;
+   public const CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE = 21;
+   public const CHAR_DIRECTION_RIGHT_TO_LEFT_OVERRIDE = 15;
+   public const CHAR_DIRECTION_SEGMENT_SEPARATOR = 8;
+   public const CHAR_DIRECTION_WHITE_SPACE_NEUTRAL = 9;
+   public const CHAR_NAME_ALIAS = 3;
+   public const CHAR_NAME_CHOICE_COUNT = 4;
+   public const CODEPOINT_MAX = 1114111;
+   public const CODEPOINT_MIN = 0;
+   public const DT_CANONICAL = 1;
+   public const DT_CIRCLE = 3;
+   public const DT_COMPAT = 2;
+   public const DT_COUNT = 18;
+   public const DT_FINAL = 4;
+   public const DT_FONT = 5;
+   public const DT_FRACTION = 6;
+   public const DT_INITIAL = 7;
+   public const DT_ISOLATED = 8;
+   public const DT_MEDIAL = 9;
+   public const DT_NARROW = 10;
+   public const DT_NOBREAK = 11;
+   public const DT_NONE = 0;
+   public const DT_SMALL = 12;
+   public const DT_SQUARE = 13;
+   public const DT_SUB = 14;
+   public const DT_SUPER = 15;
+   public const DT_VERTICAL = 16;
+   public const DT_WIDE = 17;
+   public const EA_AMBIGUOUS = 1;
+   public const EA_COUNT = 6;
+   public const EA_FULLWIDTH = 3;
+   public const EA_HALFWIDTH = 2;
+   public const EA_NARROW = 4;
+   public const EA_NEUTRAL = 0;
+   public const EA_WIDE = 5;
+   public const EXTENDED_CHAR_NAME = 2;
+   public const FOLD_CASE_DEFAULT = 0;
+   public const FOLD_CASE_EXCLUDE_SPECIAL_I = 1;
+   public const GCB_CONTROL = 1;
+   public const GCB_COUNT = 18;
+   public const GCB_CR = 2;
+   public const GCB_EXTEND = 3;
+   public const GCB_L = 4;
+   public const GCB_LF = 5;
+   public const GCB_LV = 6;
+   public const GCB_LVT = 7;
+   public const GCB_OTHER = 0;
+   public const GCB_PREPEND = 11;
+   public const GCB_REGIONAL_INDICATOR = 12;
+   public const GCB_SPACING_MARK = 10;
+   public const GCB_T = 8;
+   public const GCB_V = 9;
+   public const HST_COUNT = 6;
+   public const HST_LEADING_JAMO = 1;
+   public const HST_LVT_SYLLABLE = 5;
+   public const HST_LV_SYLLABLE = 4;
+   public const HST_NOT_APPLICABLE = 0;
+   public const HST_TRAILING_JAMO = 3;
+   public const HST_VOWEL_JAMO = 2;
+   public const JG_AIN = 1;
+   public const JG_ALAPH = 2;
+   public const JG_ALEF = 3;
+   public const JG_BEH = 4;
+   public const JG_BETH = 5;
+   public const JG_BURUSHASKI_YEH_BARREE = 54;
+   public const JG_COUNT = 105;
+   public const JG_DAL = 6;
+   public const JG_DALATH_RISH = 7;
+   public const JG_E = 8;
+   public const JG_FARSI_YEH = 55;
+   public const JG_FE = 51;
+   public const JG_FEH = 9;
+   public const JG_FINAL_SEMKATH = 10;
+   public const JG_GAF = 11;
+   public const JG_GAMAL = 12;
+   public const JG_HAH = 13;
+   public const JG_HAMZA_ON_HEH_GOAL = 14;
+   public const JG_HE = 15;
+   public const JG_HEH = 16;
+   public const JG_HEH_GOAL = 17;
+   public const JG_HETH = 18;
+   public const JG_KAF = 19;
+   public const JG_KAPH = 20;
+   public const JG_KHAPH = 52;
+   public const JG_KNOTTED_HEH = 21;
+   public const JG_LAM = 22;
+   public const JG_LAMADH = 23;
+   public const JG_MANICHAEAN_ALEPH = 58;
+   public const JG_MANICHAEAN_AYIN = 59;
+   public const JG_MANICHAEAN_BETH = 60;
+   public const JG_MANICHAEAN_DALETH = 61;
+   public const JG_MANICHAEAN_DHAMEDH = 62;
+   public const JG_MANICHAEAN_FIVE = 63;
+   public const JG_MANICHAEAN_GIMEL = 64;
+   public const JG_MANICHAEAN_HETH = 65;
+   public const JG_MANICHAEAN_HUNDRED = 66;
+   public const JG_MANICHAEAN_KAPH = 67;
+   public const JG_MANICHAEAN_LAMEDH = 68;
+   public const JG_MANICHAEAN_MEM = 69;
+   public const JG_MANICHAEAN_NUN = 70;
+   public const JG_MANICHAEAN_ONE = 71;
+   public const JG_MANICHAEAN_PE = 72;
+   public const JG_MANICHAEAN_QOPH = 73;
+   public const JG_MANICHAEAN_RESH = 74;
+   public const JG_MANICHAEAN_SADHE = 75;
+   public const JG_MANICHAEAN_SAMEKH = 76;
+   public const JG_MANICHAEAN_TAW = 77;
+   public const JG_MANICHAEAN_TEN = 78;
+   public const JG_MANICHAEAN_TETH = 79;
+   public const JG_MANICHAEAN_THAMEDH = 80;
+   public const JG_MANICHAEAN_TWENTY = 81;
+   public const JG_MANICHAEAN_WAW = 82;
+   public const JG_MANICHAEAN_YODH = 83;
+   public const JG_MANICHAEAN_ZAYIN = 84;
+   public const JG_MEEM = 24;
+   public const JG_MIM = 25;
+   public const JG_NOON = 26;
+   public const JG_NO_JOINING_GROUP = 0;
+   public const JG_NUN = 27;
+   public const JG_NYA = 56;
+   public const JG_PE = 28;
+   public const JG_QAF = 29;
+   public const JG_QAPH = 30;
+   public const JG_REH = 31;
+   public const JG_REVERSED_PE = 32;
+   public const JG_ROHINGYA_YEH = 57;
+   public const JG_SAD = 33;
+   public const JG_SADHE = 34;
+   public const JG_SEEN = 35;
+   public const JG_SEMKATH = 36;
+   public const JG_SHIN = 37;
+   public const JG_STRAIGHT_WAW = 85;
+   public const JG_SWASH_KAF = 38;
+   public const JG_SYRIAC_WAW = 39;
+   public const JG_TAH = 40;
+   public const JG_TAW = 41;
+   public const JG_TEH_MARBUTA = 42;
+   public const JG_TEH_MARBUTA_GOAL = 14;
+   public const JG_TETH = 43;
+   public const JG_WAW = 44;
+   public const JG_YEH = 45;
+   public const JG_YEH_BARREE = 46;
+   public const JG_YEH_WITH_TAIL = 47;
+   public const JG_YUDH = 48;
+   public const JG_YUDH_HE = 49;
+   public const JG_ZAIN = 50;
+   public const JG_ZHAIN = 53;
+   public const JT_COUNT = 6;
+   public const JT_DUAL_JOINING = 2;
+   public const JT_JOIN_CAUSING = 1;
+   public const JT_LEFT_JOINING = 3;
+   public const JT_NON_JOINING = 0;
+   public const JT_RIGHT_JOINING = 4;
+   public const JT_TRANSPARENT = 5;
+   public const LB_ALPHABETIC = 2;
+   public const LB_AMBIGUOUS = 1;
+   public const LB_BREAK_AFTER = 4;
+   public const LB_BREAK_BEFORE = 5;
+   public const LB_BREAK_BOTH = 3;
+   public const LB_BREAK_SYMBOLS = 27;
+   public const LB_CARRIAGE_RETURN = 10;
+   public const LB_CLOSE_PARENTHESIS = 36;
+   public const LB_CLOSE_PUNCTUATION = 8;
+   public const LB_COMBINING_MARK = 9;
+   public const LB_COMPLEX_CONTEXT = 24;
+   public const LB_CONDITIONAL_JAPANESE_STARTER = 37;
+   public const LB_CONTINGENT_BREAK = 7;
+   public const LB_COUNT = 48;
+   public const LB_EXCLAMATION = 11;
+   public const LB_GLUE = 12;
+   public const LB_H2 = 31;
+   public const LB_H3 = 32;
+   public const LB_HEBREW_LETTER = 38;
+   public const LB_HYPHEN = 13;
+   public const LB_IDEOGRAPHIC = 14;
+   public const LB_INFIX_NUMERIC = 16;
+   public const LB_INSEPARABLE = 15;
+   public const LB_INSEPERABLE = 15;
+   public const LB_JL = 33;
+   public const LB_JT = 34;
+   public const LB_JV = 35;
+   public const LB_LINE_FEED = 17;
+   public const LB_MANDATORY_BREAK = 6;
+   public const LB_NEXT_LINE = 29;
+   public const LB_NONSTARTER = 18;
+   public const LB_NUMERIC = 19;
+   public const LB_OPEN_PUNCTUATION = 20;
+   public const LB_POSTFIX_NUMERIC = 21;
+   public const LB_PREFIX_NUMERIC = 22;
+   public const LB_QUOTATION = 23;
+   public const LB_REGIONAL_INDICATOR = 39;
+   public const LB_SPACE = 26;
+   public const LB_SURROGATE = 25;
+   public const LB_UNKNOWN = 0;
+   public const LB_WORD_JOINER = 30;
+   public const LB_ZWSPACE = 28;
+   public const LONG_PROPERTY_NAME = 1;
+   public const NO_NUMERIC_VALUE = -123456789.0;
+   public const NT_COUNT = 4;
+   public const NT_DECIMAL = 1;
+   public const NT_DIGIT = 2;
+   public const NT_NONE = 0;
+   public const NT_NUMERIC = 3;
+   public const PROPERTY_AGE = 16384;
+   public const PROPERTY_ALPHABETIC = 0;
+   public const PROPERTY_ASCII_HEX_DIGIT = 1;
+   public const PROPERTY_BIDI_CLASS = 4096;
+   public const PROPERTY_BIDI_CONTROL = 2;
+   public const PROPERTY_BIDI_MIRRORED = 3;
+   public const PROPERTY_BIDI_MIRRORING_GLYPH = 16385;
+   public const PROPERTY_BIDI_PAIRED_BRACKET = 16397;
+   public const PROPERTY_BIDI_PAIRED_BRACKET_TYPE = 4117;
+   public const PROPERTY_BINARY_LIMIT = 76;
+   public const PROPERTY_BINARY_START = 0;
+   public const PROPERTY_BLOCK = 4097;
+   public const PROPERTY_CANONICAL_COMBINING_CLASS = 4098;
+   public const PROPERTY_CASED = 49;
+   public const PROPERTY_CASE_FOLDING = 16386;
+   public const PROPERTY_CASE_IGNORABLE = 50;
+   public const PROPERTY_CASE_SENSITIVE = 34;
+   public const PROPERTY_CHANGES_WHEN_CASEFOLDED = 54;
+   public const PROPERTY_CHANGES_WHEN_CASEMAPPED = 55;
+   public const PROPERTY_CHANGES_WHEN_LOWERCASED = 51;
+   public const PROPERTY_CHANGES_WHEN_NFKC_CASEFOLDED = 56;
+   public const PROPERTY_CHANGES_WHEN_TITLECASED = 53;
+   public const PROPERTY_CHANGES_WHEN_UPPERCASED = 52;
+   public const PROPERTY_DASH = 4;
+   public const PROPERTY_DECOMPOSITION_TYPE = 4099;
+   public const PROPERTY_DEFAULT_IGNORABLE_CODE_POINT = 5;
+   public const PROPERTY_DEPRECATED = 6;
+   public const PROPERTY_DIACRITIC = 7;
+   public const PROPERTY_DOUBLE_LIMIT = 12289;
+   public const PROPERTY_DOUBLE_START = 12288;
+   public const PROPERTY_EAST_ASIAN_WIDTH = 4100;
+   public const PROPERTY_EXTENDER = 8;
+   public const PROPERTY_FULL_COMPOSITION_EXCLUSION = 9;
+   public const PROPERTY_GENERAL_CATEGORY = 4101;
+   public const PROPERTY_GENERAL_CATEGORY_MASK = 8192;
+   public const PROPERTY_GRAPHEME_BASE = 10;
+   public const PROPERTY_GRAPHEME_CLUSTER_BREAK = 4114;
+   public const PROPERTY_GRAPHEME_EXTEND = 11;
+   public const PROPERTY_GRAPHEME_LINK = 12;
+   public const PROPERTY_HANGUL_SYLLABLE_TYPE = 4107;
+   public const PROPERTY_HEX_DIGIT = 13;
+   public const PROPERTY_HYPHEN = 14;
+   public const PROPERTY_IDEOGRAPHIC = 17;
+   public const PROPERTY_IDS_BINARY_OPERATOR = 18;
+   public const PROPERTY_IDS_TRINARY_OPERATOR = 19;
+   public const PROPERTY_IDS_UNARY_OPERATOR = 72;
+   public const PROPERTY_ID_COMPAT_MATH_CONTINUE = 74;
+   public const PROPERTY_ID_COMPAT_MATH_START = 73;
+   public const PROPERTY_ID_CONTINUE = 15;
+   public const PROPERTY_ID_START = 16;
+   public const PROPERTY_INT_LIMIT = 4123;
+   public const PROPERTY_INT_START = 4096;
+   public const PROPERTY_INVALID_CODE = -1;
+   public const PROPERTY_ISO_COMMENT = 16387;
+   public const PROPERTY_JOINING_GROUP = 4102;
+   public const PROPERTY_JOINING_TYPE = 4103;
+   public const PROPERTY_JOIN_CONTROL = 20;
+   public const PROPERTY_LEAD_CANONICAL_COMBINING_CLASS = 4112;
+   public const PROPERTY_LINE_BREAK = 4104;
+   public const PROPERTY_LOGICAL_ORDER_EXCEPTION = 21;
+   public const PROPERTY_LOWERCASE = 22;
+   public const PROPERTY_LOWERCASE_MAPPING = 16388;
+   public const PROPERTY_MASK_LIMIT = 8193;
+   public const PROPERTY_MASK_START = 8192;
+   public const PROPERTY_MATH = 23;
+   public const PROPERTY_NAME = 16389;
+   public const PROPERTY_NAME_CHOICE_COUNT = 2;
+   public const PROPERTY_NFC_INERT = 39;
+   public const PROPERTY_NFC_QUICK_CHECK = 4110;
+   public const PROPERTY_NFD_INERT = 37;
+   public const PROPERTY_NFD_QUICK_CHECK = 4108;
+   public const PROPERTY_NFKC_INERT = 40;
+   public const PROPERTY_NFKC_QUICK_CHECK = 4111;
+   public const PROPERTY_NFKD_INERT = 38;
+   public const PROPERTY_NFKD_QUICK_CHECK = 4109;
+   public const PROPERTY_NONCHARACTER_CODE_POINT = 24;
+   public const PROPERTY_NUMERIC_TYPE = 4105;
+   public const PROPERTY_NUMERIC_VALUE = 12288;
+   public const PROPERTY_OTHER_PROPERTY_LIMIT = 28674;
+   public const PROPERTY_OTHER_PROPERTY_START = 28672;
+   public const PROPERTY_PATTERN_SYNTAX = 42;
+   public const PROPERTY_PATTERN_WHITE_SPACE = 43;
+   public const PROPERTY_POSIX_ALNUM = 44;
+   public const PROPERTY_POSIX_BLANK = 45;
+   public const PROPERTY_POSIX_GRAPH = 46;
+   public const PROPERTY_POSIX_PRINT = 47;
+   public const PROPERTY_POSIX_XDIGIT = 48;
+   public const PROPERTY_QUOTATION_MARK = 25;
+   public const PROPERTY_RADICAL = 26;
+   public const PROPERTY_SCRIPT = 4106;
+   public const PROPERTY_SCRIPT_EXTENSIONS = 28672;
+   public const PROPERTY_SEGMENT_STARTER = 41;
+   public const PROPERTY_SENTENCE_BREAK = 4115;
+   public const PROPERTY_SIMPLE_CASE_FOLDING = 16390;
+   public const PROPERTY_SIMPLE_LOWERCASE_MAPPING = 16391;
+   public const PROPERTY_SIMPLE_TITLECASE_MAPPING = 16392;
+   public const PROPERTY_SIMPLE_UPPERCASE_MAPPING = 16393;
+   public const PROPERTY_SOFT_DOTTED = 27;
+   public const PROPERTY_STRING_LIMIT = 16398;
+   public const PROPERTY_STRING_START = 16384;
+   public const PROPERTY_S_TERM = 35;
+   public const PROPERTY_TERMINAL_PUNCTUATION = 28;
+   public const PROPERTY_TITLECASE_MAPPING = 16394;
+   public const PROPERTY_TRAIL_CANONICAL_COMBINING_CLASS = 4113;
+   public const PROPERTY_UNICODE_1_NAME = 16395;
+   public const PROPERTY_UNIFIED_IDEOGRAPH = 29;
+   public const PROPERTY_UPPERCASE = 30;
+   public const PROPERTY_UPPERCASE_MAPPING = 16396;
+   public const PROPERTY_VARIATION_SELECTOR = 36;
+   public const PROPERTY_WHITE_SPACE = 31;
+   public const PROPERTY_WORD_BREAK = 4116;
+   public const PROPERTY_XID_CONTINUE = 32;
+   public const PROPERTY_XID_START = 33;
+   public const SB_ATERM = 1;
+   public const SB_CLOSE = 2;
+   public const SB_COUNT = 15;
+   public const SB_CR = 11;
+   public const SB_EXTEND = 12;
+   public const SB_FORMAT = 3;
+   public const SB_LF = 13;
+   public const SB_LOWER = 4;
+   public const SB_NUMERIC = 5;
+   public const SB_OLETTER = 6;
+   public const SB_OTHER = 0;
+   public const SB_SCONTINUE = 14;
+   public const SB_SEP = 7;
+   public const SB_SP = 8;
+   public const SB_STERM = 9;
+   public const SB_UPPER = 10;
+   public const SHORT_PROPERTY_NAME = 0;
+   public const UNICODE_10_CHAR_NAME = 1;
+   public const UNICODE_CHAR_NAME = 0;
+   public const UNICODE_VERSION = "16.0";
+   public const WB_ALETTER = 1;
+   public const WB_COUNT = 23;
+   public const WB_CR = 8;
+   public const WB_DOUBLE_QUOTE = 16;
+   public const WB_EXTEND = 9;
+   public const WB_EXTENDNUMLET = 7;
+   public const WB_FORMAT = 2;
+   public const WB_HEBREW_LETTER = 14;
+   public const WB_KATAKANA = 3;
+   public const WB_LF = 10;
+   public const WB_MIDLETTER = 4;
+   public const WB_MIDNUM = 5;
+   public const WB_MIDNUMLET = 11;
+   public const WB_NEWLINE = 12;
+   public const WB_NUMERIC = 6;
+   public const WB_OTHER = 0;
+   public const WB_REGIONAL_INDICATOR = 13;
+   public const WB_SINGLE_QUOTE = 15;
+   /**
+    * Get the &quot;age&quot; of the code point
+    */
+   public static function charAge(string|int $codepoint): ?array {}
+   /**
+    * Get the decimal digit value of a decimal digit character
+    */
+   public static function charDigitValue(string|int $codepoint): ?int {}
+   /**
+    * Get bidirectional category value for a code point
+    */
+   public static function charDirection(string|int $codepoint): ?int {}
+   /**
+    * Find Unicode character by name and return its code point value
+    */
+   public static function charFromName(string $name, int $type = IntlChar::UNICODE_CHAR_NAME): ?int {}
+   /**
+    * Get the &quot;mirror-image&quot; character for a code point
+    */
+   public static function charMirror(string|int $codepoint): string|int|null {}
+   /**
+    * Retrieve the name of a Unicode character
+    */
+   public static function charName(string|int $codepoint, int $type = IntlChar::UNICODE_CHAR_NAME): ?string {}
+   /**
+    * Get the general category value for a code point
+    */
+   public static function charType(string|int $codepoint): ?int {}
+   /**
+    * Return Unicode character by code point value
+    */
+   public static function chr(string|int $codepoint): ?string {}
+   /**
+    * Get the decimal digit value of a code point for a given radix
+    */
+   public static function digit(string|int $codepoint, int $base = 10): int|false|null {}
+   /**
+    * Enumerate all assigned Unicode characters within a range
+    */
+   public static function enumCharNames(string|int $start, string|int $end, callable $callback, int $type = IntlChar::UNICODE_CHAR_NAME): bool {}
+   /**
+    * Enumerate all code points with their Unicode general categories
+    */
+   public static function enumCharTypes(callable $callback): void {}
+   /**
+    * Perform case folding on a code point
+    */
+   public static function foldCase(string|int $codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT): string|int|null {}
+   /**
+    * Get character representation for a given digit and radix
+    */
+   public static function forDigit(int $digit, int $base = 10): int {}
+   /**
+    * Get the paired bracket character for a code point
+    */
+   public static function getBidiPairedBracket(string|int $codepoint): string|int|null {}
+   /**
+    * Get the Unicode allocation block containing a code point
+    */
+   public static function getBlockCode(string|int $codepoint): ?int {}
+   /**
+    * Get the combining class of a code point
+    */
+   public static function getCombiningClass(string|int $codepoint): ?int {}
+   /**
+    * Get the FC_NFKC_Closure property for a code point
+    */
+   public static function getFC_NFKC_Closure(string|int $codepoint): string|false|null {}
+   /**
+    * Get the max value for a Unicode property
+    */
+   public static function getIntPropertyMaxValue(int $property): int {}
+   /**
+    * Get the min value for a Unicode property
+    */
+   public static function getIntPropertyMinValue(int $property): int {}
+   /**
+    * Get the value for a Unicode property for a code point
+    */
+   public static function getIntPropertyValue(string|int $codepoint, int $property): ?int {}
+   /**
+    * Get the numeric value for a Unicode code point
+    */
+   public static function getNumericValue(string|int $codepoint): ?float {}
+   /**
+    * Get the property constant value for a given property name
+    */
+   public static function getPropertyEnum(string $alias): int {}
+   /**
+    * Get the Unicode name for a property
+    */
+   public static function getPropertyName(int $property, int $type = IntlChar::LONG_PROPERTY_NAME): string|false {}
+   /**
+    * Get the property value for a given value name
+    */
+   public static function getPropertyValueEnum(int $property, string $name): int {}
+   /**
+    * Get the Unicode name for a property value
+    */
+   public static function getPropertyValueName(int $property, int $value, int $type = IntlChar::LONG_PROPERTY_NAME): string|false {}
+   /**
+    * Get the Unicode version
+    */
+   public static function getUnicodeVersion(): array {}
+   /**
+    * Check a binary Unicode property for a code point
+    */
+   public static function hasBinaryProperty(string|int $codepoint, int $property): ?bool {}
+   /**
+    * Check if code point is an ignorable character
+    */
+   public static function isIDIgnorable(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is permissible in an identifier
+    */
+   public static function isIDPart(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is permissible as the first character in an identifier
+    */
+   public static function isIDStart(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is an ISO control code
+    */
+   public static function isISOControl(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is permissible in a Java identifier
+    */
+   public static function isJavaIDPart(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is permissible as the first character in a Java identifier
+    */
+   public static function isJavaIDStart(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a space character according to Java
+    */
+   public static function isJavaSpaceChar(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point has the Bidi_Mirrored property
+    */
+   public static function isMirrored(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point has the Alphabetic Unicode property
+    */
+   public static function isUAlphabetic(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point has the Lowercase Unicode property
+    */
+   public static function isULowercase(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point has the Uppercase Unicode property
+    */
+   public static function isUUppercase(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point has the White_Space Unicode property
+    */
+   public static function isUWhiteSpace(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a whitespace character according to ICU
+    */
+   public static function isWhitespace(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is an alphanumeric character
+    */
+   public static function isalnum(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a letter character
+    */
+   public static function isalpha(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a base character
+    */
+   public static function isbase(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a &quot;blank&quot; or &quot;horizontal space&quot; character
+    */
+   public static function isblank(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a control character
+    */
+   public static function iscntrl(string|int $codepoint): ?bool {}
+   /**
+    * Check whether the code point is defined
+    */
+   public static function isdefined(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a digit character
+    */
+   public static function isdigit(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a graphic character
+    */
+   public static function isgraph(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a lowercase letter
+    */
+   public static function islower(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a printable character
+    */
+   public static function isprint(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is punctuation character
+    */
+   public static function ispunct(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a space character
+    */
+   public static function isspace(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a titlecase letter
+    */
+   public static function istitle(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point has the general category &quot;Lu&quot; (uppercase letter)
+    */
+   public static function isupper(string|int $codepoint): ?bool {}
+   /**
+    * Check if code point is a hexadecimal digit
+    */
+   public static function isxdigit(string|int $codepoint): ?bool {}
+   /**
+    * Return Unicode code point value of character
+    */
+   public static function ord(string|int $character): ?int {}
+   /**
+    * Make Unicode character lowercase
+    */
+   public static function tolower(string|int $codepoint): string|int|null {}
+   /**
+    * Make Unicode character titlecase
+    */
+   public static function totitle(string|int $codepoint): string|int|null {}
+   /**
+    * Make Unicode character uppercase
+    */
+   public static function toupper(string|int $codepoint): string|int|null {}
 }
 
 /**
  * The IntlCodePointBreakIterator class
  */
- class IntlCodePointBreakIterator extends \IntlBreakIterator implements \IteratorAggregate, \Traversable {
-    /**
-     * Get last code point passed over after advancing or receding the iterator
-     */
-     public function getLastCodePoint(): int {}
+class IntlCodePointBreakIterator extends \IntlBreakIterator implements \IteratorAggregate, \Traversable
+{
+   /**
+    * Get last code point passed over after advancing or receding the iterator
+    */
+   public function getLastCodePoint(): int {}
 }
 
 /**
  * The IntlDateFormatter class
  */
- class IntlDateFormatter {
-    public const FULL = 0;
-    public const GREGORIAN = 1;
-    public const LONG = 1;
-    public const MEDIUM = 2;
-    public const NONE = -1;
-    public const PATTERN = -2;
-    public const RELATIVE_FULL = 128;
-    public const RELATIVE_LONG = 129;
-    public const RELATIVE_MEDIUM = 130;
-    public const RELATIVE_SHORT = 131;
-    public const SHORT = 3;
-    public const TRADITIONAL = 0;
-    public function __construct(?string $locale, int $dateType = IntlDateFormatter::FULL, int $timeType = IntlDateFormatter::FULL, \IntlTimeZone|\DateTimeZone|string|null $timezone = NULL, ?mixed $calendar = NULL, ?string $pattern = NULL) {}
-    /**
-     * Create a date formatter
-     */
-     public static function create(?string $locale, int $dateType = IntlDateFormatter::FULL, int $timeType = IntlDateFormatter::FULL, \IntlTimeZone|\DateTimeZone|string|null $timezone = NULL, \IntlCalendar|int|null $calendar = NULL, ?string $pattern = NULL): ?\IntlDateFormatter {}
-    /**
-     * Format the date/time value as a string
-     */
-     public function format(mixed $datetime): string|false {}
-    /**
-     * Formats an object
-     */
-     public static function formatObject(mixed $datetime, ?mixed $format = NULL, ?string $locale = NULL): string|false {}
-    /**
-     * Get the calendar type used for the IntlDateFormatter
-     */
-     public function getCalendar(): int|false {}
-    /**
-     * Get copy of formatterʼs calendar object
-     */
-     public function getCalendarObject(): \IntlCalendar|false|null {}
-    /**
-     * Get the datetype used for the IntlDateFormatter
-     */
-     public function getDateType(): int|false {}
-    /**
-     * Get the error code from last operation
-     */
-     public function getErrorCode(): int {}
-    /**
-     * Get the error text from the last operation
-     */
-     public function getErrorMessage(): string {}
-    /**
-     * Get the locale used by formatter
-     */
-     public function getLocale(int $type = ULOC_ACTUAL_LOCALE): string|false {}
-    /**
-     * Get the pattern used for the IntlDateFormatter
-     */
-     public function getPattern(): string|false {}
-    /**
-     * Get the timetype used for the IntlDateFormatter
-     */
-     public function getTimeType(): int|false {}
-    /**
-     * Get formatterʼs timezone
-     */
-     public function getTimeZone(): \IntlTimeZone|false {}
-    /**
-     * Get the timezone-id used for the IntlDateFormatter
-     */
-     public function getTimeZoneId(): string|false {}
-    /**
-     * Get the lenient used for the IntlDateFormatter
-     */
-     public function isLenient(): bool {}
-    /**
-     * Parse string to a field-based time value
-     */
-     public function localtime(string $string, ?int &$offset = NULL): array|false {}
-    /**
-     * Parse string to a timestamp value
-     */
-     public function parse(string $string, ?int &$offset = NULL): int|float|false {}
-    /**
-     * Parse a string into a timestamp, updating an open calendar (PHP 8 >= 8.4.0)
-     */
-     public function parseToCalendar(string $string, ?int &$offset = NULL): int|float|false {}
-    /**
-     * Sets the calendar type used by the formatter
-     */
-     public function setCalendar(\IntlCalendar|int|null $calendar): bool {}
-    /**
-     * Set the leniency of the parser
-     */
-     public function setLenient(bool $lenient): void {}
-    /**
-     * Set the pattern used for the IntlDateFormatter
-     */
-     public function setPattern(string $pattern): bool {}
-    /**
-     * Sets formatterʼs timezone
-     */
-     public function setTimeZone(\IntlTimeZone|\DateTimeZone|string|null $timezone): bool {}
+class IntlDateFormatter
+{
+   public const FULL = 0;
+   public const GREGORIAN = 1;
+   public const LONG = 1;
+   public const MEDIUM = 2;
+   public const NONE = -1;
+   public const PATTERN = -2;
+   public const RELATIVE_FULL = 128;
+   public const RELATIVE_LONG = 129;
+   public const RELATIVE_MEDIUM = 130;
+   public const RELATIVE_SHORT = 131;
+   public const SHORT = 3;
+   public const TRADITIONAL = 0;
+   public function __construct(?string $locale, int $dateType = IntlDateFormatter::FULL, int $timeType = IntlDateFormatter::FULL, \IntlTimeZone|\DateTimeZone|string|null $timezone = NULL, ?mixed $calendar = NULL, ?string $pattern = NULL) {}
+   /**
+    * Create a date formatter
+    */
+   public static function create(?string $locale, int $dateType = IntlDateFormatter::FULL, int $timeType = IntlDateFormatter::FULL, \IntlTimeZone|\DateTimeZone|string|null $timezone = NULL, \IntlCalendar|int|null $calendar = NULL, ?string $pattern = NULL): ?\IntlDateFormatter {}
+   /**
+    * Format the date/time value as a string
+    */
+   public function format(mixed $datetime): string|false {}
+   /**
+    * Formats an object
+    */
+   public static function formatObject(mixed $datetime, ?mixed $format = NULL, ?string $locale = NULL): string|false {}
+   /**
+    * Get the calendar type used for the IntlDateFormatter
+    */
+   public function getCalendar(): int|false {}
+   /**
+    * Get copy of formatterʼs calendar object
+    */
+   public function getCalendarObject(): \IntlCalendar|false|null {}
+   /**
+    * Get the datetype used for the IntlDateFormatter
+    */
+   public function getDateType(): int|false {}
+   /**
+    * Get the error code from last operation
+    */
+   public function getErrorCode(): int {}
+   /**
+    * Get the error text from the last operation
+    */
+   public function getErrorMessage(): string {}
+   /**
+    * Get the locale used by formatter
+    */
+   public function getLocale(int $type = ULOC_ACTUAL_LOCALE): string|false {}
+   /**
+    * Get the pattern used for the IntlDateFormatter
+    */
+   public function getPattern(): string|false {}
+   /**
+    * Get the timetype used for the IntlDateFormatter
+    */
+   public function getTimeType(): int|false {}
+   /**
+    * Get formatterʼs timezone
+    */
+   public function getTimeZone(): \IntlTimeZone|false {}
+   /**
+    * Get the timezone-id used for the IntlDateFormatter
+    */
+   public function getTimeZoneId(): string|false {}
+   /**
+    * Get the lenient used for the IntlDateFormatter
+    */
+   public function isLenient(): bool {}
+   /**
+    * Parse string to a field-based time value
+    */
+   public function localtime(string $string, ?int &$offset = NULL): array|false {}
+   /**
+    * Parse string to a timestamp value
+    */
+   public function parse(string $string, ?int &$offset = NULL): int|float|false {}
+   /**
+    * Parse a string into a timestamp, updating an open calendar (PHP 8 >= 8.4.0)
+    */
+   public function parseToCalendar(string $string, ?int &$offset = NULL): int|float|false {}
+   /**
+    * Sets the calendar type used by the formatter
+    */
+   public function setCalendar(\IntlCalendar|int|null $calendar): bool {}
+   /**
+    * Set the leniency of the parser
+    */
+   public function setLenient(bool $lenient): void {}
+   /**
+    * Set the pattern used for the IntlDateFormatter
+    */
+   public function setPattern(string $pattern): bool {}
+   /**
+    * Sets formatterʼs timezone
+    */
+   public function setTimeZone(\IntlTimeZone|\DateTimeZone|string|null $timezone): bool {}
 }
 
 /**
  * The IntlDatePatternGenerator class (PHP 8 >= 8.1.0)
  */
- class IntlDatePatternGenerator {
-    public function __construct(?string $locale = NULL) {}
-    /**
-     * Creates a new IntlDatePatternGenerator instance (PHP 8 >= 8.1.0)
-     */
-     public static function create(?string $locale = NULL): ?\IntlDatePatternGenerator {}
-    /**
-     * Determines the most suitable date/time format (PHP 8 >= 8.1.0)
-     */
-     public function getBestPattern(string $skeleton): string|false {}
+class IntlDatePatternGenerator
+{
+   public function __construct(?string $locale = NULL) {}
+   /**
+    * Creates a new IntlDatePatternGenerator instance (PHP 8 >= 8.1.0)
+    */
+   public static function create(?string $locale = NULL): ?\IntlDatePatternGenerator {}
+   /**
+    * Determines the most suitable date/time format (PHP 8 >= 8.1.0)
+    */
+   public function getBestPattern(string $skeleton): string|false {}
 }
 
 /**
  * Exception class for intl errors
  */
- class IntlException extends \Exception implements \Stringable, \Throwable {
-}
+class IntlException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * The IntlGregorianCalendar class
  */
- class IntlGregorianCalendar extends \IntlCalendar {
-    /**
-     * Create the Gregorian Calendar class
-     */
-     public function __construct(?mixed $timezoneOrYear = null, ?mixed $localeOrMonth = null, ?mixed $day = null, ?mixed $hour = null, ?mixed $minute = null, ?mixed $second = null) {}
-    /**
-     * Create a new IntlGregorianCalendar instance from date (PHP 8 >= 8.3.0)
-     */
-     public static function createFromDate(int $year, int $month, int $dayOfMonth): static {}
-    /**
-     * Create a new IntlGregorianCalendar instance from date and time (PHP 8 >= 8.3.0)
-     */
-     public static function createFromDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = NULL): static {}
-    /**
-     * Get the Gregorian Calendar change date
-     */
-     public function getGregorianChange(): float {}
-    /**
-     * Determine if the given year is a leap year
-     */
-     public function isLeapYear(int $year): bool {}
-    /**
-     * Set the Gregorian Calendar change date
-     */
-     public function setGregorianChange(float $timestamp): bool {}
+class IntlGregorianCalendar extends \IntlCalendar
+{
+   /**
+    * Create the Gregorian Calendar class
+    */
+   public function __construct(?mixed $timezoneOrYear = null, ?mixed $localeOrMonth = null, ?mixed $day = null, ?mixed $hour = null, ?mixed $minute = null, ?mixed $second = null) {}
+   /**
+    * Create a new IntlGregorianCalendar instance from date (PHP 8 >= 8.3.0)
+    */
+   public static function createFromDate(int $year, int $month, int $dayOfMonth): static {}
+   /**
+    * Create a new IntlGregorianCalendar instance from date and time (PHP 8 >= 8.3.0)
+    */
+   public static function createFromDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = NULL): static {}
+   /**
+    * Get the Gregorian Calendar change date
+    */
+   public function getGregorianChange(): float {}
+   /**
+    * Determine if the given year is a leap year
+    */
+   public function isLeapYear(int $year): bool {}
+   /**
+    * Set the Gregorian Calendar change date
+    */
+   public function setGregorianChange(float $timestamp): bool {}
 }
 
 /**
  * The IntlIterator class
  */
- class IntlIterator implements \Iterator, \Traversable {
-    /**
-     * Get the current element
-     */
-     public function current(): mixed {}
-    /**
-     * Get the current key
-     */
-     public function key(): mixed {}
-    /**
-     * Move forward to the next element
-     */
-     public function next(): void {}
-    /**
-     * Rewind the iterator to the first element
-     */
-     public function rewind(): void {}
-    /**
-     * Check if current position is valid
-     */
-     public function valid(): bool {}
+class IntlIterator implements \Iterator, \Traversable
+{
+   /**
+    * Get the current element
+    */
+   public function current(): mixed {}
+   /**
+    * Get the current key
+    */
+   public function key(): mixed {}
+   /**
+    * Move forward to the next element
+    */
+   public function next(): void {}
+   /**
+    * Rewind the iterator to the first element
+    */
+   public function rewind(): void {}
+   /**
+    * Check if current position is valid
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The IntlListFormatter class
  */
- final class IntlListFormatter {
-    public const TYPE_AND = 0;
-    public const TYPE_OR = 1;
-    public const TYPE_UNITS = 2;
-    public const WIDTH_NARROW = 2;
-    public const WIDTH_SHORT = 1;
-    public const WIDTH_WIDE = 0;
-    /**
-     * Creates a new IntlListFormatter instance
-     */
-     public function __construct(string $locale, int $type = IntlListFormatter::TYPE_AND, int $width = IntlListFormatter::WIDTH_WIDE) {}
-    /**
-     * Format a list of items
-     */
-     public function format(array $strings): string|false {}
-    public function getErrorCode(): int {}
-    public function getErrorMessage(): string {}
+final class IntlListFormatter
+{
+   public const TYPE_AND = 0;
+   public const TYPE_OR = 1;
+   public const TYPE_UNITS = 2;
+   public const WIDTH_NARROW = 2;
+   public const WIDTH_SHORT = 1;
+   public const WIDTH_WIDE = 0;
+   /**
+    * Creates a new IntlListFormatter instance
+    */
+   public function __construct(string $locale, int $type = IntlListFormatter::TYPE_AND, int $width = IntlListFormatter::WIDTH_WIDE) {}
+   /**
+    * Format a list of items
+    */
+   public function format(array $strings): string|false {}
+   public function getErrorCode(): int {}
+   public function getErrorMessage(): string {}
 }
 
 /**
  * The IntlPartsIterator class
  */
- class IntlPartsIterator extends \IntlIterator implements \Iterator, \Traversable {
-    public const KEY_LEFT = 1;
-    public const KEY_RIGHT = 2;
-    public const KEY_SEQUENTIAL = 0;
-    /**
-     * Get IntlBreakIterator backing this parts iterator
-     */
-     public function getBreakIterator(): \IntlBreakIterator {}
-    public function getRuleStatus(): int {}
+class IntlPartsIterator extends \IntlIterator implements \Iterator, \Traversable
+{
+   public const KEY_LEFT = 1;
+   public const KEY_RIGHT = 2;
+   public const KEY_SEQUENTIAL = 0;
+   /**
+    * Get IntlBreakIterator backing this parts iterator
+    */
+   public function getBreakIterator(): \IntlBreakIterator {}
+   public function getRuleStatus(): int {}
 }
 
 /**
  * The IntlRuleBasedBreakIterator class
  */
- class IntlRuleBasedBreakIterator extends \IntlBreakIterator implements \IteratorAggregate, \Traversable {
-    /**
-     * Create iterator from ruleset
-     */
-     public function __construct(string $rules, bool $compiled = false) {}
-    /**
-     * Get the binary form of compiled rules
-     */
-     public function getBinaryRules(): string|false {}
-    /**
-     * Get the largest status value from the break rules that determined the current break position
-     */
-     public function getRuleStatus(): int {}
-    /**
-     * Get the status values from the break rules that determined the current break position
-     */
-     public function getRuleStatusVec(): array|false {}
-    /**
-     * Get the rule set used to create this object
-     */
-     public function getRules(): string|false {}
+class IntlRuleBasedBreakIterator extends \IntlBreakIterator implements \IteratorAggregate, \Traversable
+{
+   /**
+    * Create iterator from ruleset
+    */
+   public function __construct(string $rules, bool $compiled = false) {}
+   /**
+    * Get the binary form of compiled rules
+    */
+   public function getBinaryRules(): string|false {}
+   /**
+    * Get the largest status value from the break rules that determined the current break position
+    */
+   public function getRuleStatus(): int {}
+   /**
+    * Get the status values from the break rules that determined the current break position
+    */
+   public function getRuleStatusVec(): array|false {}
+   /**
+    * Get the rule set used to create this object
+    */
+   public function getRules(): string|false {}
 }
 
 /**
  * The IntlTimeZone class
  */
- class IntlTimeZone {
-    public const DISPLAY_GENERIC_LOCATION = 8;
-    public const DISPLAY_LONG = 2;
-    public const DISPLAY_LONG_GENERIC = 4;
-    public const DISPLAY_LONG_GMT = 6;
-    public const DISPLAY_SHORT = 1;
-    public const DISPLAY_SHORT_COMMONLY_USED = 7;
-    public const DISPLAY_SHORT_GENERIC = 3;
-    public const DISPLAY_SHORT_GMT = 5;
-    public const TYPE_ANY = 0;
-    public const TYPE_CANONICAL = 1;
-    public const TYPE_CANONICAL_LOCATION = 2;
-    /**
-     * Private constructor to disallow direct instantiation
-     */
-     private function __construct() {}
-    /**
-     * Get the number of IDs in the equivalency group that includes the given ID
-     */
-     public static function countEquivalentIDs(string $timezoneId): int|false {}
-    /**
-     * Create a new copy of the default timezone for this host
-     */
-     public static function createDefault(): \IntlTimeZone {}
-    /**
-     * Get an enumeration over time zone IDs associated with the
+class IntlTimeZone
+{
+   public const DISPLAY_GENERIC_LOCATION = 8;
+   public const DISPLAY_LONG = 2;
+   public const DISPLAY_LONG_GENERIC = 4;
+   public const DISPLAY_LONG_GMT = 6;
+   public const DISPLAY_SHORT = 1;
+   public const DISPLAY_SHORT_COMMONLY_USED = 7;
+   public const DISPLAY_SHORT_GENERIC = 3;
+   public const DISPLAY_SHORT_GMT = 5;
+   public const TYPE_ANY = 0;
+   public const TYPE_CANONICAL = 1;
+   public const TYPE_CANONICAL_LOCATION = 2;
+   /**
+    * Private constructor to disallow direct instantiation
+    */
+   private function __construct() {}
+   /**
+    * Get the number of IDs in the equivalency group that includes the given ID
+    */
+   public static function countEquivalentIDs(string $timezoneId): int|false {}
+   /**
+    * Create a new copy of the default timezone for this host
+    */
+   public static function createDefault(): \IntlTimeZone {}
+   /**
+    * Get an enumeration over time zone IDs associated with the
       given country or offset
-     */
-     public static function createEnumeration(string|int|null $countryOrRawOffset = NULL): \IntlIterator|false {}
-    /**
-     * Create a timezone object for the given ID
-     */
-     public static function createTimeZone(string $timezoneId): ?\IntlTimeZone {}
-    /**
-     * Get an enumeration over system time zone IDs with the given filter conditions
-     */
-     public static function createTimeZoneIDEnumeration(int $type, ?string $region = NULL, ?int $rawOffset = NULL): \IntlIterator|false {}
-    /**
-     * Create a timezone object from DateTimeZone
-     */
-     public static function fromDateTimeZone(\DateTimeZone $timezone): ?\IntlTimeZone {}
-    /**
-     * Get the canonical system timezone ID or the normalized custom time zone ID for the given time zone ID
-     */
-     public static function getCanonicalID(string $timezoneId, ?mixed &$isSystemId = NULL): string|false {}
-    /**
-     * Get the amount of time to be added to local standard time to get local wall clock time
-     */
-     public function getDSTSavings(): int {}
-    /**
-     * Get a name of this time zone suitable for presentation to the user
-     */
-     public function getDisplayName(bool $dst = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = NULL): string|false {}
-    /**
-     * Get an ID in the equivalency group that includes the given ID
-     */
-     public static function getEquivalentID(string $timezoneId, int $offset): string|false {}
-    /**
-     * Get last error code on the object
-     */
-     public function getErrorCode(): int|false {}
-    /**
-     * Get last error message on the object
-     */
-     public function getErrorMessage(): string|false {}
-    /**
-     * Create GMT (UTC) timezone
-     */
-     public static function getGMT(): \IntlTimeZone {}
-    /**
-     * Get timezone ID
-     */
-     public function getID(): string|false {}
-    /**
-     * Translate a Windows timezone into a system timezone
-     */
-     public static function getIDForWindowsID(string $timezoneId, ?string $region = NULL): string|false {}
-    /**
-     * Translate a timezone identifier to its IANA equivalent (PHP 8 >= 8.4.0)
-     */
-     public static function getIanaID(string $timezoneId): string|false {}
-    /**
-     * Get the time zone raw and GMT offset for the given moment in time
-     */
-     public function getOffset(float $timestamp, bool $local, mixed &$rawOffset, mixed &$dstOffset): bool {}
-    /**
-     * Get the raw GMT offset (before taking daylight savings time into account
-     */
-     public function getRawOffset(): int {}
-    /**
-     * Get the region code associated with the given system time zone ID
-     */
-     public static function getRegion(string $timezoneId): string|false {}
-    /**
-     * Get the timezone data version currently used by ICU
-     */
-     public static function getTZDataVersion(): string|false {}
-    /**
-     * Get the &quot;unknown&quot; time zone
-     */
-     public static function getUnknown(): \IntlTimeZone {}
-    /**
-     * Translate a system timezone into a Windows timezone
-     */
-     public static function getWindowsID(string $timezoneId): string|false {}
-    /**
-     * Check if this zone has the same rules and offset as another zone
-     */
-     public function hasSameRules(\IntlTimeZone $other): bool {}
-    /**
-     * Convert to DateTimeZone object
-     */
-     public function toDateTimeZone(): \DateTimeZone|false {}
-    /**
-     * Check if this time zone uses daylight savings time
-     */
-     public function useDaylightTime(): bool {}
+    */
+   public static function createEnumeration(string|int|null $countryOrRawOffset = NULL): \IntlIterator|false {}
+   /**
+    * Create a timezone object for the given ID
+    */
+   public static function createTimeZone(string $timezoneId): ?\IntlTimeZone {}
+   /**
+    * Get an enumeration over system time zone IDs with the given filter conditions
+    */
+   public static function createTimeZoneIDEnumeration(int $type, ?string $region = NULL, ?int $rawOffset = NULL): \IntlIterator|false {}
+   /**
+    * Create a timezone object from DateTimeZone
+    */
+   public static function fromDateTimeZone(\DateTimeZone $timezone): ?\IntlTimeZone {}
+   /**
+    * Get the canonical system timezone ID or the normalized custom time zone ID for the given time zone ID
+    */
+   public static function getCanonicalID(string $timezoneId, ?mixed &$isSystemId = NULL): string|false {}
+   /**
+    * Get the amount of time to be added to local standard time to get local wall clock time
+    */
+   public function getDSTSavings(): int {}
+   /**
+    * Get a name of this time zone suitable for presentation to the user
+    */
+   public function getDisplayName(bool $dst = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = NULL): string|false {}
+   /**
+    * Get an ID in the equivalency group that includes the given ID
+    */
+   public static function getEquivalentID(string $timezoneId, int $offset): string|false {}
+   /**
+    * Get last error code on the object
+    */
+   public function getErrorCode(): int|false {}
+   /**
+    * Get last error message on the object
+    */
+   public function getErrorMessage(): string|false {}
+   /**
+    * Create GMT (UTC) timezone
+    */
+   public static function getGMT(): \IntlTimeZone {}
+   /**
+    * Get timezone ID
+    */
+   public function getID(): string|false {}
+   /**
+    * Translate a Windows timezone into a system timezone
+    */
+   public static function getIDForWindowsID(string $timezoneId, ?string $region = NULL): string|false {}
+   /**
+    * Translate a timezone identifier to its IANA equivalent (PHP 8 >= 8.4.0)
+    */
+   public static function getIanaID(string $timezoneId): string|false {}
+   /**
+    * Get the time zone raw and GMT offset for the given moment in time
+    */
+   public function getOffset(float $timestamp, bool $local, mixed &$rawOffset, mixed &$dstOffset): bool {}
+   /**
+    * Get the raw GMT offset (before taking daylight savings time into account
+    */
+   public function getRawOffset(): int {}
+   /**
+    * Get the region code associated with the given system time zone ID
+    */
+   public static function getRegion(string $timezoneId): string|false {}
+   /**
+    * Get the timezone data version currently used by ICU
+    */
+   public static function getTZDataVersion(): string|false {}
+   /**
+    * Get the &quot;unknown&quot; time zone
+    */
+   public static function getUnknown(): \IntlTimeZone {}
+   /**
+    * Translate a system timezone into a Windows timezone
+    */
+   public static function getWindowsID(string $timezoneId): string|false {}
+   /**
+    * Check if this zone has the same rules and offset as another zone
+    */
+   public function hasSameRules(\IntlTimeZone $other): bool {}
+   /**
+    * Convert to DateTimeZone object
+    */
+   public function toDateTimeZone(): \DateTimeZone|false {}
+   /**
+    * Check if this time zone uses daylight savings time
+    */
+   public function useDaylightTime(): bool {}
 }
 
 /**
  * The InvalidArgumentException class
  */
- class InvalidArgumentException extends \LogicException implements \Stringable, \Throwable {
-}
+class InvalidArgumentException extends \LogicException implements \Stringable, \Throwable {}
 
 /**
  * Iterator（迭代器）接口
  */
- interface Iterator extends \Traversable {
-    /**
-     * 返回当前元素
-     */
-     public abstract function current(): mixed;
-    /**
-     * 返回当前元素的键
-     */
-     public abstract function key(): mixed;
-    /**
-     * 向前移动到下一个元素
-     */
-     public abstract function next(): void;
-    /**
-     * 返回到迭代器的第一个元素
-     */
-     public abstract function rewind(): void;
-    /**
-     * 检查当前位置是否有效
-     */
-     public abstract function valid(): bool;
+interface Iterator extends \Traversable
+{
+   /**
+    * 返回当前元素
+    */
+   public abstract function current(): mixed;
+   /**
+    * 返回当前元素的键
+    */
+   public abstract function key(): mixed;
+   /**
+    * 向前移动到下一个元素
+    */
+   public abstract function next(): void;
+   /**
+    * 返回到迭代器的第一个元素
+    */
+   public abstract function rewind(): void;
+   /**
+    * 检查当前位置是否有效
+    */
+   public abstract function valid(): bool;
 }
 
 /**
  * IteratorAggregate（聚合式迭代器）接口
  */
- interface IteratorAggregate extends \Traversable {
-    /**
-     * 获取一个外部迭代器或可遍历对象
-     */
-     public abstract function getIterator(): \Traversable;
+interface IteratorAggregate extends \Traversable
+{
+   /**
+    * 获取一个外部迭代器或可遍历对象
+    */
+   public abstract function getIterator(): \Traversable;
 }
 
 /**
  * The IteratorIterator class
  */
- class IteratorIterator implements \Iterator, \OuterIterator, \Traversable {
-    /**
-     * Create an iterator from anything that is traversable
-     */
-     public function __construct(\Traversable $iterator, ?string $class = NULL) {}
-    /**
-     * Get the current value
-     */
-     public function current(): mixed {}
-    /**
-     * Get the inner iterator
-     */
-     public function getInnerIterator(): ?\Iterator {}
-    /**
-     * Get the key of the current element
-     */
-     public function key(): mixed {}
-    /**
-     * Forward to the next element
-     */
-     public function next(): void {}
-    /**
-     * Rewind to the first element
-     */
-     public function rewind(): void {}
-    /**
-     * Checks if the current element is valid
-     */
-     public function valid(): bool {}
+class IteratorIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   /**
+    * Create an iterator from anything that is traversable
+    */
+   public function __construct(\Traversable $iterator, ?string $class = NULL) {}
+   /**
+    * Get the current value
+    */
+   public function current(): mixed {}
+   /**
+    * Get the inner iterator
+    */
+   public function getInnerIterator(): ?\Iterator {}
+   /**
+    * Get the key of the current element
+    */
+   public function key(): mixed {}
+   /**
+    * Forward to the next element
+    */
+   public function next(): void {}
+   /**
+    * Rewind to the first element
+    */
+   public function rewind(): void {}
+   /**
+    * Checks if the current element is valid
+    */
+   public function valid(): bool {}
 }
 
 /**
  * JsonException 类
  */
- class JsonException extends \Exception implements \Stringable, \Throwable {
-}
+class JsonException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * JSON 序列化接口
  */
- interface JsonSerializable {
-    /**
-     * 指定需要被序列化成 JSON 的数据
-     */
-     public abstract function jsonSerialize(): mixed;
+interface JsonSerializable
+{
+   /**
+    * 指定需要被序列化成 JSON 的数据
+    */
+   public abstract function jsonSerialize(): mixed;
 }
 
 /**
  * The LengthException class
  */
- class LengthException extends \LogicException implements \Stringable, \Throwable {
-}
+class LengthException extends \LogicException implements \Stringable, \Throwable {}
 
 /**
  * The LibXMLError class
  */
- class LibXMLError {
-    public int $code;
-    public int $column;
-    public string $file;
-    public int $level;
-    public int $line;
-    public string $message;
+class LibXMLError
+{
+   public int $code;
+   public int $column;
+   public string $file;
+   public int $level;
+   public int $line;
+   public string $message;
 }
 
 /**
  * LimitIterator 类
  */
- class LimitIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable {
-    /**
-     * Construct a LimitIterator
-     */
-     public function __construct(\Iterator $iterator, int $offset = 0, int $limit = -1) {}
-    /**
-     * Return the current position
-     */
-     public function getPosition(): int {}
-    /**
-     * Move the iterator forward
-     */
-     public function next(): void {}
-    /**
-     * Rewind the iterator to the specified starting offset
-     */
-     public function rewind(): void {}
-    /**
-     * Seek to the given position
-     */
-     public function seek(int $offset): int {}
-    /**
-     * Check whether the current element is valid
-     */
-     public function valid(): bool {}
+class LimitIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   /**
+    * Construct a LimitIterator
+    */
+   public function __construct(\Iterator $iterator, int $offset = 0, int $limit = -1) {}
+   /**
+    * Return the current position
+    */
+   public function getPosition(): int {}
+   /**
+    * Move the iterator forward
+    */
+   public function next(): void {}
+   /**
+    * Rewind the iterator to the specified starting offset
+    */
+   public function rewind(): void {}
+   /**
+    * Seek to the given position
+    */
+   public function seek(int $offset): int {}
+   /**
+    * Check whether the current element is valid
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The Locale class
  */
- class Locale {
-    public const ACTUAL_LOCALE = 0;
-    public const DEFAULT_LOCALE = NULL;
-    public const EXTLANG_TAG = "extlang";
-    public const GRANDFATHERED_LANG_TAG = "grandfathered";
-    public const LANG_TAG = "language";
-    public const PRIVATE_TAG = "private";
-    public const REGION_TAG = "region";
-    public const SCRIPT_TAG = "script";
-    public const VALID_LOCALE = 1;
-    public const VARIANT_TAG = "variant";
-    /**
-     * Tries to find out best available locale based on HTTP &quot;Accept-Language&quot; header
-     */
-     public static function acceptFromHttp(string $header): string|false {}
-    /**
-     * Add likely subtags to a locale
-     */
-     public static function addLikelySubtags(string $locale): string|false {}
-    /**
-     * Canonicalize the locale string
-     */
-     public static function canonicalize(string $locale): ?string {}
-    /**
-     * Returns a correctly ordered and delimited locale ID
-     */
-     public static function composeLocale(array $subtags): string|false {}
-    /**
-     * Checks if a language tag filter matches with locale
-     */
-     public static function filterMatches(string $languageTag, string $locale, bool $canonicalize = false): ?bool {}
-    /**
-     * Gets the variants for the input locale
-     */
-     public static function getAllVariants(string $locale): ?array {}
-    /**
-     * Gets the default locale value from the INTL global 'default_locale'
-     */
-     public static function getDefault(): string {}
-    /**
-     * Returns an appropriately localized display name for language of the inputlocale
-     */
-     public static function getDisplayLanguage(string $locale, ?string $displayLocale = NULL): string|false {}
-    /**
-     * Returns an appropriately localized display name for the input locale
-     */
-     public static function getDisplayName(string $locale, ?string $displayLocale = NULL): string|false {}
-    /**
-     * Returns an appropriately localized display name for region of the input locale
-     */
-     public static function getDisplayRegion(string $locale, ?string $displayLocale = NULL): string|false {}
-    /**
-     * Returns an appropriately localized display name for script of the input locale
-     */
-     public static function getDisplayScript(string $locale, ?string $displayLocale = NULL): string|false {}
-    /**
-     * Returns an appropriately localized display name for variants of the input locale
-     */
-     public static function getDisplayVariant(string $locale, ?string $displayLocale = NULL): string|false {}
-    /**
-     * Gets the keywords for the input locale
-     */
-     public static function getKeywords(string $locale): array|false|null {}
-    /**
-     * Gets the primary language for the input locale
-     */
-     public static function getPrimaryLanguage(string $locale): ?string {}
-    /**
-     * Gets the region for the input locale
-     */
-     public static function getRegion(string $locale): ?string {}
-    /**
-     * Gets the script for the input locale
-     */
-     public static function getScript(string $locale): ?string {}
-    /**
-     * Check whether a locale uses a right-to-left writing system
-     */
-     public static function isRightToLeft(string $locale): bool {}
-    /**
-     * Searches the language tag list for the best match to the language
-     */
-     public static function lookup(array $languageTag, string $locale, bool $canonicalize = false, ?string $defaultLocale = NULL): ?string {}
-    /**
-     * Remove likely subtags from a locale
-     */
-     public static function minimizeSubtags(string $locale): string|false {}
-    /**
-     * Returns a key-value array of locale ID subtag elements
-     */
-     public static function parseLocale(string $locale): ?array {}
-    /**
-     * Sets the default runtime locale
-     */
-     public static function setDefault(string $locale): true {}
+class Locale
+{
+   public const ACTUAL_LOCALE = 0;
+   public const DEFAULT_LOCALE = NULL;
+   public const EXTLANG_TAG = "extlang";
+   public const GRANDFATHERED_LANG_TAG = "grandfathered";
+   public const LANG_TAG = "language";
+   public const PRIVATE_TAG = "private";
+   public const REGION_TAG = "region";
+   public const SCRIPT_TAG = "script";
+   public const VALID_LOCALE = 1;
+   public const VARIANT_TAG = "variant";
+   /**
+    * Tries to find out best available locale based on HTTP &quot;Accept-Language&quot; header
+    */
+   public static function acceptFromHttp(string $header): string|false {}
+   /**
+    * Add likely subtags to a locale
+    */
+   public static function addLikelySubtags(string $locale): string|false {}
+   /**
+    * Canonicalize the locale string
+    */
+   public static function canonicalize(string $locale): ?string {}
+   /**
+    * Returns a correctly ordered and delimited locale ID
+    */
+   public static function composeLocale(array $subtags): string|false {}
+   /**
+    * Checks if a language tag filter matches with locale
+    */
+   public static function filterMatches(string $languageTag, string $locale, bool $canonicalize = false): ?bool {}
+   /**
+    * Gets the variants for the input locale
+    */
+   public static function getAllVariants(string $locale): ?array {}
+   /**
+    * Gets the default locale value from the INTL global 'default_locale'
+    */
+   public static function getDefault(): string {}
+   /**
+    * Returns an appropriately localized display name for language of the inputlocale
+    */
+   public static function getDisplayLanguage(string $locale, ?string $displayLocale = NULL): string|false {}
+   /**
+    * Returns an appropriately localized display name for the input locale
+    */
+   public static function getDisplayName(string $locale, ?string $displayLocale = NULL): string|false {}
+   /**
+    * Returns an appropriately localized display name for region of the input locale
+    */
+   public static function getDisplayRegion(string $locale, ?string $displayLocale = NULL): string|false {}
+   /**
+    * Returns an appropriately localized display name for script of the input locale
+    */
+   public static function getDisplayScript(string $locale, ?string $displayLocale = NULL): string|false {}
+   /**
+    * Returns an appropriately localized display name for variants of the input locale
+    */
+   public static function getDisplayVariant(string $locale, ?string $displayLocale = NULL): string|false {}
+   /**
+    * Gets the keywords for the input locale
+    */
+   public static function getKeywords(string $locale): array|false|null {}
+   /**
+    * Gets the primary language for the input locale
+    */
+   public static function getPrimaryLanguage(string $locale): ?string {}
+   /**
+    * Gets the region for the input locale
+    */
+   public static function getRegion(string $locale): ?string {}
+   /**
+    * Gets the script for the input locale
+    */
+   public static function getScript(string $locale): ?string {}
+   /**
+    * Check whether a locale uses a right-to-left writing system
+    */
+   public static function isRightToLeft(string $locale): bool {}
+   /**
+    * Searches the language tag list for the best match to the language
+    */
+   public static function lookup(array $languageTag, string $locale, bool $canonicalize = false, ?string $defaultLocale = NULL): ?string {}
+   /**
+    * Remove likely subtags from a locale
+    */
+   public static function minimizeSubtags(string $locale): string|false {}
+   /**
+    * Returns a key-value array of locale ID subtag elements
+    */
+   public static function parseLocale(string $locale): ?array {}
+   /**
+    * Sets the default runtime locale
+    */
+   public static function setDefault(string $locale): true {}
 }
 
 /**
  * The LogicException class
  */
- class LogicException extends \Exception implements \Stringable, \Throwable {
-}
+class LogicException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * The MessageFormatter class
  */
- class MessageFormatter {
-    public function __construct(string $locale, string $pattern) {}
-    /**
-     * Constructs a new Message Formatter
-     */
-     public static function create(string $locale, string $pattern): ?\MessageFormatter {}
-    /**
-     * Format the message
-     */
-     public function format(array $values): string|false {}
-    /**
-     * Quick format message
-     */
-     public static function formatMessage(string $locale, string $pattern, array $values): string|false {}
-    /**
-     * Get the error code from last operation
-     */
-     public function getErrorCode(): int {}
-    /**
-     * Get the error text from the last operation
-     */
-     public function getErrorMessage(): string {}
-    /**
-     * Get the locale for which the formatter was created
-     */
-     public function getLocale(): string {}
-    /**
-     * Get the pattern used by the formatter
-     */
-     public function getPattern(): string|false {}
-    /**
-     * Parse input string according to pattern
-     */
-     public function parse(string $string): array|false {}
-    /**
-     * Quick parse input string
-     */
-     public static function parseMessage(string $locale, string $pattern, string $message): array|false {}
-    /**
-     * Set the pattern used by the formatter
-     */
-     public function setPattern(string $pattern): bool {}
+class MessageFormatter
+{
+   public function __construct(string $locale, string $pattern) {}
+   /**
+    * Constructs a new Message Formatter
+    */
+   public static function create(string $locale, string $pattern): ?\MessageFormatter {}
+   /**
+    * Format the message
+    */
+   public function format(array $values): string|false {}
+   /**
+    * Quick format message
+    */
+   public static function formatMessage(string $locale, string $pattern, array $values): string|false {}
+   /**
+    * Get the error code from last operation
+    */
+   public function getErrorCode(): int {}
+   /**
+    * Get the error text from the last operation
+    */
+   public function getErrorMessage(): string {}
+   /**
+    * Get the locale for which the formatter was created
+    */
+   public function getLocale(): string {}
+   /**
+    * Get the pattern used by the formatter
+    */
+   public function getPattern(): string|false {}
+   /**
+    * Parse input string according to pattern
+    */
+   public function parse(string $string): array|false {}
+   /**
+    * Quick parse input string
+    */
+   public static function parseMessage(string $locale, string $pattern, string $message): array|false {}
+   /**
+    * Set the pattern used by the formatter
+    */
+   public function setPattern(string $pattern): bool {}
 }
 
 /**
  * The MultipleIterator class
  */
- class MultipleIterator implements \Iterator, \Traversable {
-    public const MIT_KEYS_ASSOC = 2;
-    public const MIT_KEYS_NUMERIC = 0;
-    public const MIT_NEED_ALL = 1;
-    public const MIT_NEED_ANY = 0;
-    /**
-     * Constructs a new MultipleIterator
-     */
-     public function __construct(int $flags = 1) {}
-    public function __debugInfo(): array {}
-    /**
-     * Attaches iterator information
-     */
-     public function attachIterator(\Iterator $iterator, string|int|null $info = NULL): void {}
-    /**
-     * Checks if an iterator is attached
-     */
-     public function containsIterator(\Iterator $iterator): bool {}
-    /**
-     * Gets the number of attached iterator instances
-     */
-     public function countIterators(): int {}
-    /**
-     * Gets the registered iterator instances
-     */
-     public function current(): array {}
-    /**
-     * Detaches an iterator
-     */
-     public function detachIterator(\Iterator $iterator): void {}
-    /**
-     * Gets the flag information
-     */
-     public function getFlags(): int {}
-    /**
-     * Gets the registered iterator instances
-     */
-     public function key(): array {}
-    /**
-     * Moves all attached iterator instances forward
-     */
-     public function next(): void {}
-    /**
-     * Rewinds all attached iterator instances
-     */
-     public function rewind(): void {}
-    /**
-     * Sets flags
-     */
-     public function setFlags(int $flags): void {}
-    /**
-     * Checks the validity of sub iterators
-     */
-     public function valid(): bool {}
+class MultipleIterator implements \Iterator, \Traversable
+{
+   public const MIT_KEYS_ASSOC = 2;
+   public const MIT_KEYS_NUMERIC = 0;
+   public const MIT_NEED_ALL = 1;
+   public const MIT_NEED_ANY = 0;
+   /**
+    * Constructs a new MultipleIterator
+    */
+   public function __construct(int $flags = 1) {}
+   public function __debugInfo(): array {}
+   /**
+    * Attaches iterator information
+    */
+   public function attachIterator(\Iterator $iterator, string|int|null $info = NULL): void {}
+   /**
+    * Checks if an iterator is attached
+    */
+   public function containsIterator(\Iterator $iterator): bool {}
+   /**
+    * Gets the number of attached iterator instances
+    */
+   public function countIterators(): int {}
+   /**
+    * Gets the registered iterator instances
+    */
+   public function current(): array {}
+   /**
+    * Detaches an iterator
+    */
+   public function detachIterator(\Iterator $iterator): void {}
+   /**
+    * Gets the flag information
+    */
+   public function getFlags(): int {}
+   /**
+    * Gets the registered iterator instances
+    */
+   public function key(): array {}
+   /**
+    * Moves all attached iterator instances forward
+    */
+   public function next(): void {}
+   /**
+    * Rewinds all attached iterator instances
+    */
+   public function rewind(): void {}
+   /**
+    * Sets flags
+    */
+   public function setFlags(int $flags): void {}
+   /**
+    * Checks the validity of sub iterators
+    */
+   public function valid(): bool {}
 }
 
-final class NoDiscard {
-    public readonly ?string $message;
-    public function __construct(?string $message = NULL) {}
+final class NoDiscard
+{
+   public readonly ?string $message;
+   public function __construct(?string $message = NULL) {}
 }
 
 /**
  * The NoRewindIterator class
  */
- class NoRewindIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable {
-    /**
-     * Construct a NoRewindIterator
-     */
-     public function __construct(\Iterator $iterator) {}
-    /**
-     * Get the current value
-     */
-     public function current(): mixed {}
-    /**
-     * Get the current key
-     */
-     public function key(): mixed {}
-    /**
-     * Forward to the next element
-     */
-     public function next(): void {}
-    /**
-     * Prevents the rewind operation on the inner iterator
-     */
-     public function rewind(): void {}
-    /**
-     * Validates the iterator
-     */
-     public function valid(): bool {}
+class NoRewindIterator extends \IteratorIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   /**
+    * Construct a NoRewindIterator
+    */
+   public function __construct(\Iterator $iterator) {}
+   /**
+    * Get the current value
+    */
+   public function current(): mixed {}
+   /**
+    * Get the current key
+    */
+   public function key(): mixed {}
+   /**
+    * Forward to the next element
+    */
+   public function next(): void {}
+   /**
+    * Prevents the rewind operation on the inner iterator
+    */
+   public function rewind(): void {}
+   /**
+    * Validates the iterator
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The Normalizer class
  */
- class Normalizer {
-    public const FORM_C = 16;
-    public const FORM_D = 4;
-    public const FORM_KC = 32;
-    public const FORM_KC_CF = 48;
-    public const FORM_KD = 8;
-    public const NFC = 16;
-    public const NFD = 4;
-    public const NFKC = 32;
-    public const NFKC_CF = 48;
-    public const NFKD = 8;
-    /**
-     * Gets the Decomposition_Mapping property for the given UTF-8 encoded code point
-     */
-     public static function getRawDecomposition(string $string, int $form = Normalizer::FORM_C): ?string {}
-    /**
-     * Checks if the provided string is already in the specified normalization
+class Normalizer
+{
+   public const FORM_C = 16;
+   public const FORM_D = 4;
+   public const FORM_KC = 32;
+   public const FORM_KC_CF = 48;
+   public const FORM_KD = 8;
+   public const NFC = 16;
+   public const NFD = 4;
+   public const NFKC = 32;
+   public const NFKC_CF = 48;
+   public const NFKD = 8;
+   /**
+    * Gets the Decomposition_Mapping property for the given UTF-8 encoded code point
+    */
+   public static function getRawDecomposition(string $string, int $form = Normalizer::FORM_C): ?string {}
+   /**
+    * Checks if the provided string is already in the specified normalization
        form
-     */
-     public static function isNormalized(string $string, int $form = Normalizer::FORM_C): bool {}
-    /**
-     * Normalizes the input provided and returns the normalized string
-     */
-     public static function normalize(string $string, int $form = Normalizer::FORM_C): string|false {}
+    */
+   public static function isNormalized(string $string, int $form = Normalizer::FORM_C): bool {}
+   /**
+    * Normalizes the input provided and returns the normalized string
+    */
+   public static function normalize(string $string, int $form = Normalizer::FORM_C): string|false {}
 }
 
 /**
  * The NumberFormatter class
  */
- class NumberFormatter {
-    public const CASH_CURRENCY = 13;
-    public const CURRENCY = 2;
-    public const CURRENCY_ACCOUNTING = 12;
-    public const CURRENCY_CODE = 5;
-    public const CURRENCY_ISO = 10;
-    public const CURRENCY_PLURAL = 11;
-    public const CURRENCY_STANDARD = 16;
-    public const CURRENCY_SYMBOL = 8;
-    public const DECIMAL = 1;
-    public const DECIMAL_ALWAYS_SHOWN = 2;
-    public const DECIMAL_COMPACT_LONG = 15;
-    public const DECIMAL_COMPACT_SHORT = 14;
-    public const DECIMAL_SEPARATOR_SYMBOL = 0;
-    public const DEFAULT_RULESET = 6;
-    public const DEFAULT_STYLE = 1;
-    public const DIGIT_SYMBOL = 5;
-    public const DURATION = 7;
-    public const EXPONENTIAL_SYMBOL = 11;
-    public const FORMAT_WIDTH = 13;
-    public const FRACTION_DIGITS = 8;
-    public const GROUPING_SEPARATOR_SYMBOL = 1;
-    public const GROUPING_SIZE = 10;
-    public const GROUPING_USED = 1;
-    public const IGNORE = 0;
-    public const INFINITY_SYMBOL = 14;
-    public const INTEGER_DIGITS = 5;
-    public const INTL_CURRENCY_SYMBOL = 9;
-    public const LENIENT_PARSE = 19;
-    public const MAX_FRACTION_DIGITS = 6;
-    public const MAX_INTEGER_DIGITS = 3;
-    public const MAX_SIGNIFICANT_DIGITS = 18;
-    public const MINUS_SIGN_SYMBOL = 6;
-    public const MIN_FRACTION_DIGITS = 7;
-    public const MIN_INTEGER_DIGITS = 4;
-    public const MIN_SIGNIFICANT_DIGITS = 17;
-    public const MONETARY_GROUPING_SEPARATOR_SYMBOL = 17;
-    public const MONETARY_SEPARATOR_SYMBOL = 10;
-    public const MULTIPLIER = 9;
-    public const NAN_SYMBOL = 15;
-    public const NEGATIVE_PREFIX = 2;
-    public const NEGATIVE_SUFFIX = 3;
-    public const ORDINAL = 6;
-    public const PADDING_CHARACTER = 4;
-    public const PADDING_POSITION = 14;
-    public const PAD_AFTER_PREFIX = 1;
-    public const PAD_AFTER_SUFFIX = 3;
-    public const PAD_BEFORE_PREFIX = 0;
-    public const PAD_BEFORE_SUFFIX = 2;
-    public const PAD_ESCAPE_SYMBOL = 13;
-    public const PARSE_INT_ONLY = 0;
-    public const PATTERN_DECIMAL = 0;
-    public const PATTERN_RULEBASED = 9;
-    public const PATTERN_SEPARATOR_SYMBOL = 2;
-    public const PERCENT = 3;
-    public const PERCENT_SYMBOL = 3;
-    public const PERMILL_SYMBOL = 12;
-    public const PLUS_SIGN_SYMBOL = 7;
-    public const POSITIVE_PREFIX = 0;
-    public const POSITIVE_SUFFIX = 1;
-    public const PUBLIC_RULESETS = 7;
-    public const ROUNDING_INCREMENT = 12;
-    public const ROUNDING_MODE = 11;
-    public const ROUND_AWAY_FROM_ZERO = 3;
-    public const ROUND_CEILING = 0;
-    public const ROUND_DOWN = 2;
-    public const ROUND_FLOOR = 1;
-    public const ROUND_HALFDOWN = 5;
-    public const ROUND_HALFEVEN = 4;
-    public const ROUND_HALFODD = 8;
-    public const ROUND_HALFUP = 6;
-    public const ROUND_TOWARD_ZERO = 2;
-    public const ROUND_UP = 3;
-    public const SCIENTIFIC = 4;
-    public const SECONDARY_GROUPING_SIZE = 15;
-    public const SIGNIFICANT_DIGITS_USED = 16;
-    public const SIGNIFICANT_DIGIT_SYMBOL = 16;
-    public const SPELLOUT = 5;
-    public const TYPE_CURRENCY = 4;
-    public const TYPE_DEFAULT = 0;
-    public const TYPE_DOUBLE = 3;
-    public const TYPE_INT32 = 1;
-    public const TYPE_INT64 = 2;
-    public const ZERO_DIGIT_SYMBOL = 4;
-    public function __construct(string $locale, int $style, ?string $pattern = NULL) {}
-    /**
-     * Create a number formatter
-     */
-     public static function create(string $locale, int $style, ?string $pattern = NULL): ?\NumberFormatter {}
-    /**
-     * Format a number
-     */
-     public function format(int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
-    /**
-     * Format a currency value
-     */
-     public function formatCurrency(float $amount, string $currency): string|false {}
-    /**
-     * Get an attribute
-     */
-     public function getAttribute(int $attribute): int|float|false {}
-    /**
-     * Get formatter's last error code
-     */
-     public function getErrorCode(): int {}
-    /**
-     * Get formatter's last error message
-     */
-     public function getErrorMessage(): string {}
-    /**
-     * Get formatter locale
-     */
-     public function getLocale(int $type = ULOC_ACTUAL_LOCALE): string|false {}
-    /**
-     * Get formatter pattern
-     */
-     public function getPattern(): string|false {}
-    /**
-     * Get a symbol value
-     */
-     public function getSymbol(int $symbol): string|false {}
-    /**
-     * Get a text attribute
-     */
-     public function getTextAttribute(int $attribute): string|false {}
-    /**
-     * Parse a number
-     */
-     public function parse(string $string, int $type = NumberFormatter::TYPE_DOUBLE, ?int &$offset = NULL): int|float|false {}
-    /**
-     * Parse a currency number
-     */
-     public function parseCurrency(string $string, mixed &$currency, ?int &$offset = NULL): float|false {}
-    /**
-     * Set an attribute
-     */
-     public function setAttribute(int $attribute, int|float $value): bool {}
-    /**
-     * Set formatter pattern
-     */
-     public function setPattern(string $pattern): bool {}
-    /**
-     * Set a symbol value
-     */
-     public function setSymbol(int $symbol, string $value): bool {}
-    /**
-     * Set a text attribute
-     */
-     public function setTextAttribute(int $attribute, string $value): bool {}
+class NumberFormatter
+{
+   public const CASH_CURRENCY = 13;
+   public const CURRENCY = 2;
+   public const CURRENCY_ACCOUNTING = 12;
+   public const CURRENCY_CODE = 5;
+   public const CURRENCY_ISO = 10;
+   public const CURRENCY_PLURAL = 11;
+   public const CURRENCY_STANDARD = 16;
+   public const CURRENCY_SYMBOL = 8;
+   public const DECIMAL = 1;
+   public const DECIMAL_ALWAYS_SHOWN = 2;
+   public const DECIMAL_COMPACT_LONG = 15;
+   public const DECIMAL_COMPACT_SHORT = 14;
+   public const DECIMAL_SEPARATOR_SYMBOL = 0;
+   public const DEFAULT_RULESET = 6;
+   public const DEFAULT_STYLE = 1;
+   public const DIGIT_SYMBOL = 5;
+   public const DURATION = 7;
+   public const EXPONENTIAL_SYMBOL = 11;
+   public const FORMAT_WIDTH = 13;
+   public const FRACTION_DIGITS = 8;
+   public const GROUPING_SEPARATOR_SYMBOL = 1;
+   public const GROUPING_SIZE = 10;
+   public const GROUPING_USED = 1;
+   public const IGNORE = 0;
+   public const INFINITY_SYMBOL = 14;
+   public const INTEGER_DIGITS = 5;
+   public const INTL_CURRENCY_SYMBOL = 9;
+   public const LENIENT_PARSE = 19;
+   public const MAX_FRACTION_DIGITS = 6;
+   public const MAX_INTEGER_DIGITS = 3;
+   public const MAX_SIGNIFICANT_DIGITS = 18;
+   public const MINUS_SIGN_SYMBOL = 6;
+   public const MIN_FRACTION_DIGITS = 7;
+   public const MIN_INTEGER_DIGITS = 4;
+   public const MIN_SIGNIFICANT_DIGITS = 17;
+   public const MONETARY_GROUPING_SEPARATOR_SYMBOL = 17;
+   public const MONETARY_SEPARATOR_SYMBOL = 10;
+   public const MULTIPLIER = 9;
+   public const NAN_SYMBOL = 15;
+   public const NEGATIVE_PREFIX = 2;
+   public const NEGATIVE_SUFFIX = 3;
+   public const ORDINAL = 6;
+   public const PADDING_CHARACTER = 4;
+   public const PADDING_POSITION = 14;
+   public const PAD_AFTER_PREFIX = 1;
+   public const PAD_AFTER_SUFFIX = 3;
+   public const PAD_BEFORE_PREFIX = 0;
+   public const PAD_BEFORE_SUFFIX = 2;
+   public const PAD_ESCAPE_SYMBOL = 13;
+   public const PARSE_INT_ONLY = 0;
+   public const PATTERN_DECIMAL = 0;
+   public const PATTERN_RULEBASED = 9;
+   public const PATTERN_SEPARATOR_SYMBOL = 2;
+   public const PERCENT = 3;
+   public const PERCENT_SYMBOL = 3;
+   public const PERMILL_SYMBOL = 12;
+   public const PLUS_SIGN_SYMBOL = 7;
+   public const POSITIVE_PREFIX = 0;
+   public const POSITIVE_SUFFIX = 1;
+   public const PUBLIC_RULESETS = 7;
+   public const ROUNDING_INCREMENT = 12;
+   public const ROUNDING_MODE = 11;
+   public const ROUND_AWAY_FROM_ZERO = 3;
+   public const ROUND_CEILING = 0;
+   public const ROUND_DOWN = 2;
+   public const ROUND_FLOOR = 1;
+   public const ROUND_HALFDOWN = 5;
+   public const ROUND_HALFEVEN = 4;
+   public const ROUND_HALFODD = 8;
+   public const ROUND_HALFUP = 6;
+   public const ROUND_TOWARD_ZERO = 2;
+   public const ROUND_UP = 3;
+   public const SCIENTIFIC = 4;
+   public const SECONDARY_GROUPING_SIZE = 15;
+   public const SIGNIFICANT_DIGITS_USED = 16;
+   public const SIGNIFICANT_DIGIT_SYMBOL = 16;
+   public const SPELLOUT = 5;
+   public const TYPE_CURRENCY = 4;
+   public const TYPE_DEFAULT = 0;
+   public const TYPE_DOUBLE = 3;
+   public const TYPE_INT32 = 1;
+   public const TYPE_INT64 = 2;
+   public const ZERO_DIGIT_SYMBOL = 4;
+   public function __construct(string $locale, int $style, ?string $pattern = NULL) {}
+   /**
+    * Create a number formatter
+    */
+   public static function create(string $locale, int $style, ?string $pattern = NULL): ?\NumberFormatter {}
+   /**
+    * Format a number
+    */
+   public function format(int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
+   /**
+    * Format a currency value
+    */
+   public function formatCurrency(float $amount, string $currency): string|false {}
+   /**
+    * Get an attribute
+    */
+   public function getAttribute(int $attribute): int|float|false {}
+   /**
+    * Get formatter's last error code
+    */
+   public function getErrorCode(): int {}
+   /**
+    * Get formatter's last error message
+    */
+   public function getErrorMessage(): string {}
+   /**
+    * Get formatter locale
+    */
+   public function getLocale(int $type = ULOC_ACTUAL_LOCALE): string|false {}
+   /**
+    * Get formatter pattern
+    */
+   public function getPattern(): string|false {}
+   /**
+    * Get a symbol value
+    */
+   public function getSymbol(int $symbol): string|false {}
+   /**
+    * Get a text attribute
+    */
+   public function getTextAttribute(int $attribute): string|false {}
+   /**
+    * Parse a number
+    */
+   public function parse(string $string, int $type = NumberFormatter::TYPE_DOUBLE, ?int &$offset = NULL): int|float|false {}
+   /**
+    * Parse a currency number
+    */
+   public function parseCurrency(string $string, mixed &$currency, ?int &$offset = NULL): float|false {}
+   /**
+    * Set an attribute
+    */
+   public function setAttribute(int $attribute, int|float $value): bool {}
+   /**
+    * Set formatter pattern
+    */
+   public function setPattern(string $pattern): bool {}
+   /**
+    * Set a symbol value
+    */
+   public function setSymbol(int $symbol, string $value): bool {}
+   /**
+    * Set a text attribute
+    */
+   public function setTextAttribute(int $attribute, string $value): bool {}
 }
 
 /**
  * OpenSSLAsymmetricKey 类
  */
- final class OpenSSLAsymmetricKey {
-}
+final class OpenSSLAsymmetricKey {}
 
 /**
  * OpenSSLCertificate 类
  */
- final class OpenSSLCertificate {
-}
+final class OpenSSLCertificate {}
 
 /**
  * OpenSSLCertificateSigningRequest 类
  */
- final class OpenSSLCertificateSigningRequest {
-}
+final class OpenSSLCertificateSigningRequest {}
 
 /**
  * The OutOfBoundsException class
  */
- class OutOfBoundsException extends \RuntimeException implements \Stringable, \Throwable {
-}
+class OutOfBoundsException extends \RuntimeException implements \Stringable, \Throwable {}
 
 /**
  * The OutOfRangeException class
  */
- class OutOfRangeException extends \LogicException implements \Stringable, \Throwable {
-}
+class OutOfRangeException extends \LogicException implements \Stringable, \Throwable {}
 
 /**
  * The OuterIterator interface
  */
- interface OuterIterator extends \Iterator, \Traversable {
-    /**
-     * Returns the inner iterator for the current entry
-     */
-     public abstract function getInnerIterator(): ?\Iterator;
+interface OuterIterator extends \Iterator, \Traversable
+{
+   /**
+    * Returns the inner iterator for the current entry
+    */
+   public abstract function getInnerIterator(): ?\Iterator;
 }
 
 /**
  * The OverflowException class
  */
- class OverflowException extends \RuntimeException implements \Stringable, \Throwable {
-}
+class OverflowException extends \RuntimeException implements \Stringable, \Throwable {}
 
 /**
  * Override 注解 (PHP 8 >= 8.3.0)
  */
- final class Override {
-    /**
-     * 构造新的 Override 属性实例 (PHP 8 >= 8.3.0)
-     */
-     public function __construct() {}
+final class Override
+{
+   /**
+    * 构造新的 Override 属性实例 (PHP 8 >= 8.3.0)
+    */
+   public function __construct() {}
 }
 
 /**
  * PDO 类
  */
- class PDO {
-    public const ATTR_AUTOCOMMIT = 0;
-    public const ATTR_CASE = 8;
-    public const ATTR_CLIENT_VERSION = 5;
-    public const ATTR_CONNECTION_STATUS = 7;
-    public const ATTR_CURSOR = 10;
-    public const ATTR_CURSOR_NAME = 9;
-    public const ATTR_DEFAULT_FETCH_MODE = 19;
-    public const ATTR_DEFAULT_STR_PARAM = 21;
-    public const ATTR_DRIVER_NAME = 16;
-    public const ATTR_EMULATE_PREPARES = 20;
-    public const ATTR_ERRMODE = 3;
-    public const ATTR_FETCH_CATALOG_NAMES = 15;
-    public const ATTR_FETCH_TABLE_NAMES = 14;
-    public const ATTR_MAX_COLUMN_LEN = 18;
-    public const ATTR_ORACLE_NULLS = 11;
-    public const ATTR_PERSISTENT = 12;
-    public const ATTR_PREFETCH = 1;
-    public const ATTR_SERVER_INFO = 6;
-    public const ATTR_SERVER_VERSION = 4;
-    public const ATTR_STATEMENT_CLASS = 13;
-    public const ATTR_STRINGIFY_FETCHES = 17;
-    public const ATTR_TIMEOUT = 2;
-    public const CASE_LOWER = 2;
-    public const CASE_NATURAL = 0;
-    public const CASE_UPPER = 1;
-    public const CURSOR_FWDONLY = 0;
-    public const CURSOR_SCROLL = 1;
-    public const ERRMODE_EXCEPTION = 2;
-    public const ERRMODE_SILENT = 0;
-    public const ERRMODE_WARNING = 1;
-    public const ERR_NONE = "00000";
-    public const FETCH_ASSOC = 2;
-    public const FETCH_BOTH = 4;
-    public const FETCH_BOUND = 6;
-    public const FETCH_CLASS = 8;
-    public const FETCH_CLASSTYPE = 128;
-    public const FETCH_COLUMN = 7;
-    public const FETCH_DEFAULT = 0;
-    public const FETCH_FUNC = 10;
-    public const FETCH_GROUP = 32;
-    public const FETCH_INTO = 9;
-    public const FETCH_KEY_PAIR = 12;
-    public const FETCH_LAZY = 1;
-    public const FETCH_NAMED = 11;
-    public const FETCH_NUM = 3;
-    public const FETCH_OBJ = 5;
-    public const FETCH_ORI_ABS = 4;
-    public const FETCH_ORI_FIRST = 2;
-    public const FETCH_ORI_LAST = 3;
-    public const FETCH_ORI_NEXT = 0;
-    public const FETCH_ORI_PRIOR = 1;
-    public const FETCH_ORI_REL = 5;
-    public const FETCH_PROPS_LATE = 256;
-    public const FETCH_SERIALIZE = 512;
-    public const FETCH_UNIQUE = 64;
-    public const MYSQL_ATTR_COMPRESS = 1003;
-    public const MYSQL_ATTR_DIRECT_QUERY = 20;
-    public const MYSQL_ATTR_FOUND_ROWS = 1004;
-    public const MYSQL_ATTR_IGNORE_SPACE = 1005;
-    public const MYSQL_ATTR_INIT_COMMAND = 1002;
-    public const MYSQL_ATTR_LOCAL_INFILE = 1001;
-    public const MYSQL_ATTR_LOCAL_INFILE_DIRECTORY = 1014;
-    public const MYSQL_ATTR_MULTI_STATEMENTS = 1012;
-    public const MYSQL_ATTR_SERVER_PUBLIC_KEY = 1011;
-    public const MYSQL_ATTR_SSL_CA = 1008;
-    public const MYSQL_ATTR_SSL_CAPATH = 1009;
-    public const MYSQL_ATTR_SSL_CERT = 1007;
-    public const MYSQL_ATTR_SSL_CIPHER = 1010;
-    public const MYSQL_ATTR_SSL_KEY = 1006;
-    public const MYSQL_ATTR_SSL_VERIFY_SERVER_CERT = 1013;
-    public const MYSQL_ATTR_USE_BUFFERED_QUERY = 1000;
-    public const NULL_EMPTY_STRING = 1;
-    public const NULL_NATURAL = 0;
-    public const NULL_TO_STRING = 2;
-    public const ODBC_ATTR_ASSUME_UTF8 = 1001;
-    public const ODBC_ATTR_USE_CURSOR_LIBRARY = 1000;
-    public const ODBC_SQL_USE_DRIVER = 2;
-    public const ODBC_SQL_USE_IF_NEEDED = 0;
-    public const ODBC_SQL_USE_ODBC = 1;
-    public const PARAM_BOOL = 5;
-    public const PARAM_EVT_ALLOC = 0;
-    public const PARAM_EVT_EXEC_POST = 3;
-    public const PARAM_EVT_EXEC_PRE = 2;
-    public const PARAM_EVT_FETCH_POST = 5;
-    public const PARAM_EVT_FETCH_PRE = 4;
-    public const PARAM_EVT_FREE = 1;
-    public const PARAM_EVT_NORMALIZE = 6;
-    public const PARAM_INPUT_OUTPUT = -2147483648;
-    public const PARAM_INT = 1;
-    public const PARAM_LOB = 3;
-    public const PARAM_NULL = 0;
-    public const PARAM_STMT = 4;
-    public const PARAM_STR = 2;
-    public const PARAM_STR_CHAR = 536870912;
-    public const PARAM_STR_NATL = 1073741824;
-    public const PGSQL_ATTR_DISABLE_PREPARES = 1000;
-    public const PGSQL_TRANSACTION_ACTIVE = 1;
-    public const PGSQL_TRANSACTION_IDLE = 0;
-    public const PGSQL_TRANSACTION_INERROR = 3;
-    public const PGSQL_TRANSACTION_INTRANS = 2;
-    public const PGSQL_TRANSACTION_UNKNOWN = 4;
-    public const SQLITE_ATTR_EXTENDED_RESULT_CODES = 1002;
-    public const SQLITE_ATTR_OPEN_FLAGS = 1000;
-    public const SQLITE_ATTR_READONLY_STATEMENT = 1001;
-    public const SQLITE_DETERMINISTIC = 2048;
-    public const SQLITE_OPEN_CREATE = 4;
-    public const SQLITE_OPEN_READONLY = 1;
-    public const SQLITE_OPEN_READWRITE = 2;
-    /**
-     * 创建一个表示数据库连接的 PDO 实例
-     */
-     public function __construct(string $dsn, ?string $username = NULL, ?string $password = NULL, ?array $options = NULL) {}
-    /**
-     * 启动一个事务
-     */
-     public function beginTransaction(): bool {}
-    /**
-     * 提交一个事务
-     */
-     public function commit(): bool {}
-    /**
-     * 连接到数据库，如果驱动支持则返回 PDO 子类实例 (PHP 8 >= 8.4.0)
-     */
-     public static function connect(string $dsn, ?string $username = NULL, ?string $password = NULL, ?array $options = NULL): static {}
-    /**
-     * 获取跟数据库句柄上一次操作相关的 SQLSTATE
-     */
-     public function errorCode(): ?string {}
-    /**
-     * 获取与数据库句柄上最后一次操作相关的扩展错误信息
-     */
-     public function errorInfo(): array {}
-    /**
-     * 执行 SQL 语句，并返回受影响的行数
-     */
-     public function exec(string $statement): int|false {}
-    /**
-     * 取回一个数据库连接的属性
-     */
-     public function getAttribute(int $attribute): mixed {}
-    /**
-     * 返回一个可用驱动的数组
-     */
-     public static function getAvailableDrivers(): array {}
-    /**
-     * 检查是否在事务内
-     */
-     public function inTransaction(): bool {}
-    /**
-     * 返回最后插入行的ID或序列值
-     */
-     public function lastInsertId(?string $name = NULL): string|false {}
-    /**
-     * 预处理要执行的语句，并返回语句对象
-     */
-     public function prepare(string $query, array $options = []): \PDOStatement|false {}
-    /**
-     * 预处理并执行没有占位符的 SQL 语句
-     */
-     public function query(string $query, ?int $fetchMode = NULL, mixed ...$fetchModeArgs): \PDOStatement|false {}
-    /**
-     * 为 SQL 查询里的字符串添加引号
-     */
-     public function quote(string $string, int $type = PDO::PARAM_STR): string|false {}
-    /**
-     * 回滚事务
-     */
-     public function rollBack(): bool {}
-    /**
-     * 设置属性
-     */
-     public function setAttribute(int $attribute, mixed $value): bool {}
+class PDO
+{
+   public const ATTR_AUTOCOMMIT = 0;
+   public const ATTR_CASE = 8;
+   public const ATTR_CLIENT_VERSION = 5;
+   public const ATTR_CONNECTION_STATUS = 7;
+   public const ATTR_CURSOR = 10;
+   public const ATTR_CURSOR_NAME = 9;
+   public const ATTR_DEFAULT_FETCH_MODE = 19;
+   public const ATTR_DEFAULT_STR_PARAM = 21;
+   public const ATTR_DRIVER_NAME = 16;
+   public const ATTR_EMULATE_PREPARES = 20;
+   public const ATTR_ERRMODE = 3;
+   public const ATTR_FETCH_CATALOG_NAMES = 15;
+   public const ATTR_FETCH_TABLE_NAMES = 14;
+   public const ATTR_MAX_COLUMN_LEN = 18;
+   public const ATTR_ORACLE_NULLS = 11;
+   public const ATTR_PERSISTENT = 12;
+   public const ATTR_PREFETCH = 1;
+   public const ATTR_SERVER_INFO = 6;
+   public const ATTR_SERVER_VERSION = 4;
+   public const ATTR_STATEMENT_CLASS = 13;
+   public const ATTR_STRINGIFY_FETCHES = 17;
+   public const ATTR_TIMEOUT = 2;
+   public const CASE_LOWER = 2;
+   public const CASE_NATURAL = 0;
+   public const CASE_UPPER = 1;
+   public const CURSOR_FWDONLY = 0;
+   public const CURSOR_SCROLL = 1;
+   public const ERRMODE_EXCEPTION = 2;
+   public const ERRMODE_SILENT = 0;
+   public const ERRMODE_WARNING = 1;
+   public const ERR_NONE = "00000";
+   public const FETCH_ASSOC = 2;
+   public const FETCH_BOTH = 4;
+   public const FETCH_BOUND = 6;
+   public const FETCH_CLASS = 8;
+   public const FETCH_CLASSTYPE = 128;
+   public const FETCH_COLUMN = 7;
+   public const FETCH_DEFAULT = 0;
+   public const FETCH_FUNC = 10;
+   public const FETCH_GROUP = 32;
+   public const FETCH_INTO = 9;
+   public const FETCH_KEY_PAIR = 12;
+   public const FETCH_LAZY = 1;
+   public const FETCH_NAMED = 11;
+   public const FETCH_NUM = 3;
+   public const FETCH_OBJ = 5;
+   public const FETCH_ORI_ABS = 4;
+   public const FETCH_ORI_FIRST = 2;
+   public const FETCH_ORI_LAST = 3;
+   public const FETCH_ORI_NEXT = 0;
+   public const FETCH_ORI_PRIOR = 1;
+   public const FETCH_ORI_REL = 5;
+   public const FETCH_PROPS_LATE = 256;
+   public const FETCH_SERIALIZE = 512;
+   public const FETCH_UNIQUE = 64;
+   public const MYSQL_ATTR_COMPRESS = 1003;
+   public const MYSQL_ATTR_DIRECT_QUERY = 20;
+   public const MYSQL_ATTR_FOUND_ROWS = 1004;
+   public const MYSQL_ATTR_IGNORE_SPACE = 1005;
+   public const MYSQL_ATTR_INIT_COMMAND = 1002;
+   public const MYSQL_ATTR_LOCAL_INFILE = 1001;
+   public const MYSQL_ATTR_LOCAL_INFILE_DIRECTORY = 1014;
+   public const MYSQL_ATTR_MULTI_STATEMENTS = 1012;
+   public const MYSQL_ATTR_SERVER_PUBLIC_KEY = 1011;
+   public const MYSQL_ATTR_SSL_CA = 1008;
+   public const MYSQL_ATTR_SSL_CAPATH = 1009;
+   public const MYSQL_ATTR_SSL_CERT = 1007;
+   public const MYSQL_ATTR_SSL_CIPHER = 1010;
+   public const MYSQL_ATTR_SSL_KEY = 1006;
+   public const MYSQL_ATTR_SSL_VERIFY_SERVER_CERT = 1013;
+   public const MYSQL_ATTR_USE_BUFFERED_QUERY = 1000;
+   public const NULL_EMPTY_STRING = 1;
+   public const NULL_NATURAL = 0;
+   public const NULL_TO_STRING = 2;
+   public const ODBC_ATTR_ASSUME_UTF8 = 1001;
+   public const ODBC_ATTR_USE_CURSOR_LIBRARY = 1000;
+   public const ODBC_SQL_USE_DRIVER = 2;
+   public const ODBC_SQL_USE_IF_NEEDED = 0;
+   public const ODBC_SQL_USE_ODBC = 1;
+   public const PARAM_BOOL = 5;
+   public const PARAM_EVT_ALLOC = 0;
+   public const PARAM_EVT_EXEC_POST = 3;
+   public const PARAM_EVT_EXEC_PRE = 2;
+   public const PARAM_EVT_FETCH_POST = 5;
+   public const PARAM_EVT_FETCH_PRE = 4;
+   public const PARAM_EVT_FREE = 1;
+   public const PARAM_EVT_NORMALIZE = 6;
+   public const PARAM_INPUT_OUTPUT = -2147483648;
+   public const PARAM_INT = 1;
+   public const PARAM_LOB = 3;
+   public const PARAM_NULL = 0;
+   public const PARAM_STMT = 4;
+   public const PARAM_STR = 2;
+   public const PARAM_STR_CHAR = 536870912;
+   public const PARAM_STR_NATL = 1073741824;
+   public const PGSQL_ATTR_DISABLE_PREPARES = 1000;
+   public const PGSQL_TRANSACTION_ACTIVE = 1;
+   public const PGSQL_TRANSACTION_IDLE = 0;
+   public const PGSQL_TRANSACTION_INERROR = 3;
+   public const PGSQL_TRANSACTION_INTRANS = 2;
+   public const PGSQL_TRANSACTION_UNKNOWN = 4;
+   public const SQLITE_ATTR_EXTENDED_RESULT_CODES = 1002;
+   public const SQLITE_ATTR_OPEN_FLAGS = 1000;
+   public const SQLITE_ATTR_READONLY_STATEMENT = 1001;
+   public const SQLITE_DETERMINISTIC = 2048;
+   public const SQLITE_OPEN_CREATE = 4;
+   public const SQLITE_OPEN_READONLY = 1;
+   public const SQLITE_OPEN_READWRITE = 2;
+   /**
+    * 创建一个表示数据库连接的 PDO 实例
+    */
+   public function __construct(string $dsn, ?string $username = NULL, ?string $password = NULL, ?array $options = NULL) {}
+   /**
+    * 启动一个事务
+    */
+   public function beginTransaction(): bool {}
+   /**
+    * 提交一个事务
+    */
+   public function commit(): bool {}
+   /**
+    * 连接到数据库，如果驱动支持则返回 PDO 子类实例 (PHP 8 >= 8.4.0)
+    */
+   public static function connect(string $dsn, ?string $username = NULL, ?string $password = NULL, ?array $options = NULL): static {}
+   /**
+    * 获取跟数据库句柄上一次操作相关的 SQLSTATE
+    */
+   public function errorCode(): ?string {}
+   /**
+    * 获取与数据库句柄上最后一次操作相关的扩展错误信息
+    */
+   public function errorInfo(): array {}
+   /**
+    * 执行 SQL 语句，并返回受影响的行数
+    */
+   public function exec(string $statement): int|false {}
+   /**
+    * 取回一个数据库连接的属性
+    */
+   public function getAttribute(int $attribute): mixed {}
+   /**
+    * 返回一个可用驱动的数组
+    */
+   public static function getAvailableDrivers(): array {}
+   /**
+    * 检查是否在事务内
+    */
+   public function inTransaction(): bool {}
+   /**
+    * 返回最后插入行的ID或序列值
+    */
+   public function lastInsertId(?string $name = NULL): string|false {}
+   /**
+    * 预处理要执行的语句，并返回语句对象
+    */
+   public function prepare(string $query, array $options = []): \PDOStatement|false {}
+   /**
+    * 预处理并执行没有占位符的 SQL 语句
+    */
+   public function query(string $query, ?int $fetchMode = NULL, mixed ...$fetchModeArgs): \PDOStatement|false {}
+   /**
+    * 为 SQL 查询里的字符串添加引号
+    */
+   public function quote(string $string, int $type = PDO::PARAM_STR): string|false {}
+   /**
+    * 回滚事务
+    */
+   public function rollBack(): bool {}
+   /**
+    * 设置属性
+    */
+   public function setAttribute(int $attribute, mixed $value): bool {}
 }
 
 /**
  * PDOException 异常类
  */
- class PDOException extends \RuntimeException implements \Stringable, \Throwable {
-    protected $code;
-    public ?array $errorInfo;
+class PDOException extends \RuntimeException implements \Stringable, \Throwable
+{
+   protected $code;
+   public ?array $errorInfo;
 }
 
 /**
  * The PDORow class
  */
- final class PDORow {
-    public string $queryString;
+final class PDORow
+{
+   public string $queryString;
 }
 
 /**
  * PDOStatement 类
  */
- class PDOStatement implements \IteratorAggregate, \Traversable {
-    public string $queryString;
-    /**
-     * 绑定一列到一个 PHP 变量
-     */
-     public function bindColumn(string|int $column, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = NULL): bool {}
-    /**
-     * 绑定一个参数到指定的变量名
-     */
-     public function bindParam(string|int $param, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = NULL): bool {}
-    /**
-     * 把一个值绑定到一个参数
-     */
-     public function bindValue(string|int $param, mixed $value, int $type = PDO::PARAM_STR): bool {}
-    /**
-     * 关闭游标，使语句能再次被执行
-     */
-     public function closeCursor(): bool {}
-    /**
-     * 返回结果集中的列数
-     */
-     public function columnCount(): int {}
-    /**
-     * 打印一条 SQL 预处理命令
-     */
-     public function debugDumpParams(): ?bool {}
-    /**
-     * 获取跟上一次语句句柄操作相关的 SQLSTATE
-     */
-     public function errorCode(): ?string {}
-    /**
-     * 获取跟上一次语句句柄操作相关的扩展错误信息
-     */
-     public function errorInfo(): array {}
-    /**
-     * 执行预处理语句
-     */
-     public function execute(?array $params = NULL): bool {}
-    /**
-     * 从结果集中获取下一行
-     */
-     public function fetch(int $mode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0): mixed {}
-    /**
-     * 从结果集中获取剩余的行
-     */
-     public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): array {}
-    /**
-     * 从结果集中的下一行返回单独的一列
-     */
-     public function fetchColumn(int $column = 0): mixed {}
-    /**
-     * 获取下一行并作为一个对象返回
-     */
-     public function fetchObject(?string $class = "stdClass", array $constructorArgs = []): object|false {}
-    /**
-     * 检索语句属性
-     */
-     public function getAttribute(int $name): mixed {}
-    /**
-     * 返回结果集中一列的元数据
-     */
-     public function getColumnMeta(int $column): array|false {}
-    /**
-     * 获取结果集迭代器
-     */
-     public function getIterator(): \Iterator {}
-    /**
-     * 在一个多行集合语句句柄中推进到下一个行集合
-     */
-     public function nextRowset(): bool {}
-    /**
-     * 返回受上一个 SQL 语句影响的行数
-     */
-     public function rowCount(): int {}
-    /**
-     * 设置一个语句属性
-     */
-     public function setAttribute(int $attribute, mixed $value): bool {}
-    /**
-     * 为语句设置默认的获取模式
-     */
-     public function setFetchMode(int $mode, mixed ...$args): true {}
+class PDOStatement implements \IteratorAggregate, \Traversable
+{
+   public string $queryString;
+   /**
+    * 绑定一列到一个 PHP 变量
+    */
+   public function bindColumn(string|int $column, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = NULL): bool {}
+   /**
+    * 绑定一个参数到指定的变量名
+    */
+   public function bindParam(string|int $param, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = NULL): bool {}
+   /**
+    * 把一个值绑定到一个参数
+    */
+   public function bindValue(string|int $param, mixed $value, int $type = PDO::PARAM_STR): bool {}
+   /**
+    * 关闭游标，使语句能再次被执行
+    */
+   public function closeCursor(): bool {}
+   /**
+    * 返回结果集中的列数
+    */
+   public function columnCount(): int {}
+   /**
+    * 打印一条 SQL 预处理命令
+    */
+   public function debugDumpParams(): ?bool {}
+   /**
+    * 获取跟上一次语句句柄操作相关的 SQLSTATE
+    */
+   public function errorCode(): ?string {}
+   /**
+    * 获取跟上一次语句句柄操作相关的扩展错误信息
+    */
+   public function errorInfo(): array {}
+   /**
+    * 执行预处理语句
+    */
+   public function execute(?array $params = NULL): bool {}
+   /**
+    * 从结果集中获取下一行
+    */
+   public function fetch(int $mode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0): mixed {}
+   /**
+    * 从结果集中获取剩余的行
+    */
+   public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): array {}
+   /**
+    * 从结果集中的下一行返回单独的一列
+    */
+   public function fetchColumn(int $column = 0): mixed {}
+   /**
+    * 获取下一行并作为一个对象返回
+    */
+   public function fetchObject(?string $class = "stdClass", array $constructorArgs = []): object|false {}
+   /**
+    * 检索语句属性
+    */
+   public function getAttribute(int $name): mixed {}
+   /**
+    * 返回结果集中一列的元数据
+    */
+   public function getColumnMeta(int $column): array|false {}
+   /**
+    * 获取结果集迭代器
+    */
+   public function getIterator(): \Iterator {}
+   /**
+    * 在一个多行集合语句句柄中推进到下一个行集合
+    */
+   public function nextRowset(): bool {}
+   /**
+    * 返回受上一个 SQL 语句影响的行数
+    */
+   public function rowCount(): int {}
+   /**
+    * 设置一个语句属性
+    */
+   public function setAttribute(int $attribute, mixed $value): bool {}
+   /**
+    * 为语句设置默认的获取模式
+    */
+   public function setFetchMode(int $mode, mixed ...$args): true {}
 }
 
 /**
  * The ParentIterator class
  */
- class ParentIterator extends \RecursiveFilterIterator implements \Iterator, \OuterIterator, \RecursiveIterator, \Traversable {
-    /**
-     * Constructs a ParentIterator
-     */
-     public function __construct(\RecursiveIterator $iterator) {}
-    /**
-     * Determines acceptability
-     */
-     public function accept(): bool {}
+class ParentIterator extends \RecursiveFilterIterator implements \Iterator, \OuterIterator, \RecursiveIterator, \Traversable
+{
+   /**
+    * Constructs a ParentIterator
+    */
+   public function __construct(\RecursiveIterator $iterator) {}
+   /**
+    * Determines acceptability
+    */
+   public function accept(): bool {}
 }
 
 /**
  * ParseError
  */
- class ParseError extends \CompileError implements \Stringable, \Throwable {
-}
+class ParseError extends \CompileError implements \Stringable, \Throwable {}
 
 /**
  * The Phar class
  */
- class Phar extends \RecursiveDirectoryIterator implements \ArrayAccess, \Countable, \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable {
-    public const BZ2 = 8192;
-    public const COMPRESSED = 61440;
-    public const GZ = 4096;
-    public const MD5 = 1;
-    public const NONE = 0;
-    public const OPENSSL = 16;
-    public const OPENSSL_SHA256 = 17;
-    public const OPENSSL_SHA512 = 18;
-    public const PHAR = 1;
-    public const PHP = 0;
-    public const PHPS = 1;
-    public const SHA1 = 2;
-    public const SHA256 = 3;
-    public const SHA512 = 4;
-    public const TAR = 2;
-    public const ZIP = 3;
-    /**
-     * Construct a Phar archive object
-     */
-     public function __construct(string $filename, int $flags = 12288, ?string $alias = NULL) {}
-    public function __destruct() {}
-    /**
-     * 添加一个空目录到 phar 档案
-     */
-     public function addEmptyDir(string $directory): void {}
-    /**
-     * 将一个文件从文件系统添加到 phar 档案中
-     */
-     public function addFile(string $filename, ?string $localName = NULL): void {}
-    /**
-     * 以字符串的形式添加一个文件到 phar 档案
-     */
-     public function addFromString(string $localName, string $contents): void {}
-    /**
-     * Returns the api version
-     */
-     public final static function apiVersion(): string {}
-    /**
-     * Construct a phar archive from the files within a directory
-     */
-     public function buildFromDirectory(string $directory, string $pattern = ""): array {}
-    /**
-     * Construct a phar archive from an iterator
-     */
-     public function buildFromIterator(\Traversable $iterator, ?string $baseDirectory = NULL): array {}
-    /**
-     * Returns whether phar extension supports compression using either zlib or bzip2
-     */
-     public final static function canCompress(int $compression = 0): bool {}
-    /**
-     * Returns whether phar extension supports writing and creating phars
-     */
-     public final static function canWrite(): bool {}
-    /**
-     * Compresses the entire Phar archive using Gzip or Bzip2 compression
-     */
-     public function compress(int $compression, ?string $extension = NULL): ?\Phar {}
-    /**
-     * Compresses all files in the current Phar archive
-     */
-     public function compressFiles(int $compression): void {}
-    /**
-     * Convert a phar archive to a non-executable tar or zip file
-     */
-     public function convertToData(?int $format = NULL, ?int $compression = NULL, ?string $extension = NULL): ?\PharData {}
-    /**
-     * Convert a phar archive to another executable phar archive file format
-     */
-     public function convertToExecutable(?int $format = NULL, ?int $compression = NULL, ?string $extension = NULL): ?\Phar {}
-    /**
-     * Copy a file internal to the phar archive to another new file within the phar
-     */
-     public function copy(string $from, string $to): true {}
-    /**
-     * Returns the number of entries (files) in the Phar archive
-     */
-     public function count(int $mode = COUNT_NORMAL): int {}
-    /**
-     * Create a phar-file format specific stub
-     */
-     public final static function createDefaultStub(?string $index = NULL, ?string $webIndex = NULL): string {}
-    /**
-     * Decompresses the entire Phar archive
-     */
-     public function decompress(?string $extension = NULL): ?\Phar {}
-    /**
-     * Decompresses all files in the current Phar archive
-     */
-     public function decompressFiles(): true {}
-    /**
-     * Deletes the global metadata of the phar
-     */
-     public function delMetadata(): true {}
-    /**
-     * 删除 phar 档案中的一个文件
-     */
-     public function delete(string $localName): true {}
-    /**
-     * Extract the contents of a phar archive to a directory
-     */
-     public function extractTo(string $directory, array|string|null $files = NULL, bool $overwrite = false): bool {}
-    /**
-     * Get the alias for Phar
-     */
-     public function getAlias(): ?string {}
-    /**
-     * Returns phar archive meta-data
-     */
-     public function getMetadata(array $unserializeOptions = []): mixed {}
-    /**
-     * Return whether phar was modified
-     */
-     public function getModified(): bool {}
-    /**
-     * Get the real path to the Phar archive on disk
-     */
-     public function getPath(): string {}
-    /**
-     * Return MD5/SHA1/SHA256/SHA512/OpenSSL signature of a Phar archive
-     */
-     public function getSignature(): array|false {}
-    /**
-     * Return the PHP loader or bootstrap stub of a Phar archive
-     */
-     public function getStub(): string {}
-    /**
-     * Return array of supported compression algorithms
-     */
-     public final static function getSupportedCompression(): array {}
-    /**
-     * Return array of supported signature types
-     */
-     public final static function getSupportedSignatures(): array {}
-    /**
-     * Return version info of Phar archive
-     */
-     public function getVersion(): string {}
-    /**
-     * Returns whether phar has global meta-data
-     */
-     public function hasMetadata(): bool {}
-    /**
-     * Instructs phar to intercept fopen, file_get_contents, opendir, and all of the stat-related functions
-     */
-     public final static function interceptFileFuncs(): void {}
-    /**
-     * Used to determine whether Phar write operations are being buffered, or are flushing directly to disk
-     */
-     public function isBuffering(): bool {}
-    /**
-     * Returns Phar::GZ or PHAR::BZ2 if the entire phar archive is compressed (.tar.gz/tar.bz and so on)
-     */
-     public function isCompressed(): int|false {}
-    /**
-     * Returns true if the phar archive is based on the tar/phar/zip file format depending on the parameter
-     */
-     public function isFileFormat(int $format): bool {}
-    /**
-     * Returns whether the given filename is a valid phar filename
-     */
-     public final static function isValidPharFilename(string $filename, bool $executable = true): bool {}
-    /**
-     * Returns true if the phar archive can be modified
-     */
-     public function isWritable(): bool {}
-    /**
-     * Loads any phar archive with an alias
-     */
-     public final static function loadPhar(string $filename, ?string $alias = NULL): bool {}
-    /**
-     * Reads the currently executed file (a phar) and registers its manifest
-     */
-     public final static function mapPhar(?string $alias = NULL, int $offset = 0): bool {}
-    /**
-     * Mount an external path or file to a virtual location within the phar archive
-     */
-     public final static function mount(string $pharPath, string $externalPath): void {}
-    /**
-     * Defines a list of up to 4 $_SERVER variables that should be modified for execution
-     */
-     public final static function mungServer(array $variables): void {}
-    /**
-     * Determines whether a file exists in the phar
-     */
-     public function offsetExists(mixed $localName): bool {}
-    /**
-     * Gets a PharFileInfo object for a specific file
-     */
-     public function offsetGet(mixed $localName): \SplFileInfo {}
-    /**
-     * Set the contents of an internal file to those of an external file
-     */
-     public function offsetSet(mixed $localName, mixed $value): void {}
-    /**
-     * Remove a file from a phar
-     */
-     public function offsetUnset(mixed $localName): void {}
-    /**
-     * Returns the full path on disk or full phar URL to the currently executing Phar archive
-     */
-     public final static function running(bool $returnPhar = true): string {}
-    /**
-     * Set the alias for the Phar archive
-     */
-     public function setAlias(string $alias): true {}
-    /**
-     * Used to set the PHP loader or bootstrap stub of a Phar archive to the default loader
-     */
-     public function setDefaultStub(?string $index = NULL, ?string $webIndex = NULL): true {}
-    /**
-     * Sets phar archive meta-data
-     */
-     public function setMetadata(mixed $metadata): void {}
-    /**
-     * Set the signature algorithm for a phar and apply it
-     */
-     public function setSignatureAlgorithm(int $algo, ?string $privateKey = NULL): void {}
-    /**
-     * Used to set the PHP loader or bootstrap stub of a Phar archive
-     */
-     public function setStub(mixed $stub, int $length = null): true {}
-    /**
-     * Start buffering Phar write operations, do not modify the Phar object on disk
-     */
-     public function startBuffering(): void {}
-    /**
-     * Stop buffering write requests to the Phar archive, and save changes to disk
-     */
-     public function stopBuffering(): void {}
-    /**
-     * Completely remove a phar archive from disk and from memory
-     */
-     public final static function unlinkArchive(string $filename): true {}
-    /**
-     * Routes a request from a web browser to an internal file within the phar archive
-     */
-     public final static function webPhar(?string $alias = NULL, ?string $index = NULL, ?string $fileNotFoundScript = NULL, array $mimeTypes = [], ?callable $rewrite = NULL): void {}
+class Phar extends \RecursiveDirectoryIterator implements \ArrayAccess, \Countable, \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable
+{
+   public const BZ2 = 8192;
+   public const COMPRESSED = 61440;
+   public const GZ = 4096;
+   public const MD5 = 1;
+   public const NONE = 0;
+   public const OPENSSL = 16;
+   public const OPENSSL_SHA256 = 17;
+   public const OPENSSL_SHA512 = 18;
+   public const PHAR = 1;
+   public const PHP = 0;
+   public const PHPS = 1;
+   public const SHA1 = 2;
+   public const SHA256 = 3;
+   public const SHA512 = 4;
+   public const TAR = 2;
+   public const ZIP = 3;
+   /**
+    * Construct a Phar archive object
+    */
+   public function __construct(string $filename, int $flags = 12288, ?string $alias = NULL) {}
+   public function __destruct() {}
+   /**
+    * 添加一个空目录到 phar 档案
+    */
+   public function addEmptyDir(string $directory): void {}
+   /**
+    * 将一个文件从文件系统添加到 phar 档案中
+    */
+   public function addFile(string $filename, ?string $localName = NULL): void {}
+   /**
+    * 以字符串的形式添加一个文件到 phar 档案
+    */
+   public function addFromString(string $localName, string $contents): void {}
+   /**
+    * Returns the api version
+    */
+   public final static function apiVersion(): string {}
+   /**
+    * Construct a phar archive from the files within a directory
+    */
+   public function buildFromDirectory(string $directory, string $pattern = ""): array {}
+   /**
+    * Construct a phar archive from an iterator
+    */
+   public function buildFromIterator(\Traversable $iterator, ?string $baseDirectory = NULL): array {}
+   /**
+    * Returns whether phar extension supports compression using either zlib or bzip2
+    */
+   public final static function canCompress(int $compression = 0): bool {}
+   /**
+    * Returns whether phar extension supports writing and creating phars
+    */
+   public final static function canWrite(): bool {}
+   /**
+    * Compresses the entire Phar archive using Gzip or Bzip2 compression
+    */
+   public function compress(int $compression, ?string $extension = NULL): ?\Phar {}
+   /**
+    * Compresses all files in the current Phar archive
+    */
+   public function compressFiles(int $compression): void {}
+   /**
+    * Convert a phar archive to a non-executable tar or zip file
+    */
+   public function convertToData(?int $format = NULL, ?int $compression = NULL, ?string $extension = NULL): ?\PharData {}
+   /**
+    * Convert a phar archive to another executable phar archive file format
+    */
+   public function convertToExecutable(?int $format = NULL, ?int $compression = NULL, ?string $extension = NULL): ?\Phar {}
+   /**
+    * Copy a file internal to the phar archive to another new file within the phar
+    */
+   public function copy(string $from, string $to): true {}
+   /**
+    * Returns the number of entries (files) in the Phar archive
+    */
+   public function count(int $mode = COUNT_NORMAL): int {}
+   /**
+    * Create a phar-file format specific stub
+    */
+   public final static function createDefaultStub(?string $index = NULL, ?string $webIndex = NULL): string {}
+   /**
+    * Decompresses the entire Phar archive
+    */
+   public function decompress(?string $extension = NULL): ?\Phar {}
+   /**
+    * Decompresses all files in the current Phar archive
+    */
+   public function decompressFiles(): true {}
+   /**
+    * Deletes the global metadata of the phar
+    */
+   public function delMetadata(): true {}
+   /**
+    * 删除 phar 档案中的一个文件
+    */
+   public function delete(string $localName): true {}
+   /**
+    * Extract the contents of a phar archive to a directory
+    */
+   public function extractTo(string $directory, array|string|null $files = NULL, bool $overwrite = false): bool {}
+   /**
+    * Get the alias for Phar
+    */
+   public function getAlias(): ?string {}
+   /**
+    * Returns phar archive meta-data
+    */
+   public function getMetadata(array $unserializeOptions = []): mixed {}
+   /**
+    * Return whether phar was modified
+    */
+   public function getModified(): bool {}
+   /**
+    * Get the real path to the Phar archive on disk
+    */
+   public function getPath(): string {}
+   /**
+    * Return MD5/SHA1/SHA256/SHA512/OpenSSL signature of a Phar archive
+    */
+   public function getSignature(): array|false {}
+   /**
+    * Return the PHP loader or bootstrap stub of a Phar archive
+    */
+   public function getStub(): string {}
+   /**
+    * Return array of supported compression algorithms
+    */
+   public final static function getSupportedCompression(): array {}
+   /**
+    * Return array of supported signature types
+    */
+   public final static function getSupportedSignatures(): array {}
+   /**
+    * Return version info of Phar archive
+    */
+   public function getVersion(): string {}
+   /**
+    * Returns whether phar has global meta-data
+    */
+   public function hasMetadata(): bool {}
+   /**
+    * Instructs phar to intercept fopen, file_get_contents, opendir, and all of the stat-related functions
+    */
+   public final static function interceptFileFuncs(): void {}
+   /**
+    * Used to determine whether Phar write operations are being buffered, or are flushing directly to disk
+    */
+   public function isBuffering(): bool {}
+   /**
+    * Returns Phar::GZ or PHAR::BZ2 if the entire phar archive is compressed (.tar.gz/tar.bz and so on)
+    */
+   public function isCompressed(): int|false {}
+   /**
+    * Returns true if the phar archive is based on the tar/phar/zip file format depending on the parameter
+    */
+   public function isFileFormat(int $format): bool {}
+   /**
+    * Returns whether the given filename is a valid phar filename
+    */
+   public final static function isValidPharFilename(string $filename, bool $executable = true): bool {}
+   /**
+    * Returns true if the phar archive can be modified
+    */
+   public function isWritable(): bool {}
+   /**
+    * Loads any phar archive with an alias
+    */
+   public final static function loadPhar(string $filename, ?string $alias = NULL): bool {}
+   /**
+    * Reads the currently executed file (a phar) and registers its manifest
+    */
+   public final static function mapPhar(?string $alias = NULL, int $offset = 0): bool {}
+   /**
+    * Mount an external path or file to a virtual location within the phar archive
+    */
+   public final static function mount(string $pharPath, string $externalPath): void {}
+   /**
+    * Defines a list of up to 4 $_SERVER variables that should be modified for execution
+    */
+   public final static function mungServer(array $variables): void {}
+   /**
+    * Determines whether a file exists in the phar
+    */
+   public function offsetExists(mixed $localName): bool {}
+   /**
+    * Gets a PharFileInfo object for a specific file
+    */
+   public function offsetGet(mixed $localName): \SplFileInfo {}
+   /**
+    * Set the contents of an internal file to those of an external file
+    */
+   public function offsetSet(mixed $localName, mixed $value): void {}
+   /**
+    * Remove a file from a phar
+    */
+   public function offsetUnset(mixed $localName): void {}
+   /**
+    * Returns the full path on disk or full phar URL to the currently executing Phar archive
+    */
+   public final static function running(bool $returnPhar = true): string {}
+   /**
+    * Set the alias for the Phar archive
+    */
+   public function setAlias(string $alias): true {}
+   /**
+    * Used to set the PHP loader or bootstrap stub of a Phar archive to the default loader
+    */
+   public function setDefaultStub(?string $index = NULL, ?string $webIndex = NULL): true {}
+   /**
+    * Sets phar archive meta-data
+    */
+   public function setMetadata(mixed $metadata): void {}
+   /**
+    * Set the signature algorithm for a phar and apply it
+    */
+   public function setSignatureAlgorithm(int $algo, ?string $privateKey = NULL): void {}
+   /**
+    * Used to set the PHP loader or bootstrap stub of a Phar archive
+    */
+   public function setStub(mixed $stub, int $length = null): true {}
+   /**
+    * Start buffering Phar write operations, do not modify the Phar object on disk
+    */
+   public function startBuffering(): void {}
+   /**
+    * Stop buffering write requests to the Phar archive, and save changes to disk
+    */
+   public function stopBuffering(): void {}
+   /**
+    * Completely remove a phar archive from disk and from memory
+    */
+   public final static function unlinkArchive(string $filename): true {}
+   /**
+    * Routes a request from a web browser to an internal file within the phar archive
+    */
+   public final static function webPhar(?string $alias = NULL, ?string $index = NULL, ?string $fileNotFoundScript = NULL, array $mimeTypes = [], ?callable $rewrite = NULL): void {}
 }
 
 /**
  * The PharData class
  */
- class PharData extends \RecursiveDirectoryIterator implements \ArrayAccess, \Countable, \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable {
-    /**
-     * Construct a non-executable tar or zip archive object
-     */
-     public function __construct(string $filename, int $flags = 12288, ?string $alias = NULL, int $format = 0) {}
-    public function __destruct() {}
-    /**
-     * Add an empty directory to the tar/zip archive
-     */
-     public function addEmptyDir(string $directory): void {}
-    /**
-     * Add a file from the filesystem to the tar/zip archive
-     */
-     public function addFile(string $filename, ?string $localName = NULL): void {}
-    /**
-     * Add a file from a string to the tar/zip archive
-     */
-     public function addFromString(string $localName, string $contents): void {}
-    public final static function apiVersion(): string {}
-    /**
-     * Construct a tar/zip archive from the files within a directory
-     */
-     public function buildFromDirectory(string $directory, string $pattern = ""): array {}
-    /**
-     * Construct a tar or zip archive from an iterator
-     */
-     public function buildFromIterator(\Traversable $iterator, ?string $baseDirectory = NULL): array {}
-    public final static function canCompress(int $compression = 0): bool {}
-    public final static function canWrite(): bool {}
-    /**
-     * Compresses the entire tar/zip archive using Gzip or Bzip2 compression
-     */
-     public function compress(int $compression, ?string $extension = NULL): ?\PharData {}
-    /**
-     * Compresses all files in the current tar/zip archive
-     */
-     public function compressFiles(int $compression): void {}
-    /**
-     * Convert a phar archive to a non-executable tar or zip file
-     */
-     public function convertToData(?int $format = NULL, ?int $compression = NULL, ?string $extension = NULL): ?\PharData {}
-    /**
-     * Convert a non-executable tar/zip archive to an executable phar archive
-     */
-     public function convertToExecutable(?int $format = NULL, ?int $compression = NULL, ?string $extension = NULL): ?\Phar {}
-    /**
-     * Copy a file internal to the tar/zip archive to another new file within the same archive
-     */
-     public function copy(string $from, string $to): true {}
-    public function count(int $mode = COUNT_NORMAL): int {}
-    public final static function createDefaultStub(?string $index = NULL, ?string $webIndex = NULL): string {}
-    /**
-     * Decompresses the entire Phar archive
-     */
-     public function decompress(?string $extension = NULL): ?\PharData {}
-    /**
-     * Decompresses all files in the current zip archive
-     */
-     public function decompressFiles(): true {}
-    /**
-     * Deletes the global metadata of a zip archive
-     */
-     public function delMetadata(): true {}
-    /**
-     * Delete a file within a tar/zip archive
-     */
-     public function delete(string $localName): true {}
-    /**
-     * Extract the contents of a tar/zip archive to a directory
-     */
-     public function extractTo(string $directory, array|string|null $files = NULL, bool $overwrite = false): bool {}
-    public function getAlias(): ?string {}
-    public function getMetadata(array $unserializeOptions = []): mixed {}
-    public function getModified(): bool {}
-    public function getPath(): string {}
-    public function getSignature(): array|false {}
-    public function getStub(): string {}
-    public final static function getSupportedCompression(): array {}
-    public final static function getSupportedSignatures(): array {}
-    public function getVersion(): string {}
-    public function hasMetadata(): bool {}
-    public final static function interceptFileFuncs(): void {}
-    public function isBuffering(): bool {}
-    public function isCompressed(): int|false {}
-    public function isFileFormat(int $format): bool {}
-    public final static function isValidPharFilename(string $filename, bool $executable = true): bool {}
-    /**
-     * Returns true if the tar/zip archive can be modified
-     */
-     public function isWritable(): bool {}
-    public final static function loadPhar(string $filename, ?string $alias = NULL): bool {}
-    public final static function mapPhar(?string $alias = NULL, int $offset = 0): bool {}
-    public final static function mount(string $pharPath, string $externalPath): void {}
-    public final static function mungServer(array $variables): void {}
-    public function offsetExists(mixed $localName): bool {}
-    public function offsetGet(mixed $localName): \SplFileInfo {}
-    /**
-     * Set the contents of a file within the tar/zip to those of an external file or string
-     */
-     public function offsetSet(mixed $localName, mixed $value): void {}
-    /**
-     * Remove a file from a tar/zip archive
-     */
-     public function offsetUnset(mixed $localName): void {}
-    public final static function running(bool $returnPhar = true): string {}
-    /**
-     * Dummy function (Phar::setAlias is not valid for PharData)
-     */
-     public function setAlias(string $alias): bool {}
-    /**
-     * Dummy function (Phar::setDefaultStub is not valid for PharData)
-     */
-     public function setDefaultStub(?string $index = NULL, ?string $webIndex = NULL): bool {}
-    /**
-     * Sets phar archive meta-data
-     */
-     public function setMetadata(mixed $metadata): void {}
-    /**
-     * Set the signature algorithm for a phar and apply it
-     */
-     public function setSignatureAlgorithm(int $algo, ?string $privateKey = NULL): void {}
-    /**
-     * Dummy function (Phar::setStub is not valid for PharData)
-     */
-     public function setStub(mixed $stub, int $length = null): true {}
-    public function startBuffering(): void {}
-    public function stopBuffering(): void {}
-    public final static function unlinkArchive(string $filename): true {}
-    public final static function webPhar(?string $alias = NULL, ?string $index = NULL, ?string $fileNotFoundScript = NULL, array $mimeTypes = [], ?callable $rewrite = NULL): void {}
+class PharData extends \RecursiveDirectoryIterator implements \ArrayAccess, \Countable, \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable
+{
+   /**
+    * Construct a non-executable tar or zip archive object
+    */
+   public function __construct(string $filename, int $flags = 12288, ?string $alias = NULL, int $format = 0) {}
+   public function __destruct() {}
+   /**
+    * Add an empty directory to the tar/zip archive
+    */
+   public function addEmptyDir(string $directory): void {}
+   /**
+    * Add a file from the filesystem to the tar/zip archive
+    */
+   public function addFile(string $filename, ?string $localName = NULL): void {}
+   /**
+    * Add a file from a string to the tar/zip archive
+    */
+   public function addFromString(string $localName, string $contents): void {}
+   public final static function apiVersion(): string {}
+   /**
+    * Construct a tar/zip archive from the files within a directory
+    */
+   public function buildFromDirectory(string $directory, string $pattern = ""): array {}
+   /**
+    * Construct a tar or zip archive from an iterator
+    */
+   public function buildFromIterator(\Traversable $iterator, ?string $baseDirectory = NULL): array {}
+   public final static function canCompress(int $compression = 0): bool {}
+   public final static function canWrite(): bool {}
+   /**
+    * Compresses the entire tar/zip archive using Gzip or Bzip2 compression
+    */
+   public function compress(int $compression, ?string $extension = NULL): ?\PharData {}
+   /**
+    * Compresses all files in the current tar/zip archive
+    */
+   public function compressFiles(int $compression): void {}
+   /**
+    * Convert a phar archive to a non-executable tar or zip file
+    */
+   public function convertToData(?int $format = NULL, ?int $compression = NULL, ?string $extension = NULL): ?\PharData {}
+   /**
+    * Convert a non-executable tar/zip archive to an executable phar archive
+    */
+   public function convertToExecutable(?int $format = NULL, ?int $compression = NULL, ?string $extension = NULL): ?\Phar {}
+   /**
+    * Copy a file internal to the tar/zip archive to another new file within the same archive
+    */
+   public function copy(string $from, string $to): true {}
+   public function count(int $mode = COUNT_NORMAL): int {}
+   public final static function createDefaultStub(?string $index = NULL, ?string $webIndex = NULL): string {}
+   /**
+    * Decompresses the entire Phar archive
+    */
+   public function decompress(?string $extension = NULL): ?\PharData {}
+   /**
+    * Decompresses all files in the current zip archive
+    */
+   public function decompressFiles(): true {}
+   /**
+    * Deletes the global metadata of a zip archive
+    */
+   public function delMetadata(): true {}
+   /**
+    * Delete a file within a tar/zip archive
+    */
+   public function delete(string $localName): true {}
+   /**
+    * Extract the contents of a tar/zip archive to a directory
+    */
+   public function extractTo(string $directory, array|string|null $files = NULL, bool $overwrite = false): bool {}
+   public function getAlias(): ?string {}
+   public function getMetadata(array $unserializeOptions = []): mixed {}
+   public function getModified(): bool {}
+   public function getPath(): string {}
+   public function getSignature(): array|false {}
+   public function getStub(): string {}
+   public final static function getSupportedCompression(): array {}
+   public final static function getSupportedSignatures(): array {}
+   public function getVersion(): string {}
+   public function hasMetadata(): bool {}
+   public final static function interceptFileFuncs(): void {}
+   public function isBuffering(): bool {}
+   public function isCompressed(): int|false {}
+   public function isFileFormat(int $format): bool {}
+   public final static function isValidPharFilename(string $filename, bool $executable = true): bool {}
+   /**
+    * Returns true if the tar/zip archive can be modified
+    */
+   public function isWritable(): bool {}
+   public final static function loadPhar(string $filename, ?string $alias = NULL): bool {}
+   public final static function mapPhar(?string $alias = NULL, int $offset = 0): bool {}
+   public final static function mount(string $pharPath, string $externalPath): void {}
+   public final static function mungServer(array $variables): void {}
+   public function offsetExists(mixed $localName): bool {}
+   public function offsetGet(mixed $localName): \SplFileInfo {}
+   /**
+    * Set the contents of a file within the tar/zip to those of an external file or string
+    */
+   public function offsetSet(mixed $localName, mixed $value): void {}
+   /**
+    * Remove a file from a tar/zip archive
+    */
+   public function offsetUnset(mixed $localName): void {}
+   public final static function running(bool $returnPhar = true): string {}
+   /**
+    * Dummy function (Phar::setAlias is not valid for PharData)
+    */
+   public function setAlias(string $alias): bool {}
+   /**
+    * Dummy function (Phar::setDefaultStub is not valid for PharData)
+    */
+   public function setDefaultStub(?string $index = NULL, ?string $webIndex = NULL): bool {}
+   /**
+    * Sets phar archive meta-data
+    */
+   public function setMetadata(mixed $metadata): void {}
+   /**
+    * Set the signature algorithm for a phar and apply it
+    */
+   public function setSignatureAlgorithm(int $algo, ?string $privateKey = NULL): void {}
+   /**
+    * Dummy function (Phar::setStub is not valid for PharData)
+    */
+   public function setStub(mixed $stub, int $length = null): true {}
+   public function startBuffering(): void {}
+   public function stopBuffering(): void {}
+   public final static function unlinkArchive(string $filename): true {}
+   public final static function webPhar(?string $alias = NULL, ?string $index = NULL, ?string $fileNotFoundScript = NULL, array $mimeTypes = [], ?callable $rewrite = NULL): void {}
 }
 
 /**
  * The PharException class
  */
- class PharException extends \Exception implements \Stringable, \Throwable {
-}
+class PharException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * The PharFileInfo class
  */
- class PharFileInfo extends \SplFileInfo implements \Stringable {
-    /**
-     * Construct a Phar entry object
-     */
-     public function __construct(string $filename) {}
-    public function __destruct() {}
-    /**
-     * Sets file-specific permission bits
-     */
-     public function chmod(int $perms): void {}
-    /**
-     * Compresses the current Phar entry with either zlib or bzip2 compression
-     */
-     public function compress(int $compression): true {}
-    /**
-     * Decompresses the current Phar entry within the phar
-     */
-     public function decompress(): true {}
-    /**
-     * Deletes the metadata of the entry
-     */
-     public function delMetadata(): true {}
-    /**
-     * Returns CRC32 code or throws an exception if CRC has not been verified
-     */
-     public function getCRC32(): int {}
-    /**
-     * Returns the actual size of the file (with compression) inside the Phar archive
-     */
-     public function getCompressedSize(): int {}
-    /**
-     * Get the complete file contents of the entry
-     */
-     public function getContent(): string {}
-    /**
-     * Returns file-specific meta-data saved with a file
-     */
-     public function getMetadata(array $unserializeOptions = []): mixed {}
-    /**
-     * Returns the Phar file entry flags
-     */
-     public function getPharFlags(): int {}
-    /**
-     * Returns the metadata of the entry
-     */
-     public function hasMetadata(): bool {}
-    /**
-     * Returns whether file entry has had its CRC verified
-     */
-     public function isCRCChecked(): bool {}
-    /**
-     * Returns whether the entry is compressed
-     */
-     public function isCompressed(?int $compression = NULL): bool {}
-    /**
-     * Sets file-specific meta-data saved with a file
-     */
-     public function setMetadata(mixed $metadata): void {}
+class PharFileInfo extends \SplFileInfo implements \Stringable
+{
+   /**
+    * Construct a Phar entry object
+    */
+   public function __construct(string $filename) {}
+   public function __destruct() {}
+   /**
+    * Sets file-specific permission bits
+    */
+   public function chmod(int $perms): void {}
+   /**
+    * Compresses the current Phar entry with either zlib or bzip2 compression
+    */
+   public function compress(int $compression): true {}
+   /**
+    * Decompresses the current Phar entry within the phar
+    */
+   public function decompress(): true {}
+   /**
+    * Deletes the metadata of the entry
+    */
+   public function delMetadata(): true {}
+   /**
+    * Returns CRC32 code or throws an exception if CRC has not been verified
+    */
+   public function getCRC32(): int {}
+   /**
+    * Returns the actual size of the file (with compression) inside the Phar archive
+    */
+   public function getCompressedSize(): int {}
+   /**
+    * Get the complete file contents of the entry
+    */
+   public function getContent(): string {}
+   /**
+    * Returns file-specific meta-data saved with a file
+    */
+   public function getMetadata(array $unserializeOptions = []): mixed {}
+   /**
+    * Returns the Phar file entry flags
+    */
+   public function getPharFlags(): int {}
+   /**
+    * Returns the metadata of the entry
+    */
+   public function hasMetadata(): bool {}
+   /**
+    * Returns whether file entry has had its CRC verified
+    */
+   public function isCRCChecked(): bool {}
+   /**
+    * Returns whether the entry is compressed
+    */
+   public function isCompressed(?int $compression = NULL): bool {}
+   /**
+    * Sets file-specific meta-data saved with a file
+    */
+   public function setMetadata(mixed $metadata): void {}
 }
 
 /**
  * The PhpToken class
  */
- class PhpToken implements \Stringable {
-    public int $id;
-    public int $line;
-    public int $pos;
-    public string $text;
-    /**
-     * Returns a new PhpToken object
-     */
-     public final function __construct(int $id, string $text, int $line = -1, int $pos = -1) {}
-    public function __toString(): string {}
-    /**
-     * Returns the name of the token.
-     */
-     public function getTokenName(): ?string {}
-    /**
-     * Tells whether the token is of given kind.
-     */
-     public function is(mixed $kind): bool {}
-    /**
-     * Tells whether the token would be ignored by the PHP parser.
-     */
-     public function isIgnorable(): bool {}
-    /**
-     * Splits given source into PHP tokens, represented by PhpToken objects.
-     */
-     public static function tokenize(string $code, int $flags = 0): array {}
+class PhpToken implements \Stringable
+{
+   public int $id;
+   public int $line;
+   public int $pos;
+   public string $text;
+   /**
+    * Returns a new PhpToken object
+    */
+   public final function __construct(int $id, string $text, int $line = -1, int $pos = -1) {}
+   public function __toString(): string {}
+   /**
+    * Returns the name of the token.
+    */
+   public function getTokenName(): ?string {}
+   /**
+    * Tells whether the token is of given kind.
+    */
+   public function is(mixed $kind): bool {}
+   /**
+    * Tells whether the token would be ignored by the PHP parser.
+    */
+   public function isIgnorable(): bool {}
+   /**
+    * Splits given source into PHP tokens, represented by PhpToken objects.
+    */
+   public static function tokenize(string $code, int $flags = 0): array {}
 }
 
-enum PropertyHookType implements \BackedEnum, \UnitEnum {
-    public readonly string $name;
-    public readonly string $value;
-    public static function cases(): array {}
-    public static function from(string|int $value): static {}
-    public static function tryFrom(string|int $value): ?static {}
+enum PropertyHookType implements \BackedEnum, \UnitEnum
+{
+   public readonly string $name;
+   public readonly string $value;
+   public static function cases(): array {}
+   public static function from(string|int $value): static {}
+   public static function tryFrom(string|int $value): ?static {}
 }
 
 /**
  * The RangeException class
  */
- class RangeException extends \RuntimeException implements \Stringable, \Throwable {
-}
+class RangeException extends \RuntimeException implements \Stringable, \Throwable {}
 
 /**
  * The RecursiveArrayIterator class
  */
- class RecursiveArrayIterator extends \ArrayIterator implements \ArrayAccess, \Countable, \Iterator, \RecursiveIterator, \SeekableIterator, \Serializable, \Traversable {
-    public const CHILD_ARRAYS_ONLY = 4;
-    /**
-     * Returns an iterator for the current entry if it is an array or an object
-     */
-     public function getChildren(): ?\RecursiveArrayIterator {}
-    /**
-     * Returns whether current entry is an array or an object
-     */
-     public function hasChildren(): bool {}
+class RecursiveArrayIterator extends \ArrayIterator implements \ArrayAccess, \Countable, \Iterator, \RecursiveIterator, \SeekableIterator, \Serializable, \Traversable
+{
+   public const CHILD_ARRAYS_ONLY = 4;
+   /**
+    * Returns an iterator for the current entry if it is an array or an object
+    */
+   public function getChildren(): ?\RecursiveArrayIterator {}
+   /**
+    * Returns whether current entry is an array or an object
+    */
+   public function hasChildren(): bool {}
 }
 
 /**
  * The RecursiveCachingIterator class
  */
- class RecursiveCachingIterator extends \CachingIterator implements \ArrayAccess, \Countable, \Iterator, \OuterIterator, \RecursiveIterator, \Stringable, \Traversable {
-    /**
-     * Construct
-     */
-     public function __construct(\Iterator $iterator, int $flags = RecursiveCachingIterator::CALL_TOSTRING) {}
-    /**
-     * Return the inner iterator's children as a RecursiveCachingIterator
-     */
-     public function getChildren(): ?\RecursiveCachingIterator {}
-    /**
-     * Check whether the current element of the inner iterator has children
-     */
-     public function hasChildren(): bool {}
+class RecursiveCachingIterator extends \CachingIterator implements \ArrayAccess, \Countable, \Iterator, \OuterIterator, \RecursiveIterator, \Stringable, \Traversable
+{
+   /**
+    * Construct
+    */
+   public function __construct(\Iterator $iterator, int $flags = RecursiveCachingIterator::CALL_TOSTRING) {}
+   /**
+    * Return the inner iterator's children as a RecursiveCachingIterator
+    */
+   public function getChildren(): ?\RecursiveCachingIterator {}
+   /**
+    * Check whether the current element of the inner iterator has children
+    */
+   public function hasChildren(): bool {}
 }
 
 /**
  * The RecursiveCallbackFilterIterator class
  */
- class RecursiveCallbackFilterIterator extends \CallbackFilterIterator implements \Iterator, \OuterIterator, \RecursiveIterator, \Traversable {
-    /**
-     * Create a RecursiveCallbackFilterIterator from a RecursiveIterator
-     */
-     public function __construct(\RecursiveIterator $iterator, callable $callback) {}
-    /**
-     * Return the inner iterator's children contained in a RecursiveCallbackFilterIterator
-     */
-     public function getChildren(): \RecursiveCallbackFilterIterator {}
-    /**
-     * Check whether the inner iterator's current element has children
-     */
-     public function hasChildren(): bool {}
+class RecursiveCallbackFilterIterator extends \CallbackFilterIterator implements \Iterator, \OuterIterator, \RecursiveIterator, \Traversable
+{
+   /**
+    * Create a RecursiveCallbackFilterIterator from a RecursiveIterator
+    */
+   public function __construct(\RecursiveIterator $iterator, callable $callback) {}
+   /**
+    * Return the inner iterator's children contained in a RecursiveCallbackFilterIterator
+    */
+   public function getChildren(): \RecursiveCallbackFilterIterator {}
+   /**
+    * Check whether the inner iterator's current element has children
+    */
+   public function hasChildren(): bool {}
 }
 
 /**
  * The RecursiveDirectoryIterator class
  */
- class RecursiveDirectoryIterator extends \FilesystemIterator implements \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable {
-    /**
-     * Constructs a RecursiveDirectoryIterator
-     */
-     public function __construct(string $directory, int $flags = 0) {}
-    /**
-     * Returns an iterator for the current entry if it is a directory
-     */
-     public function getChildren(): \RecursiveDirectoryIterator {}
-    /**
-     * Get sub path
-     */
-     public function getSubPath(): string {}
-    /**
-     * Get sub path and name
-     */
-     public function getSubPathname(): string {}
-    /**
-     * Returns whether current entry is a directory and not '.' or '..'
-     */
-     public function hasChildren(bool $allowLinks = false): bool {}
+class RecursiveDirectoryIterator extends \FilesystemIterator implements \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable
+{
+   /**
+    * Constructs a RecursiveDirectoryIterator
+    */
+   public function __construct(string $directory, int $flags = 0) {}
+   /**
+    * Returns an iterator for the current entry if it is a directory
+    */
+   public function getChildren(): \RecursiveDirectoryIterator {}
+   /**
+    * Get sub path
+    */
+   public function getSubPath(): string {}
+   /**
+    * Get sub path and name
+    */
+   public function getSubPathname(): string {}
+   /**
+    * Returns whether current entry is a directory and not '.' or '..'
+    */
+   public function hasChildren(bool $allowLinks = false): bool {}
 }
 
 /**
  * The RecursiveFilterIterator class
  */
- abstract class RecursiveFilterIterator extends \FilterIterator implements \Iterator, \OuterIterator, \RecursiveIterator, \Traversable {
-    /**
-     * Create a RecursiveFilterIterator from a RecursiveIterator
-     */
-     public function __construct(\RecursiveIterator $iterator) {}
-    /**
-     * Return the inner iterator's children contained in a RecursiveFilterIterator
-     */
-     public function getChildren(): ?\RecursiveFilterIterator {}
-    /**
-     * Check whether the inner iterator's current element has children
-     */
-     public function hasChildren(): bool {}
+abstract class RecursiveFilterIterator extends \FilterIterator implements \Iterator, \OuterIterator, \RecursiveIterator, \Traversable
+{
+   /**
+    * Create a RecursiveFilterIterator from a RecursiveIterator
+    */
+   public function __construct(\RecursiveIterator $iterator) {}
+   /**
+    * Return the inner iterator's children contained in a RecursiveFilterIterator
+    */
+   public function getChildren(): ?\RecursiveFilterIterator {}
+   /**
+    * Check whether the inner iterator's current element has children
+    */
+   public function hasChildren(): bool {}
 }
 
 /**
  * The RecursiveIterator interface
  */
- interface RecursiveIterator extends \Iterator, \Traversable {
-    /**
-     * Returns an iterator for the current entry
-     */
-     public abstract function getChildren(): ?\RecursiveIterator;
-    /**
-     * Returns if an iterator can be created for the current entry
-     */
-     public abstract function hasChildren(): bool;
+interface RecursiveIterator extends \Iterator, \Traversable
+{
+   /**
+    * Returns an iterator for the current entry
+    */
+   public abstract function getChildren(): ?\RecursiveIterator;
+   /**
+    * Returns if an iterator can be created for the current entry
+    */
+   public abstract function hasChildren(): bool;
 }
 
 /**
  * The RecursiveIteratorIterator class
  */
- class RecursiveIteratorIterator implements \Iterator, \OuterIterator, \Traversable {
-    public const CATCH_GET_CHILD = 16;
-    public const CHILD_FIRST = 2;
-    public const LEAVES_ONLY = 0;
-    public const SELF_FIRST = 1;
-    /**
-     * Construct a RecursiveIteratorIterator
-     */
-     public function __construct(\Traversable $iterator, int $mode = RecursiveIteratorIterator::LEAVES_ONLY, int $flags = 0) {}
-    /**
-     * Begin children
-     */
-     public function beginChildren(): void {}
-    /**
-     * Begin Iteration
-     */
-     public function beginIteration(): void {}
-    /**
-     * Get children
-     */
-     public function callGetChildren(): ?\RecursiveIterator {}
-    /**
-     * Has children
-     */
-     public function callHasChildren(): bool {}
-    /**
-     * Access the current element value
-     */
-     public function current(): mixed {}
-    /**
-     * End children
-     */
-     public function endChildren(): void {}
-    /**
-     * End Iteration
-     */
-     public function endIteration(): void {}
-    /**
-     * Get the current depth of the recursive iteration
-     */
-     public function getDepth(): int {}
-    /**
-     * Get inner iterator
-     */
-     public function getInnerIterator(): \RecursiveIterator {}
-    /**
-     * Get max depth
-     */
-     public function getMaxDepth(): int|false {}
-    /**
-     * The current active sub iterator
-     */
-     public function getSubIterator(?int $level = NULL): ?\RecursiveIterator {}
-    /**
-     * Access the current key
-     */
-     public function key(): mixed {}
-    /**
-     * Move forward to the next element
-     */
-     public function next(): void {}
-    /**
-     * Next element
-     */
-     public function nextElement(): void {}
-    /**
-     * Rewind the iterator to the first element of the top level inner iterator
-     */
-     public function rewind(): void {}
-    /**
-     * Set max depth
-     */
-     public function setMaxDepth(int $maxDepth = -1): void {}
-    /**
-     * Check whether the current position is valid
-     */
-     public function valid(): bool {}
+class RecursiveIteratorIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   public const CATCH_GET_CHILD = 16;
+   public const CHILD_FIRST = 2;
+   public const LEAVES_ONLY = 0;
+   public const SELF_FIRST = 1;
+   /**
+    * Construct a RecursiveIteratorIterator
+    */
+   public function __construct(\Traversable $iterator, int $mode = RecursiveIteratorIterator::LEAVES_ONLY, int $flags = 0) {}
+   /**
+    * Begin children
+    */
+   public function beginChildren(): void {}
+   /**
+    * Begin Iteration
+    */
+   public function beginIteration(): void {}
+   /**
+    * Get children
+    */
+   public function callGetChildren(): ?\RecursiveIterator {}
+   /**
+    * Has children
+    */
+   public function callHasChildren(): bool {}
+   /**
+    * Access the current element value
+    */
+   public function current(): mixed {}
+   /**
+    * End children
+    */
+   public function endChildren(): void {}
+   /**
+    * End Iteration
+    */
+   public function endIteration(): void {}
+   /**
+    * Get the current depth of the recursive iteration
+    */
+   public function getDepth(): int {}
+   /**
+    * Get inner iterator
+    */
+   public function getInnerIterator(): \RecursiveIterator {}
+   /**
+    * Get max depth
+    */
+   public function getMaxDepth(): int|false {}
+   /**
+    * The current active sub iterator
+    */
+   public function getSubIterator(?int $level = NULL): ?\RecursiveIterator {}
+   /**
+    * Access the current key
+    */
+   public function key(): mixed {}
+   /**
+    * Move forward to the next element
+    */
+   public function next(): void {}
+   /**
+    * Next element
+    */
+   public function nextElement(): void {}
+   /**
+    * Rewind the iterator to the first element of the top level inner iterator
+    */
+   public function rewind(): void {}
+   /**
+    * Set max depth
+    */
+   public function setMaxDepth(int $maxDepth = -1): void {}
+   /**
+    * Check whether the current position is valid
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The RecursiveRegexIterator class
  */
- class RecursiveRegexIterator extends \RegexIterator implements \Iterator, \OuterIterator, \RecursiveIterator, \Traversable {
-    /**
-     * Creates a new RecursiveRegexIterator
-     */
-     public function __construct(\RecursiveIterator $iterator, string $pattern, int $mode = RecursiveRegexIterator::MATCH, int $flags = 0, int $pregFlags = 0) {}
-    public function accept(): bool {}
-    /**
-     * Returns an iterator for the current entry
-     */
-     public function getChildren(): \RecursiveRegexIterator {}
-    /**
-     * Returns whether an iterator can be obtained for the current entry
-     */
-     public function hasChildren(): bool {}
+class RecursiveRegexIterator extends \RegexIterator implements \Iterator, \OuterIterator, \RecursiveIterator, \Traversable
+{
+   /**
+    * Creates a new RecursiveRegexIterator
+    */
+   public function __construct(\RecursiveIterator $iterator, string $pattern, int $mode = RecursiveRegexIterator::MATCH, int $flags = 0, int $pregFlags = 0) {}
+   public function accept(): bool {}
+   /**
+    * Returns an iterator for the current entry
+    */
+   public function getChildren(): \RecursiveRegexIterator {}
+   /**
+    * Returns whether an iterator can be obtained for the current entry
+    */
+   public function hasChildren(): bool {}
 }
 
 /**
  * The RecursiveTreeIterator class
  */
- class RecursiveTreeIterator extends \RecursiveIteratorIterator implements \Iterator, \OuterIterator, \Traversable {
-    public const BYPASS_CURRENT = 4;
-    public const BYPASS_KEY = 8;
-    public const PREFIX_END_HAS_NEXT = 3;
-    public const PREFIX_END_LAST = 4;
-    public const PREFIX_LEFT = 0;
-    public const PREFIX_MID_HAS_NEXT = 1;
-    public const PREFIX_MID_LAST = 2;
-    public const PREFIX_RIGHT = 5;
-    /**
-     * Construct a RecursiveTreeIterator
-     */
-     public function __construct(\RecursiveIterator|\IteratorAggregate $iterator, int $flags = RecursiveTreeIterator::BYPASS_KEY, int $cachingIteratorFlags = CachingIterator::CATCH_GET_CHILD, int $mode = RecursiveTreeIterator::SELF_FIRST) {}
-    /**
-     * Get current element
-     */
-     public function current(): mixed {}
-    /**
-     * Get current entry
-     */
-     public function getEntry(): string {}
-    /**
-     * Get the postfix
-     */
-     public function getPostfix(): string {}
-    /**
-     * Get the prefix
-     */
-     public function getPrefix(): string {}
-    /**
-     * Get the key of the current element
-     */
-     public function key(): mixed {}
-    /**
-     * Set postfix
-     */
-     public function setPostfix(string $postfix): void {}
-    /**
-     * Set a part of the prefix
-     */
-     public function setPrefixPart(int $part, string $value): void {}
+class RecursiveTreeIterator extends \RecursiveIteratorIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   public const BYPASS_CURRENT = 4;
+   public const BYPASS_KEY = 8;
+   public const PREFIX_END_HAS_NEXT = 3;
+   public const PREFIX_END_LAST = 4;
+   public const PREFIX_LEFT = 0;
+   public const PREFIX_MID_HAS_NEXT = 1;
+   public const PREFIX_MID_LAST = 2;
+   public const PREFIX_RIGHT = 5;
+   /**
+    * Construct a RecursiveTreeIterator
+    */
+   public function __construct(\RecursiveIterator|\IteratorAggregate $iterator, int $flags = RecursiveTreeIterator::BYPASS_KEY, int $cachingIteratorFlags = CachingIterator::CATCH_GET_CHILD, int $mode = RecursiveTreeIterator::SELF_FIRST) {}
+   /**
+    * Get current element
+    */
+   public function current(): mixed {}
+   /**
+    * Get current entry
+    */
+   public function getEntry(): string {}
+   /**
+    * Get the postfix
+    */
+   public function getPostfix(): string {}
+   /**
+    * Get the prefix
+    */
+   public function getPrefix(): string {}
+   /**
+    * Get the key of the current element
+    */
+   public function key(): mixed {}
+   /**
+    * Set postfix
+    */
+   public function setPostfix(string $postfix): void {}
+   /**
+    * Set a part of the prefix
+    */
+   public function setPrefixPart(int $part, string $value): void {}
 }
 
-class Redis {
-    public const AFTER = "after";
-    public const ATOMIC = 0;
-    public const BACKOFF_ALGORITHM_CONSTANT = 6;
-    public const BACKOFF_ALGORITHM_DECORRELATED_JITTER = 1;
-    public const BACKOFF_ALGORITHM_DEFAULT = 0;
-    public const BACKOFF_ALGORITHM_EQUAL_JITTER = 3;
-    public const BACKOFF_ALGORITHM_EXPONENTIAL = 4;
-    public const BACKOFF_ALGORITHM_FULL_JITTER = 2;
-    public const BACKOFF_ALGORITHM_UNIFORM = 5;
-    public const BEFORE = "before";
-    public const COMPRESSION_NONE = 0;
-    public const LEFT = "left";
-    public const MULTI = 1;
-    public const OPT_BACKOFF_ALGORITHM = 12;
-    public const OPT_BACKOFF_BASE = 13;
-    public const OPT_BACKOFF_CAP = 14;
-    public const OPT_COMPRESSION = 7;
-    public const OPT_COMPRESSION_LEVEL = 9;
-    public const OPT_MAX_RETRIES = 11;
-    public const OPT_NULL_MULTIBULK_AS_NULL = 10;
-    public const OPT_PACK_IGNORE_NUMBERS = 15;
-    public const OPT_PREFIX = 2;
-    public const OPT_READ_TIMEOUT = 3;
-    public const OPT_REPLY_LITERAL = 8;
-    public const OPT_SCAN = 4;
-    public const OPT_SERIALIZER = 1;
-    public const OPT_TCP_KEEPALIVE = 6;
-    public const PIPELINE = 2;
-    public const REDIS_HASH = 5;
-    public const REDIS_LIST = 3;
-    public const REDIS_NOT_FOUND = 0;
-    public const REDIS_SET = 2;
-    public const REDIS_STREAM = 6;
-    public const REDIS_STRING = 1;
-    public const REDIS_VECTORSET = 7;
-    public const REDIS_ZSET = 4;
-    public const RIGHT = "right";
-    public const SCAN_NOPREFIX = 3;
-    public const SCAN_NORETRY = 0;
-    public const SCAN_PREFIX = 2;
-    public const SCAN_RETRY = 1;
-    public const SERIALIZER_JSON = 4;
-    public const SERIALIZER_NONE = 0;
-    public const SERIALIZER_PHP = 1;
-    public function __construct(?array $options = NULL) {}
-    public function __destruct() {}
-    public function _compress(string $value): string {}
-    public function _pack(mixed $value): string {}
-    public function _prefix(string $key): string {}
-    public function _serialize(mixed $value): string {}
-    public function _uncompress(string $value): string {}
-    public function _unpack(string $value): mixed {}
-    public function _unserialize(string $value): mixed {}
-    public function acl(string $subcmd, string ...$args): mixed {}
-    public function append(string $key, mixed $value): \Redis|int|false {}
-    public function auth(mixed $credentials): \Redis|bool {}
-    public function bgSave(): \Redis|bool {}
-    public function bgrewriteaof(): \Redis|bool {}
-    public function bitcount(string $key, int $start = 0, int $end = -1, bool $bybit = false): \Redis|int|false {}
-    public function bitop(string $operation, string $deskey, string $srckey, string ...$other_keys): \Redis|int|false {}
-    public function bitpos(string $key, bool $bit, int $start = 0, int $end = -1, bool $bybit = false): \Redis|int|false {}
-    public function blPop(array|string $key_or_keys, string|int|float $timeout_or_key, mixed ...$extra_args): \Redis|array|false|null {}
-    public function blmove(string $src, string $dst, string $wherefrom, string $whereto, float $timeout): \Redis|string|false {}
-    public function blmpop(float $timeout, array $keys, string $from, int $count = 1): \Redis|array|false|null {}
-    public function brPop(array|string $key_or_keys, string|int|float $timeout_or_key, mixed ...$extra_args): \Redis|array|false|null {}
-    public function brpoplpush(string $src, string $dst, int|float $timeout): \Redis|string|false {}
-    public function bzPopMax(array|string $key, string|int $timeout_or_key, mixed ...$extra_args): \Redis|array|false {}
-    public function bzPopMin(array|string $key, string|int $timeout_or_key, mixed ...$extra_args): \Redis|array|false {}
-    public function bzmpop(float $timeout, array $keys, string $from, int $count = 1): \Redis|array|false|null {}
-    public function clearLastError(): bool {}
-    public function clearTransferredBytes(): void {}
-    public function client(string $opt, mixed ...$args): mixed {}
-    public function close(): bool {}
-    public function command(?string $opt = NULL, mixed ...$args): mixed {}
-    public function config(string $operation, array|string|null $key_or_settings = NULL, ?string $value = NULL): mixed {}
-    public function connect(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = NULL, int $retry_interval = 0, float $read_timeout = 0, ?array $context = NULL): bool {}
-    public function copy(string $src, string $dst, ?array $options = NULL): \Redis|bool {}
-    public function dbSize(): \Redis|int|false {}
-    public function debug(string $key): \Redis|string {}
-    public function decr(string $key, int $by = 1): \Redis|int|false {}
-    public function decrBy(string $key, int $value): \Redis|int|false {}
-    public function del(array|string $key, string ...$other_keys): \Redis|int|false {}
-    public function delete(array|string $key, string ...$other_keys): \Redis|int|false {}
-    public function delifeq(string $key, mixed $value): \Redis|int|false {}
-    public function discard(): \Redis|bool {}
-    public function dump(string $key): \Redis|string|false {}
-    public function echo(string $str): \Redis|string|false {}
-    public function eval(string $script, array $args = [], int $num_keys = 0): mixed {}
-    public function eval_ro(string $script_sha, array $args = [], int $num_keys = 0): mixed {}
-    public function evalsha(string $sha1, array $args = [], int $num_keys = 0): mixed {}
-    public function evalsha_ro(string $sha1, array $args = [], int $num_keys = 0): mixed {}
-    public function exec(): \Redis|array|false {}
-    public function exists(mixed $key, mixed ...$other_keys): \Redis|int|bool {}
-    public function expire(string $key, int $timeout, ?string $mode = NULL): \Redis|bool {}
-    public function expireAt(string $key, int $timestamp, ?string $mode = NULL): \Redis|bool {}
-    public function expiremember(string $key, string $field, int $ttl, ?string $unit = NULL): \Redis|int|false {}
-    public function expirememberat(string $key, string $field, int $timestamp): \Redis|int|false {}
-    public function expiretime(string $key): \Redis|int|false {}
-    public function failover(?array $to = NULL, bool $abort = false, int $timeout = 0): \Redis|bool {}
-    public function fcall(string $fn, array $keys = [], array $args = []): mixed {}
-    public function fcall_ro(string $fn, array $keys = [], array $args = []): mixed {}
-    public function flushAll(?bool $sync = NULL): \Redis|bool {}
-    public function flushDB(?bool $sync = NULL): \Redis|bool {}
-    public function function(string $operation, mixed ...$args): \Redis|array|string|bool {}
-    public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): \Redis|int|false {}
-    public function geodist(string $key, string $src, string $dst, ?string $unit = NULL): \Redis|float|false {}
-    public function geohash(string $key, string $member, string ...$other_members): \Redis|array|false {}
-    public function geopos(string $key, string $member, string ...$other_members): \Redis|array|false {}
-    public function georadius(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed {}
-    public function georadius_ro(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed {}
-    public function georadiusbymember(string $key, string $member, float $radius, string $unit, array $options = []): mixed {}
-    public function georadiusbymember_ro(string $key, string $member, float $radius, string $unit, array $options = []): mixed {}
-    public function geosearch(string $key, array|string $position, array|int|float $shape, string $unit, array $options = []): array {}
-    public function geosearchstore(string $dst, string $src, array|string $position, array|int|float $shape, string $unit, array $options = []): \Redis|array|int|false {}
-    public function get(string $key): mixed {}
-    public function getAuth(): mixed {}
-    public function getBit(string $key, int $idx): \Redis|int|false {}
-    public function getDBNum(): int {}
-    public function getDel(string $key): \Redis|string|bool {}
-    public function getEx(string $key, array $options = []): \Redis|string|bool {}
-    public function getHost(): string {}
-    public function getLastError(): ?string {}
-    public function getMode(): int {}
-    public function getOption(int $option): mixed {}
-    public function getPersistentID(): ?string {}
-    public function getPort(): int {}
-    public function getRange(string $key, int $start, int $end): \Redis|string|false {}
-    public function getReadTimeout(): float {}
-    public function getTimeout(): float|false {}
-    public function getTransferredBytes(): array {}
-    public function getWithMeta(string $key): \Redis|array|false {}
-    public function getset(string $key, mixed $value): \Redis|string|false {}
-    public function hDel(string $key, string $field, string ...$other_fields): \Redis|int|false {}
-    public function hExists(string $key, string $field): \Redis|bool {}
-    public function hGet(string $key, string $member): mixed {}
-    public function hGetAll(string $key): \Redis|array|false {}
-    public function hGetWithMeta(string $key, string $member): mixed {}
-    public function hIncrBy(string $key, string $field, int $value): \Redis|int|false {}
-    public function hIncrByFloat(string $key, string $field, float $value): \Redis|float|false {}
-    public function hKeys(string $key): \Redis|array|false {}
-    public function hLen(string $key): \Redis|int|false {}
-    public function hMget(string $key, array $fields): \Redis|array|false {}
-    public function hMset(string $key, array $fieldvals): \Redis|bool {}
-    public function hRandField(string $key, ?array $options = NULL): \Redis|array|string|false {}
-    public function hSet(string $key, mixed ...$fields_and_vals): \Redis|int|false {}
-    public function hSetNx(string $key, string $field, mixed $value): \Redis|bool {}
-    public function hStrLen(string $key, string $field): \Redis|int|false {}
-    public function hVals(string $key): \Redis|array|false {}
-    public function hexpire(string $key, int $ttl, array $fields, ?string $mode = NULL): \Redis|array|false {}
-    public function hexpireat(string $key, int $time, array $fields, ?string $mode = NULL): \Redis|array|false {}
-    public function hexpiretime(string $key, array $fields): \Redis|array|false {}
-    public function hgetdel(string $key, array $fields): \Redis|array|false {}
-    public function hgetex(string $key, array $fields, array|string|null $expiry = NULL): \Redis|array|false {}
-    public function hpersist(string $key, array $fields): \Redis|array|false {}
-    public function hpexpire(string $key, int $ttl, array $fields, ?string $mode = NULL): \Redis|array|false {}
-    public function hpexpireat(string $key, int $mstime, array $fields, ?string $mode = NULL): \Redis|array|false {}
-    public function hpexpiretime(string $key, array $fields): \Redis|array|false {}
-    public function hpttl(string $key, array $fields): \Redis|array|false {}
-    public function hscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): \Redis|array|bool {}
-    public function hsetex(string $key, array $fields, ?array $expiry = NULL): \Redis|int|false {}
-    public function httl(string $key, array $fields): \Redis|array|false {}
-    public function incr(string $key, int $by = 1): \Redis|int|false {}
-    public function incrBy(string $key, int $value): \Redis|int|false {}
-    public function incrByFloat(string $key, float $value): \Redis|float|false {}
-    public function info(string ...$sections): \Redis|array|false {}
-    public function isConnected(): bool {}
-    public function keys(string $pattern) {}
-    public function lInsert(string $key, string $pos, mixed $pivot, mixed $value) {}
-    public function lLen(string $key): \Redis|int|false {}
-    public function lMove(string $src, string $dst, string $wherefrom, string $whereto): \Redis|string|false {}
-    public function lPop(string $key, int $count = 0): \Redis|array|string|bool {}
-    public function lPos(string $key, mixed $value, ?array $options = NULL): \Redis|array|int|bool|null {}
-    public function lPush(string $key, mixed ...$elements): \Redis|int|false {}
-    public function lPushx(string $key, mixed $value): \Redis|int|false {}
-    public function lSet(string $key, int $index, mixed $value): \Redis|bool {}
-    public function lastSave(): int {}
-    public function lcs(string $key1, string $key2, ?array $options = NULL): \Redis|array|string|int|false {}
-    public function lindex(string $key, int $index): mixed {}
-    public function lmpop(array $keys, string $from, int $count = 1): \Redis|array|false|null {}
-    public function lrange(string $key, int $start, int $end): \Redis|array|false {}
-    public function lrem(string $key, mixed $value, int $count = 0): \Redis|int|false {}
-    public function ltrim(string $key, int $start, int $end): \Redis|bool {}
-    public function mget(array $keys): \Redis|array|false {}
-    public function migrate(string $host, int $port, array|string $key, int $dstdb, int $timeout, bool $copy = false, bool $replace = false, mixed $credentials = NULL): \Redis|bool {}
-    public function move(string $key, int $index): \Redis|bool {}
-    public function mset(array $key_values): \Redis|bool {}
-    public function msetnx(array $key_values): \Redis|bool {}
-    public function multi(int $value = Redis::MULTI): \Redis|bool {}
-    public function object(string $subcommand, string $key): \Redis|string|int|false {}
-    public function open(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = NULL, int $retry_interval = 0, float $read_timeout = 0, ?array $context = NULL): bool {}
-    public function pconnect(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = NULL, int $retry_interval = 0, float $read_timeout = 0, ?array $context = NULL): bool {}
-    public function persist(string $key): \Redis|bool {}
-    public function pexpire(string $key, int $timeout, ?string $mode = NULL): bool {}
-    public function pexpireAt(string $key, int $timestamp, ?string $mode = NULL): \Redis|bool {}
-    public function pexpiretime(string $key): \Redis|int|false {}
-    public function pfadd(string $key, array $elements): \Redis|int {}
-    public function pfcount(array|string $key_or_keys): \Redis|int|false {}
-    public function pfmerge(string $dst, array $srckeys): \Redis|bool {}
-    public function ping(?string $message = NULL): \Redis|string|bool {}
-    public function pipeline(): \Redis|bool {}
-    public function popen(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = NULL, int $retry_interval = 0, float $read_timeout = 0, ?array $context = NULL): bool {}
-    public function psetex(string $key, int $expire, mixed $value): \Redis|bool {}
-    public function psubscribe(array $patterns, callable $cb): bool {}
-    public function pttl(string $key): \Redis|int|false {}
-    public function publish(string $channel, string $message): \Redis|int|false {}
-    public function pubsub(string $command, mixed $arg = NULL): mixed {}
-    public function punsubscribe(array $patterns): \Redis|array|bool {}
-    public function rPop(string $key, int $count = 0): \Redis|array|string|bool {}
-    public function rPush(string $key, mixed ...$elements): \Redis|int|false {}
-    public function rPushx(string $key, mixed $value): \Redis|int|false {}
-    public function randomKey(): \Redis|string|false {}
-    public function rawcommand(string $command, mixed ...$args): mixed {}
-    public function rename(string $old_name, string $new_name): \Redis|bool {}
-    public function renameNx(string $key_src, string $key_dst): \Redis|bool {}
-    public function replicaof(?string $host = NULL, int $port = 6379): \Redis|bool {}
-    public function reset(): \Redis|bool {}
-    public function restore(string $key, int $ttl, string $value, ?array $options = NULL): \Redis|bool {}
-    public function role(): mixed {}
-    public function rpoplpush(string $srckey, string $dstkey): \Redis|string|false {}
-    public function sAdd(string $key, mixed $value, mixed ...$other_values): \Redis|int|false {}
-    public function sAddArray(string $key, array $values): int {}
-    public function sDiff(string $key, string ...$other_keys): \Redis|array|false {}
-    public function sDiffStore(string $dst, string $key, string ...$other_keys): \Redis|int|false {}
-    public function sInter(array|string $key, string ...$other_keys): \Redis|array|false {}
-    public function sInterStore(array|string $key, string ...$other_keys): \Redis|int|false {}
-    public function sMembers(string $key): \Redis|array|false {}
-    public function sMisMember(string $key, string $member, string ...$other_members): \Redis|array|false {}
-    public function sMove(string $src, string $dst, mixed $value): \Redis|bool {}
-    public function sPop(string $key, int $count = 0): \Redis|array|string|false {}
-    public function sRandMember(string $key, int $count = 0): mixed {}
-    public function sUnion(string $key, string ...$other_keys): \Redis|array|false {}
-    public function sUnionStore(string $dst, string $key, string ...$other_keys): \Redis|int|false {}
-    public function save(): \Redis|bool {}
-    public function scan(string|int|null &$iterator, ?string $pattern = NULL, int $count = 0, ?string $type = NULL): array|false {}
-    public function scard(string $key): \Redis|int|false {}
-    public function script(string $command, mixed ...$args): mixed {}
-    public function select(int $db): \Redis|bool {}
-    public function serverName(): string|false {}
-    public function serverVersion(): string|false {}
-    public function set(string $key, mixed $value, mixed $options = NULL): \Redis|string|bool {}
-    public function setBit(string $key, int $idx, bool $value): \Redis|int|false {}
-    public function setOption(int $option, mixed $value): bool {}
-    public function setRange(string $key, int $index, string $value): \Redis|int|false {}
-    public function setex(string $key, int $expire, mixed $value) {}
-    public function setnx(string $key, mixed $value): \Redis|bool {}
-    public function sintercard(array $keys, int $limit = -1): \Redis|int|false {}
-    public function sismember(string $key, mixed $value): \Redis|bool {}
-    public function slaveof(?string $host = NULL, int $port = 6379): \Redis|bool {}
-    public function slowlog(string $operation, int $length = 0): mixed {}
-    public function sort(string $key, ?array $options = NULL): mixed {}
-    public function sortAsc(string $key, ?string $pattern = NULL, mixed $get = NULL, int $offset = -1, int $count = -1, ?string $store = NULL): array {}
-    public function sortAscAlpha(string $key, ?string $pattern = NULL, mixed $get = NULL, int $offset = -1, int $count = -1, ?string $store = NULL): array {}
-    public function sortDesc(string $key, ?string $pattern = NULL, mixed $get = NULL, int $offset = -1, int $count = -1, ?string $store = NULL): array {}
-    public function sortDescAlpha(string $key, ?string $pattern = NULL, mixed $get = NULL, int $offset = -1, int $count = -1, ?string $store = NULL): array {}
-    public function sort_ro(string $key, ?array $options = NULL): mixed {}
-    public function srem(string $key, mixed $value, mixed ...$other_values): \Redis|int|false {}
-    public function sscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|false {}
-    public function ssubscribe(array $channels, callable $cb): bool {}
-    public function strlen(string $key): \Redis|int|false {}
-    public function subscribe(array $channels, callable $cb): bool {}
-    public function sunsubscribe(array $channels): \Redis|array|bool {}
-    public function swapdb(int $src, int $dst): \Redis|bool {}
-    public function time(): \Redis|array {}
-    public function touch(array|string $key_or_array, string ...$more_keys): \Redis|int|false {}
-    public function ttl(string $key): \Redis|int|false {}
-    public function type(string $key): \Redis|int|false {}
-    public function unlink(array|string $key, string ...$other_keys): \Redis|int|false {}
-    public function unsubscribe(array $channels): \Redis|array|bool {}
-    public function unwatch(): \Redis|bool {}
-    public function vadd(string $key, array $values, mixed $element, ?array $options = NULL): \Redis|int|false {}
-    public function vcard(string $key): \Redis|int|false {}
-    public function vdim(string $key): \Redis|int|false {}
-    public function vemb(string $key, mixed $member, bool $raw = false): \Redis|array|false {}
-    public function vgetattr(string $key, mixed $member, bool $decode = true): \Redis|array|string|false {}
-    public function vinfo(string $key): \Redis|array|false {}
-    public function vismember(string $key, mixed $member): \Redis|bool {}
-    public function vlinks(string $key, mixed $member, bool $withscores = false): \Redis|array|false {}
-    public function vrandmember(string $key, int $count = 0): \Redis|array|string|false {}
-    public function vrange(string $key, string $min, string $max, int $count = -1): \Redis|array|false {}
-    public function vrem(string $key, mixed $member): \Redis|int|false {}
-    public function vsetattr(string $key, mixed $member, array|string $attributes): \Redis|int|false {}
-    public function vsim(string $key, mixed $member, ?array $options = NULL): \Redis|array|false {}
-    public function wait(int $numreplicas, int $timeout): int|false {}
-    public function waitaof(int $numlocal, int $numreplicas, int $timeout): \Redis|array|false {}
-    public function watch(array|string $key, string ...$other_keys): \Redis|bool {}
-    public function xack(string $key, string $group, array $ids): int|false {}
-    public function xadd(string $key, string $id, array $values, int $maxlen = 0, bool $approx = false, bool $nomkstream = false): \Redis|string|false {}
-    public function xautoclaim(string $key, string $group, string $consumer, int $min_idle, string $start, int $count = -1, bool $justid = false): \Redis|array|bool {}
-    public function xclaim(string $key, string $group, string $consumer, int $min_idle, array $ids, array $options): \Redis|array|bool {}
-    public function xdel(string $key, array $ids): \Redis|int|false {}
-    public function xgroup(string $operation, ?string $key = NULL, ?string $group = NULL, ?string $id_or_consumer = NULL, bool $mkstream = false, int $entries_read = -2): mixed {}
-    public function xinfo(string $operation, ?string $arg1 = NULL, ?string $arg2 = NULL, int $count = -1): mixed {}
-    public function xlen(string $key): \Redis|int|false {}
-    public function xpending(string $key, string $group, ?string $start = NULL, ?string $end = NULL, int $count = -1, ?string $consumer = NULL): \Redis|array|false {}
-    public function xrange(string $key, string $start, string $end, int $count = -1): \Redis|array|bool {}
-    public function xread(array $streams, int $count = -1, int $block = -1): \Redis|array|bool {}
-    public function xreadgroup(string $group, string $consumer, array $streams, int $count = 1, int $block = 1): \Redis|array|bool {}
-    public function xrevrange(string $key, string $end, string $start, int $count = -1): \Redis|array|bool {}
-    public function xtrim(string $key, string $threshold, bool $approx = false, bool $minid = false, int $limit = -1): \Redis|int|false {}
-    public function zAdd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): \Redis|int|float|false {}
-    public function zCard(string $key): \Redis|int|false {}
-    public function zCount(string $key, string|int $start, string|int $end): \Redis|int|false {}
-    public function zIncrBy(string $key, float $value, mixed $member): \Redis|float|false {}
-    public function zLexCount(string $key, string $min, string $max): \Redis|int|false {}
-    public function zMscore(string $key, mixed $member, mixed ...$other_members): \Redis|array|false {}
-    public function zPopMax(string $key, ?int $count = NULL): \Redis|array|false {}
-    public function zPopMin(string $key, ?int $count = NULL): \Redis|array|false {}
-    public function zRandMember(string $key, ?array $options = NULL): \Redis|array|string {}
-    public function zRange(string $key, string|int $start, string|int $end, array|bool|null $options = NULL): \Redis|array|false {}
-    public function zRangeByLex(string $key, string $min, string $max, int $offset = -1, int $count = -1): \Redis|array|false {}
-    public function zRangeByScore(string $key, string $start, string $end, array $options = []): \Redis|array|false {}
-    public function zRank(string $key, mixed $member): \Redis|int|false {}
-    public function zRem(mixed $key, mixed $member, mixed ...$other_members): \Redis|int|false {}
-    public function zRemRangeByLex(string $key, string $min, string $max): \Redis|int|false {}
-    public function zRemRangeByRank(string $key, int $start, int $end): \Redis|int|false {}
-    public function zRemRangeByScore(string $key, string $start, string $end): \Redis|int|false {}
-    public function zRevRange(string $key, int $start, int $end, mixed $scores = NULL): \Redis|array|false {}
-    public function zRevRangeByLex(string $key, string $max, string $min, int $offset = -1, int $count = -1): \Redis|array|false {}
-    public function zRevRangeByScore(string $key, string $max, string $min, array|bool $options = []): \Redis|array|false {}
-    public function zRevRank(string $key, mixed $member): \Redis|int|false {}
-    public function zScore(string $key, mixed $member): \Redis|float|false {}
-    public function zdiff(array $keys, ?array $options = NULL): \Redis|array|false {}
-    public function zdiffstore(string $dst, array $keys): \Redis|int|false {}
-    public function zinter(array $keys, ?array $weights = NULL, ?array $options = NULL): \Redis|array|false {}
-    public function zintercard(array $keys, int $limit = -1): \Redis|int|false {}
-    public function zinterstore(string $dst, array $keys, ?array $weights = NULL, ?string $aggregate = NULL): \Redis|int|false {}
-    public function zmpop(array $keys, string $from, int $count = 1): \Redis|array|false|null {}
-    public function zrangestore(string $dstkey, string $srckey, string $start, string $end, array|bool|null $options = NULL): \Redis|int|false {}
-    public function zscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): \Redis|array|false {}
-    public function zunion(array $keys, ?array $weights = NULL, ?array $options = NULL): \Redis|array|false {}
-    public function zunionstore(string $dst, array $keys, ?array $weights = NULL, ?string $aggregate = NULL): \Redis|int|false {}
+class Redis
+{
+   public const AFTER = "after";
+   public const ATOMIC = 0;
+   public const BACKOFF_ALGORITHM_CONSTANT = 6;
+   public const BACKOFF_ALGORITHM_DECORRELATED_JITTER = 1;
+   public const BACKOFF_ALGORITHM_DEFAULT = 0;
+   public const BACKOFF_ALGORITHM_EQUAL_JITTER = 3;
+   public const BACKOFF_ALGORITHM_EXPONENTIAL = 4;
+   public const BACKOFF_ALGORITHM_FULL_JITTER = 2;
+   public const BACKOFF_ALGORITHM_UNIFORM = 5;
+   public const BEFORE = "before";
+   public const COMPRESSION_NONE = 0;
+   public const LEFT = "left";
+   public const MULTI = 1;
+   public const OPT_BACKOFF_ALGORITHM = 12;
+   public const OPT_BACKOFF_BASE = 13;
+   public const OPT_BACKOFF_CAP = 14;
+   public const OPT_COMPRESSION = 7;
+   public const OPT_COMPRESSION_LEVEL = 9;
+   public const OPT_MAX_RETRIES = 11;
+   public const OPT_NULL_MULTIBULK_AS_NULL = 10;
+   public const OPT_PACK_IGNORE_NUMBERS = 15;
+   public const OPT_PREFIX = 2;
+   public const OPT_READ_TIMEOUT = 3;
+   public const OPT_REPLY_LITERAL = 8;
+   public const OPT_SCAN = 4;
+   public const OPT_SERIALIZER = 1;
+   public const OPT_TCP_KEEPALIVE = 6;
+   public const PIPELINE = 2;
+   public const REDIS_HASH = 5;
+   public const REDIS_LIST = 3;
+   public const REDIS_NOT_FOUND = 0;
+   public const REDIS_SET = 2;
+   public const REDIS_STREAM = 6;
+   public const REDIS_STRING = 1;
+   public const REDIS_VECTORSET = 7;
+   public const REDIS_ZSET = 4;
+   public const RIGHT = "right";
+   public const SCAN_NOPREFIX = 3;
+   public const SCAN_NORETRY = 0;
+   public const SCAN_PREFIX = 2;
+   public const SCAN_RETRY = 1;
+   public const SERIALIZER_JSON = 4;
+   public const SERIALIZER_NONE = 0;
+   public const SERIALIZER_PHP = 1;
+   public function __construct(?array $options = NULL) {}
+   public function __destruct() {}
+   public function _compress(string $value): string {}
+   public function _pack(mixed $value): string {}
+   public function _prefix(string $key): string {}
+   public function _serialize(mixed $value): string {}
+   public function _uncompress(string $value): string {}
+   public function _unpack(string $value): mixed {}
+   public function _unserialize(string $value): mixed {}
+   public function acl(string $subcmd, string ...$args): mixed {}
+   public function append(string $key, mixed $value): \Redis|int|false {}
+   public function auth(mixed $credentials): \Redis|bool {}
+   public function bgSave(): \Redis|bool {}
+   public function bgrewriteaof(): \Redis|bool {}
+   public function bitcount(string $key, int $start = 0, int $end = -1, bool $bybit = false): \Redis|int|false {}
+   public function bitop(string $operation, string $deskey, string $srckey, string ...$other_keys): \Redis|int|false {}
+   public function bitpos(string $key, bool $bit, int $start = 0, int $end = -1, bool $bybit = false): \Redis|int|false {}
+   public function blPop(array|string $key_or_keys, string|int|float $timeout_or_key, mixed ...$extra_args): \Redis|array|false|null {}
+   public function blmove(string $src, string $dst, string $wherefrom, string $whereto, float $timeout): \Redis|string|false {}
+   public function blmpop(float $timeout, array $keys, string $from, int $count = 1): \Redis|array|false|null {}
+   public function brPop(array|string $key_or_keys, string|int|float $timeout_or_key, mixed ...$extra_args): \Redis|array|false|null {}
+   public function brpoplpush(string $src, string $dst, int|float $timeout): \Redis|string|false {}
+   public function bzPopMax(array|string $key, string|int $timeout_or_key, mixed ...$extra_args): \Redis|array|false {}
+   public function bzPopMin(array|string $key, string|int $timeout_or_key, mixed ...$extra_args): \Redis|array|false {}
+   public function bzmpop(float $timeout, array $keys, string $from, int $count = 1): \Redis|array|false|null {}
+   public function clearLastError(): bool {}
+   public function clearTransferredBytes(): void {}
+   public function client(string $opt, mixed ...$args): mixed {}
+   public function close(): bool {}
+   public function command(?string $opt = NULL, mixed ...$args): mixed {}
+   public function config(string $operation, array|string|null $key_or_settings = NULL, ?string $value = NULL): mixed {}
+   public function connect(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = NULL, int $retry_interval = 0, float $read_timeout = 0, ?array $context = NULL): bool {}
+   public function copy(string $src, string $dst, ?array $options = NULL): \Redis|bool {}
+   public function dbSize(): \Redis|int|false {}
+   public function debug(string $key): \Redis|string {}
+   public function decr(string $key, int $by = 1): \Redis|int|false {}
+   public function decrBy(string $key, int $value): \Redis|int|false {}
+   public function del(array|string $key, string ...$other_keys): \Redis|int|false {}
+   public function delete(array|string $key, string ...$other_keys): \Redis|int|false {}
+   public function delifeq(string $key, mixed $value): \Redis|int|false {}
+   public function discard(): \Redis|bool {}
+   public function dump(string $key): \Redis|string|false {}
+   public function echo(string $str): \Redis|string|false {}
+   public function eval(string $script, array $args = [], int $num_keys = 0): mixed {}
+   public function eval_ro(string $script_sha, array $args = [], int $num_keys = 0): mixed {}
+   public function evalsha(string $sha1, array $args = [], int $num_keys = 0): mixed {}
+   public function evalsha_ro(string $sha1, array $args = [], int $num_keys = 0): mixed {}
+   public function exec(): \Redis|array|false {}
+   public function exists(mixed $key, mixed ...$other_keys): \Redis|int|bool {}
+   public function expire(string $key, int $timeout, ?string $mode = NULL): \Redis|bool {}
+   public function expireAt(string $key, int $timestamp, ?string $mode = NULL): \Redis|bool {}
+   public function expiremember(string $key, string $field, int $ttl, ?string $unit = NULL): \Redis|int|false {}
+   public function expirememberat(string $key, string $field, int $timestamp): \Redis|int|false {}
+   public function expiretime(string $key): \Redis|int|false {}
+   public function failover(?array $to = NULL, bool $abort = false, int $timeout = 0): \Redis|bool {}
+   public function fcall(string $fn, array $keys = [], array $args = []): mixed {}
+   public function fcall_ro(string $fn, array $keys = [], array $args = []): mixed {}
+   public function flushAll(?bool $sync = NULL): \Redis|bool {}
+   public function flushDB(?bool $sync = NULL): \Redis|bool {}
+   public function function(string $operation, mixed ...$args): \Redis|array|string|bool {}
+   public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): \Redis|int|false {}
+   public function geodist(string $key, string $src, string $dst, ?string $unit = NULL): \Redis|float|false {}
+   public function geohash(string $key, string $member, string ...$other_members): \Redis|array|false {}
+   public function geopos(string $key, string $member, string ...$other_members): \Redis|array|false {}
+   public function georadius(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed {}
+   public function georadius_ro(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed {}
+   public function georadiusbymember(string $key, string $member, float $radius, string $unit, array $options = []): mixed {}
+   public function georadiusbymember_ro(string $key, string $member, float $radius, string $unit, array $options = []): mixed {}
+   public function geosearch(string $key, array|string $position, array|int|float $shape, string $unit, array $options = []): array {}
+   public function geosearchstore(string $dst, string $src, array|string $position, array|int|float $shape, string $unit, array $options = []): \Redis|array|int|false {}
+   public function get(string $key): mixed {}
+   public function getAuth(): mixed {}
+   public function getBit(string $key, int $idx): \Redis|int|false {}
+   public function getDBNum(): int {}
+   public function getDel(string $key): \Redis|string|bool {}
+   public function getEx(string $key, array $options = []): \Redis|string|bool {}
+   public function getHost(): string {}
+   public function getLastError(): ?string {}
+   public function getMode(): int {}
+   public function getOption(int $option): mixed {}
+   public function getPersistentID(): ?string {}
+   public function getPort(): int {}
+   public function getRange(string $key, int $start, int $end): \Redis|string|false {}
+   public function getReadTimeout(): float {}
+   public function getTimeout(): float|false {}
+   public function getTransferredBytes(): array {}
+   public function getWithMeta(string $key): \Redis|array|false {}
+   public function getset(string $key, mixed $value): \Redis|string|false {}
+   public function hDel(string $key, string $field, string ...$other_fields): \Redis|int|false {}
+   public function hExists(string $key, string $field): \Redis|bool {}
+   public function hGet(string $key, string $member): mixed {}
+   public function hGetAll(string $key): \Redis|array|false {}
+   public function hGetWithMeta(string $key, string $member): mixed {}
+   public function hIncrBy(string $key, string $field, int $value): \Redis|int|false {}
+   public function hIncrByFloat(string $key, string $field, float $value): \Redis|float|false {}
+   public function hKeys(string $key): \Redis|array|false {}
+   public function hLen(string $key): \Redis|int|false {}
+   public function hMget(string $key, array $fields): \Redis|array|false {}
+   public function hMset(string $key, array $fieldvals): \Redis|bool {}
+   public function hRandField(string $key, ?array $options = NULL): \Redis|array|string|false {}
+   public function hSet(string $key, mixed ...$fields_and_vals): \Redis|int|false {}
+   public function hSetNx(string $key, string $field, mixed $value): \Redis|bool {}
+   public function hStrLen(string $key, string $field): \Redis|int|false {}
+   public function hVals(string $key): \Redis|array|false {}
+   public function hexpire(string $key, int $ttl, array $fields, ?string $mode = NULL): \Redis|array|false {}
+   public function hexpireat(string $key, int $time, array $fields, ?string $mode = NULL): \Redis|array|false {}
+   public function hexpiretime(string $key, array $fields): \Redis|array|false {}
+   public function hgetdel(string $key, array $fields): \Redis|array|false {}
+   public function hgetex(string $key, array $fields, array|string|null $expiry = NULL): \Redis|array|false {}
+   public function hpersist(string $key, array $fields): \Redis|array|false {}
+   public function hpexpire(string $key, int $ttl, array $fields, ?string $mode = NULL): \Redis|array|false {}
+   public function hpexpireat(string $key, int $mstime, array $fields, ?string $mode = NULL): \Redis|array|false {}
+   public function hpexpiretime(string $key, array $fields): \Redis|array|false {}
+   public function hpttl(string $key, array $fields): \Redis|array|false {}
+   public function hscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): \Redis|array|bool {}
+   public function hsetex(string $key, array $fields, ?array $expiry = NULL): \Redis|int|false {}
+   public function httl(string $key, array $fields): \Redis|array|false {}
+   public function incr(string $key, int $by = 1): \Redis|int|false {}
+   public function incrBy(string $key, int $value): \Redis|int|false {}
+   public function incrByFloat(string $key, float $value): \Redis|float|false {}
+   public function info(string ...$sections): \Redis|array|false {}
+   public function isConnected(): bool {}
+   public function keys(string $pattern) {}
+   public function lInsert(string $key, string $pos, mixed $pivot, mixed $value) {}
+   public function lLen(string $key): \Redis|int|false {}
+   public function lMove(string $src, string $dst, string $wherefrom, string $whereto): \Redis|string|false {}
+   public function lPop(string $key, int $count = 0): \Redis|array|string|bool {}
+   public function lPos(string $key, mixed $value, ?array $options = NULL): \Redis|array|int|bool|null {}
+   public function lPush(string $key, mixed ...$elements): \Redis|int|false {}
+   public function lPushx(string $key, mixed $value): \Redis|int|false {}
+   public function lSet(string $key, int $index, mixed $value): \Redis|bool {}
+   public function lastSave(): int {}
+   public function lcs(string $key1, string $key2, ?array $options = NULL): \Redis|array|string|int|false {}
+   public function lindex(string $key, int $index): mixed {}
+   public function lmpop(array $keys, string $from, int $count = 1): \Redis|array|false|null {}
+   public function lrange(string $key, int $start, int $end): \Redis|array|false {}
+   public function lrem(string $key, mixed $value, int $count = 0): \Redis|int|false {}
+   public function ltrim(string $key, int $start, int $end): \Redis|bool {}
+   public function mget(array $keys): \Redis|array|false {}
+   public function migrate(string $host, int $port, array|string $key, int $dstdb, int $timeout, bool $copy = false, bool $replace = false, mixed $credentials = NULL): \Redis|bool {}
+   public function move(string $key, int $index): \Redis|bool {}
+   public function mset(array $key_values): \Redis|bool {}
+   public function msetnx(array $key_values): \Redis|bool {}
+   public function multi(int $value = Redis::MULTI): \Redis|bool {}
+   public function object(string $subcommand, string $key): \Redis|string|int|false {}
+   public function open(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = NULL, int $retry_interval = 0, float $read_timeout = 0, ?array $context = NULL): bool {}
+   public function pconnect(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = NULL, int $retry_interval = 0, float $read_timeout = 0, ?array $context = NULL): bool {}
+   public function persist(string $key): \Redis|bool {}
+   public function pexpire(string $key, int $timeout, ?string $mode = NULL): bool {}
+   public function pexpireAt(string $key, int $timestamp, ?string $mode = NULL): \Redis|bool {}
+   public function pexpiretime(string $key): \Redis|int|false {}
+   public function pfadd(string $key, array $elements): \Redis|int {}
+   public function pfcount(array|string $key_or_keys): \Redis|int|false {}
+   public function pfmerge(string $dst, array $srckeys): \Redis|bool {}
+   public function ping(?string $message = NULL): \Redis|string|bool {}
+   public function pipeline(): \Redis|bool {}
+   public function popen(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = NULL, int $retry_interval = 0, float $read_timeout = 0, ?array $context = NULL): bool {}
+   public function psetex(string $key, int $expire, mixed $value): \Redis|bool {}
+   public function psubscribe(array $patterns, callable $cb): bool {}
+   public function pttl(string $key): \Redis|int|false {}
+   public function publish(string $channel, string $message): \Redis|int|false {}
+   public function pubsub(string $command, mixed $arg = NULL): mixed {}
+   public function punsubscribe(array $patterns): \Redis|array|bool {}
+   public function rPop(string $key, int $count = 0): \Redis|array|string|bool {}
+   public function rPush(string $key, mixed ...$elements): \Redis|int|false {}
+   public function rPushx(string $key, mixed $value): \Redis|int|false {}
+   public function randomKey(): \Redis|string|false {}
+   public function rawcommand(string $command, mixed ...$args): mixed {}
+   public function rename(string $old_name, string $new_name): \Redis|bool {}
+   public function renameNx(string $key_src, string $key_dst): \Redis|bool {}
+   public function replicaof(?string $host = NULL, int $port = 6379): \Redis|bool {}
+   public function reset(): \Redis|bool {}
+   public function restore(string $key, int $ttl, string $value, ?array $options = NULL): \Redis|bool {}
+   public function role(): mixed {}
+   public function rpoplpush(string $srckey, string $dstkey): \Redis|string|false {}
+   public function sAdd(string $key, mixed $value, mixed ...$other_values): \Redis|int|false {}
+   public function sAddArray(string $key, array $values): int {}
+   public function sDiff(string $key, string ...$other_keys): \Redis|array|false {}
+   public function sDiffStore(string $dst, string $key, string ...$other_keys): \Redis|int|false {}
+   public function sInter(array|string $key, string ...$other_keys): \Redis|array|false {}
+   public function sInterStore(array|string $key, string ...$other_keys): \Redis|int|false {}
+   public function sMembers(string $key): \Redis|array|false {}
+   public function sMisMember(string $key, string $member, string ...$other_members): \Redis|array|false {}
+   public function sMove(string $src, string $dst, mixed $value): \Redis|bool {}
+   public function sPop(string $key, int $count = 0): \Redis|array|string|false {}
+   public function sRandMember(string $key, int $count = 0): mixed {}
+   public function sUnion(string $key, string ...$other_keys): \Redis|array|false {}
+   public function sUnionStore(string $dst, string $key, string ...$other_keys): \Redis|int|false {}
+   public function save(): \Redis|bool {}
+   public function scan(string|int|null &$iterator, ?string $pattern = NULL, int $count = 0, ?string $type = NULL): array|false {}
+   public function scard(string $key): \Redis|int|false {}
+   public function script(string $command, mixed ...$args): mixed {}
+   public function select(int $db): \Redis|bool {}
+   public function serverName(): string|false {}
+   public function serverVersion(): string|false {}
+   public function set(string $key, mixed $value, mixed $options = NULL): \Redis|string|bool {}
+   public function setBit(string $key, int $idx, bool $value): \Redis|int|false {}
+   public function setOption(int $option, mixed $value): bool {}
+   public function setRange(string $key, int $index, string $value): \Redis|int|false {}
+   public function setex(string $key, int $expire, mixed $value) {}
+   public function setnx(string $key, mixed $value): \Redis|bool {}
+   public function sintercard(array $keys, int $limit = -1): \Redis|int|false {}
+   public function sismember(string $key, mixed $value): \Redis|bool {}
+   public function slaveof(?string $host = NULL, int $port = 6379): \Redis|bool {}
+   public function slowlog(string $operation, int $length = 0): mixed {}
+   public function sort(string $key, ?array $options = NULL): mixed {}
+   public function sortAsc(string $key, ?string $pattern = NULL, mixed $get = NULL, int $offset = -1, int $count = -1, ?string $store = NULL): array {}
+   public function sortAscAlpha(string $key, ?string $pattern = NULL, mixed $get = NULL, int $offset = -1, int $count = -1, ?string $store = NULL): array {}
+   public function sortDesc(string $key, ?string $pattern = NULL, mixed $get = NULL, int $offset = -1, int $count = -1, ?string $store = NULL): array {}
+   public function sortDescAlpha(string $key, ?string $pattern = NULL, mixed $get = NULL, int $offset = -1, int $count = -1, ?string $store = NULL): array {}
+   public function sort_ro(string $key, ?array $options = NULL): mixed {}
+   public function srem(string $key, mixed $value, mixed ...$other_values): \Redis|int|false {}
+   public function sscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|false {}
+   public function ssubscribe(array $channels, callable $cb): bool {}
+   public function strlen(string $key): \Redis|int|false {}
+   public function subscribe(array $channels, callable $cb): bool {}
+   public function sunsubscribe(array $channels): \Redis|array|bool {}
+   public function swapdb(int $src, int $dst): \Redis|bool {}
+   public function time(): \Redis|array {}
+   public function touch(array|string $key_or_array, string ...$more_keys): \Redis|int|false {}
+   public function ttl(string $key): \Redis|int|false {}
+   public function type(string $key): \Redis|int|false {}
+   public function unlink(array|string $key, string ...$other_keys): \Redis|int|false {}
+   public function unsubscribe(array $channels): \Redis|array|bool {}
+   public function unwatch(): \Redis|bool {}
+   public function vadd(string $key, array $values, mixed $element, ?array $options = NULL): \Redis|int|false {}
+   public function vcard(string $key): \Redis|int|false {}
+   public function vdim(string $key): \Redis|int|false {}
+   public function vemb(string $key, mixed $member, bool $raw = false): \Redis|array|false {}
+   public function vgetattr(string $key, mixed $member, bool $decode = true): \Redis|array|string|false {}
+   public function vinfo(string $key): \Redis|array|false {}
+   public function vismember(string $key, mixed $member): \Redis|bool {}
+   public function vlinks(string $key, mixed $member, bool $withscores = false): \Redis|array|false {}
+   public function vrandmember(string $key, int $count = 0): \Redis|array|string|false {}
+   public function vrange(string $key, string $min, string $max, int $count = -1): \Redis|array|false {}
+   public function vrem(string $key, mixed $member): \Redis|int|false {}
+   public function vsetattr(string $key, mixed $member, array|string $attributes): \Redis|int|false {}
+   public function vsim(string $key, mixed $member, ?array $options = NULL): \Redis|array|false {}
+   public function wait(int $numreplicas, int $timeout): int|false {}
+   public function waitaof(int $numlocal, int $numreplicas, int $timeout): \Redis|array|false {}
+   public function watch(array|string $key, string ...$other_keys): \Redis|bool {}
+   public function xack(string $key, string $group, array $ids): int|false {}
+   public function xadd(string $key, string $id, array $values, int $maxlen = 0, bool $approx = false, bool $nomkstream = false): \Redis|string|false {}
+   public function xautoclaim(string $key, string $group, string $consumer, int $min_idle, string $start, int $count = -1, bool $justid = false): \Redis|array|bool {}
+   public function xclaim(string $key, string $group, string $consumer, int $min_idle, array $ids, array $options): \Redis|array|bool {}
+   public function xdel(string $key, array $ids): \Redis|int|false {}
+   public function xgroup(string $operation, ?string $key = NULL, ?string $group = NULL, ?string $id_or_consumer = NULL, bool $mkstream = false, int $entries_read = -2): mixed {}
+   public function xinfo(string $operation, ?string $arg1 = NULL, ?string $arg2 = NULL, int $count = -1): mixed {}
+   public function xlen(string $key): \Redis|int|false {}
+   public function xpending(string $key, string $group, ?string $start = NULL, ?string $end = NULL, int $count = -1, ?string $consumer = NULL): \Redis|array|false {}
+   public function xrange(string $key, string $start, string $end, int $count = -1): \Redis|array|bool {}
+   public function xread(array $streams, int $count = -1, int $block = -1): \Redis|array|bool {}
+   public function xreadgroup(string $group, string $consumer, array $streams, int $count = 1, int $block = 1): \Redis|array|bool {}
+   public function xrevrange(string $key, string $end, string $start, int $count = -1): \Redis|array|bool {}
+   public function xtrim(string $key, string $threshold, bool $approx = false, bool $minid = false, int $limit = -1): \Redis|int|false {}
+   public function zAdd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): \Redis|int|float|false {}
+   public function zCard(string $key): \Redis|int|false {}
+   public function zCount(string $key, string|int $start, string|int $end): \Redis|int|false {}
+   public function zIncrBy(string $key, float $value, mixed $member): \Redis|float|false {}
+   public function zLexCount(string $key, string $min, string $max): \Redis|int|false {}
+   public function zMscore(string $key, mixed $member, mixed ...$other_members): \Redis|array|false {}
+   public function zPopMax(string $key, ?int $count = NULL): \Redis|array|false {}
+   public function zPopMin(string $key, ?int $count = NULL): \Redis|array|false {}
+   public function zRandMember(string $key, ?array $options = NULL): \Redis|array|string {}
+   public function zRange(string $key, string|int $start, string|int $end, array|bool|null $options = NULL): \Redis|array|false {}
+   public function zRangeByLex(string $key, string $min, string $max, int $offset = -1, int $count = -1): \Redis|array|false {}
+   public function zRangeByScore(string $key, string $start, string $end, array $options = []): \Redis|array|false {}
+   public function zRank(string $key, mixed $member): \Redis|int|false {}
+   public function zRem(mixed $key, mixed $member, mixed ...$other_members): \Redis|int|false {}
+   public function zRemRangeByLex(string $key, string $min, string $max): \Redis|int|false {}
+   public function zRemRangeByRank(string $key, int $start, int $end): \Redis|int|false {}
+   public function zRemRangeByScore(string $key, string $start, string $end): \Redis|int|false {}
+   public function zRevRange(string $key, int $start, int $end, mixed $scores = NULL): \Redis|array|false {}
+   public function zRevRangeByLex(string $key, string $max, string $min, int $offset = -1, int $count = -1): \Redis|array|false {}
+   public function zRevRangeByScore(string $key, string $max, string $min, array|bool $options = []): \Redis|array|false {}
+   public function zRevRank(string $key, mixed $member): \Redis|int|false {}
+   public function zScore(string $key, mixed $member): \Redis|float|false {}
+   public function zdiff(array $keys, ?array $options = NULL): \Redis|array|false {}
+   public function zdiffstore(string $dst, array $keys): \Redis|int|false {}
+   public function zinter(array $keys, ?array $weights = NULL, ?array $options = NULL): \Redis|array|false {}
+   public function zintercard(array $keys, int $limit = -1): \Redis|int|false {}
+   public function zinterstore(string $dst, array $keys, ?array $weights = NULL, ?string $aggregate = NULL): \Redis|int|false {}
+   public function zmpop(array $keys, string $from, int $count = 1): \Redis|array|false|null {}
+   public function zrangestore(string $dstkey, string $srckey, string $start, string $end, array|bool|null $options = NULL): \Redis|int|false {}
+   public function zscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): \Redis|array|false {}
+   public function zunion(array $keys, ?array $weights = NULL, ?array $options = NULL): \Redis|array|false {}
+   public function zunionstore(string $dst, array $keys, ?array $weights = NULL, ?string $aggregate = NULL): \Redis|int|false {}
 }
 
-class RedisArray {
-    public function __call(string $function_name, array $arguments): mixed {}
-    public function __construct(array|string $name_or_hosts, ?array $options = NULL) {}
-    public function _continuum(): array|bool {}
-    public function _distributor(): callable|bool {}
-    public function _function(): callable|bool {}
-    public function _hosts(): array|bool {}
-    public function _instance(string $host): \Redis|bool|null {}
-    public function _rehash(?callable $fn = NULL): ?bool {}
-    public function _target(string $key): string|bool|null {}
-    public function bgsave(): array {}
-    public function del(array|string $key, string ...$otherkeys): int|bool {}
-    public function discard(): ?bool {}
-    public function exec(): array|bool|null {}
-    public function flushall(): array|bool {}
-    public function flushdb(): array|bool {}
-    public function getOption(int $opt): array|bool {}
-    public function hscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|bool {}
-    public function info(): array|bool {}
-    public function keys(string $pattern): array|bool {}
-    public function mget(array $keys): array|bool {}
-    public function mset(array $pairs): bool {}
-    public function multi(string $host, ?int $mode = NULL): \RedisArray|bool {}
-    public function ping(): array|bool {}
-    public function save(): array|bool {}
-    public function scan(string|int|null &$iterator, string $node, ?string $pattern = NULL, int $count = 0): array|bool {}
-    public function select(int $index): array|bool {}
-    public function setOption(int $opt, string $value): array|bool {}
-    public function sscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|bool {}
-    public function unlink(array|string $key, string ...$otherkeys): int|bool {}
-    public function unwatch(): ?bool {}
-    public function zscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|bool {}
+class RedisArray
+{
+   public function __call(string $function_name, array $arguments): mixed {}
+   public function __construct(array|string $name_or_hosts, ?array $options = NULL) {}
+   public function _continuum(): array|bool {}
+   public function _distributor(): callable|bool {}
+   public function _function(): callable|bool {}
+   public function _hosts(): array|bool {}
+   public function _instance(string $host): \Redis|bool|null {}
+   public function _rehash(?callable $fn = NULL): ?bool {}
+   public function _target(string $key): string|bool|null {}
+   public function bgsave(): array {}
+   public function del(array|string $key, string ...$otherkeys): int|bool {}
+   public function discard(): ?bool {}
+   public function exec(): array|bool|null {}
+   public function flushall(): array|bool {}
+   public function flushdb(): array|bool {}
+   public function getOption(int $opt): array|bool {}
+   public function hscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|bool {}
+   public function info(): array|bool {}
+   public function keys(string $pattern): array|bool {}
+   public function mget(array $keys): array|bool {}
+   public function mset(array $pairs): bool {}
+   public function multi(string $host, ?int $mode = NULL): \RedisArray|bool {}
+   public function ping(): array|bool {}
+   public function save(): array|bool {}
+   public function scan(string|int|null &$iterator, string $node, ?string $pattern = NULL, int $count = 0): array|bool {}
+   public function select(int $index): array|bool {}
+   public function setOption(int $opt, string $value): array|bool {}
+   public function sscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|bool {}
+   public function unlink(array|string $key, string ...$otherkeys): int|bool {}
+   public function unwatch(): ?bool {}
+   public function zscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|bool {}
 }
 
-class RedisCluster {
-    public const FAILOVER_DISTRIBUTE = 2;
-    public const FAILOVER_DISTRIBUTE_SLAVES = 3;
-    public const FAILOVER_ERROR = 1;
-    public const FAILOVER_NONE = 0;
-    public const OPT_SLAVE_FAILOVER = 5;
-    public function __construct(?string $name, ?array $seeds = NULL, int|float $timeout = 0, int|float $read_timeout = 0, bool $persistent = false, mixed $auth = NULL, ?array $context = NULL) {}
-    public function _compress(string $value): string {}
-    public function _masters(): array {}
-    public function _pack(mixed $value): string {}
-    public function _prefix(string $key): string|bool {}
-    public function _redir(): ?string {}
-    public function _serialize(mixed $value): string|bool {}
-    public function _uncompress(string $value): string {}
-    public function _unpack(string $value): mixed {}
-    public function _unserialize(string $value): mixed {}
-    public function acl(array|string $key_or_address, string $subcmd, string ...$args): mixed {}
-    public function append(string $key, mixed $value): \RedisCluster|int|bool {}
-    public function bgrewriteaof(array|string $key_or_address): \RedisCluster|bool {}
-    public function bgsave(array|string $key_or_address): \RedisCluster|bool {}
-    public function bitcount(string $key, int $start = 0, int $end = -1, bool $bybit = false): \RedisCluster|int|bool {}
-    public function bitop(string $operation, string $deskey, string $srckey, string ...$otherkeys): \RedisCluster|int|bool {}
-    public function bitpos(string $key, bool $bit, int $start = 0, int $end = -1, bool $bybit = false): \RedisCluster|int|false {}
-    public function blmove(string $src, string $dst, string $wherefrom, string $whereto, float $timeout): \Redis|string|false {}
-    public function blmpop(float $timeout, array $keys, string $from, int $count = 1): \RedisCluster|array|false|null {}
-    public function blpop(array|string $key, string|int|float $timeout_or_key, mixed ...$extra_args): \RedisCluster|array|false|null {}
-    public function brpop(array|string $key, string|int|float $timeout_or_key, mixed ...$extra_args): \RedisCluster|array|false|null {}
-    public function brpoplpush(string $srckey, string $deskey, int $timeout): mixed {}
-    public function bzmpop(float $timeout, array $keys, string $from, int $count = 1): \RedisCluster|array|false|null {}
-    public function bzpopmax(array|string $key, string|int $timeout_or_key, mixed ...$extra_args): array {}
-    public function bzpopmin(array|string $key, string|int $timeout_or_key, mixed ...$extra_args): array {}
-    public function clearlasterror(): bool {}
-    public function cleartransferredbytes(): void {}
-    public function client(array|string $key_or_address, string $subcommand, ?string $arg = NULL): array|string|bool {}
-    public function close(): bool {}
-    public function cluster(array|string $key_or_address, string $command, mixed ...$extra_args): mixed {}
-    public function command(mixed ...$extra_args): mixed {}
-    public function config(array|string $key_or_address, string $subcommand, mixed ...$extra_args): mixed {}
-    public function copy(string $src, string $dst, ?array $options = NULL): \RedisCluster|bool {}
-    public function dbsize(array|string $key_or_address): \RedisCluster|int {}
-    public function decr(string $key, int $by = 1): \RedisCluster|int|false {}
-    public function decrby(string $key, int $value): \RedisCluster|int|false {}
-    public function decrbyfloat(string $key, float $value): float {}
-    public function del(array|string $key, string ...$other_keys): \RedisCluster|int|false {}
-    public function delifeq(string $key, mixed $value): \RedisCluster|int|false {}
-    public function discard(): bool {}
-    public function dump(string $key): \RedisCluster|string|false {}
-    public function echo(array|string $key_or_address, string $msg): \RedisCluster|string|false {}
-    public function eval(string $script, array $args = [], int $num_keys = 0): mixed {}
-    public function eval_ro(string $script, array $args = [], int $num_keys = 0): mixed {}
-    public function evalsha(string $script_sha, array $args = [], int $num_keys = 0): mixed {}
-    public function evalsha_ro(string $script_sha, array $args = [], int $num_keys = 0): mixed {}
-    public function exec(): array|false {}
-    public function exists(mixed $key, mixed ...$other_keys): \RedisCluster|int|bool {}
-    public function expire(string $key, int $timeout, ?string $mode = NULL): \RedisCluster|bool {}
-    public function expireat(string $key, int $timestamp, ?string $mode = NULL): \RedisCluster|bool {}
-    public function expiremember(string $key, string $field, int $ttl, ?string $unit = NULL): \Redis|int|false {}
-    public function expirememberat(string $key, string $field, int $timestamp): \Redis|int|false {}
-    public function expiretime(string $key): \RedisCluster|int|false {}
-    public function flushall(array|string $key_or_address, bool $async = false): \RedisCluster|bool {}
-    public function flushdb(array|string $key_or_address, bool $async = false): \RedisCluster|bool {}
-    public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): \RedisCluster|int|false {}
-    public function geodist(string $key, string $src, string $dest, ?string $unit = NULL): \RedisCluster|float|false {}
-    public function geohash(string $key, string $member, string ...$other_members): \RedisCluster|array|false {}
-    public function geopos(string $key, string $member, string ...$other_members): \RedisCluster|array|false {}
-    public function georadius(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed {}
-    public function georadius_ro(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed {}
-    public function georadiusbymember(string $key, string $member, float $radius, string $unit, array $options = []): mixed {}
-    public function georadiusbymember_ro(string $key, string $member, float $radius, string $unit, array $options = []): mixed {}
-    public function geosearch(string $key, array|string $position, array|int|float $shape, string $unit, array $options = []): \RedisCluster|array {}
-    public function geosearchstore(string $dst, string $src, array|string $position, array|int|float $shape, string $unit, array $options = []): \RedisCluster|array|int|false {}
-    public function get(string $key): mixed {}
-    public function getWithMeta(string $key): \RedisCluster|array|false {}
-    public function getbit(string $key, int $value): \RedisCluster|int|false {}
-    public function getdel(string $key): mixed {}
-    public function getex(string $key, array $options = []): \RedisCluster|string|false {}
-    public function getlasterror(): ?string {}
-    public function getmode(): int {}
-    public function getoption(int $option): mixed {}
-    public function getrange(string $key, int $start, int $end): \RedisCluster|string|false {}
-    public function getset(string $key, mixed $value): \RedisCluster|string|bool {}
-    public function gettransferredbytes(): array|false {}
-    public function hdel(string $key, string $member, string ...$other_members): \RedisCluster|int|false {}
-    public function hexists(string $key, string $member): \RedisCluster|bool {}
-    public function hexpire(string $key, int $ttl, array $fields, ?string $mode = NULL): \RedisCluster|array|false {}
-    public function hexpireat(string $key, int $time, array $fields, ?string $mode = NULL): \RedisCluster|array|false {}
-    public function hexpiretime(string $key, array $fields): \RedisCluster|array|false {}
-    public function hget(string $key, string $member): mixed {}
-    public function hgetWithMeta(string $key, string $member): mixed {}
-    public function hgetall(string $key): \RedisCluster|array|false {}
-    public function hgetdel(string $key, array $fields): \RedisCluster|array|false {}
-    public function hgetex(string $key, array $fields, array|string|null $expiry = NULL): \RedisCluster|array|false {}
-    public function hincrby(string $key, string $member, int $value): \RedisCluster|int|false {}
-    public function hincrbyfloat(string $key, string $member, float $value): \RedisCluster|float|false {}
-    public function hkeys(string $key): \RedisCluster|array|false {}
-    public function hlen(string $key): \RedisCluster|int|false {}
-    public function hmget(string $key, array $keys): \RedisCluster|array|false {}
-    public function hmset(string $key, array $key_values): \RedisCluster|bool {}
-    public function hpersist(string $key, array $fields): \RedisCluster|array|false {}
-    public function hpexpire(string $key, int $ttl, array $fields, ?string $mode = NULL): \RedisCluster|array|false {}
-    public function hpexpireat(string $key, int $mstime, array $fields, ?string $mode = NULL): \RedisCluster|array|false {}
-    public function hpexpiretime(string $key, array $fields): \RedisCluster|array|false {}
-    public function hpttl(string $key, array $fields): \RedisCluster|array|false {}
-    public function hrandfield(string $key, ?array $options = NULL): \RedisCluster|array|string {}
-    public function hscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|bool {}
-    public function hset(string $key, string $member, mixed $value): \RedisCluster|int|false {}
-    public function hsetex(string $key, array $fields, ?array $expiry = NULL): \RedisCluster|int|false {}
-    public function hsetnx(string $key, string $member, mixed $value): \RedisCluster|bool {}
-    public function hstrlen(string $key, string $field): \RedisCluster|int|false {}
-    public function httl(string $key, array $fields): \RedisCluster|array|false {}
-    public function hvals(string $key): \RedisCluster|array|false {}
-    public function incr(string $key, int $by = 1): \RedisCluster|int|false {}
-    public function incrby(string $key, int $value): \RedisCluster|int|false {}
-    public function incrbyfloat(string $key, float $value): \RedisCluster|float|false {}
-    public function info(array|string $key_or_address, string ...$sections): \RedisCluster|array|false {}
-    public function keys(string $pattern): \RedisCluster|array|false {}
-    public function lastsave(array|string $key_or_address): \RedisCluster|int|false {}
-    public function lcs(string $key1, string $key2, ?array $options = NULL): \RedisCluster|array|string|int|false {}
-    public function lget(string $key, int $index): \RedisCluster|string|bool {}
-    public function lindex(string $key, int $index): mixed {}
-    public function linsert(string $key, string $pos, mixed $pivot, mixed $value): \RedisCluster|int|false {}
-    public function llen(string $key): \RedisCluster|int|bool {}
-    public function lmove(string $src, string $dst, string $wherefrom, string $whereto): \Redis|string|false {}
-    public function lmpop(array $keys, string $from, int $count = 1): \RedisCluster|array|false|null {}
-    public function lpop(string $key, int $count = 0): \RedisCluster|array|string|bool {}
-    public function lpos(string $key, mixed $value, ?array $options = NULL): \Redis|array|int|bool|null {}
-    public function lpush(string $key, mixed $value, mixed ...$other_values): \RedisCluster|int|bool {}
-    public function lpushx(string $key, mixed $value): \RedisCluster|int|bool {}
-    public function lrange(string $key, int $start, int $end): \RedisCluster|array|false {}
-    public function lrem(string $key, mixed $value, int $count = 0): \RedisCluster|int|bool {}
-    public function lset(string $key, int $index, mixed $value): \RedisCluster|bool {}
-    public function ltrim(string $key, int $start, int $end): \RedisCluster|bool {}
-    public function mget(array $keys): \RedisCluster|array|false {}
-    public function mset(array $key_values): \RedisCluster|bool {}
-    public function msetnx(array $key_values): \RedisCluster|array|false {}
-    public function multi(int $value = Redis::MULTI): \RedisCluster|bool {}
-    public function object(string $subcommand, string $key): \RedisCluster|string|int|false {}
-    public function persist(string $key): \RedisCluster|bool {}
-    public function pexpire(string $key, int $timeout, ?string $mode = NULL): \RedisCluster|bool {}
-    public function pexpireat(string $key, int $timestamp, ?string $mode = NULL): \RedisCluster|bool {}
-    public function pexpiretime(string $key): \RedisCluster|int|false {}
-    public function pfadd(string $key, array $elements): \RedisCluster|bool {}
-    public function pfcount(string $key): \RedisCluster|int|false {}
-    public function pfmerge(string $key, array $keys): \RedisCluster|bool {}
-    public function ping(array|string $key_or_address, ?string $message = NULL): mixed {}
-    public function psetex(string $key, int $timeout, string $value): \RedisCluster|bool {}
-    public function psubscribe(array $patterns, callable $callback): void {}
-    public function pttl(string $key): \RedisCluster|int|false {}
-    public function publish(string $channel, string $message): \RedisCluster|int|bool {}
-    public function pubsub(array|string $key_or_address, string ...$values): mixed {}
-    public function punsubscribe(string $pattern, string ...$other_patterns): array|bool {}
-    public function randomkey(array|string $key_or_address): \RedisCluster|string|bool {}
-    public function rawcommand(array|string $key_or_address, string $command, mixed ...$args): mixed {}
-    public function rename(string $key_src, string $key_dst): \RedisCluster|bool {}
-    public function renamenx(string $key, string $newkey): \RedisCluster|bool {}
-    public function restore(string $key, int $timeout, string $value, ?array $options = NULL): \RedisCluster|bool {}
-    public function role(array|string $key_or_address): mixed {}
-    public function rpop(string $key, int $count = 0): \RedisCluster|array|string|bool {}
-    public function rpoplpush(string $src, string $dst): \RedisCluster|string|bool {}
-    public function rpush(string $key, mixed ...$elements): \RedisCluster|int|false {}
-    public function rpushx(string $key, string $value): \RedisCluster|int|bool {}
-    public function sadd(string $key, mixed $value, mixed ...$other_values): \RedisCluster|int|false {}
-    public function saddarray(string $key, array $values): \RedisCluster|int|bool {}
-    public function save(array|string $key_or_address): \RedisCluster|bool {}
-    public function scan(string|int|null &$iterator, array|string $key_or_address, ?string $pattern = NULL, int $count = 0): array|bool {}
-    public function scard(string $key): \RedisCluster|int|false {}
-    public function script(array|string $key_or_address, mixed ...$args): mixed {}
-    public function sdiff(string $key, string ...$other_keys): \RedisCluster|array|false {}
-    public function sdiffstore(string $dst, string $key, string ...$other_keys): \RedisCluster|int|false {}
-    public function set(string $key, mixed $value, mixed $options = NULL): \RedisCluster|string|bool {}
-    public function setbit(string $key, int $offset, bool $onoff): \RedisCluster|int|false {}
-    public function setex(string $key, int $expire, mixed $value): \RedisCluster|bool {}
-    public function setnx(string $key, mixed $value): \RedisCluster|bool {}
-    public function setoption(int $option, mixed $value): bool {}
-    public function setrange(string $key, int $offset, string $value): \RedisCluster|int|false {}
-    public function sinter(array|string $key, string ...$other_keys): \RedisCluster|array|false {}
-    public function sintercard(array $keys, int $limit = -1): \RedisCluster|int|false {}
-    public function sinterstore(array|string $key, string ...$other_keys): \RedisCluster|int|false {}
-    public function sismember(string $key, mixed $value): \RedisCluster|bool {}
-    public function slowlog(array|string $key_or_address, mixed ...$args): mixed {}
-    public function smembers(string $key): \RedisCluster|array|false {}
-    public function smismember(string $key, string $member, string ...$other_members): \RedisCluster|array|false {}
-    public function smove(string $src, string $dst, string $member): \RedisCluster|bool {}
-    public function sort(string $key, ?array $options = NULL): \RedisCluster|array|string|int|bool {}
-    public function sort_ro(string $key, ?array $options = NULL): \RedisCluster|array|string|int|bool {}
-    public function spop(string $key, int $count = 0): \RedisCluster|array|string|false {}
-    public function srandmember(string $key, int $count = 0): \RedisCluster|array|string|false {}
-    public function srem(string $key, mixed $value, mixed ...$other_values): \RedisCluster|int|false {}
-    public function sscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|false {}
-    public function strlen(string $key): \RedisCluster|int|false {}
-    public function subscribe(array $channels, callable $cb): void {}
-    public function sunion(string $key, string ...$other_keys): \RedisCluster|array|bool {}
-    public function sunionstore(string $dst, string $key, string ...$other_keys): \RedisCluster|int|false {}
-    public function time(array|string $key_or_address): \RedisCluster|array|bool {}
-    public function touch(mixed $key, mixed ...$other_keys): \RedisCluster|int|bool {}
-    public function ttl(string $key): \RedisCluster|int|false {}
-    public function type(string $key): \RedisCluster|int|false {}
-    public function unlink(array|string $key, string ...$other_keys): \RedisCluster|int|false {}
-    public function unsubscribe(array $channels): array|bool {}
-    public function unwatch(): bool {}
-    public function vadd(string $key, array $values, mixed $element, ?array $options = NULL): \RedisCluster|int|false {}
-    public function vcard(string $key): \RedisCluster|int|false {}
-    public function vdim(string $key): \RedisCluster|int|false {}
-    public function vemb(string $key, mixed $member, bool $raw = false): \RedisCluster|array|false {}
-    public function vgetattr(string $key, mixed $member, bool $decode = true): \RedisCluster|array|string|false {}
-    public function vinfo(string $key): \RedisCluster|array|false {}
-    public function vismember(string $key, mixed $member): \RedisCluster|bool {}
-    public function vlinks(string $key, mixed $member, bool $withscores = false): \RedisCluster|array|false {}
-    public function vrandmember(string $key, int $count = 0): \RedisCluster|array|string|false {}
-    public function vrange(string $key, string $min, string $max, int $count = -1): \RedisCluster|array|false {}
-    public function vrem(string $key, mixed $member): \RedisCluster|int|false {}
-    public function vsetattr(string $key, mixed $member, array|string $attributes): \RedisCluster|int|false {}
-    public function vsim(string $key, mixed $member, ?array $options = NULL): \RedisCluster|array|false {}
-    public function waitaof(array|string $key_or_address, int $numlocal, int $numreplicas, int $timeout): \RedisCluster|array|false {}
-    public function watch(string $key, string ...$other_keys): \RedisCluster|bool {}
-    public function xack(string $key, string $group, array $ids): \RedisCluster|int|false {}
-    public function xadd(string $key, string $id, array $values, int $maxlen = 0, bool $approx = false): \RedisCluster|string|false {}
-    public function xautoclaim(string $key, string $group, string $consumer, int $min_idle, string $start, int $count = -1, bool $justid = false): \RedisCluster|array|bool {}
-    public function xclaim(string $key, string $group, string $consumer, int $min_iddle, array $ids, array $options): \RedisCluster|array|string|false {}
-    public function xdel(string $key, array $ids): \RedisCluster|int|false {}
-    public function xgroup(string $operation, ?string $key = NULL, ?string $group = NULL, ?string $id_or_consumer = NULL, bool $mkstream = false, int $entries_read = -2): mixed {}
-    public function xinfo(string $operation, ?string $arg1 = NULL, ?string $arg2 = NULL, int $count = -1): mixed {}
-    public function xlen(string $key): \RedisCluster|int|false {}
-    public function xpending(string $key, string $group, ?string $start = NULL, ?string $end = NULL, int $count = -1, ?string $consumer = NULL): \RedisCluster|array|false {}
-    public function xrange(string $key, string $start, string $end, int $count = -1): \RedisCluster|array|bool {}
-    public function xread(array $streams, int $count = -1, int $block = -1): \RedisCluster|array|bool {}
-    public function xreadgroup(string $group, string $consumer, array $streams, int $count = 1, int $block = 1): \RedisCluster|array|bool {}
-    public function xrevrange(string $key, string $start, string $end, int $count = -1): \RedisCluster|array|bool {}
-    public function xtrim(string $key, int $maxlen, bool $approx = false, bool $minid = false, int $limit = -1): \RedisCluster|int|false {}
-    public function zadd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): \RedisCluster|int|float|false {}
-    public function zcard(string $key): \RedisCluster|int|false {}
-    public function zcount(string $key, string $start, string $end): \RedisCluster|int|false {}
-    public function zdiff(array $keys, ?array $options = NULL): \RedisCluster|array|false {}
-    public function zdiffstore(string $dst, array $keys): \RedisCluster|int|false {}
-    public function zincrby(string $key, float $value, string $member): \RedisCluster|float|false {}
-    public function zinter(array $keys, ?array $weights = NULL, ?array $options = NULL): \RedisCluster|array|false {}
-    public function zintercard(array $keys, int $limit = -1): \RedisCluster|int|false {}
-    public function zinterstore(string $dst, array $keys, ?array $weights = NULL, ?string $aggregate = NULL): \RedisCluster|int|false {}
-    public function zlexcount(string $key, string $min, string $max): \RedisCluster|int|false {}
-    public function zmpop(array $keys, string $from, int $count = 1): \RedisCluster|array|false|null {}
-    public function zmscore(string $key, mixed $member, mixed ...$other_members): \Redis|array|false {}
-    public function zpopmax(string $key, ?int $value = NULL): \RedisCluster|array|bool {}
-    public function zpopmin(string $key, ?int $value = NULL): \RedisCluster|array|bool {}
-    public function zrandmember(string $key, ?array $options = NULL): \RedisCluster|array|string {}
-    public function zrange(string $key, mixed $start, mixed $end, array|bool|null $options = NULL): \RedisCluster|array|bool {}
-    public function zrangebylex(string $key, string $min, string $max, int $offset = -1, int $count = -1): \RedisCluster|array|false {}
-    public function zrangebyscore(string $key, string $start, string $end, array $options = []): \RedisCluster|array|false {}
-    public function zrangestore(string $dstkey, string $srckey, int $start, int $end, array|bool|null $options = NULL): \RedisCluster|int|false {}
-    public function zrank(string $key, mixed $member): \RedisCluster|int|false {}
-    public function zrem(string $key, string $value, string ...$other_values): \RedisCluster|int|false {}
-    public function zremrangebylex(string $key, string $min, string $max): \RedisCluster|int|false {}
-    public function zremrangebyrank(string $key, string $min, string $max): \RedisCluster|int|false {}
-    public function zremrangebyscore(string $key, string $min, string $max): \RedisCluster|int|false {}
-    public function zrevrange(string $key, string $min, string $max, ?array $options = NULL): \RedisCluster|array|bool {}
-    public function zrevrangebylex(string $key, string $min, string $max, ?array $options = NULL): \RedisCluster|array|bool {}
-    public function zrevrangebyscore(string $key, string $min, string $max, ?array $options = NULL): \RedisCluster|array|bool {}
-    public function zrevrank(string $key, mixed $member): \RedisCluster|int|false {}
-    public function zscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): \RedisCluster|array|bool {}
-    public function zscore(string $key, mixed $member): \RedisCluster|float|false {}
-    public function zunion(array $keys, ?array $weights = NULL, ?array $options = NULL): \RedisCluster|array|false {}
-    public function zunionstore(string $dst, array $keys, ?array $weights = NULL, ?string $aggregate = NULL): \RedisCluster|int|false {}
+class RedisCluster
+{
+   public const FAILOVER_DISTRIBUTE = 2;
+   public const FAILOVER_DISTRIBUTE_SLAVES = 3;
+   public const FAILOVER_ERROR = 1;
+   public const FAILOVER_NONE = 0;
+   public const OPT_SLAVE_FAILOVER = 5;
+   public function __construct(?string $name, ?array $seeds = NULL, int|float $timeout = 0, int|float $read_timeout = 0, bool $persistent = false, mixed $auth = NULL, ?array $context = NULL) {}
+   public function _compress(string $value): string {}
+   public function _masters(): array {}
+   public function _pack(mixed $value): string {}
+   public function _prefix(string $key): string|bool {}
+   public function _redir(): ?string {}
+   public function _serialize(mixed $value): string|bool {}
+   public function _uncompress(string $value): string {}
+   public function _unpack(string $value): mixed {}
+   public function _unserialize(string $value): mixed {}
+   public function acl(array|string $key_or_address, string $subcmd, string ...$args): mixed {}
+   public function append(string $key, mixed $value): \RedisCluster|int|bool {}
+   public function bgrewriteaof(array|string $key_or_address): \RedisCluster|bool {}
+   public function bgsave(array|string $key_or_address): \RedisCluster|bool {}
+   public function bitcount(string $key, int $start = 0, int $end = -1, bool $bybit = false): \RedisCluster|int|bool {}
+   public function bitop(string $operation, string $deskey, string $srckey, string ...$otherkeys): \RedisCluster|int|bool {}
+   public function bitpos(string $key, bool $bit, int $start = 0, int $end = -1, bool $bybit = false): \RedisCluster|int|false {}
+   public function blmove(string $src, string $dst, string $wherefrom, string $whereto, float $timeout): \Redis|string|false {}
+   public function blmpop(float $timeout, array $keys, string $from, int $count = 1): \RedisCluster|array|false|null {}
+   public function blpop(array|string $key, string|int|float $timeout_or_key, mixed ...$extra_args): \RedisCluster|array|false|null {}
+   public function brpop(array|string $key, string|int|float $timeout_or_key, mixed ...$extra_args): \RedisCluster|array|false|null {}
+   public function brpoplpush(string $srckey, string $deskey, int $timeout): mixed {}
+   public function bzmpop(float $timeout, array $keys, string $from, int $count = 1): \RedisCluster|array|false|null {}
+   public function bzpopmax(array|string $key, string|int $timeout_or_key, mixed ...$extra_args): array {}
+   public function bzpopmin(array|string $key, string|int $timeout_or_key, mixed ...$extra_args): array {}
+   public function clearlasterror(): bool {}
+   public function cleartransferredbytes(): void {}
+   public function client(array|string $key_or_address, string $subcommand, ?string $arg = NULL): array|string|bool {}
+   public function close(): bool {}
+   public function cluster(array|string $key_or_address, string $command, mixed ...$extra_args): mixed {}
+   public function command(mixed ...$extra_args): mixed {}
+   public function config(array|string $key_or_address, string $subcommand, mixed ...$extra_args): mixed {}
+   public function copy(string $src, string $dst, ?array $options = NULL): \RedisCluster|bool {}
+   public function dbsize(array|string $key_or_address): \RedisCluster|int {}
+   public function decr(string $key, int $by = 1): \RedisCluster|int|false {}
+   public function decrby(string $key, int $value): \RedisCluster|int|false {}
+   public function decrbyfloat(string $key, float $value): float {}
+   public function del(array|string $key, string ...$other_keys): \RedisCluster|int|false {}
+   public function delifeq(string $key, mixed $value): \RedisCluster|int|false {}
+   public function discard(): bool {}
+   public function dump(string $key): \RedisCluster|string|false {}
+   public function echo(array|string $key_or_address, string $msg): \RedisCluster|string|false {}
+   public function eval(string $script, array $args = [], int $num_keys = 0): mixed {}
+   public function eval_ro(string $script, array $args = [], int $num_keys = 0): mixed {}
+   public function evalsha(string $script_sha, array $args = [], int $num_keys = 0): mixed {}
+   public function evalsha_ro(string $script_sha, array $args = [], int $num_keys = 0): mixed {}
+   public function exec(): array|false {}
+   public function exists(mixed $key, mixed ...$other_keys): \RedisCluster|int|bool {}
+   public function expire(string $key, int $timeout, ?string $mode = NULL): \RedisCluster|bool {}
+   public function expireat(string $key, int $timestamp, ?string $mode = NULL): \RedisCluster|bool {}
+   public function expiremember(string $key, string $field, int $ttl, ?string $unit = NULL): \Redis|int|false {}
+   public function expirememberat(string $key, string $field, int $timestamp): \Redis|int|false {}
+   public function expiretime(string $key): \RedisCluster|int|false {}
+   public function flushall(array|string $key_or_address, bool $async = false): \RedisCluster|bool {}
+   public function flushdb(array|string $key_or_address, bool $async = false): \RedisCluster|bool {}
+   public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): \RedisCluster|int|false {}
+   public function geodist(string $key, string $src, string $dest, ?string $unit = NULL): \RedisCluster|float|false {}
+   public function geohash(string $key, string $member, string ...$other_members): \RedisCluster|array|false {}
+   public function geopos(string $key, string $member, string ...$other_members): \RedisCluster|array|false {}
+   public function georadius(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed {}
+   public function georadius_ro(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed {}
+   public function georadiusbymember(string $key, string $member, float $radius, string $unit, array $options = []): mixed {}
+   public function georadiusbymember_ro(string $key, string $member, float $radius, string $unit, array $options = []): mixed {}
+   public function geosearch(string $key, array|string $position, array|int|float $shape, string $unit, array $options = []): \RedisCluster|array {}
+   public function geosearchstore(string $dst, string $src, array|string $position, array|int|float $shape, string $unit, array $options = []): \RedisCluster|array|int|false {}
+   public function get(string $key): mixed {}
+   public function getWithMeta(string $key): \RedisCluster|array|false {}
+   public function getbit(string $key, int $value): \RedisCluster|int|false {}
+   public function getdel(string $key): mixed {}
+   public function getex(string $key, array $options = []): \RedisCluster|string|false {}
+   public function getlasterror(): ?string {}
+   public function getmode(): int {}
+   public function getoption(int $option): mixed {}
+   public function getrange(string $key, int $start, int $end): \RedisCluster|string|false {}
+   public function getset(string $key, mixed $value): \RedisCluster|string|bool {}
+   public function gettransferredbytes(): array|false {}
+   public function hdel(string $key, string $member, string ...$other_members): \RedisCluster|int|false {}
+   public function hexists(string $key, string $member): \RedisCluster|bool {}
+   public function hexpire(string $key, int $ttl, array $fields, ?string $mode = NULL): \RedisCluster|array|false {}
+   public function hexpireat(string $key, int $time, array $fields, ?string $mode = NULL): \RedisCluster|array|false {}
+   public function hexpiretime(string $key, array $fields): \RedisCluster|array|false {}
+   public function hget(string $key, string $member): mixed {}
+   public function hgetWithMeta(string $key, string $member): mixed {}
+   public function hgetall(string $key): \RedisCluster|array|false {}
+   public function hgetdel(string $key, array $fields): \RedisCluster|array|false {}
+   public function hgetex(string $key, array $fields, array|string|null $expiry = NULL): \RedisCluster|array|false {}
+   public function hincrby(string $key, string $member, int $value): \RedisCluster|int|false {}
+   public function hincrbyfloat(string $key, string $member, float $value): \RedisCluster|float|false {}
+   public function hkeys(string $key): \RedisCluster|array|false {}
+   public function hlen(string $key): \RedisCluster|int|false {}
+   public function hmget(string $key, array $keys): \RedisCluster|array|false {}
+   public function hmset(string $key, array $key_values): \RedisCluster|bool {}
+   public function hpersist(string $key, array $fields): \RedisCluster|array|false {}
+   public function hpexpire(string $key, int $ttl, array $fields, ?string $mode = NULL): \RedisCluster|array|false {}
+   public function hpexpireat(string $key, int $mstime, array $fields, ?string $mode = NULL): \RedisCluster|array|false {}
+   public function hpexpiretime(string $key, array $fields): \RedisCluster|array|false {}
+   public function hpttl(string $key, array $fields): \RedisCluster|array|false {}
+   public function hrandfield(string $key, ?array $options = NULL): \RedisCluster|array|string {}
+   public function hscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|bool {}
+   public function hset(string $key, string $member, mixed $value): \RedisCluster|int|false {}
+   public function hsetex(string $key, array $fields, ?array $expiry = NULL): \RedisCluster|int|false {}
+   public function hsetnx(string $key, string $member, mixed $value): \RedisCluster|bool {}
+   public function hstrlen(string $key, string $field): \RedisCluster|int|false {}
+   public function httl(string $key, array $fields): \RedisCluster|array|false {}
+   public function hvals(string $key): \RedisCluster|array|false {}
+   public function incr(string $key, int $by = 1): \RedisCluster|int|false {}
+   public function incrby(string $key, int $value): \RedisCluster|int|false {}
+   public function incrbyfloat(string $key, float $value): \RedisCluster|float|false {}
+   public function info(array|string $key_or_address, string ...$sections): \RedisCluster|array|false {}
+   public function keys(string $pattern): \RedisCluster|array|false {}
+   public function lastsave(array|string $key_or_address): \RedisCluster|int|false {}
+   public function lcs(string $key1, string $key2, ?array $options = NULL): \RedisCluster|array|string|int|false {}
+   public function lget(string $key, int $index): \RedisCluster|string|bool {}
+   public function lindex(string $key, int $index): mixed {}
+   public function linsert(string $key, string $pos, mixed $pivot, mixed $value): \RedisCluster|int|false {}
+   public function llen(string $key): \RedisCluster|int|bool {}
+   public function lmove(string $src, string $dst, string $wherefrom, string $whereto): \Redis|string|false {}
+   public function lmpop(array $keys, string $from, int $count = 1): \RedisCluster|array|false|null {}
+   public function lpop(string $key, int $count = 0): \RedisCluster|array|string|bool {}
+   public function lpos(string $key, mixed $value, ?array $options = NULL): \Redis|array|int|bool|null {}
+   public function lpush(string $key, mixed $value, mixed ...$other_values): \RedisCluster|int|bool {}
+   public function lpushx(string $key, mixed $value): \RedisCluster|int|bool {}
+   public function lrange(string $key, int $start, int $end): \RedisCluster|array|false {}
+   public function lrem(string $key, mixed $value, int $count = 0): \RedisCluster|int|bool {}
+   public function lset(string $key, int $index, mixed $value): \RedisCluster|bool {}
+   public function ltrim(string $key, int $start, int $end): \RedisCluster|bool {}
+   public function mget(array $keys): \RedisCluster|array|false {}
+   public function mset(array $key_values): \RedisCluster|bool {}
+   public function msetnx(array $key_values): \RedisCluster|array|false {}
+   public function multi(int $value = Redis::MULTI): \RedisCluster|bool {}
+   public function object(string $subcommand, string $key): \RedisCluster|string|int|false {}
+   public function persist(string $key): \RedisCluster|bool {}
+   public function pexpire(string $key, int $timeout, ?string $mode = NULL): \RedisCluster|bool {}
+   public function pexpireat(string $key, int $timestamp, ?string $mode = NULL): \RedisCluster|bool {}
+   public function pexpiretime(string $key): \RedisCluster|int|false {}
+   public function pfadd(string $key, array $elements): \RedisCluster|bool {}
+   public function pfcount(string $key): \RedisCluster|int|false {}
+   public function pfmerge(string $key, array $keys): \RedisCluster|bool {}
+   public function ping(array|string $key_or_address, ?string $message = NULL): mixed {}
+   public function psetex(string $key, int $timeout, string $value): \RedisCluster|bool {}
+   public function psubscribe(array $patterns, callable $callback): void {}
+   public function pttl(string $key): \RedisCluster|int|false {}
+   public function publish(string $channel, string $message): \RedisCluster|int|bool {}
+   public function pubsub(array|string $key_or_address, string ...$values): mixed {}
+   public function punsubscribe(string $pattern, string ...$other_patterns): array|bool {}
+   public function randomkey(array|string $key_or_address): \RedisCluster|string|bool {}
+   public function rawcommand(array|string $key_or_address, string $command, mixed ...$args): mixed {}
+   public function rename(string $key_src, string $key_dst): \RedisCluster|bool {}
+   public function renamenx(string $key, string $newkey): \RedisCluster|bool {}
+   public function restore(string $key, int $timeout, string $value, ?array $options = NULL): \RedisCluster|bool {}
+   public function role(array|string $key_or_address): mixed {}
+   public function rpop(string $key, int $count = 0): \RedisCluster|array|string|bool {}
+   public function rpoplpush(string $src, string $dst): \RedisCluster|string|bool {}
+   public function rpush(string $key, mixed ...$elements): \RedisCluster|int|false {}
+   public function rpushx(string $key, string $value): \RedisCluster|int|bool {}
+   public function sadd(string $key, mixed $value, mixed ...$other_values): \RedisCluster|int|false {}
+   public function saddarray(string $key, array $values): \RedisCluster|int|bool {}
+   public function save(array|string $key_or_address): \RedisCluster|bool {}
+   public function scan(string|int|null &$iterator, array|string $key_or_address, ?string $pattern = NULL, int $count = 0): array|bool {}
+   public function scard(string $key): \RedisCluster|int|false {}
+   public function script(array|string $key_or_address, mixed ...$args): mixed {}
+   public function sdiff(string $key, string ...$other_keys): \RedisCluster|array|false {}
+   public function sdiffstore(string $dst, string $key, string ...$other_keys): \RedisCluster|int|false {}
+   public function set(string $key, mixed $value, mixed $options = NULL): \RedisCluster|string|bool {}
+   public function setbit(string $key, int $offset, bool $onoff): \RedisCluster|int|false {}
+   public function setex(string $key, int $expire, mixed $value): \RedisCluster|bool {}
+   public function setnx(string $key, mixed $value): \RedisCluster|bool {}
+   public function setoption(int $option, mixed $value): bool {}
+   public function setrange(string $key, int $offset, string $value): \RedisCluster|int|false {}
+   public function sinter(array|string $key, string ...$other_keys): \RedisCluster|array|false {}
+   public function sintercard(array $keys, int $limit = -1): \RedisCluster|int|false {}
+   public function sinterstore(array|string $key, string ...$other_keys): \RedisCluster|int|false {}
+   public function sismember(string $key, mixed $value): \RedisCluster|bool {}
+   public function slowlog(array|string $key_or_address, mixed ...$args): mixed {}
+   public function smembers(string $key): \RedisCluster|array|false {}
+   public function smismember(string $key, string $member, string ...$other_members): \RedisCluster|array|false {}
+   public function smove(string $src, string $dst, string $member): \RedisCluster|bool {}
+   public function sort(string $key, ?array $options = NULL): \RedisCluster|array|string|int|bool {}
+   public function sort_ro(string $key, ?array $options = NULL): \RedisCluster|array|string|int|bool {}
+   public function spop(string $key, int $count = 0): \RedisCluster|array|string|false {}
+   public function srandmember(string $key, int $count = 0): \RedisCluster|array|string|false {}
+   public function srem(string $key, mixed $value, mixed ...$other_values): \RedisCluster|int|false {}
+   public function sscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): array|false {}
+   public function strlen(string $key): \RedisCluster|int|false {}
+   public function subscribe(array $channels, callable $cb): void {}
+   public function sunion(string $key, string ...$other_keys): \RedisCluster|array|bool {}
+   public function sunionstore(string $dst, string $key, string ...$other_keys): \RedisCluster|int|false {}
+   public function time(array|string $key_or_address): \RedisCluster|array|bool {}
+   public function touch(mixed $key, mixed ...$other_keys): \RedisCluster|int|bool {}
+   public function ttl(string $key): \RedisCluster|int|false {}
+   public function type(string $key): \RedisCluster|int|false {}
+   public function unlink(array|string $key, string ...$other_keys): \RedisCluster|int|false {}
+   public function unsubscribe(array $channels): array|bool {}
+   public function unwatch(): bool {}
+   public function vadd(string $key, array $values, mixed $element, ?array $options = NULL): \RedisCluster|int|false {}
+   public function vcard(string $key): \RedisCluster|int|false {}
+   public function vdim(string $key): \RedisCluster|int|false {}
+   public function vemb(string $key, mixed $member, bool $raw = false): \RedisCluster|array|false {}
+   public function vgetattr(string $key, mixed $member, bool $decode = true): \RedisCluster|array|string|false {}
+   public function vinfo(string $key): \RedisCluster|array|false {}
+   public function vismember(string $key, mixed $member): \RedisCluster|bool {}
+   public function vlinks(string $key, mixed $member, bool $withscores = false): \RedisCluster|array|false {}
+   public function vrandmember(string $key, int $count = 0): \RedisCluster|array|string|false {}
+   public function vrange(string $key, string $min, string $max, int $count = -1): \RedisCluster|array|false {}
+   public function vrem(string $key, mixed $member): \RedisCluster|int|false {}
+   public function vsetattr(string $key, mixed $member, array|string $attributes): \RedisCluster|int|false {}
+   public function vsim(string $key, mixed $member, ?array $options = NULL): \RedisCluster|array|false {}
+   public function waitaof(array|string $key_or_address, int $numlocal, int $numreplicas, int $timeout): \RedisCluster|array|false {}
+   public function watch(string $key, string ...$other_keys): \RedisCluster|bool {}
+   public function xack(string $key, string $group, array $ids): \RedisCluster|int|false {}
+   public function xadd(string $key, string $id, array $values, int $maxlen = 0, bool $approx = false): \RedisCluster|string|false {}
+   public function xautoclaim(string $key, string $group, string $consumer, int $min_idle, string $start, int $count = -1, bool $justid = false): \RedisCluster|array|bool {}
+   public function xclaim(string $key, string $group, string $consumer, int $min_iddle, array $ids, array $options): \RedisCluster|array|string|false {}
+   public function xdel(string $key, array $ids): \RedisCluster|int|false {}
+   public function xgroup(string $operation, ?string $key = NULL, ?string $group = NULL, ?string $id_or_consumer = NULL, bool $mkstream = false, int $entries_read = -2): mixed {}
+   public function xinfo(string $operation, ?string $arg1 = NULL, ?string $arg2 = NULL, int $count = -1): mixed {}
+   public function xlen(string $key): \RedisCluster|int|false {}
+   public function xpending(string $key, string $group, ?string $start = NULL, ?string $end = NULL, int $count = -1, ?string $consumer = NULL): \RedisCluster|array|false {}
+   public function xrange(string $key, string $start, string $end, int $count = -1): \RedisCluster|array|bool {}
+   public function xread(array $streams, int $count = -1, int $block = -1): \RedisCluster|array|bool {}
+   public function xreadgroup(string $group, string $consumer, array $streams, int $count = 1, int $block = 1): \RedisCluster|array|bool {}
+   public function xrevrange(string $key, string $start, string $end, int $count = -1): \RedisCluster|array|bool {}
+   public function xtrim(string $key, int $maxlen, bool $approx = false, bool $minid = false, int $limit = -1): \RedisCluster|int|false {}
+   public function zadd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): \RedisCluster|int|float|false {}
+   public function zcard(string $key): \RedisCluster|int|false {}
+   public function zcount(string $key, string $start, string $end): \RedisCluster|int|false {}
+   public function zdiff(array $keys, ?array $options = NULL): \RedisCluster|array|false {}
+   public function zdiffstore(string $dst, array $keys): \RedisCluster|int|false {}
+   public function zincrby(string $key, float $value, string $member): \RedisCluster|float|false {}
+   public function zinter(array $keys, ?array $weights = NULL, ?array $options = NULL): \RedisCluster|array|false {}
+   public function zintercard(array $keys, int $limit = -1): \RedisCluster|int|false {}
+   public function zinterstore(string $dst, array $keys, ?array $weights = NULL, ?string $aggregate = NULL): \RedisCluster|int|false {}
+   public function zlexcount(string $key, string $min, string $max): \RedisCluster|int|false {}
+   public function zmpop(array $keys, string $from, int $count = 1): \RedisCluster|array|false|null {}
+   public function zmscore(string $key, mixed $member, mixed ...$other_members): \Redis|array|false {}
+   public function zpopmax(string $key, ?int $value = NULL): \RedisCluster|array|bool {}
+   public function zpopmin(string $key, ?int $value = NULL): \RedisCluster|array|bool {}
+   public function zrandmember(string $key, ?array $options = NULL): \RedisCluster|array|string {}
+   public function zrange(string $key, mixed $start, mixed $end, array|bool|null $options = NULL): \RedisCluster|array|bool {}
+   public function zrangebylex(string $key, string $min, string $max, int $offset = -1, int $count = -1): \RedisCluster|array|false {}
+   public function zrangebyscore(string $key, string $start, string $end, array $options = []): \RedisCluster|array|false {}
+   public function zrangestore(string $dstkey, string $srckey, int $start, int $end, array|bool|null $options = NULL): \RedisCluster|int|false {}
+   public function zrank(string $key, mixed $member): \RedisCluster|int|false {}
+   public function zrem(string $key, string $value, string ...$other_values): \RedisCluster|int|false {}
+   public function zremrangebylex(string $key, string $min, string $max): \RedisCluster|int|false {}
+   public function zremrangebyrank(string $key, string $min, string $max): \RedisCluster|int|false {}
+   public function zremrangebyscore(string $key, string $min, string $max): \RedisCluster|int|false {}
+   public function zrevrange(string $key, string $min, string $max, ?array $options = NULL): \RedisCluster|array|bool {}
+   public function zrevrangebylex(string $key, string $min, string $max, ?array $options = NULL): \RedisCluster|array|bool {}
+   public function zrevrangebyscore(string $key, string $min, string $max, ?array $options = NULL): \RedisCluster|array|bool {}
+   public function zrevrank(string $key, mixed $member): \RedisCluster|int|false {}
+   public function zscan(string $key, string|int|null &$iterator, ?string $pattern = NULL, int $count = 0): \RedisCluster|array|bool {}
+   public function zscore(string $key, mixed $member): \RedisCluster|float|false {}
+   public function zunion(array $keys, ?array $weights = NULL, ?array $options = NULL): \RedisCluster|array|false {}
+   public function zunionstore(string $dst, array $keys, ?array $weights = NULL, ?string $aggregate = NULL): \RedisCluster|int|false {}
 }
 
-class RedisClusterException extends \RuntimeException implements \Stringable, \Throwable {
-}
+class RedisClusterException extends \RuntimeException implements \Stringable, \Throwable {}
 
-class RedisException extends \RuntimeException implements \Stringable, \Throwable {
-}
+class RedisException extends \RuntimeException implements \Stringable, \Throwable {}
 
-class RedisSentinel {
-    public function __construct(?array $options = NULL) {}
-    public function ckquorum(string $master) {}
-    public function failover(string $master) {}
-    public function flushconfig() {}
-    public function getMasterAddrByName(string $master) {}
-    public function master(string $master) {}
-    public function masters() {}
-    public function myid(): string {}
-    public function ping() {}
-    public function reset(string $pattern) {}
-    public function sentinels(string $master) {}
-    public function slaves(string $master) {}
+class RedisSentinel
+{
+   public function __construct(?array $options = NULL) {}
+   public function ckquorum(string $master) {}
+   public function failover(string $master) {}
+   public function flushconfig() {}
+   public function getMasterAddrByName(string $master) {}
+   public function master(string $master) {}
+   public function masters() {}
+   public function myid(): string {}
+   public function ping() {}
+   public function reset(string $pattern) {}
+   public function sentinels(string $master) {}
+   public function slaves(string $master) {}
 }
 
 /**
  * Reflection 类
  */
- class Reflection {
-    /**
-     * 获取修饰符的名称
-     */
-     public static function getModifierNames(int $modifiers): array {}
+class Reflection
+{
+   /**
+    * 获取修饰符的名称
+    */
+   public static function getModifierNames(int $modifiers): array {}
 }
 
 /**
  * ReflectionAttribute 类
  */
- class ReflectionAttribute implements \Reflector, \Stringable {
-    public const IS_INSTANCEOF = 2;
-    public string $name;
-    private function __clone(): void {}
-    /**
-     * 禁止直接实例化的私有构造函数
-     */
-     private function __construct() {}
-    public function __toString(): string {}
-    /**
-     * 获取传递给属性的参数
-     */
-     public function getArguments(): array {}
-    /**
-     * 获取属性名称
-     */
-     public function getName(): string {}
-    /**
-     * 返回属性的目标位掩码
-     */
-     public function getTarget(): int {}
-    /**
-     * 返回该名称的属性是否已重复出现在代码元素上
-     */
-     public function isRepeated(): bool {}
-    /**
-     * 实例化由 ReflectionAttribute 类和参数表示的属性类
-     */
-     public function newInstance(): object {}
+class ReflectionAttribute implements \Reflector, \Stringable
+{
+   public const IS_INSTANCEOF = 2;
+   public string $name;
+   private function __clone(): void {}
+   /**
+    * 禁止直接实例化的私有构造函数
+    */
+   private function __construct() {}
+   public function __toString(): string {}
+   /**
+    * 获取传递给属性的参数
+    */
+   public function getArguments(): array {}
+   /**
+    * 获取属性名称
+    */
+   public function getName(): string {}
+   /**
+    * 返回属性的目标位掩码
+    */
+   public function getTarget(): int {}
+   /**
+    * 返回该名称的属性是否已重复出现在代码元素上
+    */
+   public function isRepeated(): bool {}
+   /**
+    * 实例化由 ReflectionAttribute 类和参数表示的属性类
+    */
+   public function newInstance(): object {}
 }
 
 /**
  * ReflectionClass 类
  */
- class ReflectionClass implements \Reflector, \Stringable {
-    public const IS_EXPLICIT_ABSTRACT = 64;
-    public const IS_FINAL = 32;
-    public const IS_IMPLICIT_ABSTRACT = 16;
-    public const IS_READONLY = 65536;
-    public const SKIP_DESTRUCTOR = 16;
-    public const SKIP_INITIALIZATION_ON_SERIALIZE = 8;
-    public string $name;
-    private function __clone(): void {}
-    /**
-     * 初始化 ReflectionClass 类
-     */
-     public function __construct(object|string $objectOrClass) {}
-    public function __toString(): string {}
-    /**
-     * 获取所有属性
-     */
-     public function getAttributes(?string $name = NULL, int $flags = 0): array {}
-    /**
-     * 获取已定义的常量
-     */
-     public function getConstant(string $name): mixed {}
-    /**
-     * 获取常量
-     */
-     public function getConstants(?int $filter = NULL): array {}
-    /**
-     * 获取类的构造函数
-     */
-     public function getConstructor(): ?\ReflectionMethod {}
-    /**
-     * 获取默认属性
-     */
-     public function getDefaultProperties(): array {}
-    /**
-     * 获取文档注释
-     */
-     public function getDocComment(): string|false {}
-    /**
-     * 获取最后一行的行数
-     */
-     public function getEndLine(): int|false {}
-    /**
-     * 根据已定义的类获取所在扩展的 ReflectionExtension 对象
-     */
-     public function getExtension(): ?\ReflectionExtension {}
-    /**
-     * 获取定义的类所在的扩展的名称
-     */
-     public function getExtensionName(): string|false {}
-    /**
-     * 获取定义类的文件名
-     */
-     public function getFileName(): string|false {}
-    /**
-     * 获取接口（interface）名称
-     */
-     public function getInterfaceNames(): array {}
-    /**
-     * 获取接口
-     */
-     public function getInterfaces(): array {}
-    /**
-     * Gets lazy initializer (PHP 8 >= 8.4.0)
-     */
-     public function getLazyInitializer(object $object): ?callable {}
-    /**
-     * 获取类方法的 ReflectionMethod
-     */
-     public function getMethod(string $name): \ReflectionMethod {}
-    /**
-     * 获取方法的数组
-     */
-     public function getMethods(?int $filter = NULL): array {}
-    /**
-     * 获取类的修饰符
-     */
-     public function getModifiers(): int {}
-    /**
-     * 获取类名
-     */
-     public function getName(): string {}
-    /**
-     * 获取命名空间的名称
-     */
-     public function getNamespaceName(): string {}
-    /**
-     * 获取父类
-     */
-     public function getParentClass(): \ReflectionClass|false {}
-    /**
-     * 获取属性
-     */
-     public function getProperties(?int $filter = NULL): array {}
-    /**
-     * 获取类的一个属性的 ReflectionProperty
-     */
-     public function getProperty(string $name): \ReflectionProperty {}
-    /**
-     * Gets a ReflectionClassConstant for a class's constant
-     */
-     public function getReflectionConstant(string $name): \ReflectionClassConstant|false {}
-    /**
-     * Gets class constants
-     */
-     public function getReflectionConstants(?int $filter = NULL): array {}
-    /**
-     * 获取短名
-     */
-     public function getShortName(): string {}
-    /**
-     * 获取起始行号
-     */
-     public function getStartLine(): int|false {}
-    /**
-     * 获取静态（static）属性
-     */
-     public function getStaticProperties(): array {}
-    /**
-     * 获取静态（static）属性的值
-     */
-     public function getStaticPropertyValue(string $name, mixed $default = null): mixed {}
-    /**
-     * 返回 trait 别名数组
-     */
-     public function getTraitAliases(): array {}
-    /**
-     * 返回这个类所使用 traits 的名称的数组
-     */
-     public function getTraitNames(): array {}
-    /**
-     * 返回这个类所使用的 traits 数组
-     */
-     public function getTraits(): array {}
-    /**
-     * 检查常量是否已经定义
-     */
-     public function hasConstant(string $name): bool {}
-    /**
-     * 检查方法是否已定义
-     */
-     public function hasMethod(string $name): bool {}
-    /**
-     * 检查属性是否已定义
-     */
-     public function hasProperty(string $name): bool {}
-    /**
-     * 实现接口
-     */
-     public function implementsInterface(\ReflectionClass|string $interface): bool {}
-    /**
-     * 检查是否位于命名空间中
-     */
-     public function inNamespace(): bool {}
-    /**
-     * Forces initialization of a lazy object (PHP 8 >= 8.4.0)
-     */
-     public function initializeLazyObject(object $object): object {}
-    /**
-     * 检查类是否是抽象类（abstract）
-     */
-     public function isAbstract(): bool {}
-    /**
-     * 检查类是否是匿名类
-     */
-     public function isAnonymous(): bool {}
-    /**
-     * 返回了一个类是否可复制
-     */
-     public function isCloneable(): bool {}
-    /**
-     * Returns whether this is an enum (PHP 8 >= 8.1.0)
-     */
-     public function isEnum(): bool {}
-    /**
-     * 检查类是否声明为 final
-     */
-     public function isFinal(): bool {}
-    /**
-     * 检查类的实例
-     */
-     public function isInstance(object $object): bool {}
-    /**
-     * 检查类是否可实例化
-     */
-     public function isInstantiable(): bool {}
-    /**
-     * 检查类是否是接口（interface）
-     */
-     public function isInterface(): bool {}
-    /**
-     * 检查类是否由扩展或核心在内部定义
-     */
-     public function isInternal(): bool {}
-    /**
-     * Check whether this class is iterable
-     */
-     public function isIterable(): bool {}
-    /**
-     * 别名 ReflectionClass::isIterable
-     */
-     public function isIterateable(): bool {}
-    /**
-     * Checks if class is readonly (PHP 8 >= 8.2.0)
-     */
-     public function isReadOnly(): bool {}
-    /**
-     * 检查是否为子类
-     */
-     public function isSubclassOf(\ReflectionClass|string $class): bool {}
-    /**
-     * 返回了是否是 trait
-     */
-     public function isTrait(): bool {}
-    /**
-     * Checks if an object is lazy and uninitialized (PHP 8 >= 8.4.0)
-     */
-     public function isUninitializedLazyObject(object $object): bool {}
-    /**
-     * 检查是否由用户定义的
-     */
-     public function isUserDefined(): bool {}
-    /**
-     * Marks a lazy object as initialized without calling the initializer or factory (PHP 8 >= 8.4.0)
-     */
-     public function markLazyObjectAsInitialized(object $object): object {}
-    /**
-     * 从指定的参数创建新类实例
-     */
-     public function newInstance(mixed ...$args): object {}
-    /**
-     * 从给出的参数创建一个新的类实例
-     */
-     public function newInstanceArgs(array $args = []): ?object {}
-    /**
-     * 创建新的类实例而不调用它的构造函数
-     */
-     public function newInstanceWithoutConstructor(): object {}
-    /**
-     * Creates a new lazy ghost instance (PHP 8 >= 8.4.0)
-     */
-     public function newLazyGhost(callable $initializer, int $options = 0): object {}
-    /**
-     * Creates a new lazy proxy instance (PHP 8 >= 8.4.0)
-     */
-     public function newLazyProxy(callable $factory, int $options = 0): object {}
-    /**
-     * Resets an object and marks it as lazy (PHP 8 >= 8.4.0)
-     */
-     public function resetAsLazyGhost(object $object, callable $initializer, int $options = 0): void {}
-    /**
-     * Resets an object and marks it as lazy (PHP 8 >= 8.4.0)
-     */
-     public function resetAsLazyProxy(object $object, callable $factory, int $options = 0): void {}
-    /**
-     * 设置 public static 属性的值
-     */
-     public function setStaticPropertyValue(string $name, mixed $value): void {}
+class ReflectionClass implements \Reflector, \Stringable
+{
+   public const IS_EXPLICIT_ABSTRACT = 64;
+   public const IS_FINAL = 32;
+   public const IS_IMPLICIT_ABSTRACT = 16;
+   public const IS_READONLY = 65536;
+   public const SKIP_DESTRUCTOR = 16;
+   public const SKIP_INITIALIZATION_ON_SERIALIZE = 8;
+   public string $name;
+   private function __clone(): void {}
+   /**
+    * 初始化 ReflectionClass 类
+    */
+   public function __construct(object|string $objectOrClass) {}
+   public function __toString(): string {}
+   /**
+    * 获取所有属性
+    */
+   public function getAttributes(?string $name = NULL, int $flags = 0): array {}
+   /**
+    * 获取已定义的常量
+    */
+   public function getConstant(string $name): mixed {}
+   /**
+    * 获取常量
+    */
+   public function getConstants(?int $filter = NULL): array {}
+   /**
+    * 获取类的构造函数
+    */
+   public function getConstructor(): ?\ReflectionMethod {}
+   /**
+    * 获取默认属性
+    */
+   public function getDefaultProperties(): array {}
+   /**
+    * 获取文档注释
+    */
+   public function getDocComment(): string|false {}
+   /**
+    * 获取最后一行的行数
+    */
+   public function getEndLine(): int|false {}
+   /**
+    * 根据已定义的类获取所在扩展的 ReflectionExtension 对象
+    */
+   public function getExtension(): ?\ReflectionExtension {}
+   /**
+    * 获取定义的类所在的扩展的名称
+    */
+   public function getExtensionName(): string|false {}
+   /**
+    * 获取定义类的文件名
+    */
+   public function getFileName(): string|false {}
+   /**
+    * 获取接口（interface）名称
+    */
+   public function getInterfaceNames(): array {}
+   /**
+    * 获取接口
+    */
+   public function getInterfaces(): array {}
+   /**
+    * Gets lazy initializer (PHP 8 >= 8.4.0)
+    */
+   public function getLazyInitializer(object $object): ?callable {}
+   /**
+    * 获取类方法的 ReflectionMethod
+    */
+   public function getMethod(string $name): \ReflectionMethod {}
+   /**
+    * 获取方法的数组
+    */
+   public function getMethods(?int $filter = NULL): array {}
+   /**
+    * 获取类的修饰符
+    */
+   public function getModifiers(): int {}
+   /**
+    * 获取类名
+    */
+   public function getName(): string {}
+   /**
+    * 获取命名空间的名称
+    */
+   public function getNamespaceName(): string {}
+   /**
+    * 获取父类
+    */
+   public function getParentClass(): \ReflectionClass|false {}
+   /**
+    * 获取属性
+    */
+   public function getProperties(?int $filter = NULL): array {}
+   /**
+    * 获取类的一个属性的 ReflectionProperty
+    */
+   public function getProperty(string $name): \ReflectionProperty {}
+   /**
+    * Gets a ReflectionClassConstant for a class's constant
+    */
+   public function getReflectionConstant(string $name): \ReflectionClassConstant|false {}
+   /**
+    * Gets class constants
+    */
+   public function getReflectionConstants(?int $filter = NULL): array {}
+   /**
+    * 获取短名
+    */
+   public function getShortName(): string {}
+   /**
+    * 获取起始行号
+    */
+   public function getStartLine(): int|false {}
+   /**
+    * 获取静态（static）属性
+    */
+   public function getStaticProperties(): array {}
+   /**
+    * 获取静态（static）属性的值
+    */
+   public function getStaticPropertyValue(string $name, mixed $default = null): mixed {}
+   /**
+    * 返回 trait 别名数组
+    */
+   public function getTraitAliases(): array {}
+   /**
+    * 返回这个类所使用 traits 的名称的数组
+    */
+   public function getTraitNames(): array {}
+   /**
+    * 返回这个类所使用的 traits 数组
+    */
+   public function getTraits(): array {}
+   /**
+    * 检查常量是否已经定义
+    */
+   public function hasConstant(string $name): bool {}
+   /**
+    * 检查方法是否已定义
+    */
+   public function hasMethod(string $name): bool {}
+   /**
+    * 检查属性是否已定义
+    */
+   public function hasProperty(string $name): bool {}
+   /**
+    * 实现接口
+    */
+   public function implementsInterface(\ReflectionClass|string $interface): bool {}
+   /**
+    * 检查是否位于命名空间中
+    */
+   public function inNamespace(): bool {}
+   /**
+    * Forces initialization of a lazy object (PHP 8 >= 8.4.0)
+    */
+   public function initializeLazyObject(object $object): object {}
+   /**
+    * 检查类是否是抽象类（abstract）
+    */
+   public function isAbstract(): bool {}
+   /**
+    * 检查类是否是匿名类
+    */
+   public function isAnonymous(): bool {}
+   /**
+    * 返回了一个类是否可复制
+    */
+   public function isCloneable(): bool {}
+   /**
+    * Returns whether this is an enum (PHP 8 >= 8.1.0)
+    */
+   public function isEnum(): bool {}
+   /**
+    * 检查类是否声明为 final
+    */
+   public function isFinal(): bool {}
+   /**
+    * 检查类的实例
+    */
+   public function isInstance(object $object): bool {}
+   /**
+    * 检查类是否可实例化
+    */
+   public function isInstantiable(): bool {}
+   /**
+    * 检查类是否是接口（interface）
+    */
+   public function isInterface(): bool {}
+   /**
+    * 检查类是否由扩展或核心在内部定义
+    */
+   public function isInternal(): bool {}
+   /**
+    * Check whether this class is iterable
+    */
+   public function isIterable(): bool {}
+   /**
+    * 别名 ReflectionClass::isIterable
+    */
+   public function isIterateable(): bool {}
+   /**
+    * Checks if class is readonly (PHP 8 >= 8.2.0)
+    */
+   public function isReadOnly(): bool {}
+   /**
+    * 检查是否为子类
+    */
+   public function isSubclassOf(\ReflectionClass|string $class): bool {}
+   /**
+    * 返回了是否是 trait
+    */
+   public function isTrait(): bool {}
+   /**
+    * Checks if an object is lazy and uninitialized (PHP 8 >= 8.4.0)
+    */
+   public function isUninitializedLazyObject(object $object): bool {}
+   /**
+    * 检查是否由用户定义的
+    */
+   public function isUserDefined(): bool {}
+   /**
+    * Marks a lazy object as initialized without calling the initializer or factory (PHP 8 >= 8.4.0)
+    */
+   public function markLazyObjectAsInitialized(object $object): object {}
+   /**
+    * 从指定的参数创建新类实例
+    */
+   public function newInstance(mixed ...$args): object {}
+   /**
+    * 从给出的参数创建一个新的类实例
+    */
+   public function newInstanceArgs(array $args = []): ?object {}
+   /**
+    * 创建新的类实例而不调用它的构造函数
+    */
+   public function newInstanceWithoutConstructor(): object {}
+   /**
+    * Creates a new lazy ghost instance (PHP 8 >= 8.4.0)
+    */
+   public function newLazyGhost(callable $initializer, int $options = 0): object {}
+   /**
+    * Creates a new lazy proxy instance (PHP 8 >= 8.4.0)
+    */
+   public function newLazyProxy(callable $factory, int $options = 0): object {}
+   /**
+    * Resets an object and marks it as lazy (PHP 8 >= 8.4.0)
+    */
+   public function resetAsLazyGhost(object $object, callable $initializer, int $options = 0): void {}
+   /**
+    * Resets an object and marks it as lazy (PHP 8 >= 8.4.0)
+    */
+   public function resetAsLazyProxy(object $object, callable $factory, int $options = 0): void {}
+   /**
+    * 设置 public static 属性的值
+    */
+   public function setStaticPropertyValue(string $name, mixed $value): void {}
 }
 
 /**
  * The ReflectionClassConstant class
  */
- class ReflectionClassConstant implements \Reflector, \Stringable {
-    public const IS_FINAL = 32;
-    public const IS_PRIVATE = 4;
-    public const IS_PROTECTED = 2;
-    public const IS_PUBLIC = 1;
-    public string $class;
-    public string $name;
-    private function __clone(): void {}
-    /**
-     * Constructs a ReflectionClassConstant
-     */
-     public function __construct(object|string $class, string $constant) {}
-    public function __toString(): string {}
-    /**
-     * Gets Attributes
-     */
-     public function getAttributes(?string $name = NULL, int $flags = 0): array {}
-    /**
-     * Gets declaring class
-     */
-     public function getDeclaringClass(): \ReflectionClass {}
-    /**
-     * Gets doc comments
-     */
-     public function getDocComment(): string|false {}
-    /**
-     * Gets the class constant modifiers
-     */
-     public function getModifiers(): int {}
-    /**
-     * Get name of the constant
-     */
-     public function getName(): string {}
-    /**
-     * Gets a class constant's type (PHP 8 >= 8.3.0)
-     */
-     public function getType(): ?\ReflectionType {}
-    /**
-     * Gets value
-     */
-     public function getValue(): mixed {}
-    /**
-     * Checks if class constant has a type (PHP 8 >= 8.3.0)
-     */
-     public function hasType(): bool {}
-    /**
-     * Checks if deprecated (PHP 8 >= 8.4.0)
-     */
-     public function isDeprecated(): bool {}
-    /**
-     * Checks if class constant is an Enum case (PHP 8 >= 8.1.0)
-     */
-     public function isEnumCase(): bool {}
-    /**
-     * Checks if class constant is final (PHP 8 >= 8.1.0)
-     */
-     public function isFinal(): bool {}
-    /**
-     * Checks if class constant is private
-     */
-     public function isPrivate(): bool {}
-    /**
-     * Checks if class constant is protected
-     */
-     public function isProtected(): bool {}
-    /**
-     * Checks if class constant is public
-     */
-     public function isPublic(): bool {}
+class ReflectionClassConstant implements \Reflector, \Stringable
+{
+   public const IS_FINAL = 32;
+   public const IS_PRIVATE = 4;
+   public const IS_PROTECTED = 2;
+   public const IS_PUBLIC = 1;
+   public string $class;
+   public string $name;
+   private function __clone(): void {}
+   /**
+    * Constructs a ReflectionClassConstant
+    */
+   public function __construct(object|string $class, string $constant) {}
+   public function __toString(): string {}
+   /**
+    * Gets Attributes
+    */
+   public function getAttributes(?string $name = NULL, int $flags = 0): array {}
+   /**
+    * Gets declaring class
+    */
+   public function getDeclaringClass(): \ReflectionClass {}
+   /**
+    * Gets doc comments
+    */
+   public function getDocComment(): string|false {}
+   /**
+    * Gets the class constant modifiers
+    */
+   public function getModifiers(): int {}
+   /**
+    * Get name of the constant
+    */
+   public function getName(): string {}
+   /**
+    * Gets a class constant's type (PHP 8 >= 8.3.0)
+    */
+   public function getType(): ?\ReflectionType {}
+   /**
+    * Gets value
+    */
+   public function getValue(): mixed {}
+   /**
+    * Checks if class constant has a type (PHP 8 >= 8.3.0)
+    */
+   public function hasType(): bool {}
+   /**
+    * Checks if deprecated (PHP 8 >= 8.4.0)
+    */
+   public function isDeprecated(): bool {}
+   /**
+    * Checks if class constant is an Enum case (PHP 8 >= 8.1.0)
+    */
+   public function isEnumCase(): bool {}
+   /**
+    * Checks if class constant is final (PHP 8 >= 8.1.0)
+    */
+   public function isFinal(): bool {}
+   /**
+    * Checks if class constant is private
+    */
+   public function isPrivate(): bool {}
+   /**
+    * Checks if class constant is protected
+    */
+   public function isProtected(): bool {}
+   /**
+    * Checks if class constant is public
+    */
+   public function isPublic(): bool {}
 }
 
 /**
  * The ReflectionConstant class (PHP 8 >= 8.4.0)
  */
- class ReflectionConstant implements \Reflector, \Stringable {
-    public string $name;
-    /**
-     * Constructs a ReflectionConstant (PHP 8 >= 8.4.0)
-     */
-     public function __construct(string $name) {}
-    public function __toString(): string {}
-    /**
-     * Gets Attributes
-     */
-     public function getAttributes(?string $name = NULL, int $flags = 0): array {}
-    /**
-     * Gets ReflectionExtension of the defining extension (PHP 8 >= 8.5.0)
-     */
-     public function getExtension(): ?\ReflectionExtension {}
-    /**
-     * Gets name of the defining extension (PHP 8 >= 8.5.0)
-     */
-     public function getExtensionName(): string|false {}
-    /**
-     * Gets name of the defining file (PHP 8 >= 8.5.0)
-     */
-     public function getFileName(): string|false {}
-    /**
-     * Gets name (PHP 8 >= 8.4.0)
-     */
-     public function getName(): string {}
-    /**
-     * Gets namespace name (PHP 8 >= 8.4.0)
-     */
-     public function getNamespaceName(): string {}
-    /**
-     * Gets short name (PHP 8 >= 8.4.0)
-     */
-     public function getShortName(): string {}
-    /**
-     * Gets value (PHP 8 >= 8.4.0)
-     */
-     public function getValue(): mixed {}
-    /**
-     * Checks if deprecated (PHP 8 >= 8.4.0)
-     */
-     public function isDeprecated(): bool {}
+class ReflectionConstant implements \Reflector, \Stringable
+{
+   public string $name;
+   /**
+    * Constructs a ReflectionConstant (PHP 8 >= 8.4.0)
+    */
+   public function __construct(string $name) {}
+   public function __toString(): string {}
+   /**
+    * Gets Attributes
+    */
+   public function getAttributes(?string $name = NULL, int $flags = 0): array {}
+   /**
+    * Gets ReflectionExtension of the defining extension (PHP 8 >= 8.5.0)
+    */
+   public function getExtension(): ?\ReflectionExtension {}
+   /**
+    * Gets name of the defining extension (PHP 8 >= 8.5.0)
+    */
+   public function getExtensionName(): string|false {}
+   /**
+    * Gets name of the defining file (PHP 8 >= 8.5.0)
+    */
+   public function getFileName(): string|false {}
+   /**
+    * Gets name (PHP 8 >= 8.4.0)
+    */
+   public function getName(): string {}
+   /**
+    * Gets namespace name (PHP 8 >= 8.4.0)
+    */
+   public function getNamespaceName(): string {}
+   /**
+    * Gets short name (PHP 8 >= 8.4.0)
+    */
+   public function getShortName(): string {}
+   /**
+    * Gets value (PHP 8 >= 8.4.0)
+    */
+   public function getValue(): mixed {}
+   /**
+    * Checks if deprecated (PHP 8 >= 8.4.0)
+    */
+   public function isDeprecated(): bool {}
 }
 
 /**
  * ReflectionEnum 类 (PHP 8 >= 8.1.0)
  */
- class ReflectionEnum extends \ReflectionClass implements \Reflector, \Stringable {
-    /**
-     * 实例化 ReflectionEnum 对象 (PHP 8 >= 8.1.0)
-     */
-     public function __construct(object|string $objectOrClass) {}
-    /**
-     * 获取枚举回退的类型 (PHP 8 >= 8.1.0)
-     */
-     public function getBackingType(): ?\ReflectionNamedType {}
-    /**
-     * 返回指定的枚举条目 (PHP 8 >= 8.1.0)
-     */
-     public function getCase(string $name): \ReflectionEnumUnitCase {}
-    /**
-     * 返回枚举中的所有条目的清单 (PHP 8 >= 8.1.0)
-     */
-     public function getCases(): array {}
-    /**
-     * 在枚举上检测条目 (PHP 8 >= 8.1.0)
-     */
-     public function hasCase(string $name): bool {}
-    /**
-     * 检测 Enum 是否为回退（Backed）Enum (PHP 8 >= 8.1.0)
-     */
-     public function isBacked(): bool {}
+class ReflectionEnum extends \ReflectionClass implements \Reflector, \Stringable
+{
+   /**
+    * 实例化 ReflectionEnum 对象 (PHP 8 >= 8.1.0)
+    */
+   public function __construct(object|string $objectOrClass) {}
+   /**
+    * 获取枚举回退的类型 (PHP 8 >= 8.1.0)
+    */
+   public function getBackingType(): ?\ReflectionNamedType {}
+   /**
+    * 返回指定的枚举条目 (PHP 8 >= 8.1.0)
+    */
+   public function getCase(string $name): \ReflectionEnumUnitCase {}
+   /**
+    * 返回枚举中的所有条目的清单 (PHP 8 >= 8.1.0)
+    */
+   public function getCases(): array {}
+   /**
+    * 在枚举上检测条目 (PHP 8 >= 8.1.0)
+    */
+   public function hasCase(string $name): bool {}
+   /**
+    * 检测 Enum 是否为回退（Backed）Enum (PHP 8 >= 8.1.0)
+    */
+   public function isBacked(): bool {}
 }
 
 /**
  * ReflectionEnumBackedCase 类 (PHP 8 >= 8.1.0)
  */
- class ReflectionEnumBackedCase extends \ReflectionEnumUnitCase implements \Reflector, \Stringable {
-    /**
-     * Instantiates a ReflectionEnumBackedCase object (PHP 8 >= 8.1.0)
-     */
-     public function __construct(object|string $class, string $constant) {}
-    /**
-     * 获取枚举条目回退的标量值 (PHP 8 >= 8.1.0)
-     */
-     public function getBackingValue(): string|int {}
+class ReflectionEnumBackedCase extends \ReflectionEnumUnitCase implements \Reflector, \Stringable
+{
+   /**
+    * Instantiates a ReflectionEnumBackedCase object (PHP 8 >= 8.1.0)
+    */
+   public function __construct(object|string $class, string $constant) {}
+   /**
+    * 获取枚举条目回退的标量值 (PHP 8 >= 8.1.0)
+    */
+   public function getBackingValue(): string|int {}
 }
 
 /**
  * ReflectionEnumUnitCase 类 (PHP 8 >= 8.1.0)
  */
- class ReflectionEnumUnitCase extends \ReflectionClassConstant implements \Reflector, \Stringable {
-    /**
-     * Instantiates a ReflectionEnumUnitCase object (PHP 8 >= 8.1.0)
-     */
-     public function __construct(object|string $class, string $constant) {}
-    /**
-     * 获取该枚举条目的反射 (PHP 8 >= 8.1.0)
-     */
-     public function getEnum(): \ReflectionEnum {}
-    /**
-     * 获取反射对象描述的枚举条目对象 (PHP 8 >= 8.1.0)
-     */
-     public function getValue(): \UnitEnum {}
+class ReflectionEnumUnitCase extends \ReflectionClassConstant implements \Reflector, \Stringable
+{
+   /**
+    * Instantiates a ReflectionEnumUnitCase object (PHP 8 >= 8.1.0)
+    */
+   public function __construct(object|string $class, string $constant) {}
+   /**
+    * 获取该枚举条目的反射 (PHP 8 >= 8.1.0)
+    */
+   public function getEnum(): \ReflectionEnum {}
+   /**
+    * 获取反射对象描述的枚举条目对象 (PHP 8 >= 8.1.0)
+    */
+   public function getValue(): \UnitEnum {}
 }
 
 /**
  * ReflectionException 类
  */
- class ReflectionException extends \Exception implements \Stringable, \Throwable {
-}
+class ReflectionException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * ReflectionExtension 类
  */
- class ReflectionExtension implements \Reflector, \Stringable {
-    public string $name;
-    private function __clone(): void {}
-    /**
-     * 构造 ReflectionExtension
-     */
-     public function __construct(string $name) {}
-    public function __toString(): string {}
-    /**
-     * 获取类名列表
-     */
-     public function getClassNames(): array {}
-    /**
-     * 获取类列表
-     */
-     public function getClasses(): array {}
-    /**
-     * 获取常量
-     */
-     public function getConstants(): array {}
-    /**
-     * 获取依赖
-     */
-     public function getDependencies(): array {}
-    /**
-     * 获取扩展中的函数
-     */
-     public function getFunctions(): array {}
-    /**
-     * 获取 ini 配置
-     */
-     public function getINIEntries(): array {}
-    /**
-     * 获取扩展名称
-     */
-     public function getName(): string {}
-    /**
-     * 获取扩展版本
-     */
-     public function getVersion(): ?string {}
-    /**
-     * 输出扩展信息
-     */
-     public function info(): void {}
-    /**
-     * 返回扩展是否持久化的
-     */
-     public function isPersistent(): bool {}
-    /**
-     * 返回扩展是否是临时载入
-     */
-     public function isTemporary(): bool {}
+class ReflectionExtension implements \Reflector, \Stringable
+{
+   public string $name;
+   private function __clone(): void {}
+   /**
+    * 构造 ReflectionExtension
+    */
+   public function __construct(string $name) {}
+   public function __toString(): string {}
+   /**
+    * 获取类名列表
+    */
+   public function getClassNames(): array {}
+   /**
+    * 获取类列表
+    */
+   public function getClasses(): array {}
+   /**
+    * 获取常量
+    */
+   public function getConstants(): array {}
+   /**
+    * 获取依赖
+    */
+   public function getDependencies(): array {}
+   /**
+    * 获取扩展中的函数
+    */
+   public function getFunctions(): array {}
+   /**
+    * 获取 ini 配置
+    */
+   public function getINIEntries(): array {}
+   /**
+    * 获取扩展名称
+    */
+   public function getName(): string {}
+   /**
+    * 获取扩展版本
+    */
+   public function getVersion(): ?string {}
+   /**
+    * 输出扩展信息
+    */
+   public function info(): void {}
+   /**
+    * 返回扩展是否持久化的
+    */
+   public function isPersistent(): bool {}
+   /**
+    * 返回扩展是否是临时载入
+    */
+   public function isTemporary(): bool {}
 }
 
 /**
  * ReflectionFiber 类 (PHP 8 >= 8.1.0)
  */
- final class ReflectionFiber {
-    /**
-     * Constructs a ReflectionFiber object (PHP 8 >= 8.1.0)
-     */
-     public function __construct(\Fiber $fiber) {}
-    /**
-     * Gets the callable used to create the Fiber (PHP 8 >= 8.1.0)
-     */
-     public function getCallable(): callable {}
-    /**
-     * Get the file name of the current execution point (PHP 8 >= 8.1.0)
-     */
-     public function getExecutingFile(): ?string {}
-    /**
-     * Get the line number of the current execution point (PHP 8 >= 8.1.0)
-     */
-     public function getExecutingLine(): ?int {}
-    /**
-     * Get the reflected Fiber instance (PHP 8 >= 8.1.0)
-     */
-     public function getFiber(): \Fiber {}
-    /**
-     * Get the backtrace of the current execution point (PHP 8 >= 8.1.0)
-     */
-     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
+final class ReflectionFiber
+{
+   /**
+    * Constructs a ReflectionFiber object (PHP 8 >= 8.1.0)
+    */
+   public function __construct(\Fiber $fiber) {}
+   /**
+    * Gets the callable used to create the Fiber (PHP 8 >= 8.1.0)
+    */
+   public function getCallable(): callable {}
+   /**
+    * Get the file name of the current execution point (PHP 8 >= 8.1.0)
+    */
+   public function getExecutingFile(): ?string {}
+   /**
+    * Get the line number of the current execution point (PHP 8 >= 8.1.0)
+    */
+   public function getExecutingLine(): ?int {}
+   /**
+    * Get the reflected Fiber instance (PHP 8 >= 8.1.0)
+    */
+   public function getFiber(): \Fiber {}
+   /**
+    * Get the backtrace of the current execution point (PHP 8 >= 8.1.0)
+    */
+   public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
 }
 
 /**
  * ReflectionFunction 类
  */
- class ReflectionFunction extends \ReflectionFunctionAbstract implements \Reflector, \Stringable {
-    public const IS_DEPRECATED = 2048;
-    /**
-     * Constructs a ReflectionFunction object
-     */
-     public function __construct(\Closure|string $function) {}
-    public function __toString(): string {}
-    /**
-     * Returns a dynamically created closure for the function
-     */
-     public function getClosure(): \Closure {}
-    /**
-     * Invokes function
-     */
-     public function invoke(mixed ...$args): mixed {}
-    /**
-     * Invokes function args
-     */
-     public function invokeArgs(array $args): mixed {}
-    /**
-     * Checks if a function is anonymous (PHP 8 >= 8.2.0)
-     */
-     public function isAnonymous(): bool {}
-    /**
-     * Checks if function is disabled
-     */
-     public function isDisabled(): bool {}
+class ReflectionFunction extends \ReflectionFunctionAbstract implements \Reflector, \Stringable
+{
+   public const IS_DEPRECATED = 2048;
+   /**
+    * Constructs a ReflectionFunction object
+    */
+   public function __construct(\Closure|string $function) {}
+   public function __toString(): string {}
+   /**
+    * Returns a dynamically created closure for the function
+    */
+   public function getClosure(): \Closure {}
+   /**
+    * Invokes function
+    */
+   public function invoke(mixed ...$args): mixed {}
+   /**
+    * Invokes function args
+    */
+   public function invokeArgs(array $args): mixed {}
+   /**
+    * Checks if a function is anonymous (PHP 8 >= 8.2.0)
+    */
+   public function isAnonymous(): bool {}
+   /**
+    * Checks if function is disabled
+    */
+   public function isDisabled(): bool {}
 }
 
 /**
  * ReflectionFunctionAbstract 类
  */
- abstract class ReflectionFunctionAbstract implements \Reflector, \Stringable {
-    public string $name;
-    private function __clone(): void {}
-    /**
-     * Gets Attributes
-     */
-     public function getAttributes(?string $name = NULL, int $flags = 0): array {}
-    /**
-     * Returns the class corresponding to static:: inside a closure (PHP 8 >= 8.0.23, PHP 8 >= 8.1.11)
-     */
-     public function getClosureCalledClass(): ?\ReflectionClass {}
-    /**
-     * Returns the class corresponding to the scope inside a closure
-     */
-     public function getClosureScopeClass(): ?\ReflectionClass {}
-    /**
-     * 返回闭包内与 $this 对应的对象
-     */
-     public function getClosureThis(): ?object {}
-    /**
-     * Returns an array of the used variables in the Closure (PHP 8 >= 8.1.0)
-     */
-     public function getClosureUsedVariables(): array {}
-    /**
-     * 获取注释内容
-     */
-     public function getDocComment(): string|false {}
-    /**
-     * 获取结束行号
-     */
-     public function getEndLine(): int|false {}
-    /**
-     * 获取扩展信息
-     */
-     public function getExtension(): ?\ReflectionExtension {}
-    /**
-     * 获取扩展名称
-     */
-     public function getExtensionName(): string|false {}
-    /**
-     * 获取文件名称
-     */
-     public function getFileName(): string|false {}
-    /**
-     * 获取函数名称
-     */
-     public function getName(): string {}
-    /**
-     * 获取命名空间
-     */
-     public function getNamespaceName(): string {}
-    /**
-     * 获取参数数目
-     */
-     public function getNumberOfParameters(): int {}
-    /**
-     * 获取必须输入参数个数
-     */
-     public function getNumberOfRequiredParameters(): int {}
-    /**
-     * 获取参数
-     */
-     public function getParameters(): array {}
-    /**
-     * Gets the specified return type of a function
-     */
-     public function getReturnType(): ?\ReflectionType {}
-    /**
-     * 获取函数短名称
-     */
-     public function getShortName(): string {}
-    /**
-     * 获取开始行号
-     */
-     public function getStartLine(): int|false {}
-    /**
-     * 获取静态变量
-     */
-     public function getStaticVariables(): array {}
-    /**
-     * Returns the tentative return type associated with the function (PHP 8 >= 8.1.0)
-     */
-     public function getTentativeReturnType(): ?\ReflectionType {}
-    /**
-     * Checks if the function has a specified return type
-     */
-     public function hasReturnType(): bool {}
-    /**
-     * Returns whether the function has a tentative return type (PHP 8 >= 8.1.0)
-     */
-     public function hasTentativeReturnType(): bool {}
-    /**
-     * 检查是否处于命名空间
-     */
-     public function inNamespace(): bool {}
-    /**
-     * 检查是否是匿名函数
-     */
-     public function isClosure(): bool {}
-    /**
-     * 检查是否已经弃用
-     */
-     public function isDeprecated(): bool {}
-    /**
-     * 判断函数是否是一个生成器函数
-     */
-     public function isGenerator(): bool {}
-    /**
-     * 判断函数是否是内置函数
-     */
-     public function isInternal(): bool {}
-    public function isStatic(): bool {}
-    /**
-     * 检查是否是用户定义
-     */
-     public function isUserDefined(): bool {}
-    /**
-     * Checks if the function is variadic
-     */
-     public function isVariadic(): bool {}
-    /**
-     * 检查是否返回引用
-     */
-     public function returnsReference(): bool {}
+abstract class ReflectionFunctionAbstract implements \Reflector, \Stringable
+{
+   public string $name;
+   private function __clone(): void {}
+   /**
+    * Gets Attributes
+    */
+   public function getAttributes(?string $name = NULL, int $flags = 0): array {}
+   /**
+    * Returns the class corresponding to static:: inside a closure (PHP 8 >= 8.0.23, PHP 8 >= 8.1.11)
+    */
+   public function getClosureCalledClass(): ?\ReflectionClass {}
+   /**
+    * Returns the class corresponding to the scope inside a closure
+    */
+   public function getClosureScopeClass(): ?\ReflectionClass {}
+   /**
+    * 返回闭包内与 $this 对应的对象
+    */
+   public function getClosureThis(): ?object {}
+   /**
+    * Returns an array of the used variables in the Closure (PHP 8 >= 8.1.0)
+    */
+   public function getClosureUsedVariables(): array {}
+   /**
+    * 获取注释内容
+    */
+   public function getDocComment(): string|false {}
+   /**
+    * 获取结束行号
+    */
+   public function getEndLine(): int|false {}
+   /**
+    * 获取扩展信息
+    */
+   public function getExtension(): ?\ReflectionExtension {}
+   /**
+    * 获取扩展名称
+    */
+   public function getExtensionName(): string|false {}
+   /**
+    * 获取文件名称
+    */
+   public function getFileName(): string|false {}
+   /**
+    * 获取函数名称
+    */
+   public function getName(): string {}
+   /**
+    * 获取命名空间
+    */
+   public function getNamespaceName(): string {}
+   /**
+    * 获取参数数目
+    */
+   public function getNumberOfParameters(): int {}
+   /**
+    * 获取必须输入参数个数
+    */
+   public function getNumberOfRequiredParameters(): int {}
+   /**
+    * 获取参数
+    */
+   public function getParameters(): array {}
+   /**
+    * Gets the specified return type of a function
+    */
+   public function getReturnType(): ?\ReflectionType {}
+   /**
+    * 获取函数短名称
+    */
+   public function getShortName(): string {}
+   /**
+    * 获取开始行号
+    */
+   public function getStartLine(): int|false {}
+   /**
+    * 获取静态变量
+    */
+   public function getStaticVariables(): array {}
+   /**
+    * Returns the tentative return type associated with the function (PHP 8 >= 8.1.0)
+    */
+   public function getTentativeReturnType(): ?\ReflectionType {}
+   /**
+    * Checks if the function has a specified return type
+    */
+   public function hasReturnType(): bool {}
+   /**
+    * Returns whether the function has a tentative return type (PHP 8 >= 8.1.0)
+    */
+   public function hasTentativeReturnType(): bool {}
+   /**
+    * 检查是否处于命名空间
+    */
+   public function inNamespace(): bool {}
+   /**
+    * 检查是否是匿名函数
+    */
+   public function isClosure(): bool {}
+   /**
+    * 检查是否已经弃用
+    */
+   public function isDeprecated(): bool {}
+   /**
+    * 判断函数是否是一个生成器函数
+    */
+   public function isGenerator(): bool {}
+   /**
+    * 判断函数是否是内置函数
+    */
+   public function isInternal(): bool {}
+   public function isStatic(): bool {}
+   /**
+    * 检查是否是用户定义
+    */
+   public function isUserDefined(): bool {}
+   /**
+    * Checks if the function is variadic
+    */
+   public function isVariadic(): bool {}
+   /**
+    * 检查是否返回引用
+    */
+   public function returnsReference(): bool {}
 }
 
 /**
  * ReflectionGenerator 类
  */
- final class ReflectionGenerator {
-    /**
-     * Constructs a ReflectionGenerator object
-     */
-     public function __construct(\Generator $generator) {}
-    /**
-     * Gets the file name of the currently executing generator
-     */
-     public function getExecutingFile(): string {}
-    /**
-     * Gets the executing Generator object
-     */
-     public function getExecutingGenerator(): \Generator {}
-    /**
-     * Gets the currently executing line of the generator
-     */
-     public function getExecutingLine(): int {}
-    /**
-     * Gets the function name of the generator
-     */
-     public function getFunction(): \ReflectionFunctionAbstract {}
-    /**
-     * Gets the $this value of the generator
-     */
-     public function getThis(): ?object {}
-    /**
-     * Gets the trace of the executing generator
-     */
-     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
-    /**
-     * Checks if execution finished (PHP 8 >= 8.4.0)
-     */
-     public function isClosed(): bool {}
+final class ReflectionGenerator
+{
+   /**
+    * Constructs a ReflectionGenerator object
+    */
+   public function __construct(\Generator $generator) {}
+   /**
+    * Gets the file name of the currently executing generator
+    */
+   public function getExecutingFile(): string {}
+   /**
+    * Gets the executing Generator object
+    */
+   public function getExecutingGenerator(): \Generator {}
+   /**
+    * Gets the currently executing line of the generator
+    */
+   public function getExecutingLine(): int {}
+   /**
+    * Gets the function name of the generator
+    */
+   public function getFunction(): \ReflectionFunctionAbstract {}
+   /**
+    * Gets the $this value of the generator
+    */
+   public function getThis(): ?object {}
+   /**
+    * Gets the trace of the executing generator
+    */
+   public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
+   /**
+    * Checks if execution finished (PHP 8 >= 8.4.0)
+    */
+   public function isClosed(): bool {}
 }
 
 /**
  * ReflectionIntersectionType 类 (PHP 8 >= 8.1.0)
  */
- class ReflectionIntersectionType extends \ReflectionType implements \Stringable {
-    /**
-     * 返回包含在交集类型中的类型 (PHP 8 >= 8.1.0)
-     */
-     public function getTypes(): array {}
+class ReflectionIntersectionType extends \ReflectionType implements \Stringable
+{
+   /**
+    * 返回包含在交集类型中的类型 (PHP 8 >= 8.1.0)
+    */
+   public function getTypes(): array {}
 }
 
 /**
  * ReflectionMethod 类
  */
- class ReflectionMethod extends \ReflectionFunctionAbstract implements \Reflector, \Stringable {
-    public const IS_ABSTRACT = 64;
-    public const IS_FINAL = 32;
-    public const IS_PRIVATE = 4;
-    public const IS_PROTECTED = 2;
-    public const IS_PUBLIC = 1;
-    public const IS_STATIC = 16;
-    public string $class;
-    /**
-     * 构造 ReflectionMethod
-     */
-     public function __construct(object|string $objectOrMethod, ?string $method = NULL) {}
-    public function __toString(): string {}
-    /**
-     * Creates a new ReflectionMethod (PHP 8 >= 8.3.0)
-     */
-     public static function createFromMethodName(string $method): static {}
-    /**
-     * 返回动态建立的方法调用接口（译者注：可以使用这个返回值直接调用非公开方法）
-     */
-     public function getClosure(?object $object = NULL): \Closure {}
-    /**
-     * 获取被反射的方法所在类的反射实例
-     */
-     public function getDeclaringClass(): \ReflectionClass {}
-    /**
-     * 获取方法的修饰符
-     */
-     public function getModifiers(): int {}
-    /**
-     * 返回方法原型 (如果存在)
-     */
-     public function getPrototype(): \ReflectionMethod {}
-    /**
-     * Returns whether a method has a prototype (PHP 8 >= 8.2.0)
-     */
-     public function hasPrototype(): bool {}
-    /**
-     * Invoke
-     */
-     public function invoke(?object $object, mixed ...$args): mixed {}
-    /**
-     * 带参数执行
-     */
-     public function invokeArgs(?object $object, array $args): mixed {}
-    /**
-     * 判断方法是否是抽象方法
-     */
-     public function isAbstract(): bool {}
-    /**
-     * 判断方法是否是构造方法
-     */
-     public function isConstructor(): bool {}
-    /**
-     * 判断方法是否是析构方法
-     */
-     public function isDestructor(): bool {}
-    /**
-     * 判断方法是否定义 final
-     */
-     public function isFinal(): bool {}
-    /**
-     * 判断方法是否是私有
-     */
-     public function isPrivate(): bool {}
-    /**
-     * 判断方法是否是 protected
-     */
-     public function isProtected(): bool {}
-    /**
-     * 判断方法是否是 public
-     */
-     public function isPublic(): bool {}
-    /**
-     * 设置方法是否可访问
-     */
-     public function setAccessible(bool $accessible): void {}
+class ReflectionMethod extends \ReflectionFunctionAbstract implements \Reflector, \Stringable
+{
+   public const IS_ABSTRACT = 64;
+   public const IS_FINAL = 32;
+   public const IS_PRIVATE = 4;
+   public const IS_PROTECTED = 2;
+   public const IS_PUBLIC = 1;
+   public const IS_STATIC = 16;
+   public string $class;
+   /**
+    * 构造 ReflectionMethod
+    */
+   public function __construct(object|string $objectOrMethod, ?string $method = NULL) {}
+   public function __toString(): string {}
+   /**
+    * Creates a new ReflectionMethod (PHP 8 >= 8.3.0)
+    */
+   public static function createFromMethodName(string $method): static {}
+   /**
+    * 返回动态建立的方法调用接口（译者注：可以使用这个返回值直接调用非公开方法）
+    */
+   public function getClosure(?object $object = NULL): \Closure {}
+   /**
+    * 获取被反射的方法所在类的反射实例
+    */
+   public function getDeclaringClass(): \ReflectionClass {}
+   /**
+    * 获取方法的修饰符
+    */
+   public function getModifiers(): int {}
+   /**
+    * 返回方法原型 (如果存在)
+    */
+   public function getPrototype(): \ReflectionMethod {}
+   /**
+    * Returns whether a method has a prototype (PHP 8 >= 8.2.0)
+    */
+   public function hasPrototype(): bool {}
+   /**
+    * Invoke
+    */
+   public function invoke(?object $object, mixed ...$args): mixed {}
+   /**
+    * 带参数执行
+    */
+   public function invokeArgs(?object $object, array $args): mixed {}
+   /**
+    * 判断方法是否是抽象方法
+    */
+   public function isAbstract(): bool {}
+   /**
+    * 判断方法是否是构造方法
+    */
+   public function isConstructor(): bool {}
+   /**
+    * 判断方法是否是析构方法
+    */
+   public function isDestructor(): bool {}
+   /**
+    * 判断方法是否定义 final
+    */
+   public function isFinal(): bool {}
+   /**
+    * 判断方法是否是私有
+    */
+   public function isPrivate(): bool {}
+   /**
+    * 判断方法是否是 protected
+    */
+   public function isProtected(): bool {}
+   /**
+    * 判断方法是否是 public
+    */
+   public function isPublic(): bool {}
+   /**
+    * 设置方法是否可访问
+    */
+   public function setAccessible(bool $accessible): void {}
 }
 
 /**
  * ReflectionNamedType 类
  */
- class ReflectionNamedType extends \ReflectionType implements \Stringable {
-    /**
-     * 以字符串形式获取类型的名称
-     */
-     public function getName(): string {}
-    /**
-     * 检查它是否是内置类型
-     */
-     public function isBuiltin(): bool {}
+class ReflectionNamedType extends \ReflectionType implements \Stringable
+{
+   /**
+    * 以字符串形式获取类型的名称
+    */
+   public function getName(): string {}
+   /**
+    * 检查它是否是内置类型
+    */
+   public function isBuiltin(): bool {}
 }
 
 /**
  * ReflectionObject 类
  */
- class ReflectionObject extends \ReflectionClass implements \Reflector, \Stringable {
-    /**
-     * Constructs a ReflectionObject
-     */
-     public function __construct(object $object) {}
+class ReflectionObject extends \ReflectionClass implements \Reflector, \Stringable
+{
+   /**
+    * Constructs a ReflectionObject
+    */
+   public function __construct(object $object) {}
 }
 
 /**
  * ReflectionParameter 类
  */
- class ReflectionParameter implements \Reflector, \Stringable {
-    public string $name;
-    private function __clone(): void {}
-    /**
-     * Construct
-     */
-     public function __construct(mixed $function, string|int $param) {}
-    public function __toString(): string {}
-    /**
-     * Checks if null is allowed
-     */
-     public function allowsNull(): bool {}
-    /**
-     * Returns whether this parameter can be passed by value
-     */
-     public function canBePassedByValue(): bool {}
-    /**
-     * Gets Attributes
-     */
-     public function getAttributes(?string $name = NULL, int $flags = 0): array {}
-    /**
-     * 获取参数的 ReflectionClass 对象或为 null
-     */
-     public function getClass(): ?\ReflectionClass {}
-    /**
-     * Gets declaring class
-     */
-     public function getDeclaringClass(): ?\ReflectionClass {}
-    /**
-     * Gets declaring function
-     */
-     public function getDeclaringFunction(): \ReflectionFunctionAbstract {}
-    /**
-     * Gets default parameter value
-     */
-     public function getDefaultValue(): mixed {}
-    /**
-     * Returns the default value's constant name if default value is constant or null
-     */
-     public function getDefaultValueConstantName(): ?string {}
-    /**
-     * Gets parameter name
-     */
-     public function getName(): string {}
-    /**
-     * Gets parameter position
-     */
-     public function getPosition(): int {}
-    /**
-     * Gets a parameter's type
-     */
-     public function getType(): ?\ReflectionType {}
-    /**
-     * Checks if parameter has a type
-     */
-     public function hasType(): bool {}
-    /**
-     * Checks if parameter expects an array
-     */
-     public function isArray(): bool {}
-    /**
-     * Returns whether parameter MUST be callable
-     */
-     public function isCallable(): bool {}
-    /**
-     * 检查默认是否可用
-     */
-     public function isDefaultValueAvailable(): bool {}
-    /**
-     * Returns whether the default value of this parameter is a constant
-     */
-     public function isDefaultValueConstant(): bool {}
-    /**
-     * Checks if optional
-     */
-     public function isOptional(): bool {}
-    /**
-     * Checks if passed by reference
-     */
-     public function isPassedByReference(): bool {}
-    /**
-     * Checks if a parameter is promoted to a property
-     */
-     public function isPromoted(): bool {}
-    /**
-     * Checks if the parameter is variadic
-     */
-     public function isVariadic(): bool {}
+class ReflectionParameter implements \Reflector, \Stringable
+{
+   public string $name;
+   private function __clone(): void {}
+   /**
+    * Construct
+    */
+   public function __construct(mixed $function, string|int $param) {}
+   public function __toString(): string {}
+   /**
+    * Checks if null is allowed
+    */
+   public function allowsNull(): bool {}
+   /**
+    * Returns whether this parameter can be passed by value
+    */
+   public function canBePassedByValue(): bool {}
+   /**
+    * Gets Attributes
+    */
+   public function getAttributes(?string $name = NULL, int $flags = 0): array {}
+   /**
+    * 获取参数的 ReflectionClass 对象或为 null
+    */
+   public function getClass(): ?\ReflectionClass {}
+   /**
+    * Gets declaring class
+    */
+   public function getDeclaringClass(): ?\ReflectionClass {}
+   /**
+    * Gets declaring function
+    */
+   public function getDeclaringFunction(): \ReflectionFunctionAbstract {}
+   /**
+    * Gets default parameter value
+    */
+   public function getDefaultValue(): mixed {}
+   /**
+    * Returns the default value's constant name if default value is constant or null
+    */
+   public function getDefaultValueConstantName(): ?string {}
+   /**
+    * Gets parameter name
+    */
+   public function getName(): string {}
+   /**
+    * Gets parameter position
+    */
+   public function getPosition(): int {}
+   /**
+    * Gets a parameter's type
+    */
+   public function getType(): ?\ReflectionType {}
+   /**
+    * Checks if parameter has a type
+    */
+   public function hasType(): bool {}
+   /**
+    * Checks if parameter expects an array
+    */
+   public function isArray(): bool {}
+   /**
+    * Returns whether parameter MUST be callable
+    */
+   public function isCallable(): bool {}
+   /**
+    * 检查默认是否可用
+    */
+   public function isDefaultValueAvailable(): bool {}
+   /**
+    * Returns whether the default value of this parameter is a constant
+    */
+   public function isDefaultValueConstant(): bool {}
+   /**
+    * Checks if optional
+    */
+   public function isOptional(): bool {}
+   /**
+    * Checks if passed by reference
+    */
+   public function isPassedByReference(): bool {}
+   /**
+    * Checks if a parameter is promoted to a property
+    */
+   public function isPromoted(): bool {}
+   /**
+    * Checks if the parameter is variadic
+    */
+   public function isVariadic(): bool {}
 }
 
 /**
  * ReflectionProperty 类
  */
- class ReflectionProperty implements \Reflector, \Stringable {
-    public const IS_ABSTRACT = 64;
-    public const IS_FINAL = 32;
-    public const IS_PRIVATE = 4;
-    public const IS_PRIVATE_SET = 4096;
-    public const IS_PROTECTED = 2;
-    public const IS_PROTECTED_SET = 2048;
-    public const IS_PUBLIC = 1;
-    public const IS_READONLY = 128;
-    public const IS_STATIC = 16;
-    public const IS_VIRTUAL = 512;
-    public string $class;
-    public string $name;
-    private function __clone(): void {}
-    /**
-     * Construct a ReflectionProperty object
-     */
-     public function __construct(object|string $class, string $property) {}
-    public function __toString(): string {}
-    /**
-     * Gets Attributes
-     */
-     public function getAttributes(?string $name = NULL, int $flags = 0): array {}
-    /**
-     * Gets declaring class
-     */
-     public function getDeclaringClass(): \ReflectionClass {}
-    /**
-     * Returns the default value declared for a property
-     */
-     public function getDefaultValue(): mixed {}
-    /**
-     * Gets the property doc comment
-     */
-     public function getDocComment(): string|false {}
-    /**
-     * Returns a reflection object for a specified hook (PHP 8 >= 8.4.0)
-     */
-     public function getHook(\PropertyHookType $type): ?\ReflectionMethod {}
-    /**
-     * Returns an array of all hooks on this property (PHP 8 >= 8.4.0)
-     */
-     public function getHooks(): array {}
-    /**
-     * Gets the mangled name of the property
-     */
-     public function getMangledName(): string {}
-    /**
-     * Gets the property modifiers
-     */
-     public function getModifiers(): int {}
-    /**
-     * Gets property name
-     */
-     public function getName(): string {}
-    /**
-     * Returns the value of a property, bypassing a get hook if defined (PHP 8 >= 8.4.0)
-     */
-     public function getRawValue(object $object): mixed {}
-    /**
-     * Returns the parameter type of a setter hook (PHP 8 >= 8.4.0)
-     */
-     public function getSettableType(): ?\ReflectionType {}
-    /**
-     * Gets a property's type
-     */
-     public function getType(): ?\ReflectionType {}
-    /**
-     * Gets value
-     */
-     public function getValue(?object $object = NULL): mixed {}
-    /**
-     * Checks if property has a default value declared
-     */
-     public function hasDefaultValue(): bool {}
-    /**
-     * Returns whether the property has a given hook defined (PHP 8 >= 8.4.0)
-     */
-     public function hasHook(\PropertyHookType $type): bool {}
-    /**
-     * Returns whether the property has any hooks defined (PHP 8 >= 8.4.0)
-     */
-     public function hasHooks(): bool {}
-    /**
-     * Checks if property has a type
-     */
-     public function hasType(): bool {}
-    /**
-     * Determines if a property is abstract (PHP 8 >= 8.4.0)
-     */
-     public function isAbstract(): bool {}
-    /**
-     * Checks if property is a default property
-     */
-     public function isDefault(): bool {}
-    /**
-     * Checks if property is a dynamic property (PHP 8 >= 8.4.0)
-     */
-     public function isDynamic(): bool {}
-    /**
-     * Determines if this property is final or not (PHP 8 >= 8.4.0)
-     */
-     public function isFinal(): bool {}
-    /**
-     * Checks whether a property is initialized
-     */
-     public function isInitialized(?object $object = NULL): bool {}
-    /**
-     * Checks whether a property is lazy (PHP 8 >= 8.4.0)
-     */
-     public function isLazy(object $object): bool {}
-    /**
-     * Checks if property is private
-     */
-     public function isPrivate(): bool {}
-    /**
-     * Checks if property is private for writing (PHP 8 >= 8.4.0)
-     */
-     public function isPrivateSet(): bool {}
-    /**
-     * Checks if property is promoted
-     */
-     public function isPromoted(): bool {}
-    /**
-     * Checks if property is protected
-     */
-     public function isProtected(): bool {}
-    /**
-     * Checks whether the property is protected for writing (PHP 8 >= 8.4.0)
-     */
-     public function isProtectedSet(): bool {}
-    /**
-     * Checks if property is public
-     */
-     public function isPublic(): bool {}
-    /**
-     * 检查属性是否为只读 (PHP 8 >= 8.1.0)
-     */
-     public function isReadOnly(): bool {}
-    /**
-     * Checks if property is static
-     */
-     public function isStatic(): bool {}
-    /**
-     * Determines if a property is virtual (PHP 8 >= 8.4.0)
-     */
-     public function isVirtual(): bool {}
-    /**
-     * Set property accessibility
-     */
-     public function setAccessible(bool $accessible): void {}
-    /**
-     * Sets the value of a property, bypassing a set hook if defined (PHP 8 >= 8.4.0)
-     */
-     public function setRawValue(object $object, mixed $value): void {}
-    /**
-     * Set raw property value without triggering lazy initialization (PHP 8 >= 8.4.0)
-     */
-     public function setRawValueWithoutLazyInitialization(object $object, mixed $value): void {}
-    /**
-     * Set property value
-     */
-     public function setValue(mixed $objectOrValue, mixed $value = null): void {}
-    /**
-     * Marks property as non-lazy (PHP 8 >= 8.4.0)
-     */
-     public function skipLazyInitialization(object $object): void {}
+class ReflectionProperty implements \Reflector, \Stringable
+{
+   public const IS_ABSTRACT = 64;
+   public const IS_FINAL = 32;
+   public const IS_PRIVATE = 4;
+   public const IS_PRIVATE_SET = 4096;
+   public const IS_PROTECTED = 2;
+   public const IS_PROTECTED_SET = 2048;
+   public const IS_PUBLIC = 1;
+   public const IS_READONLY = 128;
+   public const IS_STATIC = 16;
+   public const IS_VIRTUAL = 512;
+   public string $class;
+   public string $name;
+   private function __clone(): void {}
+   /**
+    * Construct a ReflectionProperty object
+    */
+   public function __construct(object|string $class, string $property) {}
+   public function __toString(): string {}
+   /**
+    * Gets Attributes
+    */
+   public function getAttributes(?string $name = NULL, int $flags = 0): array {}
+   /**
+    * Gets declaring class
+    */
+   public function getDeclaringClass(): \ReflectionClass {}
+   /**
+    * Returns the default value declared for a property
+    */
+   public function getDefaultValue(): mixed {}
+   /**
+    * Gets the property doc comment
+    */
+   public function getDocComment(): string|false {}
+   /**
+    * Returns a reflection object for a specified hook (PHP 8 >= 8.4.0)
+    */
+   public function getHook(\PropertyHookType $type): ?\ReflectionMethod {}
+   /**
+    * Returns an array of all hooks on this property (PHP 8 >= 8.4.0)
+    */
+   public function getHooks(): array {}
+   /**
+    * Gets the mangled name of the property
+    */
+   public function getMangledName(): string {}
+   /**
+    * Gets the property modifiers
+    */
+   public function getModifiers(): int {}
+   /**
+    * Gets property name
+    */
+   public function getName(): string {}
+   /**
+    * Returns the value of a property, bypassing a get hook if defined (PHP 8 >= 8.4.0)
+    */
+   public function getRawValue(object $object): mixed {}
+   /**
+    * Returns the parameter type of a setter hook (PHP 8 >= 8.4.0)
+    */
+   public function getSettableType(): ?\ReflectionType {}
+   /**
+    * Gets a property's type
+    */
+   public function getType(): ?\ReflectionType {}
+   /**
+    * Gets value
+    */
+   public function getValue(?object $object = NULL): mixed {}
+   /**
+    * Checks if property has a default value declared
+    */
+   public function hasDefaultValue(): bool {}
+   /**
+    * Returns whether the property has a given hook defined (PHP 8 >= 8.4.0)
+    */
+   public function hasHook(\PropertyHookType $type): bool {}
+   /**
+    * Returns whether the property has any hooks defined (PHP 8 >= 8.4.0)
+    */
+   public function hasHooks(): bool {}
+   /**
+    * Checks if property has a type
+    */
+   public function hasType(): bool {}
+   /**
+    * Determines if a property is abstract (PHP 8 >= 8.4.0)
+    */
+   public function isAbstract(): bool {}
+   /**
+    * Checks if property is a default property
+    */
+   public function isDefault(): bool {}
+   /**
+    * Checks if property is a dynamic property (PHP 8 >= 8.4.0)
+    */
+   public function isDynamic(): bool {}
+   /**
+    * Determines if this property is final or not (PHP 8 >= 8.4.0)
+    */
+   public function isFinal(): bool {}
+   /**
+    * Checks whether a property is initialized
+    */
+   public function isInitialized(?object $object = NULL): bool {}
+   /**
+    * Checks whether a property is lazy (PHP 8 >= 8.4.0)
+    */
+   public function isLazy(object $object): bool {}
+   /**
+    * Checks if property is private
+    */
+   public function isPrivate(): bool {}
+   /**
+    * Checks if property is private for writing (PHP 8 >= 8.4.0)
+    */
+   public function isPrivateSet(): bool {}
+   /**
+    * Checks if property is promoted
+    */
+   public function isPromoted(): bool {}
+   /**
+    * Checks if property is protected
+    */
+   public function isProtected(): bool {}
+   /**
+    * Checks whether the property is protected for writing (PHP 8 >= 8.4.0)
+    */
+   public function isProtectedSet(): bool {}
+   /**
+    * Checks if property is public
+    */
+   public function isPublic(): bool {}
+   /**
+    * 检查属性是否为只读 (PHP 8 >= 8.1.0)
+    */
+   public function isReadOnly(): bool {}
+   /**
+    * Checks if property is static
+    */
+   public function isStatic(): bool {}
+   /**
+    * Determines if a property is virtual (PHP 8 >= 8.4.0)
+    */
+   public function isVirtual(): bool {}
+   /**
+    * Set property accessibility
+    */
+   public function setAccessible(bool $accessible): void {}
+   /**
+    * Sets the value of a property, bypassing a set hook if defined (PHP 8 >= 8.4.0)
+    */
+   public function setRawValue(object $object, mixed $value): void {}
+   /**
+    * Set raw property value without triggering lazy initialization (PHP 8 >= 8.4.0)
+    */
+   public function setRawValueWithoutLazyInitialization(object $object, mixed $value): void {}
+   /**
+    * Set property value
+    */
+   public function setValue(mixed $objectOrValue, mixed $value = null): void {}
+   /**
+    * Marks property as non-lazy (PHP 8 >= 8.4.0)
+    */
+   public function skipLazyInitialization(object $object): void {}
 }
 
 /**
  * ReflectionReference 类
  */
- final class ReflectionReference {
-    private function __clone(): void {}
-    /**
-     * 私有构造函数以禁用直接实例化
-     */
-     private function __construct() {}
-    /**
-     * 从数组元素创建一个 ReflectionReference
-     */
-     public static function fromArrayElement(array $array, string|int $key): ?\ReflectionReference {}
-    /**
-     * 获取引用的唯一 ID
-     */
-     public function getId(): string {}
+final class ReflectionReference
+{
+   private function __clone(): void {}
+   /**
+    * 私有构造函数以禁用直接实例化
+    */
+   private function __construct() {}
+   /**
+    * 从数组元素创建一个 ReflectionReference
+    */
+   public static function fromArrayElement(array $array, string|int $key): ?\ReflectionReference {}
+   /**
+    * 获取引用的唯一 ID
+    */
+   public function getId(): string {}
 }
 
 /**
  * ReflectionType 类
  */
- abstract class ReflectionType implements \Stringable {
-    private function __clone(): void {}
-    public function __toString(): string {}
-    /**
-     * Checks if null is allowed
-     */
-     public function allowsNull(): bool {}
+abstract class ReflectionType implements \Stringable
+{
+   private function __clone(): void {}
+   public function __toString(): string {}
+   /**
+    * Checks if null is allowed
+    */
+   public function allowsNull(): bool {}
 }
 
 /**
  * ReflectionUnionType 类
  */
- class ReflectionUnionType extends \ReflectionType implements \Stringable {
-    /**
-     * 返回联合类型中包含的类型
-     */
-     public function getTypes(): array {}
+class ReflectionUnionType extends \ReflectionType implements \Stringable
+{
+   /**
+    * 返回联合类型中包含的类型
+    */
+   public function getTypes(): array {}
 }
 
 /**
  * ReflectionZendExtension 类
  */
- class ReflectionZendExtension implements \Reflector, \Stringable {
-    public string $name;
-    private function __clone(): void {}
-    /**
-     * Constructs a ReflectionZendExtension object
-     */
-     public function __construct(string $name) {}
-    public function __toString(): string {}
-    /**
-     * Gets author
-     */
-     public function getAuthor(): string {}
-    /**
-     * Gets copyright
-     */
-     public function getCopyright(): string {}
-    /**
-     * Gets name
-     */
-     public function getName(): string {}
-    /**
-     * Gets URL
-     */
-     public function getURL(): string {}
-    /**
-     * Gets version
-     */
-     public function getVersion(): string {}
+class ReflectionZendExtension implements \Reflector, \Stringable
+{
+   public string $name;
+   private function __clone(): void {}
+   /**
+    * Constructs a ReflectionZendExtension object
+    */
+   public function __construct(string $name) {}
+   public function __toString(): string {}
+   /**
+    * Gets author
+    */
+   public function getAuthor(): string {}
+   /**
+    * Gets copyright
+    */
+   public function getCopyright(): string {}
+   /**
+    * Gets name
+    */
+   public function getName(): string {}
+   /**
+    * Gets URL
+    */
+   public function getURL(): string {}
+   /**
+    * Gets version
+    */
+   public function getVersion(): string {}
 }
 
 /**
  * Reflector 接口
  */
- interface Reflector extends \Stringable {
-}
+interface Reflector extends \Stringable {}
 
 /**
  * The RegexIterator class
  */
- class RegexIterator extends \FilterIterator implements \Iterator, \OuterIterator, \Traversable {
-    public const ALL_MATCHES = 2;
-    public const GET_MATCH = 1;
-    public const INVERT_MATCH = 2;
-    public const MATCH = 0;
-    public const REPLACE = 4;
-    public const SPLIT = 3;
-    public const USE_KEY = 1;
-    public ?string $replacement;
-    /**
-     * Create a new RegexIterator
-     */
-     public function __construct(\Iterator $iterator, string $pattern, int $mode = RegexIterator::MATCH, int $flags = 0, int $pregFlags = 0) {}
-    /**
-     * Get accept status
-     */
-     public function accept(): bool {}
-    /**
-     * Get flags
-     */
-     public function getFlags(): int {}
-    /**
-     * Returns operation mode
-     */
-     public function getMode(): int {}
-    /**
-     * Returns the regular expression flags
-     */
-     public function getPregFlags(): int {}
-    /**
-     * Returns current regular expression
-     */
-     public function getRegex(): string {}
-    /**
-     * Sets the flags
-     */
-     public function setFlags(int $flags): void {}
-    /**
-     * Sets the operation mode
-     */
-     public function setMode(int $mode): void {}
-    /**
-     * Sets the regular expression flags
-     */
-     public function setPregFlags(int $pregFlags): void {}
+class RegexIterator extends \FilterIterator implements \Iterator, \OuterIterator, \Traversable
+{
+   public const ALL_MATCHES = 2;
+   public const GET_MATCH = 1;
+   public const INVERT_MATCH = 2;
+   public const MATCH = 0;
+   public const REPLACE = 4;
+   public const SPLIT = 3;
+   public const USE_KEY = 1;
+   public ?string $replacement;
+   /**
+    * Create a new RegexIterator
+    */
+   public function __construct(\Iterator $iterator, string $pattern, int $mode = RegexIterator::MATCH, int $flags = 0, int $pregFlags = 0) {}
+   /**
+    * Get accept status
+    */
+   public function accept(): bool {}
+   /**
+    * Get flags
+    */
+   public function getFlags(): int {}
+   /**
+    * Returns operation mode
+    */
+   public function getMode(): int {}
+   /**
+    * Returns the regular expression flags
+    */
+   public function getPregFlags(): int {}
+   /**
+    * Returns current regular expression
+    */
+   public function getRegex(): string {}
+   /**
+    * Sets the flags
+    */
+   public function setFlags(int $flags): void {}
+   /**
+    * Sets the operation mode
+    */
+   public function setMode(int $mode): void {}
+   /**
+    * Sets the regular expression flags
+    */
+   public function setPregFlags(int $pregFlags): void {}
 }
 
 /**
  * RequestParseBodyException (PHP 8 >= 8.4.0)
  */
- class RequestParseBodyException extends \Exception implements \Stringable, \Throwable {
-}
+class RequestParseBodyException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * The ResourceBundle class
  */
- class ResourceBundle implements \Countable, \IteratorAggregate, \Traversable {
-    public function __construct(?string $locale, ?string $bundle, bool $fallback = true) {}
-    /**
-     * Get number of elements in the bundle
-     */
-     public function count(): int {}
-    /**
-     * Create a resource bundle
-     */
-     public static function create(?string $locale, ?string $bundle, bool $fallback = true): ?\ResourceBundle {}
-    /**
-     * Get data from the bundle
-     */
-     public function get(string|int $index, bool $fallback = true): \ResourceBundle|array|string|int|null {}
-    /**
-     * Get bundle's last error code
-     */
-     public function getErrorCode(): int {}
-    /**
-     * Get bundle's last error message
-     */
-     public function getErrorMessage(): string {}
-    public function getIterator(): \Iterator {}
-    public static function getLocales(string $bundle): array|false {}
+class ResourceBundle implements \Countable, \IteratorAggregate, \Traversable
+{
+   public function __construct(?string $locale, ?string $bundle, bool $fallback = true) {}
+   /**
+    * Get number of elements in the bundle
+    */
+   public function count(): int {}
+   /**
+    * Create a resource bundle
+    */
+   public static function create(?string $locale, ?string $bundle, bool $fallback = true): ?\ResourceBundle {}
+   /**
+    * Get data from the bundle
+    */
+   public function get(string|int $index, bool $fallback = true): \ResourceBundle|array|string|int|null {}
+   /**
+    * Get bundle's last error code
+    */
+   public function getErrorCode(): int {}
+   /**
+    * Get bundle's last error message
+    */
+   public function getErrorMessage(): string {}
+   public function getIterator(): \Iterator {}
+   public static function getLocales(string $bundle): array|false {}
 }
 
 /**
  * ReturnTypeWillChange 注解 (PHP 8 >= 8.1.0)
  */
- final class ReturnTypeWillChange {
-    /**
-     * 构造新的 ReturnTypeWillChange 注解实例 (PHP 8 >= 8.1.0)
-     */
-     public function __construct() {}
+final class ReturnTypeWillChange
+{
+   /**
+    * 构造新的 ReturnTypeWillChange 注解实例 (PHP 8 >= 8.1.0)
+    */
+   public function __construct() {}
 }
 
-enum RoundingMode implements \UnitEnum {
-    public readonly string $name;
-    public static function cases(): array {}
+enum RoundingMode implements \UnitEnum
+{
+   public readonly string $name;
+   public static function cases(): array {}
 }
 
 /**
  * The RuntimeException class
  */
- class RuntimeException extends \Exception implements \Stringable, \Throwable {
-}
+class RuntimeException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * SQLite3 类
  */
- class SQLite3 {
-    public const ALTER_TABLE = 26;
-    public const ANALYZE = 28;
-    public const ATTACH = 24;
-    public const COPY = 0;
-    public const CREATE_INDEX = 1;
-    public const CREATE_TABLE = 2;
-    public const CREATE_TEMP_INDEX = 3;
-    public const CREATE_TEMP_TABLE = 4;
-    public const CREATE_TEMP_TRIGGER = 5;
-    public const CREATE_TEMP_VIEW = 6;
-    public const CREATE_TRIGGER = 7;
-    public const CREATE_VIEW = 8;
-    public const CREATE_VTABLE = 29;
-    public const DELETE = 9;
-    public const DENY = 1;
-    public const DETACH = 25;
-    public const DROP_INDEX = 10;
-    public const DROP_TABLE = 11;
-    public const DROP_TEMP_INDEX = 12;
-    public const DROP_TEMP_TABLE = 13;
-    public const DROP_TEMP_TRIGGER = 14;
-    public const DROP_TEMP_VIEW = 15;
-    public const DROP_TRIGGER = 16;
-    public const DROP_VIEW = 17;
-    public const DROP_VTABLE = 30;
-    public const FUNCTION = 31;
-    public const IGNORE = 2;
-    public const INSERT = 18;
-    public const OK = 0;
-    public const PRAGMA = 19;
-    public const READ = 20;
-    public const RECURSIVE = 33;
-    public const REINDEX = 27;
-    public const SAVEPOINT = 32;
-    public const SELECT = 21;
-    public const TRANSACTION = 22;
-    public const UPDATE = 23;
-    /**
-     * 实例化 SQLite3 对象并打开 SQLite 3 数据库
-     */
-     public function __construct(string $filename, int $flags = 6, string $encryptionKey = "") {}
-    /**
-     * Backup one database to another database
-     */
-     public function backup(\SQLite3 $destination, string $sourceDatabase = "main", string $destinationDatabase = "main"): bool {}
-    /**
-     * Sets the busy connection handler
-     */
-     public function busyTimeout(int $milliseconds): bool {}
-    /**
-     * Returns the number of database rows that were changed (or inserted or
+class SQLite3
+{
+   public const ALTER_TABLE = 26;
+   public const ANALYZE = 28;
+   public const ATTACH = 24;
+   public const COPY = 0;
+   public const CREATE_INDEX = 1;
+   public const CREATE_TABLE = 2;
+   public const CREATE_TEMP_INDEX = 3;
+   public const CREATE_TEMP_TABLE = 4;
+   public const CREATE_TEMP_TRIGGER = 5;
+   public const CREATE_TEMP_VIEW = 6;
+   public const CREATE_TRIGGER = 7;
+   public const CREATE_VIEW = 8;
+   public const CREATE_VTABLE = 29;
+   public const DELETE = 9;
+   public const DENY = 1;
+   public const DETACH = 25;
+   public const DROP_INDEX = 10;
+   public const DROP_TABLE = 11;
+   public const DROP_TEMP_INDEX = 12;
+   public const DROP_TEMP_TABLE = 13;
+   public const DROP_TEMP_TRIGGER = 14;
+   public const DROP_TEMP_VIEW = 15;
+   public const DROP_TRIGGER = 16;
+   public const DROP_VIEW = 17;
+   public const DROP_VTABLE = 30;
+   public const FUNCTION = 31;
+   public const IGNORE = 2;
+   public const INSERT = 18;
+   public const OK = 0;
+   public const PRAGMA = 19;
+   public const READ = 20;
+   public const RECURSIVE = 33;
+   public const REINDEX = 27;
+   public const SAVEPOINT = 32;
+   public const SELECT = 21;
+   public const TRANSACTION = 22;
+   public const UPDATE = 23;
+   /**
+    * 实例化 SQLite3 对象并打开 SQLite 3 数据库
+    */
+   public function __construct(string $filename, int $flags = 6, string $encryptionKey = "") {}
+   /**
+    * Backup one database to another database
+    */
+   public function backup(\SQLite3 $destination, string $sourceDatabase = "main", string $destinationDatabase = "main"): bool {}
+   /**
+    * Sets the busy connection handler
+    */
+   public function busyTimeout(int $milliseconds): bool {}
+   /**
+    * Returns the number of database rows that were changed (or inserted or
        deleted) by the most recent SQL statement
-     */
-     public function changes(): int {}
-    /**
-     * Closes the database connection
-     */
-     public function close(): bool {}
-    /**
-     * Registers a PHP function for use as an SQL aggregate function
-     */
-     public function createAggregate(string $name, callable $stepCallback, callable $finalCallback, int $argCount = -1): bool {}
-    /**
-     * Registers a PHP function for use as an SQL collating function
-     */
-     public function createCollation(string $name, callable $callback): bool {}
-    /**
-     * Registers a PHP function for use as an SQL scalar function
-     */
-     public function createFunction(string $name, callable $callback, int $argCount = -1, int $flags = 0): bool {}
-    /**
-     * Enable throwing exceptions
-     */
-     public function enableExceptions(bool $enable = false): bool {}
-    /**
-     * Enables or disables the use of extended result codes
-     */
-     public function enableExtendedResultCodes(bool $enable = true): bool {}
-    /**
-     * Returns a string that has been properly escaped
-     */
-     public static function escapeString(string $string): string {}
-    /**
-     * Executes a result-less query against a given database
-     */
-     public function exec(string $query): bool {}
-    /**
-     * Returns the numeric result code of the most recent failed SQLite request
-     */
-     public function lastErrorCode(): int {}
-    /**
-     * Returns English text describing the most recent failed SQLite request
-     */
-     public function lastErrorMsg(): string {}
-    /**
-     * Returns the numeric extended result code of the most recent failed
+    */
+   public function changes(): int {}
+   /**
+    * Closes the database connection
+    */
+   public function close(): bool {}
+   /**
+    * Registers a PHP function for use as an SQL aggregate function
+    */
+   public function createAggregate(string $name, callable $stepCallback, callable $finalCallback, int $argCount = -1): bool {}
+   /**
+    * Registers a PHP function for use as an SQL collating function
+    */
+   public function createCollation(string $name, callable $callback): bool {}
+   /**
+    * Registers a PHP function for use as an SQL scalar function
+    */
+   public function createFunction(string $name, callable $callback, int $argCount = -1, int $flags = 0): bool {}
+   /**
+    * Enable throwing exceptions
+    */
+   public function enableExceptions(bool $enable = false): bool {}
+   /**
+    * Enables or disables the use of extended result codes
+    */
+   public function enableExtendedResultCodes(bool $enable = true): bool {}
+   /**
+    * Returns a string that has been properly escaped
+    */
+   public static function escapeString(string $string): string {}
+   /**
+    * Executes a result-less query against a given database
+    */
+   public function exec(string $query): bool {}
+   /**
+    * Returns the numeric result code of the most recent failed SQLite request
+    */
+   public function lastErrorCode(): int {}
+   /**
+    * Returns English text describing the most recent failed SQLite request
+    */
+   public function lastErrorMsg(): string {}
+   /**
+    * Returns the numeric extended result code of the most recent failed
        SQLite request
-     */
-     public function lastExtendedErrorCode(): int {}
-    /**
-     * Returns the row ID of the most recent INSERT into the database
-     */
-     public function lastInsertRowID(): int {}
-    /**
-     * Attempts to load an SQLite extension library
-     */
-     public function loadExtension(string $name): bool {}
-    /**
-     * Opens an SQLite database
-     */
-     public function open(string $filename, int $flags = 6, string $encryptionKey = ""): void {}
-    /**
-     * Opens a stream resource to read a BLOB
-     */
-     public function openBlob(string $table, string $column, int $rowid, string $database = "main", int $flags = SQLITE3_OPEN_READONLY) {}
-    /**
-     * Prepares an SQL statement for execution
-     */
-     public function prepare(string $query): \SQLite3Stmt|false {}
-    /**
-     * Executes an SQL query
-     */
-     public function query(string $query): \SQLite3Result|false {}
-    /**
-     * Executes a query and returns a single result
-     */
-     public function querySingle(string $query, bool $entireRow = false): mixed {}
-    /**
-     * Configures a callback to be used as an authorizer to limit what a statement can do
-     */
-     public function setAuthorizer(?callable $callback): bool {}
-    /**
-     * Returns the SQLite3 library version as a string constant and as a number
-     */
-     public static function version(): array {}
+    */
+   public function lastExtendedErrorCode(): int {}
+   /**
+    * Returns the row ID of the most recent INSERT into the database
+    */
+   public function lastInsertRowID(): int {}
+   /**
+    * Attempts to load an SQLite extension library
+    */
+   public function loadExtension(string $name): bool {}
+   /**
+    * Opens an SQLite database
+    */
+   public function open(string $filename, int $flags = 6, string $encryptionKey = ""): void {}
+   /**
+    * Opens a stream resource to read a BLOB
+    */
+   public function openBlob(string $table, string $column, int $rowid, string $database = "main", int $flags = SQLITE3_OPEN_READONLY) {}
+   /**
+    * Prepares an SQL statement for execution
+    */
+   public function prepare(string $query): \SQLite3Stmt|false {}
+   /**
+    * Executes an SQL query
+    */
+   public function query(string $query): \SQLite3Result|false {}
+   /**
+    * Executes a query and returns a single result
+    */
+   public function querySingle(string $query, bool $entireRow = false): mixed {}
+   /**
+    * Configures a callback to be used as an authorizer to limit what a statement can do
+    */
+   public function setAuthorizer(?callable $callback): bool {}
+   /**
+    * Returns the SQLite3 library version as a string constant and as a number
+    */
+   public static function version(): array {}
 }
 
 /**
  * The SQLite3Exception class (PHP 8 >= 8.3.0)
  */
- class SQLite3Exception extends \Exception implements \Stringable, \Throwable {
-}
+class SQLite3Exception extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * SQLite3Result 类
  */
- class SQLite3Result {
-    /**
-     * Constructs an SQLite3Result
-     */
-     private function __construct() {}
-    /**
-     * Returns the name of the nth column
-     */
-     public function columnName(int $column): string|false {}
-    /**
-     * Returns the type of the nth column
-     */
-     public function columnType(int $column): int|false {}
-    public function fetchAll(int $mode = SQLITE3_BOTH): array|false {}
-    /**
-     * Fetches a result row as an associative or numerically indexed array or both
-     */
-     public function fetchArray(int $mode = SQLITE3_BOTH): array|false {}
-    /**
-     * Closes the result set
-     */
-     public function finalize(): true {}
-    /**
-     * Returns the number of columns in the result set
-     */
-     public function numColumns(): int {}
-    /**
-     * Resets the result set back to the first row
-     */
-     public function reset(): bool {}
+class SQLite3Result
+{
+   /**
+    * Constructs an SQLite3Result
+    */
+   private function __construct() {}
+   /**
+    * Returns the name of the nth column
+    */
+   public function columnName(int $column): string|false {}
+   /**
+    * Returns the type of the nth column
+    */
+   public function columnType(int $column): int|false {}
+   public function fetchAll(int $mode = SQLITE3_BOTH): array|false {}
+   /**
+    * Fetches a result row as an associative or numerically indexed array or both
+    */
+   public function fetchArray(int $mode = SQLITE3_BOTH): array|false {}
+   /**
+    * Closes the result set
+    */
+   public function finalize(): true {}
+   /**
+    * Returns the number of columns in the result set
+    */
+   public function numColumns(): int {}
+   /**
+    * Resets the result set back to the first row
+    */
+   public function reset(): bool {}
 }
 
 /**
  * SQLite3Stmt 类
  */
- class SQLite3Stmt {
-    public const EXPLAIN_MODE_EXPLAIN = 1;
-    public const EXPLAIN_MODE_EXPLAIN_QUERY_PLAN = 2;
-    public const EXPLAIN_MODE_PREPARED = 0;
-    /**
-     * Constructs an SQLite3Stmt object
-     */
-     private function __construct(\SQLite3 $sqlite3, string $query) {}
-    /**
-     * Binds a parameter to a statement variable
-     */
-     public function bindParam(string|int $param, mixed &$var, int $type = SQLITE3_TEXT): bool {}
-    /**
-     * Binds the value of a parameter to a statement variable
-     */
-     public function bindValue(string|int $param, mixed $value, int $type = SQLITE3_TEXT): bool {}
-    /**
-     * Returns whether the statement has been fetched but not yet completed (PHP 8 >= 8.5.0)
-     */
-     public function busy(): bool {}
-    /**
-     * Clears all current bound parameters
-     */
-     public function clear(): bool {}
-    /**
-     * Closes the prepared statement
-     */
-     public function close(): true {}
-    /**
-     * Executes a prepared statement and returns a result set object
-     */
-     public function execute(): \SQLite3Result|false {}
-    /**
-     * Returns the explain mode of the statement (PHP 8 >= 8.5.0)
-     */
-     public function explain(): int {}
-    /**
-     * Get the SQL of the statement
-     */
-     public function getSQL(bool $expand = false): string|false {}
-    /**
-     * Returns the number of parameters within the prepared statement
-     */
-     public function paramCount(): int {}
-    /**
-     * Returns whether a statement is definitely read only
-     */
-     public function readOnly(): bool {}
-    /**
-     * Resets the prepared statement
-     */
-     public function reset(): bool {}
-    /**
-     * Changes the explain mode of the statement (PHP 8 >= 8.5.0)
-     */
-     public function setExplain(int $mode): bool {}
+class SQLite3Stmt
+{
+   public const EXPLAIN_MODE_EXPLAIN = 1;
+   public const EXPLAIN_MODE_EXPLAIN_QUERY_PLAN = 2;
+   public const EXPLAIN_MODE_PREPARED = 0;
+   /**
+    * Constructs an SQLite3Stmt object
+    */
+   private function __construct(\SQLite3 $sqlite3, string $query) {}
+   /**
+    * Binds a parameter to a statement variable
+    */
+   public function bindParam(string|int $param, mixed &$var, int $type = SQLITE3_TEXT): bool {}
+   /**
+    * Binds the value of a parameter to a statement variable
+    */
+   public function bindValue(string|int $param, mixed $value, int $type = SQLITE3_TEXT): bool {}
+   /**
+    * Returns whether the statement has been fetched but not yet completed (PHP 8 >= 8.5.0)
+    */
+   public function busy(): bool {}
+   /**
+    * Clears all current bound parameters
+    */
+   public function clear(): bool {}
+   /**
+    * Closes the prepared statement
+    */
+   public function close(): true {}
+   /**
+    * Executes a prepared statement and returns a result set object
+    */
+   public function execute(): \SQLite3Result|false {}
+   /**
+    * Returns the explain mode of the statement (PHP 8 >= 8.5.0)
+    */
+   public function explain(): int {}
+   /**
+    * Get the SQL of the statement
+    */
+   public function getSQL(bool $expand = false): string|false {}
+   /**
+    * Returns the number of parameters within the prepared statement
+    */
+   public function paramCount(): int {}
+   /**
+    * Returns whether a statement is definitely read only
+    */
+   public function readOnly(): bool {}
+   /**
+    * Resets the prepared statement
+    */
+   public function reset(): bool {}
+   /**
+    * Changes the explain mode of the statement (PHP 8 >= 8.5.0)
+    */
+   public function setExplain(int $mode): bool {}
 }
 
 /**
  * SeekableIterator 接口
  */
- interface SeekableIterator extends \Iterator, \Traversable {
-    /**
-     * Seeks to a position
-     */
-     public abstract function seek(int $offset): void;
+interface SeekableIterator extends \Iterator, \Traversable
+{
+   /**
+    * Seeks to a position
+    */
+   public abstract function seek(int $offset): void;
 }
 
 /**
  * SensitiveParameter 注解 (PHP 8 >= 8.2.0)
  */
- final class SensitiveParameter {
-    /**
-     * 构造新的 SensitiveParameter 属性实例 (PHP 8 >= 8.2.0)
-     */
-     public function __construct() {}
+final class SensitiveParameter
+{
+   /**
+    * 构造新的 SensitiveParameter 属性实例 (PHP 8 >= 8.2.0)
+    */
+   public function __construct() {}
 }
 
 /**
  * SensitiveParameterValue 类 (PHP 8 >= 8.2.0)
  */
- final class SensitiveParameterValue {
-    private readonly mixed $value;
-    /**
-     * 构造新的 SensitiveParameterValue 对象 (PHP 8 >= 8.2.0)
-     */
-     public function __construct(mixed $value) {}
-    public function __debugInfo(): array {}
-    /**
-     * 返回敏感值 (PHP 8 >= 8.2.0)
-     */
-     public function getValue(): mixed {}
+final class SensitiveParameterValue
+{
+   private readonly mixed $value;
+   /**
+    * 构造新的 SensitiveParameterValue 对象 (PHP 8 >= 8.2.0)
+    */
+   public function __construct(mixed $value) {}
+   public function __debugInfo(): array {}
+   /**
+    * 返回敏感值 (PHP 8 >= 8.2.0)
+    */
+   public function getValue(): mixed {}
 }
 
 /**
  * Serializable 接口
  */
- interface Serializable {
-    /**
-     * 对象的字符串表示
-     */
-     public abstract function serialize();
-    /**
-     * 构造对象
-     */
-     public abstract function unserialize(string $data);
+interface Serializable
+{
+   /**
+    * 对象的字符串表示
+    */
+   public abstract function serialize();
+   /**
+    * 构造对象
+    */
+   public abstract function unserialize(string $data);
 }
 
 /**
  * The SessionHandler class
  */
- class SessionHandler implements \SessionHandlerInterface, \SessionIdInterface {
-    /**
-     * Close the session
-     */
-     public function close(): bool {}
-    /**
-     * Return a new session ID
-     */
-     public function create_sid(): string {}
-    /**
-     * Destroy a session
-     */
-     public function destroy(string $id): bool {}
-    /**
-     * Cleanup old sessions
-     */
-     public function gc(int $max_lifetime): int|false {}
-    /**
-     * Initialize session
-     */
-     public function open(string $path, string $name): bool {}
-    /**
-     * Read session data
-     */
-     public function read(string $id): string|false {}
-    /**
-     * Write session data
-     */
-     public function write(string $id, string $data): bool {}
+class SessionHandler implements \SessionHandlerInterface, \SessionIdInterface
+{
+   /**
+    * Close the session
+    */
+   public function close(): bool {}
+   /**
+    * Return a new session ID
+    */
+   public function create_sid(): string {}
+   /**
+    * Destroy a session
+    */
+   public function destroy(string $id): bool {}
+   /**
+    * Cleanup old sessions
+    */
+   public function gc(int $max_lifetime): int|false {}
+   /**
+    * Initialize session
+    */
+   public function open(string $path, string $name): bool {}
+   /**
+    * Read session data
+    */
+   public function read(string $id): string|false {}
+   /**
+    * Write session data
+    */
+   public function write(string $id, string $data): bool {}
 }
 
 /**
  * The SessionHandlerInterface class
  */
- interface SessionHandlerInterface {
-    /**
-     * Close the session
-     */
-     public abstract function close(): bool;
-    /**
-     * Destroy a session
-     */
-     public abstract function destroy(string $id): bool;
-    /**
-     * Cleanup old sessions
-     */
-     public abstract function gc(int $max_lifetime): int|false;
-    /**
-     * Initialize session
-     */
-     public abstract function open(string $path, string $name): bool;
-    /**
-     * Read session data
-     */
-     public abstract function read(string $id): string|false;
-    /**
-     * Write session data
-     */
-     public abstract function write(string $id, string $data): bool;
+interface SessionHandlerInterface
+{
+   /**
+    * Close the session
+    */
+   public abstract function close(): bool;
+   /**
+    * Destroy a session
+    */
+   public abstract function destroy(string $id): bool;
+   /**
+    * Cleanup old sessions
+    */
+   public abstract function gc(int $max_lifetime): int|false;
+   /**
+    * Initialize session
+    */
+   public abstract function open(string $path, string $name): bool;
+   /**
+    * Read session data
+    */
+   public abstract function read(string $id): string|false;
+   /**
+    * Write session data
+    */
+   public abstract function write(string $id, string $data): bool;
 }
 
 /**
  * The SessionIdInterface interface
  */
- interface SessionIdInterface {
-    /**
-     * Create session ID
-     */
-     public abstract function create_sid(): string;
+interface SessionIdInterface
+{
+   /**
+    * Create session ID
+    */
+   public abstract function create_sid(): string;
 }
 
 /**
  * The SessionUpdateTimestampHandlerInterface interface
  */
- interface SessionUpdateTimestampHandlerInterface {
-    /**
-     * Update timestamp
-     */
-     public abstract function updateTimestamp(string $id, string $data): bool;
-    /**
-     * Validate ID
-     */
-     public abstract function validateId(string $id): bool;
+interface SessionUpdateTimestampHandlerInterface
+{
+   /**
+    * Update timestamp
+    */
+   public abstract function updateTimestamp(string $id, string $data): bool;
+   /**
+    * Validate ID
+    */
+   public abstract function validateId(string $id): bool;
 }
 
 /**
  * The Shmop class
  */
- final class Shmop {
-}
+final class Shmop {}
 
 /**
  * The SimpleXMLElement class
  */
- class SimpleXMLElement implements \Countable, \Iterator, \RecursiveIterator, \Stringable, \Traversable {
-    /**
-     * Creates a new SimpleXMLElement object
-     */
-     public function __construct(string $data, int $options = 0, bool $dataIsURL = false, string $namespaceOrPrefix = "", bool $isPrefix = false) {}
-    public function __debugInfo(): ?array {}
-    public function __toString(): string {}
-    /**
-     * Adds an attribute to the SimpleXML element
-     */
-     public function addAttribute(string $qualifiedName, string $value, ?string $namespace = NULL): void {}
-    /**
-     * Adds a child element to the XML node
-     */
-     public function addChild(string $qualifiedName, ?string $value = NULL, ?string $namespace = NULL): ?\SimpleXMLElement {}
-    /**
-     * Return a well-formed XML string based on SimpleXML element
-     */
-     public function asXML(?string $filename = NULL): string|bool {}
-    /**
-     * Identifies an element's attributes
-     */
-     public function attributes(?string $namespaceOrPrefix = NULL, bool $isPrefix = false): ?\SimpleXMLElement {}
-    /**
-     * Finds children of given node
-     */
-     public function children(?string $namespaceOrPrefix = NULL, bool $isPrefix = false): ?\SimpleXMLElement {}
-    /**
-     * Counts the children of an element
-     */
-     public function count(): int {}
-    /**
-     * Returns the current element
-     */
-     public function current(): \SimpleXMLElement {}
-    /**
-     * Returns the sub-elements of the current element
-     */
-     public function getChildren(): ?\SimpleXMLElement {}
-    /**
-     * Returns namespaces declared in document
-     */
-     public function getDocNamespaces(bool $recursive = false, bool $fromRoot = true): array|false {}
-    /**
-     * Gets the name of the XML element
-     */
-     public function getName(): string {}
-    /**
-     * Returns namespaces used in document
-     */
-     public function getNamespaces(bool $recursive = false): array {}
-    /**
-     * Checks whether the current element has sub elements
-     */
-     public function hasChildren(): bool {}
-    /**
-     * Return current key
-     */
-     public function key(): string {}
-    /**
-     * Move to next element
-     */
-     public function next(): void {}
-    /**
-     * Creates a prefix/ns context for the next XPath query
-     */
-     public function registerXPathNamespace(string $prefix, string $namespace): bool {}
-    /**
-     * Rewind to the first element
-     */
-     public function rewind(): void {}
-    /**
-     * 别名 SimpleXMLElement::asXML
-     */
-     public function saveXML(?string $filename = NULL): string|bool {}
-    /**
-     * Check whether the current element is valid
-     */
-     public function valid(): bool {}
-    /**
-     * Runs XPath query on XML data
-     */
-     public function xpath(string $expression): array|false|null {}
+class SimpleXMLElement implements \Countable, \Iterator, \RecursiveIterator, \Stringable, \Traversable
+{
+   /**
+    * Creates a new SimpleXMLElement object
+    */
+   public function __construct(string $data, int $options = 0, bool $dataIsURL = false, string $namespaceOrPrefix = "", bool $isPrefix = false) {}
+   public function __debugInfo(): ?array {}
+   public function __toString(): string {}
+   /**
+    * Adds an attribute to the SimpleXML element
+    */
+   public function addAttribute(string $qualifiedName, string $value, ?string $namespace = NULL): void {}
+   /**
+    * Adds a child element to the XML node
+    */
+   public function addChild(string $qualifiedName, ?string $value = NULL, ?string $namespace = NULL): ?\SimpleXMLElement {}
+   /**
+    * Return a well-formed XML string based on SimpleXML element
+    */
+   public function asXML(?string $filename = NULL): string|bool {}
+   /**
+    * Identifies an element's attributes
+    */
+   public function attributes(?string $namespaceOrPrefix = NULL, bool $isPrefix = false): ?\SimpleXMLElement {}
+   /**
+    * Finds children of given node
+    */
+   public function children(?string $namespaceOrPrefix = NULL, bool $isPrefix = false): ?\SimpleXMLElement {}
+   /**
+    * Counts the children of an element
+    */
+   public function count(): int {}
+   /**
+    * Returns the current element
+    */
+   public function current(): \SimpleXMLElement {}
+   /**
+    * Returns the sub-elements of the current element
+    */
+   public function getChildren(): ?\SimpleXMLElement {}
+   /**
+    * Returns namespaces declared in document
+    */
+   public function getDocNamespaces(bool $recursive = false, bool $fromRoot = true): array|false {}
+   /**
+    * Gets the name of the XML element
+    */
+   public function getName(): string {}
+   /**
+    * Returns namespaces used in document
+    */
+   public function getNamespaces(bool $recursive = false): array {}
+   /**
+    * Checks whether the current element has sub elements
+    */
+   public function hasChildren(): bool {}
+   /**
+    * Return current key
+    */
+   public function key(): string {}
+   /**
+    * Move to next element
+    */
+   public function next(): void {}
+   /**
+    * Creates a prefix/ns context for the next XPath query
+    */
+   public function registerXPathNamespace(string $prefix, string $namespace): bool {}
+   /**
+    * Rewind to the first element
+    */
+   public function rewind(): void {}
+   /**
+    * 别名 SimpleXMLElement::asXML
+    */
+   public function saveXML(?string $filename = NULL): string|bool {}
+   /**
+    * Check whether the current element is valid
+    */
+   public function valid(): bool {}
+   /**
+    * Runs XPath query on XML data
+    */
+   public function xpath(string $expression): array|false|null {}
 }
 
 /**
  * The SimpleXMLIterator class
  */
- class SimpleXMLIterator extends \SimpleXMLElement implements \Countable, \Iterator, \RecursiveIterator, \Stringable, \Traversable {
-}
+class SimpleXMLIterator extends \SimpleXMLElement implements \Countable, \Iterator, \RecursiveIterator, \Stringable, \Traversable {}
 
 /**
  * The SoapClient class
  */
- class SoapClient {
-    private ?array $__default_headers;
-    private ?string $__last_request;
-    private ?string $__last_request_headers;
-    private ?string $__last_response;
-    private ?string $__last_response_headers;
-    private ?\SoapFault $__soap_fault;
-    private ?array $_classmap;
-    private int $_connection_timeout;
-    private array $_cookies;
-    private ?string $_digest;
-    private ?string $_encoding;
-    private bool $_exceptions;
-    private ?int $_features;
-    private bool $_keep_alive;
-    private ?string $_login;
-    private ?string $_password;
-    private ?string $_proxy_host;
-    private ?string $_proxy_login;
-    private ?string $_proxy_password;
-    private ?int $_proxy_port;
-    private int $_soap_version;
-    private ?int $_ssl_method;
-    private $_stream_context;
-    private bool $_use_digest;
-    private ?int $_use_proxy;
-    private ?string $_user_agent;
-    private ?int $compression;
-    private $httpsocket;
-    private ?\Soap\Url $httpurl;
-    private ?string $location;
-    private ?\Soap\Sdl $sdl;
-    private ?int $style;
-    private bool $trace;
-    private ?array $typemap;
-    private ?string $uri;
-    private ?int $use;
-    public function __call(string $name, array $args): mixed {}
-    /**
-     * SoapClient constructor
-     */
-     public function __construct(?string $wsdl, array $options = []) {}
-    public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false, ?string $uriParserClass = NULL): ?string {}
-    public function __getCookies(): array {}
-    public function __getFunctions(): ?array {}
-    public function __getLastRequest(): ?string {}
-    public function __getLastRequestHeaders(): ?string {}
-    public function __getLastResponse(): ?string {}
-    public function __getLastResponseHeaders(): ?string {}
-    public function __getTypes(): ?array {}
-    public function __setCookie(string $name, ?string $value = NULL): void {}
-    public function __setLocation(?string $location = NULL): ?string {}
-    public function __setSoapHeaders(?mixed $headers = NULL): bool {}
-    public function __soapCall(string $name, array $args, ?array $options = NULL, ?mixed $inputHeaders = NULL, ?mixed &$outputHeaders = NULL): mixed {}
+class SoapClient
+{
+   private ?array $__default_headers;
+   private ?string $__last_request;
+   private ?string $__last_request_headers;
+   private ?string $__last_response;
+   private ?string $__last_response_headers;
+   private ?\SoapFault $__soap_fault;
+   private ?array $_classmap;
+   private int $_connection_timeout;
+   private array $_cookies;
+   private ?string $_digest;
+   private ?string $_encoding;
+   private bool $_exceptions;
+   private ?int $_features;
+   private bool $_keep_alive;
+   private ?string $_login;
+   private ?string $_password;
+   private ?string $_proxy_host;
+   private ?string $_proxy_login;
+   private ?string $_proxy_password;
+   private ?int $_proxy_port;
+   private int $_soap_version;
+   private ?int $_ssl_method;
+   private $_stream_context;
+   private bool $_use_digest;
+   private ?int $_use_proxy;
+   private ?string $_user_agent;
+   private ?int $compression;
+   private $httpsocket;
+   private ?\Soap\Url $httpurl;
+   private ?string $location;
+   private ?\Soap\Sdl $sdl;
+   private ?int $style;
+   private bool $trace;
+   private ?array $typemap;
+   private ?string $uri;
+   private ?int $use;
+   public function __call(string $name, array $args): mixed {}
+   /**
+    * SoapClient constructor
+    */
+   public function __construct(?string $wsdl, array $options = []) {}
+   public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false, ?string $uriParserClass = NULL): ?string {}
+   public function __getCookies(): array {}
+   public function __getFunctions(): ?array {}
+   public function __getLastRequest(): ?string {}
+   public function __getLastRequestHeaders(): ?string {}
+   public function __getLastResponse(): ?string {}
+   public function __getLastResponseHeaders(): ?string {}
+   public function __getTypes(): ?array {}
+   public function __setCookie(string $name, ?string $value = NULL): void {}
+   public function __setLocation(?string $location = NULL): ?string {}
+   public function __setSoapHeaders(?mixed $headers = NULL): bool {}
+   public function __soapCall(string $name, array $args, ?array $options = NULL, ?mixed $inputHeaders = NULL, ?mixed &$outputHeaders = NULL): mixed {}
 }
 
 /**
  * The SoapFault class
  */
- class SoapFault extends \Exception implements \Stringable, \Throwable {
-    public ?string $_name;
-    public mixed $detail;
-    public ?string $faultactor;
-    public ?string $faultcode;
-    public ?string $faultcodens;
-    public string $faultstring;
-    public mixed $headerfault;
-    public string $lang;
-    /**
-     * SoapFault constructor
-     */
-     public function __construct(array|string|null $code, string $string, ?string $actor = NULL, mixed $details = NULL, ?string $name = NULL, mixed $headerFault = NULL, string $lang = "") {}
-    public function __toString(): string {}
+class SoapFault extends \Exception implements \Stringable, \Throwable
+{
+   public ?string $_name;
+   public mixed $detail;
+   public ?string $faultactor;
+   public ?string $faultcode;
+   public ?string $faultcodens;
+   public string $faultstring;
+   public mixed $headerfault;
+   public string $lang;
+   /**
+    * SoapFault constructor
+    */
+   public function __construct(array|string|null $code, string $string, ?string $actor = NULL, mixed $details = NULL, ?string $name = NULL, mixed $headerFault = NULL, string $lang = "") {}
+   public function __toString(): string {}
 }
 
 /**
  * The SoapHeader class
  */
- class SoapHeader {
-    public string|int|null $actor;
-    public mixed $data;
-    public bool $mustUnderstand;
-    public string $name;
-    public string $namespace;
-    /**
-     * SoapHeader constructor
-     */
-     public function __construct(string $namespace, string $name, mixed $data = null, bool $mustUnderstand = false, string|int|null $actor = NULL) {}
+class SoapHeader
+{
+   public string|int|null $actor;
+   public mixed $data;
+   public bool $mustUnderstand;
+   public string $name;
+   public string $namespace;
+   /**
+    * SoapHeader constructor
+    */
+   public function __construct(string $namespace, string $name, mixed $data = null, bool $mustUnderstand = false, string|int|null $actor = NULL) {}
 }
 
 /**
  * The SoapParam class
  */
- class SoapParam {
-    public mixed $param_data;
-    public string $param_name;
-    /**
-     * SoapParam constructor
-     */
-     public function __construct(mixed $data, string $name) {}
+class SoapParam
+{
+   public mixed $param_data;
+   public string $param_name;
+   /**
+    * SoapParam constructor
+    */
+   public function __construct(mixed $data, string $name) {}
 }
 
 /**
  * The SoapServer class
  */
- class SoapServer {
-    private ?\SoapFault $__soap_fault;
-    /**
-     * SoapServer constructor
-     */
-     public function __construct(?string $wsdl, array $options = []) {}
-    public function __getLastResponse(): ?string {}
-    /**
-     * 添加一个或多个函数来处理 SOAP 请求
-     */
-     public function addFunction(mixed $functions): void {}
-    /**
-     * Add a SOAP header to the response
-     */
-     public function addSoapHeader(\SoapHeader $header): void {}
-    /**
-     * Issue SoapServer fault indicating an error
-     */
-     public function fault(string $code, string $string, string $actor = "", mixed $details = NULL, string $name = "", string $lang = ""): void {}
-    /**
-     * Returns list of defined functions
-     */
-     public function getFunctions(): array {}
-    /**
-     * Handles a SOAP request
-     */
-     public function handle(?string $request = NULL): void {}
-    /**
-     * Sets the class which handles SOAP requests
-     */
-     public function setClass(string $class, mixed ...$args): void {}
-    /**
-     * Sets the object which will be used to handle SOAP requests
-     */
-     public function setObject(object $object): void {}
-    /**
-     * Sets SoapServer persistence mode
-     */
-     public function setPersistence(int $mode): void {}
+class SoapServer
+{
+   private ?\SoapFault $__soap_fault;
+   /**
+    * SoapServer constructor
+    */
+   public function __construct(?string $wsdl, array $options = []) {}
+   public function __getLastResponse(): ?string {}
+   /**
+    * 添加一个或多个函数来处理 SOAP 请求
+    */
+   public function addFunction(mixed $functions): void {}
+   /**
+    * Add a SOAP header to the response
+    */
+   public function addSoapHeader(\SoapHeader $header): void {}
+   /**
+    * Issue SoapServer fault indicating an error
+    */
+   public function fault(string $code, string $string, string $actor = "", mixed $details = NULL, string $name = "", string $lang = ""): void {}
+   /**
+    * Returns list of defined functions
+    */
+   public function getFunctions(): array {}
+   /**
+    * Handles a SOAP request
+    */
+   public function handle(?string $request = NULL): void {}
+   /**
+    * Sets the class which handles SOAP requests
+    */
+   public function setClass(string $class, mixed ...$args): void {}
+   /**
+    * Sets the object which will be used to handle SOAP requests
+    */
+   public function setObject(object $object): void {}
+   /**
+    * Sets SoapServer persistence mode
+    */
+   public function setPersistence(int $mode): void {}
 }
 
 /**
  * The SoapVar class
  */
- class SoapVar {
-    public ?string $enc_name;
-    public ?string $enc_namens;
-    public ?string $enc_ns;
-    public ?string $enc_stype;
-    public int $enc_type;
-    public mixed $enc_value;
-    /**
-     * SoapVar constructor
-     */
-     public function __construct(mixed $data, ?int $encoding, ?string $typeName = NULL, ?string $typeNamespace = NULL, ?string $nodeName = NULL, ?string $nodeNamespace = NULL) {}
+class SoapVar
+{
+   public ?string $enc_name;
+   public ?string $enc_namens;
+   public ?string $enc_ns;
+   public ?string $enc_stype;
+   public int $enc_type;
+   public mixed $enc_value;
+   /**
+    * SoapVar constructor
+    */
+   public function __construct(mixed $data, ?int $encoding, ?string $typeName = NULL, ?string $typeNamespace = NULL, ?string $nodeName = NULL, ?string $nodeNamespace = NULL) {}
 }
 
 /**
  * Socket 类
  */
- final class Socket {
-}
+final class Socket {}
 
 /**
  * The SodiumException class
  */
- class SodiumException extends \Exception implements \Stringable, \Throwable {
-}
+class SodiumException extends \Exception implements \Stringable, \Throwable {}
 
 /**
  * SplDoublyLinkedList 类
  */
- class SplDoublyLinkedList implements \ArrayAccess, \Countable, \Iterator, \Serializable, \Traversable {
-    public const IT_MODE_DELETE = 1;
-    public const IT_MODE_FIFO = 0;
-    public const IT_MODE_KEEP = 0;
-    public const IT_MODE_LIFO = 2;
-    public function __debugInfo(): array {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
-    /**
-     * Add/insert a new value at the specified index
-     */
-     public function add(int $index, mixed $value): void {}
-    /**
-     * Peeks at the node from the beginning of the doubly linked list
-     */
-     public function bottom(): mixed {}
-    /**
-     * Counts the number of elements in the doubly linked list
-     */
-     public function count(): int {}
-    /**
-     * Return current array entry
-     */
-     public function current(): mixed {}
-    /**
-     * Returns the mode of iteration
-     */
-     public function getIteratorMode(): int {}
-    /**
-     * Checks whether the doubly linked list is empty
-     */
-     public function isEmpty(): bool {}
-    /**
-     * Return current node index
-     */
-     public function key(): int {}
-    /**
-     * Move to next entry
-     */
-     public function next(): void {}
-    /**
-     * Returns whether the requested $index exists
-     */
-     public function offsetExists(int $index): bool {}
-    /**
-     * Returns the value at the specified $index
-     */
-     public function offsetGet(int $index): mixed {}
-    /**
-     * Sets the value at the specified $index to $value
-     */
-     public function offsetSet(int $index, mixed $value): void {}
-    /**
-     * Unsets the value at the specified $index
-     */
-     public function offsetUnset(int $index): void {}
-    /**
-     * Pops a node from the end of the doubly linked list
-     */
-     public function pop(): mixed {}
-    /**
-     * Move to previous entry
-     */
-     public function prev(): void {}
-    /**
-     * Pushes an element at the end of the doubly linked list
-     */
-     public function push(mixed $value): void {}
-    /**
-     * Rewind iterator back to the start
-     */
-     public function rewind(): void {}
-    /**
-     * Serializes the storage
-     */
-     public function serialize(): string {}
-    /**
-     * Sets the mode of iteration
-     */
-     public function setIteratorMode(int $mode): int {}
-    /**
-     * Shifts a node from the beginning of the doubly linked list
-     */
-     public function shift(): mixed {}
-    /**
-     * Peeks at the node from the end of the doubly linked list
-     */
-     public function top(): mixed {}
-    /**
-     * Unserializes the storage
-     */
-     public function unserialize(string $data): void {}
-    /**
-     * Prepends the doubly linked list with an element
-     */
-     public function unshift(mixed $value): void {}
-    /**
-     * Check whether the doubly linked list contains more nodes
-     */
-     public function valid(): bool {}
+class SplDoublyLinkedList implements \ArrayAccess, \Countable, \Iterator, \Serializable, \Traversable
+{
+   public const IT_MODE_DELETE = 1;
+   public const IT_MODE_FIFO = 0;
+   public const IT_MODE_KEEP = 0;
+   public const IT_MODE_LIFO = 2;
+   public function __debugInfo(): array {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
+   /**
+    * Add/insert a new value at the specified index
+    */
+   public function add(int $index, mixed $value): void {}
+   /**
+    * Peeks at the node from the beginning of the doubly linked list
+    */
+   public function bottom(): mixed {}
+   /**
+    * Counts the number of elements in the doubly linked list
+    */
+   public function count(): int {}
+   /**
+    * Return current array entry
+    */
+   public function current(): mixed {}
+   /**
+    * Returns the mode of iteration
+    */
+   public function getIteratorMode(): int {}
+   /**
+    * Checks whether the doubly linked list is empty
+    */
+   public function isEmpty(): bool {}
+   /**
+    * Return current node index
+    */
+   public function key(): int {}
+   /**
+    * Move to next entry
+    */
+   public function next(): void {}
+   /**
+    * Returns whether the requested $index exists
+    */
+   public function offsetExists(int $index): bool {}
+   /**
+    * Returns the value at the specified $index
+    */
+   public function offsetGet(int $index): mixed {}
+   /**
+    * Sets the value at the specified $index to $value
+    */
+   public function offsetSet(int $index, mixed $value): void {}
+   /**
+    * Unsets the value at the specified $index
+    */
+   public function offsetUnset(int $index): void {}
+   /**
+    * Pops a node from the end of the doubly linked list
+    */
+   public function pop(): mixed {}
+   /**
+    * Move to previous entry
+    */
+   public function prev(): void {}
+   /**
+    * Pushes an element at the end of the doubly linked list
+    */
+   public function push(mixed $value): void {}
+   /**
+    * Rewind iterator back to the start
+    */
+   public function rewind(): void {}
+   /**
+    * Serializes the storage
+    */
+   public function serialize(): string {}
+   /**
+    * Sets the mode of iteration
+    */
+   public function setIteratorMode(int $mode): int {}
+   /**
+    * Shifts a node from the beginning of the doubly linked list
+    */
+   public function shift(): mixed {}
+   /**
+    * Peeks at the node from the end of the doubly linked list
+    */
+   public function top(): mixed {}
+   /**
+    * Unserializes the storage
+    */
+   public function unserialize(string $data): void {}
+   /**
+    * Prepends the doubly linked list with an element
+    */
+   public function unshift(mixed $value): void {}
+   /**
+    * Check whether the doubly linked list contains more nodes
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The SplFileInfo class
  */
- class SplFileInfo implements \Stringable {
-    /**
-     * 构造新的 SplFileInfo 对象
-     */
-     public function __construct(string $filename) {}
-    public function __debugInfo(): array {}
-    public function __toString(): string {}
-    public final function _bad_state_ex(): void {}
-    /**
-     * Gets last access time of the file
-     */
-     public function getATime(): int|false {}
-    /**
-     * Gets the base name of the file
-     */
-     public function getBasename(string $suffix = ""): string {}
-    /**
-     * 获取文件 inode 修改时间
-     */
-     public function getCTime(): int|false {}
-    /**
-     * Gets the file extension
-     */
-     public function getExtension(): string {}
-    /**
-     * Gets an SplFileInfo object for the file
-     */
-     public function getFileInfo(?string $class = NULL): \SplFileInfo {}
-    /**
-     * Gets the filename
-     */
-     public function getFilename(): string {}
-    /**
-     * Gets the file group
-     */
-     public function getGroup(): int|false {}
-    /**
-     * Gets the inode for the file
-     */
-     public function getInode(): int|false {}
-    /**
-     * Gets the target of a link
-     */
-     public function getLinkTarget(): string|false {}
-    /**
-     * Gets the last modified time
-     */
-     public function getMTime(): int|false {}
-    /**
-     * Gets the owner of the file
-     */
-     public function getOwner(): int|false {}
-    /**
-     * Gets the path without filename
-     */
-     public function getPath(): string {}
-    /**
-     * Gets an SplFileInfo object for the path
-     */
-     public function getPathInfo(?string $class = NULL): ?\SplFileInfo {}
-    /**
-     * Gets the path to the file
-     */
-     public function getPathname(): string {}
-    /**
-     * Gets file permissions
-     */
-     public function getPerms(): int|false {}
-    /**
-     * Gets absolute path to file
-     */
-     public function getRealPath(): string|false {}
-    /**
-     * Gets file size
-     */
-     public function getSize(): int|false {}
-    /**
-     * Gets file type
-     */
-     public function getType(): string|false {}
-    /**
-     * Tells if the file is a directory
-     */
-     public function isDir(): bool {}
-    /**
-     * Tells if the file is executable
-     */
-     public function isExecutable(): bool {}
-    /**
-     * Tells if the object references a regular file
-     */
-     public function isFile(): bool {}
-    /**
-     * Tells if the file is a link
-     */
-     public function isLink(): bool {}
-    /**
-     * Tells if file is readable
-     */
-     public function isReadable(): bool {}
-    /**
-     * Tells if the entry is writable
-     */
-     public function isWritable(): bool {}
-    /**
-     * Gets an SplFileObject object for the file
-     */
-     public function openFile(string $mode = "r", bool $useIncludePath = false, ?resource $context = NULL): \SplFileObject {}
-    /**
-     * Sets the class used with SplFileInfo::openFile
-     */
-     public function setFileClass(string $class = "SplFileObject"): void {}
-    /**
-     * Sets the class used with SplFileInfo::getFileInfo and SplFileInfo::getPathInfo
-     */
-     public function setInfoClass(string $class = "SplFileInfo"): void {}
+class SplFileInfo implements \Stringable
+{
+   /**
+    * 构造新的 SplFileInfo 对象
+    */
+   public function __construct(string $filename) {}
+   public function __debugInfo(): array {}
+   public function __toString(): string {}
+   public final function _bad_state_ex(): void {}
+   /**
+    * Gets last access time of the file
+    */
+   public function getATime(): int|false {}
+   /**
+    * Gets the base name of the file
+    */
+   public function getBasename(string $suffix = ""): string {}
+   /**
+    * 获取文件 inode 修改时间
+    */
+   public function getCTime(): int|false {}
+   /**
+    * Gets the file extension
+    */
+   public function getExtension(): string {}
+   /**
+    * Gets an SplFileInfo object for the file
+    */
+   public function getFileInfo(?string $class = NULL): \SplFileInfo {}
+   /**
+    * Gets the filename
+    */
+   public function getFilename(): string {}
+   /**
+    * Gets the file group
+    */
+   public function getGroup(): int|false {}
+   /**
+    * Gets the inode for the file
+    */
+   public function getInode(): int|false {}
+   /**
+    * Gets the target of a link
+    */
+   public function getLinkTarget(): string|false {}
+   /**
+    * Gets the last modified time
+    */
+   public function getMTime(): int|false {}
+   /**
+    * Gets the owner of the file
+    */
+   public function getOwner(): int|false {}
+   /**
+    * Gets the path without filename
+    */
+   public function getPath(): string {}
+   /**
+    * Gets an SplFileInfo object for the path
+    */
+   public function getPathInfo(?string $class = NULL): ?\SplFileInfo {}
+   /**
+    * Gets the path to the file
+    */
+   public function getPathname(): string {}
+   /**
+    * Gets file permissions
+    */
+   public function getPerms(): int|false {}
+   /**
+    * Gets absolute path to file
+    */
+   public function getRealPath(): string|false {}
+   /**
+    * Gets file size
+    */
+   public function getSize(): int|false {}
+   /**
+    * Gets file type
+    */
+   public function getType(): string|false {}
+   /**
+    * Tells if the file is a directory
+    */
+   public function isDir(): bool {}
+   /**
+    * Tells if the file is executable
+    */
+   public function isExecutable(): bool {}
+   /**
+    * Tells if the object references a regular file
+    */
+   public function isFile(): bool {}
+   /**
+    * Tells if the file is a link
+    */
+   public function isLink(): bool {}
+   /**
+    * Tells if file is readable
+    */
+   public function isReadable(): bool {}
+   /**
+    * Tells if the entry is writable
+    */
+   public function isWritable(): bool {}
+   /**
+    * Gets an SplFileObject object for the file
+    */
+   public function openFile(string $mode = "r", bool $useIncludePath = false, ?resource $context = NULL): \SplFileObject {}
+   /**
+    * Sets the class used with SplFileInfo::openFile
+    */
+   public function setFileClass(string $class = "SplFileObject"): void {}
+   /**
+    * Sets the class used with SplFileInfo::getFileInfo and SplFileInfo::getPathInfo
+    */
+   public function setInfoClass(string $class = "SplFileInfo"): void {}
 }
 
 /**
  * SplFileObject 类
  */
- class SplFileObject extends \SplFileInfo implements \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable {
-    public const DROP_NEW_LINE = 1;
-    public const READ_AHEAD = 2;
-    public const READ_CSV = 8;
-    public const SKIP_EMPTY = 4;
-    /**
-     * Construct a new file object
-     */
-     public function __construct(string $filename, string $mode = "r", bool $useIncludePath = false, ?resource $context = NULL) {}
-    public function __toString(): string {}
-    /**
-     * Retrieve current line of file
-     */
-     public function current(): array|string|false {}
-    /**
-     * Reached end of file
-     */
-     public function eof(): bool {}
-    /**
-     * Flushes the output to the file
-     */
-     public function fflush(): bool {}
-    /**
-     * Gets character from file
-     */
-     public function fgetc(): string|false {}
-    /**
-     * Gets line from file and parse as CSV fields
-     */
-     public function fgetcsv(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
-    /**
-     * Gets line from file
-     */
-     public function fgets(): string {}
-    /**
-     * Portable file locking
-     */
-     public function flock(int $operation, ?mixed &$wouldBlock = NULL): bool {}
-    /**
-     * Output all remaining data on a file pointer
-     */
-     public function fpassthru(): int {}
-    /**
-     * Write a field array as a CSV line
-     */
-     public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
-    /**
-     * Read from file
-     */
-     public function fread(int $length): string|false {}
-    /**
-     * Parses input from file according to a format
-     */
-     public function fscanf(string $format, mixed &...$vars): array|int|null {}
-    /**
-     * Seek to a position
-     */
-     public function fseek(int $offset, int $whence = SEEK_SET): int {}
-    /**
-     * Gets information about the file
-     */
-     public function fstat(): array {}
-    /**
-     * Return current file position
-     */
-     public function ftell(): int|false {}
-    /**
-     * Truncates the file to a given length
-     */
-     public function ftruncate(int $size): bool {}
-    /**
-     * Write to file
-     */
-     public function fwrite(string $data, ?int $length = NULL): int|false {}
-    /**
-     * No purpose
-     */
-     public function getChildren(): null {}
-    /**
-     * Get the delimiter, enclosure and escape character for CSV
-     */
-     public function getCsvControl(): array {}
-    /**
-     * 别名 SplFileObject::fgets
-     */
-     public function getCurrentLine(): string {}
-    /**
-     * Gets flags for the SplFileObject
-     */
-     public function getFlags(): int {}
-    /**
-     * Get maximum line length
-     */
-     public function getMaxLineLen(): int {}
-    /**
-     * SplFileObject does not have children
-     */
-     public function hasChildren(): false {}
-    /**
-     * Get line number
-     */
-     public function key(): int {}
-    /**
-     * Read next line
-     */
-     public function next(): void {}
-    /**
-     * Rewind the file to the first line
-     */
-     public function rewind(): void {}
-    /**
-     * Seek to specified line
-     */
-     public function seek(int $line): void {}
-    /**
-     * Set the delimiter, enclosure and escape character for CSV
-     */
-     public function setCsvControl(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): void {}
-    /**
-     * Sets flags for the SplFileObject
-     */
-     public function setFlags(int $flags): void {}
-    /**
-     * Set maximum line length
-     */
-     public function setMaxLineLen(int $maxLength): void {}
-    /**
-     * Not at EOF
-     */
-     public function valid(): bool {}
+class SplFileObject extends \SplFileInfo implements \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable
+{
+   public const DROP_NEW_LINE = 1;
+   public const READ_AHEAD = 2;
+   public const READ_CSV = 8;
+   public const SKIP_EMPTY = 4;
+   /**
+    * Construct a new file object
+    */
+   public function __construct(string $filename, string $mode = "r", bool $useIncludePath = false, ?resource $context = NULL) {}
+   public function __toString(): string {}
+   /**
+    * Retrieve current line of file
+    */
+   public function current(): array|string|false {}
+   /**
+    * Reached end of file
+    */
+   public function eof(): bool {}
+   /**
+    * Flushes the output to the file
+    */
+   public function fflush(): bool {}
+   /**
+    * Gets character from file
+    */
+   public function fgetc(): string|false {}
+   /**
+    * Gets line from file and parse as CSV fields
+    */
+   public function fgetcsv(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
+   /**
+    * Gets line from file
+    */
+   public function fgets(): string {}
+   /**
+    * Portable file locking
+    */
+   public function flock(int $operation, ?mixed &$wouldBlock = NULL): bool {}
+   /**
+    * Output all remaining data on a file pointer
+    */
+   public function fpassthru(): int {}
+   /**
+    * Write a field array as a CSV line
+    */
+   public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
+   /**
+    * Read from file
+    */
+   public function fread(int $length): string|false {}
+   /**
+    * Parses input from file according to a format
+    */
+   public function fscanf(string $format, mixed &...$vars): array|int|null {}
+   /**
+    * Seek to a position
+    */
+   public function fseek(int $offset, int $whence = SEEK_SET): int {}
+   /**
+    * Gets information about the file
+    */
+   public function fstat(): array {}
+   /**
+    * Return current file position
+    */
+   public function ftell(): int|false {}
+   /**
+    * Truncates the file to a given length
+    */
+   public function ftruncate(int $size): bool {}
+   /**
+    * Write to file
+    */
+   public function fwrite(string $data, ?int $length = NULL): int|false {}
+   /**
+    * No purpose
+    */
+   public function getChildren(): null {}
+   /**
+    * Get the delimiter, enclosure and escape character for CSV
+    */
+   public function getCsvControl(): array {}
+   /**
+    * 别名 SplFileObject::fgets
+    */
+   public function getCurrentLine(): string {}
+   /**
+    * Gets flags for the SplFileObject
+    */
+   public function getFlags(): int {}
+   /**
+    * Get maximum line length
+    */
+   public function getMaxLineLen(): int {}
+   /**
+    * SplFileObject does not have children
+    */
+   public function hasChildren(): false {}
+   /**
+    * Get line number
+    */
+   public function key(): int {}
+   /**
+    * Read next line
+    */
+   public function next(): void {}
+   /**
+    * Rewind the file to the first line
+    */
+   public function rewind(): void {}
+   /**
+    * Seek to specified line
+    */
+   public function seek(int $line): void {}
+   /**
+    * Set the delimiter, enclosure and escape character for CSV
+    */
+   public function setCsvControl(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): void {}
+   /**
+    * Sets flags for the SplFileObject
+    */
+   public function setFlags(int $flags): void {}
+   /**
+    * Set maximum line length
+    */
+   public function setMaxLineLen(int $maxLength): void {}
+   /**
+    * Not at EOF
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The SplFixedArray class
  */
- class SplFixedArray implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSerializable, \Traversable {
-    /**
-     * Constructs a new fixed array
-     */
-     public function __construct(int $size = 0) {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
-    public function __wakeup(): void {}
-    /**
-     * Returns the size of the array
-     */
-     public function count(): int {}
-    /**
-     * Import a PHP array in a SplFixedArray instance
-     */
-     public static function fromArray(array $array, bool $preserveKeys = true): \SplFixedArray {}
-    /**
-     * Retrieve the iterator to go through the array
-     */
-     public function getIterator(): \Iterator {}
-    /**
-     * Gets the size of the array
-     */
-     public function getSize(): int {}
-    /**
-     * Returns a representation that can be converted to JSON (PHP 8 >= 8.1.0)
-     */
-     public function jsonSerialize(): array {}
-    /**
-     * Returns whether the requested index exists
-     */
-     public function offsetExists(int $index): bool {}
-    /**
-     * Returns the value at the specified index
-     */
-     public function offsetGet(int $index): mixed {}
-    /**
-     * Sets a new value at a specified index
-     */
-     public function offsetSet(int $index, mixed $value): void {}
-    /**
-     * Unsets the value at the specified $index
-     */
-     public function offsetUnset(int $index): void {}
-    /**
-     * Change the size of an array
-     */
-     public function setSize(int $size): true {}
-    /**
-     * Returns a PHP array from the fixed array
-     */
-     public function toArray(): array {}
+class SplFixedArray implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSerializable, \Traversable
+{
+   /**
+    * Constructs a new fixed array
+    */
+   public function __construct(int $size = 0) {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
+   public function __wakeup(): void {}
+   /**
+    * Returns the size of the array
+    */
+   public function count(): int {}
+   /**
+    * Import a PHP array in a SplFixedArray instance
+    */
+   public static function fromArray(array $array, bool $preserveKeys = true): \SplFixedArray {}
+   /**
+    * Retrieve the iterator to go through the array
+    */
+   public function getIterator(): \Iterator {}
+   /**
+    * Gets the size of the array
+    */
+   public function getSize(): int {}
+   /**
+    * Returns a representation that can be converted to JSON (PHP 8 >= 8.1.0)
+    */
+   public function jsonSerialize(): array {}
+   /**
+    * Returns whether the requested index exists
+    */
+   public function offsetExists(int $index): bool {}
+   /**
+    * Returns the value at the specified index
+    */
+   public function offsetGet(int $index): mixed {}
+   /**
+    * Sets a new value at a specified index
+    */
+   public function offsetSet(int $index, mixed $value): void {}
+   /**
+    * Unsets the value at the specified $index
+    */
+   public function offsetUnset(int $index): void {}
+   /**
+    * Change the size of an array
+    */
+   public function setSize(int $size): true {}
+   /**
+    * Returns a PHP array from the fixed array
+    */
+   public function toArray(): array {}
 }
 
 /**
  * The SplHeap class
  */
- abstract class SplHeap implements \Countable, \Iterator, \Traversable {
-    public function __debugInfo(): array {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
-    /**
-     * Compare elements in order to place them correctly in the heap while sifting up
-     */
-     protected abstract function compare(mixed $value1, mixed $value2): int;
-    /**
-     * Counts the number of elements in the heap
-     */
-     public function count(): int {}
-    /**
-     * Return current node pointed by the iterator
-     */
-     public function current(): mixed {}
-    /**
-     * Extracts a node from top of the heap and sift up
-     */
-     public function extract(): mixed {}
-    /**
-     * Inserts an element in the heap by sifting it up
-     */
-     public function insert(mixed $value): true {}
-    /**
-     * Tells if the heap is in a corrupted state
-     */
-     public function isCorrupted(): bool {}
-    /**
-     * Checks whether the heap is empty
-     */
-     public function isEmpty(): bool {}
-    /**
-     * Return current node index
-     */
-     public function key(): int {}
-    /**
-     * Move to the next node
-     */
-     public function next(): void {}
-    /**
-     * Recover from the corrupted state and allow further actions on the heap
-     */
-     public function recoverFromCorruption(): true {}
-    /**
-     * Rewind iterator back to the start (no-op)
-     */
-     public function rewind(): void {}
-    /**
-     * Peeks at the node from the top of the heap
-     */
-     public function top(): mixed {}
-    /**
-     * Check whether the heap contains more nodes
-     */
-     public function valid(): bool {}
+abstract class SplHeap implements \Countable, \Iterator, \Traversable
+{
+   public function __debugInfo(): array {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
+   /**
+    * Compare elements in order to place them correctly in the heap while sifting up
+    */
+   protected abstract function compare(mixed $value1, mixed $value2): int;
+   /**
+    * Counts the number of elements in the heap
+    */
+   public function count(): int {}
+   /**
+    * Return current node pointed by the iterator
+    */
+   public function current(): mixed {}
+   /**
+    * Extracts a node from top of the heap and sift up
+    */
+   public function extract(): mixed {}
+   /**
+    * Inserts an element in the heap by sifting it up
+    */
+   public function insert(mixed $value): true {}
+   /**
+    * Tells if the heap is in a corrupted state
+    */
+   public function isCorrupted(): bool {}
+   /**
+    * Checks whether the heap is empty
+    */
+   public function isEmpty(): bool {}
+   /**
+    * Return current node index
+    */
+   public function key(): int {}
+   /**
+    * Move to the next node
+    */
+   public function next(): void {}
+   /**
+    * Recover from the corrupted state and allow further actions on the heap
+    */
+   public function recoverFromCorruption(): true {}
+   /**
+    * Rewind iterator back to the start (no-op)
+    */
+   public function rewind(): void {}
+   /**
+    * Peeks at the node from the top of the heap
+    */
+   public function top(): mixed {}
+   /**
+    * Check whether the heap contains more nodes
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The SplMaxHeap class
  */
- class SplMaxHeap extends \SplHeap implements \Countable, \Iterator, \Traversable {
-    /**
-     * Compare elements in order to place them correctly in the heap while sifting up
-     */
-     protected function compare(mixed $value1, mixed $value2): int {}
+class SplMaxHeap extends \SplHeap implements \Countable, \Iterator, \Traversable
+{
+   /**
+    * Compare elements in order to place them correctly in the heap while sifting up
+    */
+   protected function compare(mixed $value1, mixed $value2): int {}
 }
 
 /**
  * The SplMinHeap class
  */
- class SplMinHeap extends \SplHeap implements \Countable, \Iterator, \Traversable {
-    /**
-     * Compare elements in order to place them correctly in the heap while sifting up
-     */
-     protected function compare(mixed $value1, mixed $value2): int {}
+class SplMinHeap extends \SplHeap implements \Countable, \Iterator, \Traversable
+{
+   /**
+    * Compare elements in order to place them correctly in the heap while sifting up
+    */
+   protected function compare(mixed $value1, mixed $value2): int {}
 }
 
 /**
  * The SplObjectStorage class
  */
- class SplObjectStorage implements \ArrayAccess, \Countable, \Iterator, \SeekableIterator, \Serializable, \Traversable {
-    public function __debugInfo(): array {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
-    /**
-     * Adds all objects from another storage
-     */
-     public function addAll(\SplObjectStorage $storage): int {}
-    /**
-     * Adds an object in the storage
-     */
-     public function attach(object $object, mixed $info = NULL): void {}
-    /**
-     * Checks if the storage contains a specific object
-     */
-     public function contains(object $object): bool {}
-    /**
-     * Returns the number of objects in the storage
-     */
-     public function count(int $mode = COUNT_NORMAL): int {}
-    /**
-     * Returns the current storage entry
-     */
-     public function current(): object {}
-    /**
-     * Removes an object from the storage
-     */
-     public function detach(object $object): void {}
-    /**
-     * Calculate a unique identifier for the contained objects
-     */
-     public function getHash(object $object): string {}
-    /**
-     * Returns the data associated with the current iterator entry
-     */
-     public function getInfo(): mixed {}
-    /**
-     * Returns the index at which the iterator currently is
-     */
-     public function key(): int {}
-    /**
-     * Move to the next entry
-     */
-     public function next(): void {}
-    /**
-     * Checks whether an object exists in the storage
-     */
-     public function offsetExists(mixed $object): bool {}
-    /**
-     * Returns the data associated with an object
-     */
-     public function offsetGet(mixed $object): mixed {}
-    /**
-     * Associates data to an object in the storage
-     */
-     public function offsetSet(mixed $object, mixed $info = NULL): void {}
-    /**
-     * Removes an object from the storage
-     */
-     public function offsetUnset(mixed $object): void {}
-    /**
-     * Removes objects contained in another storage from the current storage
-     */
-     public function removeAll(\SplObjectStorage $storage): int {}
-    /**
-     * Removes all objects except for those contained in another storage from the current storage
-     */
-     public function removeAllExcept(\SplObjectStorage $storage): int {}
-    /**
-     * Rewind the iterator to the first storage element
-     */
-     public function rewind(): void {}
-    /**
-     * Seeks iterator to a position (PHP 8 >= 8.4.0)
-     */
-     public function seek(int $offset): void {}
-    /**
-     * Serializes the storage
-     */
-     public function serialize(): string {}
-    /**
-     * Sets the data associated with the current iterator entry
-     */
-     public function setInfo(mixed $info): void {}
-    /**
-     * Unserializes a storage from its string representation
-     */
-     public function unserialize(string $data): void {}
-    /**
-     * Returns if the current iterator entry is valid
-     */
-     public function valid(): bool {}
+class SplObjectStorage implements \ArrayAccess, \Countable, \Iterator, \SeekableIterator, \Serializable, \Traversable
+{
+   public function __debugInfo(): array {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
+   /**
+    * Adds all objects from another storage
+    */
+   public function addAll(\SplObjectStorage $storage): int {}
+   /**
+    * Adds an object in the storage
+    */
+   public function attach(object $object, mixed $info = NULL): void {}
+   /**
+    * Checks if the storage contains a specific object
+    */
+   public function contains(object $object): bool {}
+   /**
+    * Returns the number of objects in the storage
+    */
+   public function count(int $mode = COUNT_NORMAL): int {}
+   /**
+    * Returns the current storage entry
+    */
+   public function current(): object {}
+   /**
+    * Removes an object from the storage
+    */
+   public function detach(object $object): void {}
+   /**
+    * Calculate a unique identifier for the contained objects
+    */
+   public function getHash(object $object): string {}
+   /**
+    * Returns the data associated with the current iterator entry
+    */
+   public function getInfo(): mixed {}
+   /**
+    * Returns the index at which the iterator currently is
+    */
+   public function key(): int {}
+   /**
+    * Move to the next entry
+    */
+   public function next(): void {}
+   /**
+    * Checks whether an object exists in the storage
+    */
+   public function offsetExists(mixed $object): bool {}
+   /**
+    * Returns the data associated with an object
+    */
+   public function offsetGet(mixed $object): mixed {}
+   /**
+    * Associates data to an object in the storage
+    */
+   public function offsetSet(mixed $object, mixed $info = NULL): void {}
+   /**
+    * Removes an object from the storage
+    */
+   public function offsetUnset(mixed $object): void {}
+   /**
+    * Removes objects contained in another storage from the current storage
+    */
+   public function removeAll(\SplObjectStorage $storage): int {}
+   /**
+    * Removes all objects except for those contained in another storage from the current storage
+    */
+   public function removeAllExcept(\SplObjectStorage $storage): int {}
+   /**
+    * Rewind the iterator to the first storage element
+    */
+   public function rewind(): void {}
+   /**
+    * Seeks iterator to a position (PHP 8 >= 8.4.0)
+    */
+   public function seek(int $offset): void {}
+   /**
+    * Serializes the storage
+    */
+   public function serialize(): string {}
+   /**
+    * Sets the data associated with the current iterator entry
+    */
+   public function setInfo(mixed $info): void {}
+   /**
+    * Unserializes a storage from its string representation
+    */
+   public function unserialize(string $data): void {}
+   /**
+    * Returns if the current iterator entry is valid
+    */
+   public function valid(): bool {}
 }
 
 /**
  * The SplObserver interface
  */
- interface SplObserver {
-    /**
-     * Receive update from subject
-     */
-     public abstract function update(\SplSubject $subject): void;
+interface SplObserver
+{
+   /**
+    * Receive update from subject
+    */
+   public abstract function update(\SplSubject $subject): void;
 }
 
 /**
  * The SplPriorityQueue class
  */
- class SplPriorityQueue implements \Countable, \Iterator, \Traversable {
-    public const EXTR_BOTH = 3;
-    public const EXTR_DATA = 1;
-    public const EXTR_PRIORITY = 2;
-    public function __debugInfo(): array {}
-    public function __serialize(): array {}
-    public function __unserialize(array $data): void {}
-    /**
-     * Compare priorities in order to place elements correctly in the heap while sifting up
-     */
-     public function compare(mixed $priority1, mixed $priority2): int {}
-    /**
-     * Counts the number of elements in the queue
-     */
-     public function count(): int {}
-    /**
-     * Return current node pointed by the iterator
-     */
-     public function current(): mixed {}
-    /**
-     * Extracts a node from top of the heap and sift up
-     */
-     public function extract(): mixed {}
-    /**
-     * Get the flags of extraction
-     */
-     public function getExtractFlags(): int {}
-    /**
-     * Inserts an element in the queue by sifting it up
-     */
-     public function insert(mixed $value, mixed $priority): true {}
-    /**
-     * Tells if the priority queue is in a corrupted state
-     */
-     public function isCorrupted(): bool {}
-    /**
-     * Checks whether the queue is empty
-     */
-     public function isEmpty(): bool {}
-    /**
-     * Return current node index
-     */
-     public function key(): int {}
-    /**
-     * Move to the next node
-     */
-     public function next(): void {}
-    /**
-     * Recover from the corrupted state and allow further actions on the queue
-     */
-     public function recoverFromCorruption(): true {}
-    /**
-     * Rewind iterator back to the start (no-op)
-     */
-     public function rewind(): void {}
-    /**
-     * Sets the mode of extraction
-     */
-     public function setExtractFlags(int $flags): int {}
-    /**
-     * Peeks at the node from the top of the queue
-     */
-     public function top(): mixed {}
-    /**
-     * Check whether the queue contains more nodes
-     */
-     public function valid(): bool {}
+class SplPriorityQueue implements \Countable, \Iterator, \Traversable
+{
+   public const EXTR_BOTH = 3;
+   public const EXTR_DATA = 1;
+   public const EXTR_PRIORITY = 2;
+   public function __debugInfo(): array {}
+   public function __serialize(): array {}
+   public function __unserialize(array $data): void {}
+   /**
+    * Compare priorities in order to place elements correctly in the heap while sifting up
+    */
+   public function compare(mixed $priority1, mixed $priority2): int {}
+   /**
+    * Counts the number of elements in the queue
+    */
+   public function count(): int {}
+   /**
+    * Return current node pointed by the iterator
+    */
+   public function current(): mixed {}
+   /**
+    * Extracts a node from top of the heap and sift up
+    */
+   public function extract(): mixed {}
+   /**
+    * Get the flags of extraction
+    */
+   public function getExtractFlags(): int {}
+   /**
+    * Inserts an element in the queue by sifting it up
+    */
+   public function insert(mixed $value, mixed $priority): true {}
+   /**
+    * Tells if the priority queue is in a corrupted state
+    */
+   public function isCorrupted(): bool {}
+   /**
+    * Checks whether the queue is empty
+    */
+   public function isEmpty(): bool {}
+   /**
+    * Return current node index
+    */
+   public function key(): int {}
+   /**
+    * Move to the next node
+    */
+   public function next(): void {}
+   /**
+    * Recover from the corrupted state and allow further actions on the queue
+    */
+   public function recoverFromCorruption(): true {}
+   /**
+    * Rewind iterator back to the start (no-op)
+    */
+   public function rewind(): void {}
+   /**
+    * Sets the mode of extraction
+    */
+   public function setExtractFlags(int $flags): int {}
+   /**
+    * Peeks at the node from the top of the queue
+    */
+   public function top(): mixed {}
+   /**
+    * Check whether the queue contains more nodes
+    */
+   public function valid(): bool {}
 }
 
 /**
  * SplQueue 类
  */
- class SplQueue extends \SplDoublyLinkedList implements \ArrayAccess, \Countable, \Iterator, \Serializable, \Traversable {
-    /**
-     * Dequeues a node from the queue
-     */
-     public function dequeue(): mixed {}
-    /**
-     * Adds an element to the queue
-     */
-     public function enqueue(mixed $value): void {}
+class SplQueue extends \SplDoublyLinkedList implements \ArrayAccess, \Countable, \Iterator, \Serializable, \Traversable
+{
+   /**
+    * Dequeues a node from the queue
+    */
+   public function dequeue(): mixed {}
+   /**
+    * Adds an element to the queue
+    */
+   public function enqueue(mixed $value): void {}
 }
 
 /**
  * SplStack 类
  */
- class SplStack extends \SplDoublyLinkedList implements \ArrayAccess, \Countable, \Iterator, \Serializable, \Traversable {
-}
+class SplStack extends \SplDoublyLinkedList implements \ArrayAccess, \Countable, \Iterator, \Serializable, \Traversable {}
 
 /**
  * The SplSubject interface
  */
- interface SplSubject {
-    /**
-     * Attach an SplObserver
-     */
-     public abstract function attach(\SplObserver $observer): void;
-    /**
-     * Detach an observer
-     */
-     public abstract function detach(\SplObserver $observer): void;
-    /**
-     * Notify an observer
-     */
-     public abstract function notify(): void;
+interface SplSubject
+{
+   /**
+    * Attach an SplObserver
+    */
+   public abstract function attach(\SplObserver $observer): void;
+   /**
+    * Detach an observer
+    */
+   public abstract function detach(\SplObserver $observer): void;
+   /**
+    * Notify an observer
+    */
+   public abstract function notify(): void;
 }
 
 /**
  * The SplTempFileObject class
  */
- class SplTempFileObject extends \SplFileObject implements \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable {
-    /**
-     * Construct a new temporary file object
-     */
-     public function __construct(int $maxMemory = 2097152) {}
+class SplTempFileObject extends \SplFileObject implements \Iterator, \RecursiveIterator, \SeekableIterator, \Stringable, \Traversable
+{
+   /**
+    * Construct a new temporary file object
+    */
+   public function __construct(int $maxMemory = 2097152) {}
 }
 
 /**
  * The Spoofchecker class
  */
- class Spoofchecker {
-    public const ADD_CASE_MAPPINGS = 4;
-    public const ANY_CASE = 8;
-    public const ASCII = 268435456;
-    public const CASE_INSENSITIVE = 2;
-    public const CHAR_LIMIT = 64;
-    public const HIDDEN_OVERLAY = 256;
-    public const HIGHLY_RESTRICTIVE = 805306368;
-    public const IGNORE_SPACE = 1;
-    public const INVISIBLE = 32;
-    public const MINIMALLY_RESTRICTIVE = 1342177280;
-    public const MIXED_NUMBERS = 128;
-    public const MIXED_SCRIPT_CONFUSABLE = 2;
-    public const MODERATELY_RESTRICTIVE = 1073741824;
-    public const SIMPLE_CASE_INSENSITIVE = 6;
-    public const SINGLE_SCRIPT = 16;
-    public const SINGLE_SCRIPT_CONFUSABLE = 1;
-    public const SINGLE_SCRIPT_RESTRICTIVE = 536870912;
-    public const UNRESTRICTIVE = 1610612736;
-    public const WHOLE_SCRIPT_CONFUSABLE = 4;
-    /**
-     * Constructor
-     */
-     public function __construct() {}
-    /**
-     * Checks if given strings can be confused
-     */
-     public function areConfusable(string $string1, string $string2, ?mixed &$errorCode = NULL): bool {}
-    /**
-     * Checks if a given text contains any suspicious characters
-     */
-     public function isSuspicious(string $string, ?mixed &$errorCode = NULL): bool {}
-    /**
-     * Set the set of characters allowed when running checks (PHP 8 >= 8.4.0)
-     */
-     public function setAllowedChars(string $pattern, int $patternOptions = 0): void {}
-    /**
-     * Locales to use when running checks
-     */
-     public function setAllowedLocales(string $locales): void {}
-    /**
-     * Set the checks to run
-     */
-     public function setChecks(int $checks): void {}
-    /**
-     * Set the restriction level
-     */
-     public function setRestrictionLevel(int $level): void {}
+class Spoofchecker
+{
+   public const ADD_CASE_MAPPINGS = 4;
+   public const ANY_CASE = 8;
+   public const ASCII = 268435456;
+   public const CASE_INSENSITIVE = 2;
+   public const CHAR_LIMIT = 64;
+   public const HIDDEN_OVERLAY = 256;
+   public const HIGHLY_RESTRICTIVE = 805306368;
+   public const IGNORE_SPACE = 1;
+   public const INVISIBLE = 32;
+   public const MINIMALLY_RESTRICTIVE = 1342177280;
+   public const MIXED_NUMBERS = 128;
+   public const MIXED_SCRIPT_CONFUSABLE = 2;
+   public const MODERATELY_RESTRICTIVE = 1073741824;
+   public const SIMPLE_CASE_INSENSITIVE = 6;
+   public const SINGLE_SCRIPT = 16;
+   public const SINGLE_SCRIPT_CONFUSABLE = 1;
+   public const SINGLE_SCRIPT_RESTRICTIVE = 536870912;
+   public const UNRESTRICTIVE = 1610612736;
+   public const WHOLE_SCRIPT_CONFUSABLE = 4;
+   /**
+    * Constructor
+    */
+   public function __construct() {}
+   /**
+    * Checks if given strings can be confused
+    */
+   public function areConfusable(string $string1, string $string2, ?mixed &$errorCode = NULL): bool {}
+   /**
+    * Checks if a given text contains any suspicious characters
+    */
+   public function isSuspicious(string $string, ?mixed &$errorCode = NULL): bool {}
+   /**
+    * Set the set of characters allowed when running checks (PHP 8 >= 8.4.0)
+    */
+   public function setAllowedChars(string $pattern, int $patternOptions = 0): void {}
+   /**
+    * Locales to use when running checks
+    */
+   public function setAllowedLocales(string $locales): void {}
+   /**
+    * Set the checks to run
+    */
+   public function setChecks(int $checks): void {}
+   /**
+    * Set the restriction level
+    */
+   public function setRestrictionLevel(int $level): void {}
 }
 
-final class StreamBucket {
-    public $bucket;
-    public string $data;
-    public int $dataLength;
-    public int $datalen;
+final class StreamBucket
+{
+   public $bucket;
+   public string $data;
+   public int $dataLength;
+   public int $datalen;
 }
 
 /**
  * Stringable 接口
  */
- interface Stringable {
-    public abstract function __toString(): string;
+interface Stringable
+{
+   public abstract function __toString(): string;
 }
 
 /**
  * Throwable
  */
- interface Throwable extends \Stringable {
-    /**
-     * 获取异常代码
-     */
-     public abstract function getCode();
-    /**
-     * 获取创建对象的文件
-     */
-     public abstract function getFile(): string;
-    /**
-     * 获取初始化对象时候的行号
-     */
-     public abstract function getLine(): int;
-    /**
-     * 获取信息
-     */
-     public abstract function getMessage(): string;
-    /**
-     * 返回先前的 Throwable
-     */
-     public abstract function getPrevious(): ?\Throwable;
-    /**
-     * 获取堆栈踪迹（Stack Trace）
-     */
-     public abstract function getTrace(): array;
-    /**
-     * 以 string 形式获取堆栈踪迹
-     */
-     public abstract function getTraceAsString(): string;
+interface Throwable extends \Stringable
+{
+   /**
+    * 获取异常代码
+    */
+   public abstract function getCode();
+   /**
+    * 获取创建对象的文件
+    */
+   public abstract function getFile(): string;
+   /**
+    * 获取初始化对象时候的行号
+    */
+   public abstract function getLine(): int;
+   /**
+    * 获取信息
+    */
+   public abstract function getMessage(): string;
+   /**
+    * 返回先前的 Throwable
+    */
+   public abstract function getPrevious(): ?\Throwable;
+   /**
+    * 获取堆栈踪迹（Stack Trace）
+    */
+   public abstract function getTrace(): array;
+   /**
+    * 以 string 形式获取堆栈踪迹
+    */
+   public abstract function getTraceAsString(): string;
 }
 
 /**
  * The Transliterator class
  */
- class Transliterator {
-    public const FORWARD = 0;
-    public const REVERSE = 1;
-    public readonly string $id;
-    /**
-     * Private constructor to deny instantiation
-     */
-     private final function __construct() {}
-    /**
-     * Create a transliterator
-     */
-     public static function create(string $id, int $direction = Transliterator::FORWARD): ?\Transliterator {}
-    /**
-     * Create transliterator from rules
-     */
-     public static function createFromRules(string $rules, int $direction = Transliterator::FORWARD): ?\Transliterator {}
-    /**
-     * Create an inverse transliterator
-     */
-     public function createInverse(): ?\Transliterator {}
-    /**
-     * Get last error code
-     */
-     public function getErrorCode(): int {}
-    /**
-     * Get last error message
-     */
-     public function getErrorMessage(): string {}
-    /**
-     * Get transliterator IDs
-     */
-     public static function listIDs(): array|false {}
-    /**
-     * Transliterate a string
-     */
-     public function transliterate(string $string, int $start = 0, int $end = -1): string|false {}
+class Transliterator
+{
+   public const FORWARD = 0;
+   public const REVERSE = 1;
+   public readonly string $id;
+   /**
+    * Private constructor to deny instantiation
+    */
+   private final function __construct() {}
+   /**
+    * Create a transliterator
+    */
+   public static function create(string $id, int $direction = Transliterator::FORWARD): ?\Transliterator {}
+   /**
+    * Create transliterator from rules
+    */
+   public static function createFromRules(string $rules, int $direction = Transliterator::FORWARD): ?\Transliterator {}
+   /**
+    * Create an inverse transliterator
+    */
+   public function createInverse(): ?\Transliterator {}
+   /**
+    * Get last error code
+    */
+   public function getErrorCode(): int {}
+   /**
+    * Get last error message
+    */
+   public function getErrorMessage(): string {}
+   /**
+    * Get transliterator IDs
+    */
+   public static function listIDs(): array|false {}
+   /**
+    * Transliterate a string
+    */
+   public function transliterate(string $string, int $start = 0, int $end = -1): string|false {}
 }
 
 /**
  * Traversable （遍历）接口
  */
- interface Traversable {
-}
+interface Traversable {}
 
 /**
  * TypeError
  */
- class TypeError extends \Error implements \Stringable, \Throwable {
-}
+class TypeError extends \Error implements \Stringable, \Throwable {}
 
 /**
  * The UConverter class
  */
- class UConverter {
-    public const BOCU1 = 28;
-    public const CESU8 = 31;
-    public const DBCS = 1;
-    public const EBCDIC_STATEFUL = 9;
-    public const HZ = 23;
-    public const IMAP_MAILBOX = 32;
-    public const ISCII = 25;
-    public const ISO_2022 = 10;
-    public const LATIN_1 = 3;
-    public const LMBCS_1 = 11;
-    public const LMBCS_11 = 18;
-    public const LMBCS_16 = 19;
-    public const LMBCS_17 = 20;
-    public const LMBCS_18 = 21;
-    public const LMBCS_19 = 22;
-    public const LMBCS_2 = 12;
-    public const LMBCS_3 = 13;
-    public const LMBCS_4 = 14;
-    public const LMBCS_5 = 15;
-    public const LMBCS_6 = 16;
-    public const LMBCS_8 = 17;
-    public const LMBCS_LAST = 22;
-    public const MBCS = 2;
-    public const REASON_CLONE = 5;
-    public const REASON_CLOSE = 4;
-    public const REASON_ILLEGAL = 1;
-    public const REASON_IRREGULAR = 2;
-    public const REASON_RESET = 3;
-    public const REASON_UNASSIGNED = 0;
-    public const SBCS = 0;
-    public const SCSU = 24;
-    public const UNSUPPORTED_CONVERTER = -1;
-    public const US_ASCII = 26;
-    public const UTF16 = 29;
-    public const UTF16_BigEndian = 5;
-    public const UTF16_LittleEndian = 6;
-    public const UTF32 = 30;
-    public const UTF32_BigEndian = 7;
-    public const UTF32_LittleEndian = 8;
-    public const UTF7 = 27;
-    public const UTF8 = 4;
-    /**
-     * Create UConverter object
-     */
-     public function __construct(?string $destination_encoding = NULL, ?string $source_encoding = NULL) {}
-    /**
-     * Convert string from one charset to another
-     */
-     public function convert(string $str, bool $reverse = false): string|false {}
-    /**
-     * Default &quot;from&quot; callback function
-     */
-     public function fromUCallback(int $reason, array $source, int $codePoint, mixed &$error): array|string|int|null {}
-    /**
-     * Get the aliases of the given name
-     */
-     public static function getAliases(string $name): array|false|null {}
-    /**
-     * Get the available canonical converter names
-     */
-     public static function getAvailable(): array {}
-    /**
-     * Get the destination encoding
-     */
-     public function getDestinationEncoding(): string|false|null {}
-    /**
-     * Get the destination converter type
-     */
-     public function getDestinationType(): int|false|null {}
-    /**
-     * Get last error code on the object
-     */
-     public function getErrorCode(): int {}
-    /**
-     * Get last error message on the object
-     */
-     public function getErrorMessage(): ?string {}
-    /**
-     * Get the source encoding
-     */
-     public function getSourceEncoding(): string|false|null {}
-    /**
-     * Get the source converter type
-     */
-     public function getSourceType(): int|false|null {}
-    /**
-     * Get standards associated to converter names
-     */
-     public static function getStandards(): ?array {}
-    /**
-     * Get substitution chars
-     */
-     public function getSubstChars(): string|false|null {}
-    /**
-     * Get string representation of the callback reason
-     */
-     public static function reasonText(int $reason): string {}
-    /**
-     * Set the destination encoding
-     */
-     public function setDestinationEncoding(string $encoding): bool {}
-    /**
-     * Set the source encoding
-     */
-     public function setSourceEncoding(string $encoding): bool {}
-    /**
-     * Set the substitution chars
-     */
-     public function setSubstChars(string $chars): bool {}
-    /**
-     * Default &quot;to&quot; callback function
-     */
-     public function toUCallback(int $reason, string $source, string $codeUnits, mixed &$error): array|string|int|null {}
-    /**
-     * Convert a string from one character encoding to another
-     */
-     public static function transcode(string $str, string $toEncoding, string $fromEncoding, ?array $options = NULL): string|false {}
+class UConverter
+{
+   public const BOCU1 = 28;
+   public const CESU8 = 31;
+   public const DBCS = 1;
+   public const EBCDIC_STATEFUL = 9;
+   public const HZ = 23;
+   public const IMAP_MAILBOX = 32;
+   public const ISCII = 25;
+   public const ISO_2022 = 10;
+   public const LATIN_1 = 3;
+   public const LMBCS_1 = 11;
+   public const LMBCS_11 = 18;
+   public const LMBCS_16 = 19;
+   public const LMBCS_17 = 20;
+   public const LMBCS_18 = 21;
+   public const LMBCS_19 = 22;
+   public const LMBCS_2 = 12;
+   public const LMBCS_3 = 13;
+   public const LMBCS_4 = 14;
+   public const LMBCS_5 = 15;
+   public const LMBCS_6 = 16;
+   public const LMBCS_8 = 17;
+   public const LMBCS_LAST = 22;
+   public const MBCS = 2;
+   public const REASON_CLONE = 5;
+   public const REASON_CLOSE = 4;
+   public const REASON_ILLEGAL = 1;
+   public const REASON_IRREGULAR = 2;
+   public const REASON_RESET = 3;
+   public const REASON_UNASSIGNED = 0;
+   public const SBCS = 0;
+   public const SCSU = 24;
+   public const UNSUPPORTED_CONVERTER = -1;
+   public const US_ASCII = 26;
+   public const UTF16 = 29;
+   public const UTF16_BigEndian = 5;
+   public const UTF16_LittleEndian = 6;
+   public const UTF32 = 30;
+   public const UTF32_BigEndian = 7;
+   public const UTF32_LittleEndian = 8;
+   public const UTF7 = 27;
+   public const UTF8 = 4;
+   /**
+    * Create UConverter object
+    */
+   public function __construct(?string $destination_encoding = NULL, ?string $source_encoding = NULL) {}
+   /**
+    * Convert string from one charset to another
+    */
+   public function convert(string $str, bool $reverse = false): string|false {}
+   /**
+    * Default &quot;from&quot; callback function
+    */
+   public function fromUCallback(int $reason, array $source, int $codePoint, mixed &$error): array|string|int|null {}
+   /**
+    * Get the aliases of the given name
+    */
+   public static function getAliases(string $name): array|false|null {}
+   /**
+    * Get the available canonical converter names
+    */
+   public static function getAvailable(): array {}
+   /**
+    * Get the destination encoding
+    */
+   public function getDestinationEncoding(): string|false|null {}
+   /**
+    * Get the destination converter type
+    */
+   public function getDestinationType(): int|false|null {}
+   /**
+    * Get last error code on the object
+    */
+   public function getErrorCode(): int {}
+   /**
+    * Get last error message on the object
+    */
+   public function getErrorMessage(): ?string {}
+   /**
+    * Get the source encoding
+    */
+   public function getSourceEncoding(): string|false|null {}
+   /**
+    * Get the source converter type
+    */
+   public function getSourceType(): int|false|null {}
+   /**
+    * Get standards associated to converter names
+    */
+   public static function getStandards(): ?array {}
+   /**
+    * Get substitution chars
+    */
+   public function getSubstChars(): string|false|null {}
+   /**
+    * Get string representation of the callback reason
+    */
+   public static function reasonText(int $reason): string {}
+   /**
+    * Set the destination encoding
+    */
+   public function setDestinationEncoding(string $encoding): bool {}
+   /**
+    * Set the source encoding
+    */
+   public function setSourceEncoding(string $encoding): bool {}
+   /**
+    * Set the substitution chars
+    */
+   public function setSubstChars(string $chars): bool {}
+   /**
+    * Default &quot;to&quot; callback function
+    */
+   public function toUCallback(int $reason, string $source, string $codeUnits, mixed &$error): array|string|int|null {}
+   /**
+    * Convert a string from one character encoding to another
+    */
+   public static function transcode(string $str, string $toEncoding, string $fromEncoding, ?array $options = NULL): string|false {}
 }
 
 /**
  * The UnderflowException class
  */
- class UnderflowException extends \RuntimeException implements \Stringable, \Throwable {
-}
+class UnderflowException extends \RuntimeException implements \Stringable, \Throwable {}
 
 /**
  * The UnexpectedValueException class
  */
- class UnexpectedValueException extends \RuntimeException implements \Stringable, \Throwable {
-}
+class UnexpectedValueException extends \RuntimeException implements \Stringable, \Throwable {}
 
 /**
  * UnhandledMatchError
  */
- class UnhandledMatchError extends \Error implements \Stringable, \Throwable {
-}
+class UnhandledMatchError extends \Error implements \Stringable, \Throwable {}
 
 /**
  * UnitEnum 接口 (PHP 8 >= 8.1.0)
  */
- interface UnitEnum {
-    /**
-     * 生成枚举的条目清单 (PHP 8 >= 8.1.0)
-     */
-     public abstract static function cases(): array;
+interface UnitEnum
+{
+   /**
+    * 生成枚举的条目清单 (PHP 8 >= 8.1.0)
+    */
+   public abstract static function cases(): array;
 }
 
 /**
  * ValueError
  */
- class ValueError extends \Error implements \Stringable, \Throwable {
-}
+class ValueError extends \Error implements \Stringable, \Throwable {}
 
 /**
  * WeakMap 类
  */
- final class WeakMap implements \ArrayAccess, \Countable, \IteratorAggregate, \Traversable {
-    /**
-     * 统计 map 中存活实体的数量
-     */
-     public function count(): int {}
-    /**
-     * 接收一个外部迭代器
-     */
-     public function getIterator(): \Iterator {}
-    /**
-     * 检测 map 中是否存在某个对象
-     */
-     public function offsetExists(mixed $object): bool {}
-    /**
-     * 返回某个对象指向的值
-     */
-     public function offsetGet(mixed $object): mixed {}
-    /**
-     * 更新 map 新的键值对
-     */
-     public function offsetSet(mixed $object, mixed $value): void {}
-    /**
-     * 从 map 中移除一条
-     */
-     public function offsetUnset(mixed $object): void {}
+final class WeakMap implements \ArrayAccess, \Countable, \IteratorAggregate, \Traversable
+{
+   /**
+    * 统计 map 中存活实体的数量
+    */
+   public function count(): int {}
+   /**
+    * 接收一个外部迭代器
+    */
+   public function getIterator(): \Iterator {}
+   /**
+    * 检测 map 中是否存在某个对象
+    */
+   public function offsetExists(mixed $object): bool {}
+   /**
+    * 返回某个对象指向的值
+    */
+   public function offsetGet(mixed $object): mixed {}
+   /**
+    * 更新 map 新的键值对
+    */
+   public function offsetSet(mixed $object, mixed $value): void {}
+   /**
+    * 从 map 中移除一条
+    */
+   public function offsetUnset(mixed $object): void {}
 }
 
 /**
  * WeakReference 类
  */
- final class WeakReference {
-    /**
-     * 不允许实例化的构造函数
-     */
-     public function __construct() {}
-    /**
-     * 创建新的弱引用
-     */
-     public static function create(object $object): \WeakReference {}
-    /**
-     * 获取弱引用对象
-     */
-     public function get(): ?object {}
+final class WeakReference
+{
+   /**
+    * 不允许实例化的构造函数
+    */
+   public function __construct() {}
+   /**
+    * 创建新的弱引用
+    */
+   public static function create(object $object): \WeakReference {}
+   /**
+    * 获取弱引用对象
+    */
+   public function get(): ?object {}
 }
 
 /**
  * XMLParser 类
  */
- final class XMLParser {
-}
+final class XMLParser {}
 
 /**
  * The XMLReader class
  */
- class XMLReader {
-    public const ATTRIBUTE = 2;
-    public const CDATA = 4;
-    public const COMMENT = 8;
-    public const DEFAULTATTRS = 2;
-    public const DOC = 9;
-    public const DOC_FRAGMENT = 11;
-    public const DOC_TYPE = 10;
-    public const ELEMENT = 1;
-    public const END_ELEMENT = 15;
-    public const END_ENTITY = 16;
-    public const ENTITY = 6;
-    public const ENTITY_REF = 5;
-    public const LOADDTD = 1;
-    public const NONE = 0;
-    public const NOTATION = 12;
-    public const PI = 7;
-    public const SIGNIFICANT_WHITESPACE = 14;
-    public const SUBST_ENTITIES = 4;
-    public const TEXT = 3;
-    public const VALIDATE = 3;
-    public const WHITESPACE = 13;
-    public const XML_DECLARATION = 17;
-    public int $attributeCount;
-    public string $baseURI;
-    public int $depth;
-    public bool $hasAttributes;
-    public bool $hasValue;
-    public bool $isDefault;
-    public bool $isEmptyElement;
-    public string $localName;
-    public string $name;
-    public string $namespaceURI;
-    public int $nodeType;
-    public string $prefix;
-    public string $value;
-    public string $xmlLang;
-    /**
-     * Set the data containing the XML to parse
-     */
-     public static function XML(string $source, ?string $encoding = NULL, int $flags = 0) {}
-    /**
-     * Close the XMLReader input
-     */
-     public function close(): true {}
-    /**
-     * Returns a copy of the current node as a DOM object
-     */
-     public function expand(?\DOMNode $baseNode = NULL): \DOMNode|false {}
-    /**
-     * Creates an XMLReader from a stream to read from (PHP 8 >= 8.4.0)
-     */
-     public static function fromStream(mixed $stream, ?string $encoding = NULL, int $flags = 0, ?string $documentUri = NULL): static {}
-    /**
-     * Creates an XMLReader from an XML string (PHP 8 >= 8.4.0)
-     */
-     public static function fromString(string $source, ?string $encoding = NULL, int $flags = 0): static {}
-    /**
-     * Creates an XMLReader from a URI to read from (PHP 8 >= 8.4.0)
-     */
-     public static function fromUri(string $uri, ?string $encoding = NULL, int $flags = 0): static {}
-    /**
-     * Get the value of a named attribute
-     */
-     public function getAttribute(string $name): ?string {}
-    /**
-     * Get the value of an attribute by index
-     */
-     public function getAttributeNo(int $index): ?string {}
-    /**
-     * Get the value of an attribute by localname and URI
-     */
-     public function getAttributeNs(string $name, string $namespace): ?string {}
-    /**
-     * Indicates if specified property has been set
-     */
-     public function getParserProperty(int $property): bool {}
-    /**
-     * Indicates if the parsed document is valid
-     */
-     public function isValid(): bool {}
-    /**
-     * Lookup namespace for a prefix
-     */
-     public function lookupNamespace(string $prefix): ?string {}
-    /**
-     * Move cursor to a named attribute
-     */
-     public function moveToAttribute(string $name): bool {}
-    /**
-     * Move cursor to an attribute by index
-     */
-     public function moveToAttributeNo(int $index): bool {}
-    /**
-     * Move cursor to a named attribute
-     */
-     public function moveToAttributeNs(string $name, string $namespace): bool {}
-    /**
-     * Position cursor on the parent Element of current Attribute
-     */
-     public function moveToElement(): bool {}
-    /**
-     * Position cursor on the first Attribute
-     */
-     public function moveToFirstAttribute(): bool {}
-    /**
-     * Position cursor on the next Attribute
-     */
-     public function moveToNextAttribute(): bool {}
-    /**
-     * Move cursor to next node skipping all subtrees
-     */
-     public function next(?string $name = NULL): bool {}
-    /**
-     * Set the URI containing the XML to parse
-     */
-     public static function open(string $uri, ?string $encoding = NULL, int $flags = 0) {}
-    /**
-     * Move to next node in document
-     */
-     public function read(): bool {}
-    /**
-     * Retrieve XML from current node
-     */
-     public function readInnerXml(): string {}
-    /**
-     * Retrieve XML from current node, including itself
-     */
-     public function readOuterXml(): string {}
-    /**
-     * Reads the contents of the current node as a string
-     */
-     public function readString(): string {}
-    /**
-     * Set parser options
-     */
-     public function setParserProperty(int $property, bool $value): bool {}
-    /**
-     * Set the filename or URI for a RelaxNG Schema
-     */
-     public function setRelaxNGSchema(?string $filename): bool {}
-    /**
-     * Set the data containing a RelaxNG Schema
-     */
-     public function setRelaxNGSchemaSource(?string $source): bool {}
-    /**
-     * Validate document against XSD
-     */
-     public function setSchema(?string $filename): bool {}
+class XMLReader
+{
+   public const ATTRIBUTE = 2;
+   public const CDATA = 4;
+   public const COMMENT = 8;
+   public const DEFAULTATTRS = 2;
+   public const DOC = 9;
+   public const DOC_FRAGMENT = 11;
+   public const DOC_TYPE = 10;
+   public const ELEMENT = 1;
+   public const END_ELEMENT = 15;
+   public const END_ENTITY = 16;
+   public const ENTITY = 6;
+   public const ENTITY_REF = 5;
+   public const LOADDTD = 1;
+   public const NONE = 0;
+   public const NOTATION = 12;
+   public const PI = 7;
+   public const SIGNIFICANT_WHITESPACE = 14;
+   public const SUBST_ENTITIES = 4;
+   public const TEXT = 3;
+   public const VALIDATE = 3;
+   public const WHITESPACE = 13;
+   public const XML_DECLARATION = 17;
+   public int $attributeCount;
+   public string $baseURI;
+   public int $depth;
+   public bool $hasAttributes;
+   public bool $hasValue;
+   public bool $isDefault;
+   public bool $isEmptyElement;
+   public string $localName;
+   public string $name;
+   public string $namespaceURI;
+   public int $nodeType;
+   public string $prefix;
+   public string $value;
+   public string $xmlLang;
+   /**
+    * Set the data containing the XML to parse
+    */
+   public static function XML(string $source, ?string $encoding = NULL, int $flags = 0) {}
+   /**
+    * Close the XMLReader input
+    */
+   public function close(): true {}
+   /**
+    * Returns a copy of the current node as a DOM object
+    */
+   public function expand(?\DOMNode $baseNode = NULL): \DOMNode|false {}
+   /**
+    * Creates an XMLReader from a stream to read from (PHP 8 >= 8.4.0)
+    */
+   public static function fromStream(mixed $stream, ?string $encoding = NULL, int $flags = 0, ?string $documentUri = NULL): static {}
+   /**
+    * Creates an XMLReader from an XML string (PHP 8 >= 8.4.0)
+    */
+   public static function fromString(string $source, ?string $encoding = NULL, int $flags = 0): static {}
+   /**
+    * Creates an XMLReader from a URI to read from (PHP 8 >= 8.4.0)
+    */
+   public static function fromUri(string $uri, ?string $encoding = NULL, int $flags = 0): static {}
+   /**
+    * Get the value of a named attribute
+    */
+   public function getAttribute(string $name): ?string {}
+   /**
+    * Get the value of an attribute by index
+    */
+   public function getAttributeNo(int $index): ?string {}
+   /**
+    * Get the value of an attribute by localname and URI
+    */
+   public function getAttributeNs(string $name, string $namespace): ?string {}
+   /**
+    * Indicates if specified property has been set
+    */
+   public function getParserProperty(int $property): bool {}
+   /**
+    * Indicates if the parsed document is valid
+    */
+   public function isValid(): bool {}
+   /**
+    * Lookup namespace for a prefix
+    */
+   public function lookupNamespace(string $prefix): ?string {}
+   /**
+    * Move cursor to a named attribute
+    */
+   public function moveToAttribute(string $name): bool {}
+   /**
+    * Move cursor to an attribute by index
+    */
+   public function moveToAttributeNo(int $index): bool {}
+   /**
+    * Move cursor to a named attribute
+    */
+   public function moveToAttributeNs(string $name, string $namespace): bool {}
+   /**
+    * Position cursor on the parent Element of current Attribute
+    */
+   public function moveToElement(): bool {}
+   /**
+    * Position cursor on the first Attribute
+    */
+   public function moveToFirstAttribute(): bool {}
+   /**
+    * Position cursor on the next Attribute
+    */
+   public function moveToNextAttribute(): bool {}
+   /**
+    * Move cursor to next node skipping all subtrees
+    */
+   public function next(?string $name = NULL): bool {}
+   /**
+    * Set the URI containing the XML to parse
+    */
+   public static function open(string $uri, ?string $encoding = NULL, int $flags = 0) {}
+   /**
+    * Move to next node in document
+    */
+   public function read(): bool {}
+   /**
+    * Retrieve XML from current node
+    */
+   public function readInnerXml(): string {}
+   /**
+    * Retrieve XML from current node, including itself
+    */
+   public function readOuterXml(): string {}
+   /**
+    * Reads the contents of the current node as a string
+    */
+   public function readString(): string {}
+   /**
+    * Set parser options
+    */
+   public function setParserProperty(int $property, bool $value): bool {}
+   /**
+    * Set the filename or URI for a RelaxNG Schema
+    */
+   public function setRelaxNGSchema(?string $filename): bool {}
+   /**
+    * Set the data containing a RelaxNG Schema
+    */
+   public function setRelaxNGSchemaSource(?string $source): bool {}
+   /**
+    * Validate document against XSD
+    */
+   public function setSchema(?string $filename): bool {}
 }
 
 /**
  * The XMLWriter class
  */
- class XMLWriter {
-    /**
-     * End attribute
-     */
-     public function endAttribute(): bool {}
-    /**
-     * End current CDATA
-     */
-     public function endCdata(): bool {}
-    /**
-     * Create end comment
-     */
-     public function endComment(): bool {}
-    /**
-     * End current document
-     */
-     public function endDocument(): bool {}
-    /**
-     * End current DTD
-     */
-     public function endDtd(): bool {}
-    /**
-     * End current DTD AttList
-     */
-     public function endDtdAttlist(): bool {}
-    /**
-     * End current DTD element
-     */
-     public function endDtdElement(): bool {}
-    /**
-     * End current DTD Entity
-     */
-     public function endDtdEntity(): bool {}
-    /**
-     * End current element
-     */
-     public function endElement(): bool {}
-    /**
-     * End current PI
-     */
-     public function endPi(): bool {}
-    /**
-     * Flush current buffer
-     */
-     public function flush(bool $empty = true): string|int {}
-    /**
-     * End current element
-     */
-     public function fullEndElement(): bool {}
-    /**
-     * Create new xmlwriter using memory for string output
-     */
-     public function openMemory(): bool {}
-    /**
-     * Create new xmlwriter using source uri for output
-     */
-     public function openUri(string $uri): bool {}
-    /**
-     * Returns current buffer
-     */
-     public function outputMemory(bool $flush = true): string {}
-    /**
-     * Toggle indentation on/off
-     */
-     public function setIndent(bool $enable): bool {}
-    /**
-     * Set string used for indenting
-     */
-     public function setIndentString(string $indentation): bool {}
-    /**
-     * Create start attribute
-     */
-     public function startAttribute(string $name): bool {}
-    /**
-     * Create start namespaced attribute
-     */
-     public function startAttributeNs(?string $prefix, string $name, ?string $namespace): bool {}
-    /**
-     * Create start CDATA tag
-     */
-     public function startCdata(): bool {}
-    /**
-     * Create start comment
-     */
-     public function startComment(): bool {}
-    /**
-     * Create document tag
-     */
-     public function startDocument(?string $version = "1.0", ?string $encoding = NULL, ?string $standalone = NULL): bool {}
-    /**
-     * Create start DTD tag
-     */
-     public function startDtd(string $qualifiedName, ?string $publicId = NULL, ?string $systemId = NULL): bool {}
-    /**
-     * Create start DTD AttList
-     */
-     public function startDtdAttlist(string $name): bool {}
-    /**
-     * Create start DTD element
-     */
-     public function startDtdElement(string $qualifiedName): bool {}
-    /**
-     * Create start DTD Entity
-     */
-     public function startDtdEntity(string $name, bool $isParam): bool {}
-    /**
-     * Create start element tag
-     */
-     public function startElement(string $name): bool {}
-    /**
-     * Create start namespaced element tag
-     */
-     public function startElementNs(?string $prefix, string $name, ?string $namespace): bool {}
-    /**
-     * Create start PI tag
-     */
-     public function startPi(string $target): bool {}
-    /**
-     * Write text
-     */
-     public function text(string $content): bool {}
-    /**
-     * Create new XMLWriter using memory for string output (PHP 8 >= 8.4.0)
-     */
-     public static function toMemory(): static {}
-    /**
-     * Create new XMLWriter using a stream for output (PHP 8 >= 8.4.0)
-     */
-     public static function toStream(mixed $stream): static {}
-    /**
-     * Create new XMLWriter using a URI for output (PHP 8 >= 8.4.0)
-     */
-     public static function toUri(string $uri): static {}
-    /**
-     * Write full attribute
-     */
-     public function writeAttribute(string $name, string $value): bool {}
-    /**
-     * Write full namespaced attribute
-     */
-     public function writeAttributeNs(?string $prefix, string $name, ?string $namespace, string $value): bool {}
-    /**
-     * Write full CDATA tag
-     */
-     public function writeCdata(string $content): bool {}
-    /**
-     * Write full comment tag
-     */
-     public function writeComment(string $content): bool {}
-    /**
-     * Write full DTD tag
-     */
-     public function writeDtd(string $name, ?string $publicId = NULL, ?string $systemId = NULL, ?string $content = NULL): bool {}
-    /**
-     * Write full DTD AttList tag
-     */
-     public function writeDtdAttlist(string $name, string $content): bool {}
-    /**
-     * Write full DTD element tag
-     */
-     public function writeDtdElement(string $name, string $content): bool {}
-    /**
-     * Write full DTD Entity tag
-     */
-     public function writeDtdEntity(string $name, string $content, bool $isParam = false, ?string $publicId = NULL, ?string $systemId = NULL, ?string $notationData = NULL): bool {}
-    /**
-     * Write full element tag
-     */
-     public function writeElement(string $name, ?string $content = NULL): bool {}
-    /**
-     * Write full namespaced element tag
-     */
-     public function writeElementNs(?string $prefix, string $name, ?string $namespace, ?string $content = NULL): bool {}
-    /**
-     * Writes a PI
-     */
-     public function writePi(string $target, string $content): bool {}
-    /**
-     * Write a raw XML text
-     */
-     public function writeRaw(string $content): bool {}
+class XMLWriter
+{
+   /**
+    * End attribute
+    */
+   public function endAttribute(): bool {}
+   /**
+    * End current CDATA
+    */
+   public function endCdata(): bool {}
+   /**
+    * Create end comment
+    */
+   public function endComment(): bool {}
+   /**
+    * End current document
+    */
+   public function endDocument(): bool {}
+   /**
+    * End current DTD
+    */
+   public function endDtd(): bool {}
+   /**
+    * End current DTD AttList
+    */
+   public function endDtdAttlist(): bool {}
+   /**
+    * End current DTD element
+    */
+   public function endDtdElement(): bool {}
+   /**
+    * End current DTD Entity
+    */
+   public function endDtdEntity(): bool {}
+   /**
+    * End current element
+    */
+   public function endElement(): bool {}
+   /**
+    * End current PI
+    */
+   public function endPi(): bool {}
+   /**
+    * Flush current buffer
+    */
+   public function flush(bool $empty = true): string|int {}
+   /**
+    * End current element
+    */
+   public function fullEndElement(): bool {}
+   /**
+    * Create new xmlwriter using memory for string output
+    */
+   public function openMemory(): bool {}
+   /**
+    * Create new xmlwriter using source uri for output
+    */
+   public function openUri(string $uri): bool {}
+   /**
+    * Returns current buffer
+    */
+   public function outputMemory(bool $flush = true): string {}
+   /**
+    * Toggle indentation on/off
+    */
+   public function setIndent(bool $enable): bool {}
+   /**
+    * Set string used for indenting
+    */
+   public function setIndentString(string $indentation): bool {}
+   /**
+    * Create start attribute
+    */
+   public function startAttribute(string $name): bool {}
+   /**
+    * Create start namespaced attribute
+    */
+   public function startAttributeNs(?string $prefix, string $name, ?string $namespace): bool {}
+   /**
+    * Create start CDATA tag
+    */
+   public function startCdata(): bool {}
+   /**
+    * Create start comment
+    */
+   public function startComment(): bool {}
+   /**
+    * Create document tag
+    */
+   public function startDocument(?string $version = "1.0", ?string $encoding = NULL, ?string $standalone = NULL): bool {}
+   /**
+    * Create start DTD tag
+    */
+   public function startDtd(string $qualifiedName, ?string $publicId = NULL, ?string $systemId = NULL): bool {}
+   /**
+    * Create start DTD AttList
+    */
+   public function startDtdAttlist(string $name): bool {}
+   /**
+    * Create start DTD element
+    */
+   public function startDtdElement(string $qualifiedName): bool {}
+   /**
+    * Create start DTD Entity
+    */
+   public function startDtdEntity(string $name, bool $isParam): bool {}
+   /**
+    * Create start element tag
+    */
+   public function startElement(string $name): bool {}
+   /**
+    * Create start namespaced element tag
+    */
+   public function startElementNs(?string $prefix, string $name, ?string $namespace): bool {}
+   /**
+    * Create start PI tag
+    */
+   public function startPi(string $target): bool {}
+   /**
+    * Write text
+    */
+   public function text(string $content): bool {}
+   /**
+    * Create new XMLWriter using memory for string output (PHP 8 >= 8.4.0)
+    */
+   public static function toMemory(): static {}
+   /**
+    * Create new XMLWriter using a stream for output (PHP 8 >= 8.4.0)
+    */
+   public static function toStream(mixed $stream): static {}
+   /**
+    * Create new XMLWriter using a URI for output (PHP 8 >= 8.4.0)
+    */
+   public static function toUri(string $uri): static {}
+   /**
+    * Write full attribute
+    */
+   public function writeAttribute(string $name, string $value): bool {}
+   /**
+    * Write full namespaced attribute
+    */
+   public function writeAttributeNs(?string $prefix, string $name, ?string $namespace, string $value): bool {}
+   /**
+    * Write full CDATA tag
+    */
+   public function writeCdata(string $content): bool {}
+   /**
+    * Write full comment tag
+    */
+   public function writeComment(string $content): bool {}
+   /**
+    * Write full DTD tag
+    */
+   public function writeDtd(string $name, ?string $publicId = NULL, ?string $systemId = NULL, ?string $content = NULL): bool {}
+   /**
+    * Write full DTD AttList tag
+    */
+   public function writeDtdAttlist(string $name, string $content): bool {}
+   /**
+    * Write full DTD element tag
+    */
+   public function writeDtdElement(string $name, string $content): bool {}
+   /**
+    * Write full DTD Entity tag
+    */
+   public function writeDtdEntity(string $name, string $content, bool $isParam = false, ?string $publicId = NULL, ?string $systemId = NULL, ?string $notationData = NULL): bool {}
+   /**
+    * Write full element tag
+    */
+   public function writeElement(string $name, ?string $content = NULL): bool {}
+   /**
+    * Write full namespaced element tag
+    */
+   public function writeElementNs(?string $prefix, string $name, ?string $namespace, ?string $content = NULL): bool {}
+   /**
+    * Writes a PI
+    */
+   public function writePi(string $target, string $content): bool {}
+   /**
+    * Write a raw XML text
+    */
+   public function writeRaw(string $content): bool {}
 }
 
 /**
  * The XSLTProcessor class
  */
- class XSLTProcessor {
-    public bool $cloneDocument;
-    public bool $doXInclude;
-    public int $maxTemplateDepth;
-    public int $maxTemplateVars;
-    /**
-     * Get value of a parameter
-     */
-     public function getParameter(string $namespace, string $name): string|false {}
-    /**
-     * Get security preferences
-     */
-     public function getSecurityPrefs(): int {}
-    /**
-     * Determine if PHP has EXSLT support
-     */
-     public function hasExsltSupport(): bool {}
-    /**
-     * Import stylesheet
-     */
-     public function importStylesheet(object $stylesheet): bool {}
-    /**
-     * Register a PHP function as namespaced XSLT function
-     */
-     public function registerPHPFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
-    /**
-     * Enables the ability to use PHP functions as XSLT functions
-     */
-     public function registerPHPFunctions(array|string|null $functions = NULL): void {}
-    /**
-     * Remove parameter
-     */
-     public function removeParameter(string $namespace, string $name): bool {}
-    /**
-     * Set value for a parameter
-     */
-     public function setParameter(string $namespace, array|string $name, ?string $value = NULL): bool {}
-    /**
-     * Sets profiling output file
-     */
-     public function setProfiling(?string $filename): true {}
-    /**
-     * Set security preferences
-     */
-     public function setSecurityPrefs(int $preferences): int {}
-    /**
-     * Transform to a document
-     */
-     public function transformToDoc(object $document, ?string $returnClass = NULL): object|false {}
-    /**
-     * Transform to URI
-     */
-     public function transformToUri(object $document, string $uri): int {}
-    /**
-     * Transform to XML
-     */
-     public function transformToXml(object $document): string|false|null {}
+class XSLTProcessor
+{
+   public bool $cloneDocument;
+   public bool $doXInclude;
+   public int $maxTemplateDepth;
+   public int $maxTemplateVars;
+   /**
+    * Get value of a parameter
+    */
+   public function getParameter(string $namespace, string $name): string|false {}
+   /**
+    * Get security preferences
+    */
+   public function getSecurityPrefs(): int {}
+   /**
+    * Determine if PHP has EXSLT support
+    */
+   public function hasExsltSupport(): bool {}
+   /**
+    * Import stylesheet
+    */
+   public function importStylesheet(object $stylesheet): bool {}
+   /**
+    * Register a PHP function as namespaced XSLT function
+    */
+   public function registerPHPFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
+   /**
+    * Enables the ability to use PHP functions as XSLT functions
+    */
+   public function registerPHPFunctions(array|string|null $functions = NULL): void {}
+   /**
+    * Remove parameter
+    */
+   public function removeParameter(string $namespace, string $name): bool {}
+   /**
+    * Set value for a parameter
+    */
+   public function setParameter(string $namespace, array|string $name, ?string $value = NULL): bool {}
+   /**
+    * Sets profiling output file
+    */
+   public function setProfiling(?string $filename): true {}
+   /**
+    * Set security preferences
+    */
+   public function setSecurityPrefs(int $preferences): int {}
+   /**
+    * Transform to a document
+    */
+   public function transformToDoc(object $document, ?string $returnClass = NULL): object|false {}
+   /**
+    * Transform to URI
+    */
+   public function transformToUri(object $document, string $uri): int {}
+   /**
+    * Transform to XML
+    */
+   public function transformToXml(object $document): string|false|null {}
 }
 
 /**
  * ZipArchive 类
  */
- class ZipArchive implements \Countable {
-    public const AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE = 16;
-    public const AFL_IS_TORRENTZIP = 4;
-    public const AFL_RDONLY = 2;
-    public const AFL_WANT_TORRENTZIP = 8;
-    public const CHECKCONS = 4;
-    public const CM_BZIP2 = 12;
-    public const CM_DEFAULT = -1;
-    public const CM_DEFLATE = 8;
-    public const CM_DEFLATE64 = 9;
-    public const CM_IMPLODE = 6;
-    public const CM_LZ77 = 19;
-    public const CM_LZMA = 14;
-    public const CM_LZMA2 = 33;
-    public const CM_PKWARE_IMPLODE = 10;
-    public const CM_PPMD = 98;
-    public const CM_REDUCE_1 = 2;
-    public const CM_REDUCE_2 = 3;
-    public const CM_REDUCE_3 = 4;
-    public const CM_REDUCE_4 = 5;
-    public const CM_SHRINK = 1;
-    public const CM_STORE = 0;
-    public const CM_TERSE = 18;
-    public const CM_WAVPACK = 97;
-    public const CM_XZ = 95;
-    public const CM_ZSTD = 93;
-    public const CREATE = 1;
-    public const EM_AES_128 = 257;
-    public const EM_AES_192 = 258;
-    public const EM_AES_256 = 259;
-    public const EM_NONE = 0;
-    public const EM_TRAD_PKWARE = 1;
-    public const EM_UNKNOWN = 65535;
-    public const ER_CANCELLED = 32;
-    public const ER_CHANGED = 15;
-    public const ER_CLOSE = 3;
-    public const ER_COMPNOTSUPP = 16;
-    public const ER_COMPRESSED_DATA = 31;
-    public const ER_CRC = 7;
-    public const ER_DATA_LENGTH = 33;
-    public const ER_DELETED = 23;
-    public const ER_ENCRNOTSUPP = 24;
-    public const ER_EOF = 17;
-    public const ER_EXISTS = 10;
-    public const ER_INCONS = 21;
-    public const ER_INTERNAL = 20;
-    public const ER_INUSE = 29;
-    public const ER_INVAL = 18;
-    public const ER_MEMORY = 14;
-    public const ER_MULTIDISK = 1;
-    public const ER_NOENT = 9;
-    public const ER_NOPASSWD = 26;
-    public const ER_NOT_ALLOWED = 34;
-    public const ER_NOZIP = 19;
-    public const ER_OK = 0;
-    public const ER_OPEN = 11;
-    public const ER_OPNOTSUPP = 28;
-    public const ER_RDONLY = 25;
-    public const ER_READ = 5;
-    public const ER_REMOVE = 22;
-    public const ER_RENAME = 2;
-    public const ER_SEEK = 4;
-    public const ER_TELL = 30;
-    public const ER_TMPOPEN = 12;
-    public const ER_TRUNCATED_ZIP = 35;
-    public const ER_WRITE = 6;
-    public const ER_WRONGPASSWD = 27;
-    public const ER_ZIPCLOSED = 8;
-    public const ER_ZLIB = 13;
-    public const EXCL = 2;
-    public const FL_CENTRAL = 512;
-    public const FL_COMPRESSED = 4;
-    public const FL_ENCRYPTED = 32;
-    public const FL_ENC_CP437 = 4096;
-    public const FL_ENC_GUESS = 0;
-    public const FL_ENC_RAW = 64;
-    public const FL_ENC_STRICT = 128;
-    public const FL_ENC_UTF_8 = 2048;
-    public const FL_LOCAL = 256;
-    public const FL_NOCASE = 1;
-    public const FL_NODIR = 2;
-    public const FL_OPEN_FILE_NOW = 1073741824;
-    public const FL_OVERWRITE = 8192;
-    public const FL_RECOMPRESS = 16;
-    public const FL_UNCHANGED = 8;
-    public const LENGTH_TO_END = 0;
-    public const LENGTH_UNCHECKED = -2;
-    public const LIBZIP_VERSION = "1.12";
-    public const OPSYS_ACORN_RISC = 13;
-    public const OPSYS_ALTERNATE_MVS = 15;
-    public const OPSYS_AMIGA = 1;
-    public const OPSYS_ATARI_ST = 5;
-    public const OPSYS_BEOS = 16;
-    public const OPSYS_CPM = 9;
-    public const OPSYS_DEFAULT = 3;
-    public const OPSYS_DOS = 0;
-    public const OPSYS_MACINTOSH = 7;
-    public const OPSYS_MVS = 11;
-    public const OPSYS_OPENVMS = 2;
-    public const OPSYS_OS_2 = 6;
-    public const OPSYS_OS_400 = 18;
-    public const OPSYS_OS_X = 19;
-    public const OPSYS_TANDEM = 17;
-    public const OPSYS_UNIX = 3;
-    public const OPSYS_VFAT = 14;
-    public const OPSYS_VM_CMS = 4;
-    public const OPSYS_VSE = 12;
-    public const OPSYS_WINDOWS_NTFS = 10;
-    public const OPSYS_Z_SYSTEM = 8;
-    public const OVERWRITE = 8;
-    public const RDONLY = 16;
-    public string $comment;
-    public string $filename;
-    public int $lastId;
-    public int $numFiles;
-    public int $status;
-    public int $statusSys;
-    /**
-     * Add a new directory
-     */
-     public function addEmptyDir(string $dirname, int $flags = 0): bool {}
-    /**
-     * Adds a file to a ZIP archive from the given path
-     */
-     public function addFile(string $filepath, string $entryname = "", int $start = 0, int $length = ZipArchive::LENGTH_TO_END, int $flags = ZipArchive::FL_OVERWRITE): bool {}
-    /**
-     * Add a file to a ZIP archive using its contents
-     */
-     public function addFromString(string $name, string $content, int $flags = ZipArchive::FL_OVERWRITE): bool {}
-    /**
-     * Add files from a directory by glob pattern
-     */
-     public function addGlob(string $pattern, int $flags = 0, array $options = []): array|false {}
-    /**
-     * Add files from a directory by PCRE pattern
-     */
-     public function addPattern(string $pattern, string $path = ".", array $options = []): array|false {}
-    /**
-     * 清除状态错误消息、系统和/或 zip 消息 (PHP 8 >= 8.2.0, PECL zip >= 1.20.0)
-     */
-     public function clearError(): void {}
-    /**
-     * Close the active archive (opened or newly created)
-     */
-     public function close(): bool {}
-    /**
-     * Counts the number of files in the archive
-     */
-     public function count(): int {}
-    /**
-     * Delete an entry in the archive using its index
-     */
-     public function deleteIndex(int $index): bool {}
-    /**
-     * Delete an entry in the archive using its name
-     */
-     public function deleteName(string $name): bool {}
-    /**
-     * 解压缩文件
-     */
-     public function extractTo(string $pathto, array|string|null $files = NULL): bool {}
-    /**
-     * Returns the Zip archive comment
-     */
-     public function getArchiveComment(int $flags = 0): string|false {}
-    /**
-     * 返回 Zip 归档全局 flag 的值
-     */
-     public function getArchiveFlag(int $flag, int $flags = 0): int {}
-    /**
-     * Returns the comment of an entry using the entry index
-     */
-     public function getCommentIndex(int $index, int $flags = 0): string|false {}
-    /**
-     * Returns the comment of an entry using the entry name
-     */
-     public function getCommentName(string $name, int $flags = 0): string|false {}
-    /**
-     * Retrieve the external attributes of an entry defined by its index
-     */
-     public function getExternalAttributesIndex(int $index, mixed &$opsys, mixed &$attr, int $flags = 0): bool {}
-    /**
-     * Retrieve the external attributes of an entry defined by its name
-     */
-     public function getExternalAttributesName(string $name, mixed &$opsys, mixed &$attr, int $flags = 0): bool {}
-    /**
-     * Returns the entry contents using its index
-     */
-     public function getFromIndex(int $index, int $len = 0, int $flags = 0): string|false {}
-    /**
-     * Returns the entry contents using its name
-     */
-     public function getFromName(string $name, int $len = 0, int $flags = 0): string|false {}
-    /**
-     * Returns the name of an entry using its index
-     */
-     public function getNameIndex(int $index, int $flags = 0): string|false {}
-    /**
-     * Returns the status error message, system and/or zip messages
-     */
-     public function getStatusString(): string {}
-    /**
-     * Get a file handler to the entry defined by its name (read only)
-     */
-     public function getStream(string $name) {}
-    /**
-     * Get a file handler to the entry defined by its index (read only) (PHP 8 >= 8.2.0, PECL zip >= 1.20.0)
-     */
-     public function getStreamIndex(int $index, int $flags = 0) {}
-    /**
-     * Get a file handler to the entry defined by its name (read only) (PHP 8 >= 8.2.0, PECL zip >= 1.20.0)
-     */
-     public function getStreamName(string $name, int $flags = 0) {}
-    public static function isCompressionMethodSupported(int $method, bool $enc = true): bool {}
-    public static function isEncryptionMethodSupported(int $method, bool $enc = true): bool {}
-    /**
-     * Returns the index of the entry in the archive
-     */
-     public function locateName(string $name, int $flags = 0): int|false {}
-    /**
-     * Open a ZIP file archive
-     */
-     public function open(string $filename, int $flags = 0): int|bool {}
-    /**
-     * Register a callback to allow cancellation during archive close.
-     */
-     public function registerCancelCallback(callable $callback): bool {}
-    /**
-     * Register a callback to provide updates during archive close.
-     */
-     public function registerProgressCallback(float $rate, callable $callback): bool {}
-    /**
-     * Renames an entry defined by its index
-     */
-     public function renameIndex(int $index, string $new_name): bool {}
-    /**
-     * Renames an entry defined by its name
-     */
-     public function renameName(string $name, string $new_name): bool {}
-    /**
-     * Replace file in ZIP archive with a given path
-     */
-     public function replaceFile(string $filepath, int $index, int $start = 0, int $length = ZipArchive::LENGTH_TO_END, int $flags = 0): bool {}
-    /**
-     * Set the comment of a ZIP archive
-     */
-     public function setArchiveComment(string $comment): bool {}
-    /**
-     * 设置 ZIP 归档的全局 flag
-     */
-     public function setArchiveFlag(int $flag, int $value): bool {}
-    /**
-     * Set the comment of an entry defined by its index
-     */
-     public function setCommentIndex(int $index, string $comment): bool {}
-    /**
-     * Set the comment of an entry defined by its name
-     */
-     public function setCommentName(string $name, string $comment): bool {}
-    /**
-     * Set the compression method of an entry defined by its index
-     */
-     public function setCompressionIndex(int $index, int $method, int $compflags = 0): bool {}
-    /**
-     * Set the compression method of an entry defined by its name
-     */
-     public function setCompressionName(string $name, int $method, int $compflags = 0): bool {}
-    /**
-     * Set the encryption method of an entry defined by its index
-     */
-     public function setEncryptionIndex(int $index, int $method, ?string $password = NULL): bool {}
-    /**
-     * Set the encryption method of an entry defined by its name
-     */
-     public function setEncryptionName(string $name, int $method, ?string $password = NULL): bool {}
-    /**
-     * Set the external attributes of an entry defined by its index
-     */
-     public function setExternalAttributesIndex(int $index, int $opsys, int $attr, int $flags = 0): bool {}
-    /**
-     * Set the external attributes of an entry defined by its name
-     */
-     public function setExternalAttributesName(string $name, int $opsys, int $attr, int $flags = 0): bool {}
-    /**
-     * Set the modification time of an entry defined by its index
-     */
-     public function setMtimeIndex(int $index, int $timestamp, int $flags = 0): bool {}
-    /**
-     * Set the modification time of an entry defined by its name
-     */
-     public function setMtimeName(string $name, int $timestamp, int $flags = 0): bool {}
-    /**
-     * Set the password for the active archive
-     */
-     public function setPassword(string $password): bool {}
-    /**
-     * Get the details of an entry defined by its index
-     */
-     public function statIndex(int $index, int $flags = 0): array|false {}
-    /**
-     * Get the details of an entry defined by its name
-     */
-     public function statName(string $name, int $flags = 0): array|false {}
-    /**
-     * Undo all changes done in the archive
-     */
-     public function unchangeAll(): bool {}
-    /**
-     * Revert all global changes done in the archive
-     */
-     public function unchangeArchive(): bool {}
-    /**
-     * Revert all changes done to an entry at the given index
-     */
-     public function unchangeIndex(int $index): bool {}
-    /**
-     * Revert all changes done to an entry with the given name
-     */
-     public function unchangeName(string $name): bool {}
+class ZipArchive implements \Countable
+{
+   public const AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE = 16;
+   public const AFL_IS_TORRENTZIP = 4;
+   public const AFL_RDONLY = 2;
+   public const AFL_WANT_TORRENTZIP = 8;
+   public const CHECKCONS = 4;
+   public const CM_BZIP2 = 12;
+   public const CM_DEFAULT = -1;
+   public const CM_DEFLATE = 8;
+   public const CM_DEFLATE64 = 9;
+   public const CM_IMPLODE = 6;
+   public const CM_LZ77 = 19;
+   public const CM_LZMA = 14;
+   public const CM_LZMA2 = 33;
+   public const CM_PKWARE_IMPLODE = 10;
+   public const CM_PPMD = 98;
+   public const CM_REDUCE_1 = 2;
+   public const CM_REDUCE_2 = 3;
+   public const CM_REDUCE_3 = 4;
+   public const CM_REDUCE_4 = 5;
+   public const CM_SHRINK = 1;
+   public const CM_STORE = 0;
+   public const CM_TERSE = 18;
+   public const CM_WAVPACK = 97;
+   public const CM_XZ = 95;
+   public const CM_ZSTD = 93;
+   public const CREATE = 1;
+   public const EM_AES_128 = 257;
+   public const EM_AES_192 = 258;
+   public const EM_AES_256 = 259;
+   public const EM_NONE = 0;
+   public const EM_TRAD_PKWARE = 1;
+   public const EM_UNKNOWN = 65535;
+   public const ER_CANCELLED = 32;
+   public const ER_CHANGED = 15;
+   public const ER_CLOSE = 3;
+   public const ER_COMPNOTSUPP = 16;
+   public const ER_COMPRESSED_DATA = 31;
+   public const ER_CRC = 7;
+   public const ER_DATA_LENGTH = 33;
+   public const ER_DELETED = 23;
+   public const ER_ENCRNOTSUPP = 24;
+   public const ER_EOF = 17;
+   public const ER_EXISTS = 10;
+   public const ER_INCONS = 21;
+   public const ER_INTERNAL = 20;
+   public const ER_INUSE = 29;
+   public const ER_INVAL = 18;
+   public const ER_MEMORY = 14;
+   public const ER_MULTIDISK = 1;
+   public const ER_NOENT = 9;
+   public const ER_NOPASSWD = 26;
+   public const ER_NOT_ALLOWED = 34;
+   public const ER_NOZIP = 19;
+   public const ER_OK = 0;
+   public const ER_OPEN = 11;
+   public const ER_OPNOTSUPP = 28;
+   public const ER_RDONLY = 25;
+   public const ER_READ = 5;
+   public const ER_REMOVE = 22;
+   public const ER_RENAME = 2;
+   public const ER_SEEK = 4;
+   public const ER_TELL = 30;
+   public const ER_TMPOPEN = 12;
+   public const ER_TRUNCATED_ZIP = 35;
+   public const ER_WRITE = 6;
+   public const ER_WRONGPASSWD = 27;
+   public const ER_ZIPCLOSED = 8;
+   public const ER_ZLIB = 13;
+   public const EXCL = 2;
+   public const FL_CENTRAL = 512;
+   public const FL_COMPRESSED = 4;
+   public const FL_ENCRYPTED = 32;
+   public const FL_ENC_CP437 = 4096;
+   public const FL_ENC_GUESS = 0;
+   public const FL_ENC_RAW = 64;
+   public const FL_ENC_STRICT = 128;
+   public const FL_ENC_UTF_8 = 2048;
+   public const FL_LOCAL = 256;
+   public const FL_NOCASE = 1;
+   public const FL_NODIR = 2;
+   public const FL_OPEN_FILE_NOW = 1073741824;
+   public const FL_OVERWRITE = 8192;
+   public const FL_RECOMPRESS = 16;
+   public const FL_UNCHANGED = 8;
+   public const LENGTH_TO_END = 0;
+   public const LENGTH_UNCHECKED = -2;
+   public const LIBZIP_VERSION = "1.12";
+   public const OPSYS_ACORN_RISC = 13;
+   public const OPSYS_ALTERNATE_MVS = 15;
+   public const OPSYS_AMIGA = 1;
+   public const OPSYS_ATARI_ST = 5;
+   public const OPSYS_BEOS = 16;
+   public const OPSYS_CPM = 9;
+   public const OPSYS_DEFAULT = 3;
+   public const OPSYS_DOS = 0;
+   public const OPSYS_MACINTOSH = 7;
+   public const OPSYS_MVS = 11;
+   public const OPSYS_OPENVMS = 2;
+   public const OPSYS_OS_2 = 6;
+   public const OPSYS_OS_400 = 18;
+   public const OPSYS_OS_X = 19;
+   public const OPSYS_TANDEM = 17;
+   public const OPSYS_UNIX = 3;
+   public const OPSYS_VFAT = 14;
+   public const OPSYS_VM_CMS = 4;
+   public const OPSYS_VSE = 12;
+   public const OPSYS_WINDOWS_NTFS = 10;
+   public const OPSYS_Z_SYSTEM = 8;
+   public const OVERWRITE = 8;
+   public const RDONLY = 16;
+   public string $comment;
+   public string $filename;
+   public int $lastId;
+   public int $numFiles;
+   public int $status;
+   public int $statusSys;
+   /**
+    * Add a new directory
+    */
+   public function addEmptyDir(string $dirname, int $flags = 0): bool {}
+   /**
+    * Adds a file to a ZIP archive from the given path
+    */
+   public function addFile(string $filepath, string $entryname = "", int $start = 0, int $length = ZipArchive::LENGTH_TO_END, int $flags = ZipArchive::FL_OVERWRITE): bool {}
+   /**
+    * Add a file to a ZIP archive using its contents
+    */
+   public function addFromString(string $name, string $content, int $flags = ZipArchive::FL_OVERWRITE): bool {}
+   /**
+    * Add files from a directory by glob pattern
+    */
+   public function addGlob(string $pattern, int $flags = 0, array $options = []): array|false {}
+   /**
+    * Add files from a directory by PCRE pattern
+    */
+   public function addPattern(string $pattern, string $path = ".", array $options = []): array|false {}
+   /**
+    * 清除状态错误消息、系统和/或 zip 消息 (PHP 8 >= 8.2.0, PECL zip >= 1.20.0)
+    */
+   public function clearError(): void {}
+   /**
+    * Close the active archive (opened or newly created)
+    */
+   public function close(): bool {}
+   /**
+    * Counts the number of files in the archive
+    */
+   public function count(): int {}
+   /**
+    * Delete an entry in the archive using its index
+    */
+   public function deleteIndex(int $index): bool {}
+   /**
+    * Delete an entry in the archive using its name
+    */
+   public function deleteName(string $name): bool {}
+   /**
+    * 解压缩文件
+    */
+   public function extractTo(string $pathto, array|string|null $files = NULL): bool {}
+   /**
+    * Returns the Zip archive comment
+    */
+   public function getArchiveComment(int $flags = 0): string|false {}
+   /**
+    * 返回 Zip 归档全局 flag 的值
+    */
+   public function getArchiveFlag(int $flag, int $flags = 0): int {}
+   /**
+    * Returns the comment of an entry using the entry index
+    */
+   public function getCommentIndex(int $index, int $flags = 0): string|false {}
+   /**
+    * Returns the comment of an entry using the entry name
+    */
+   public function getCommentName(string $name, int $flags = 0): string|false {}
+   /**
+    * Retrieve the external attributes of an entry defined by its index
+    */
+   public function getExternalAttributesIndex(int $index, mixed &$opsys, mixed &$attr, int $flags = 0): bool {}
+   /**
+    * Retrieve the external attributes of an entry defined by its name
+    */
+   public function getExternalAttributesName(string $name, mixed &$opsys, mixed &$attr, int $flags = 0): bool {}
+   /**
+    * Returns the entry contents using its index
+    */
+   public function getFromIndex(int $index, int $len = 0, int $flags = 0): string|false {}
+   /**
+    * Returns the entry contents using its name
+    */
+   public function getFromName(string $name, int $len = 0, int $flags = 0): string|false {}
+   /**
+    * Returns the name of an entry using its index
+    */
+   public function getNameIndex(int $index, int $flags = 0): string|false {}
+   /**
+    * Returns the status error message, system and/or zip messages
+    */
+   public function getStatusString(): string {}
+   /**
+    * Get a file handler to the entry defined by its name (read only)
+    */
+   public function getStream(string $name) {}
+   /**
+    * Get a file handler to the entry defined by its index (read only) (PHP 8 >= 8.2.0, PECL zip >= 1.20.0)
+    */
+   public function getStreamIndex(int $index, int $flags = 0) {}
+   /**
+    * Get a file handler to the entry defined by its name (read only) (PHP 8 >= 8.2.0, PECL zip >= 1.20.0)
+    */
+   public function getStreamName(string $name, int $flags = 0) {}
+   public static function isCompressionMethodSupported(int $method, bool $enc = true): bool {}
+   public static function isEncryptionMethodSupported(int $method, bool $enc = true): bool {}
+   /**
+    * Returns the index of the entry in the archive
+    */
+   public function locateName(string $name, int $flags = 0): int|false {}
+   /**
+    * Open a ZIP file archive
+    */
+   public function open(string $filename, int $flags = 0): int|bool {}
+   /**
+    * Register a callback to allow cancellation during archive close.
+    */
+   public function registerCancelCallback(callable $callback): bool {}
+   /**
+    * Register a callback to provide updates during archive close.
+    */
+   public function registerProgressCallback(float $rate, callable $callback): bool {}
+   /**
+    * Renames an entry defined by its index
+    */
+   public function renameIndex(int $index, string $new_name): bool {}
+   /**
+    * Renames an entry defined by its name
+    */
+   public function renameName(string $name, string $new_name): bool {}
+   /**
+    * Replace file in ZIP archive with a given path
+    */
+   public function replaceFile(string $filepath, int $index, int $start = 0, int $length = ZipArchive::LENGTH_TO_END, int $flags = 0): bool {}
+   /**
+    * Set the comment of a ZIP archive
+    */
+   public function setArchiveComment(string $comment): bool {}
+   /**
+    * 设置 ZIP 归档的全局 flag
+    */
+   public function setArchiveFlag(int $flag, int $value): bool {}
+   /**
+    * Set the comment of an entry defined by its index
+    */
+   public function setCommentIndex(int $index, string $comment): bool {}
+   /**
+    * Set the comment of an entry defined by its name
+    */
+   public function setCommentName(string $name, string $comment): bool {}
+   /**
+    * Set the compression method of an entry defined by its index
+    */
+   public function setCompressionIndex(int $index, int $method, int $compflags = 0): bool {}
+   /**
+    * Set the compression method of an entry defined by its name
+    */
+   public function setCompressionName(string $name, int $method, int $compflags = 0): bool {}
+   /**
+    * Set the encryption method of an entry defined by its index
+    */
+   public function setEncryptionIndex(int $index, int $method, ?string $password = NULL): bool {}
+   /**
+    * Set the encryption method of an entry defined by its name
+    */
+   public function setEncryptionName(string $name, int $method, ?string $password = NULL): bool {}
+   /**
+    * Set the external attributes of an entry defined by its index
+    */
+   public function setExternalAttributesIndex(int $index, int $opsys, int $attr, int $flags = 0): bool {}
+   /**
+    * Set the external attributes of an entry defined by its name
+    */
+   public function setExternalAttributesName(string $name, int $opsys, int $attr, int $flags = 0): bool {}
+   /**
+    * Set the modification time of an entry defined by its index
+    */
+   public function setMtimeIndex(int $index, int $timestamp, int $flags = 0): bool {}
+   /**
+    * Set the modification time of an entry defined by its name
+    */
+   public function setMtimeName(string $name, int $timestamp, int $flags = 0): bool {}
+   /**
+    * Set the password for the active archive
+    */
+   public function setPassword(string $password): bool {}
+   /**
+    * Get the details of an entry defined by its index
+    */
+   public function statIndex(int $index, int $flags = 0): array|false {}
+   /**
+    * Get the details of an entry defined by its name
+    */
+   public function statName(string $name, int $flags = 0): array|false {}
+   /**
+    * Undo all changes done in the archive
+    */
+   public function unchangeAll(): bool {}
+   /**
+    * Revert all global changes done in the archive
+    */
+   public function unchangeArchive(): bool {}
+   /**
+    * Revert all changes done to an entry at the given index
+    */
+   public function unchangeIndex(int $index): bool {}
+   /**
+    * Revert all changes done to an entry with the given name
+    */
+   public function unchangeName(string $name): bool {}
 }
 
-final class __PHP_Incomplete_Class {
-}
+final class __PHP_Incomplete_Class {}
 
 /**
  * finfo 类
  */
- class finfo {
-    /**
-     * 别名 finfo_open
-     */
-     public function __construct(int $flags = FILEINFO_NONE, ?string $magic_database = NULL) {}
-    /**
-     * 别名 finfo_buffer()
-     */
-     public function buffer(string $string, int $flags = FILEINFO_NONE, ?resource $context = NULL): string|false {}
-    /**
-     * 别名 finfo_file()
-     */
-     public function file(string $filename, int $flags = FILEINFO_NONE, ?resource $context = NULL): string|false {}
-    /**
-     * 别名 finfo_set_flags()
-     */
-     public function set_flags(int $flags): true {}
+class finfo
+{
+   /**
+    * 别名 finfo_open
+    */
+   public function __construct(int $flags = FILEINFO_NONE, ?string $magic_database = NULL) {}
+   /**
+    * 别名 finfo_buffer()
+    */
+   public function buffer(string $string, int $flags = FILEINFO_NONE, ?resource $context = NULL): string|false {}
+   /**
+    * 别名 finfo_file()
+    */
+   public function file(string $filename, int $flags = FILEINFO_NONE, ?resource $context = NULL): string|false {}
+   /**
+    * 别名 finfo_set_flags()
+    */
+   public function set_flags(int $flags): true {}
 }
 
 /**
  * mysqli 类
  */
- class mysqli {
-    public string|int $affected_rows;
-    public string $client_info;
-    public int $client_version;
-    public int $connect_errno;
-    public ?string $connect_error;
-    public int $errno;
-    public string $error;
-    public array $error_list;
-    public int $field_count;
-    public string $host_info;
-    public ?string $info;
-    public string|int $insert_id;
-    public int $protocol_version;
-    public string $server_info;
-    public int $server_version;
-    public string $sqlstate;
-    public int $thread_id;
-    public int $warning_count;
-    /**
-     * Open a new connection to the MySQL server
-     */
-     public function __construct(?string $hostname = NULL, ?string $username = NULL, ?string $password = NULL, ?string $database = NULL, ?int $port = NULL, ?string $socket = NULL) {}
-    /**
-     * 打开或关闭本次数据库连接的自动命令提交事务模式
-     */
-     public function autocommit(bool $enable): bool {}
-    /**
-     * Starts a transaction
-     */
-     public function begin_transaction(int $flags = 0, ?string $name = NULL): bool {}
-    /**
-     * Changes the user of the database connection
-     */
-     public function change_user(string $username, string $password, ?string $database): bool {}
-    /**
-     * 返回当前数据库连接的字符编码
-     */
-     public function character_set_name(): string {}
-    /**
-     * 关闭先前打开的数据库连接
-     */
-     public function close(): true {}
-    /**
-     * 提交当前事务
-     */
-     public function commit(int $flags = 0, ?string $name = NULL): bool {}
-    public function connect(?string $hostname = NULL, ?string $username = NULL, ?string $password = NULL, ?string $database = NULL, ?int $port = NULL, ?string $socket = NULL): bool {}
-    /**
-     * Performs debugging operations
-     */
-     public function debug(string $options): true {}
-    /**
-     * 将调试信息输出到日志
-     */
-     public function dump_debug_info(): bool {}
-    /**
-     * 别名 mysqli_real_escape_string
-     */
-     public function escape_string(string $string): string {}
-    /**
-     * Prepares, binds parameters, and executes SQL statement (PHP 8 >= 8.2.0)
-     */
-     public function execute_query(string $query, ?array $params = NULL): \mysqli_result|bool {}
-    /**
-     * Returns a character set object
-     */
-     public function get_charset(): ?object {}
-    /**
-     * 获取 MySQL 客户端信息
-     */
-     public function get_client_info(): string {}
-    /**
-     * 返回客户端连接的统计数据
-     */
-     public function get_connection_stats(): array {}
-    /**
-     * 返回 MySQL 服务器的版本号
-     */
-     public function get_server_info(): string {}
-    /**
-     * Get result of SHOW WARNINGS
-     */
-     public function get_warnings(): \mysqli_warning|false {}
-    /**
-     * 初始化 MySQLi 并返回用于 mysqli_real_connect() 的对象
-     */
-     public function init() {}
-    /**
-     * 让服务器杀死一个 MySQL 线程
-     */
-     public function kill(int $process_id): bool {}
-    /**
-     * 检查批量查询中是否还有查询结果
-     */
-     public function more_results(): bool {}
-    /**
-     * 在数据库上执行一个或多个查询
-     */
-     public function multi_query(string $query): bool {}
-    /**
-     * 为读取 multi_query 执行之后的下一个结果集做准备
-     */
-     public function next_result(): bool {}
-    /**
-     * 设置选项
-     */
-     public function options(int $option, mixed $value): bool {}
-    /**
-     * ping 一个连接，或者如果连接处于断开状态，重新连接
-     */
-     public function ping(): bool {}
-    /**
-     * 轮询连接
-     */
-     public static function poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
-    /**
-     * 预处理执行 SQL
-     */
-     public function prepare(string $query): \mysqli_stmt|false {}
-    /**
-     * 对数据库执行查询
-     */
-     public function query(string $query, int $result_mode = MYSQLI_STORE_RESULT): \mysqli_result|bool {}
-    /**
-     * 建立一个 MySQL 服务器连接
-     */
-     public function real_connect(?string $hostname = NULL, ?string $username = NULL, ?string $password = NULL, ?string $database = NULL, ?int $port = NULL, ?string $socket = NULL, int $flags = 0): bool {}
-    /**
-     * 根据当前连接的字符集，对于 SQL 语句中的特殊字符进行转义
-     */
-     public function real_escape_string(string $string): string {}
-    /**
-     * 执行一个mysql查询
-     */
-     public function real_query(string $query): bool {}
-    /**
-     * 获取异步查询的结果
-     */
-     public function reap_async_query(): \mysqli_result|bool {}
-    /**
-     * 刷新
-     */
-     public function refresh(int $flags): bool {}
-    /**
-     * 从当前事务的保存点中移除一个命名保存点
-     */
-     public function release_savepoint(string $name): bool {}
-    /**
-     * 回滚当前事务
-     */
-     public function rollback(int $flags = 0, ?string $name = NULL): bool {}
-    /**
-     * 在当前事务中设置命名保存点
-     */
-     public function savepoint(string $name): bool {}
-    /**
-     * 选择用于数据库查询的默认数据库
-     */
-     public function select_db(string $database): bool {}
-    /**
-     * 设置客户端字符集
-     */
-     public function set_charset(string $charset): bool {}
-    /**
-     * 别名 mysqli_options
-     */
-     public function set_opt(int $option, mixed $value): bool {}
-    /**
-     * 用于使用 SSL 建立安全连接
-     */
-     public function ssl_set(?string $key, ?string $certificate, ?string $ca_certificate, ?string $ca_path, ?string $cipher_algos): true {}
-    /**
-     * 获取当前系统状态信息
-     */
-     public function stat(): string|false {}
-    /**
-     * 初始化语句并返回用于 mysqli_stmt_prepare（调用）的对象
-     */
-     public function stmt_init(): \mysqli_stmt|false {}
-    /**
-     * 传输上次查询的结果集
-     */
-     public function store_result(int $mode = 0): \mysqli_result|false {}
-    /**
-     * 返回是否线程安全
-     */
-     public function thread_safe(): bool {}
-    /**
-     * Initiate a result set retrieval
-     */
-     public function use_result(): \mysqli_result|false {}
+class mysqli
+{
+   public string|int $affected_rows;
+   public string $client_info;
+   public int $client_version;
+   public int $connect_errno;
+   public ?string $connect_error;
+   public int $errno;
+   public string $error;
+   public array $error_list;
+   public int $field_count;
+   public string $host_info;
+   public ?string $info;
+   public string|int $insert_id;
+   public int $protocol_version;
+   public string $server_info;
+   public int $server_version;
+   public string $sqlstate;
+   public int $thread_id;
+   public int $warning_count;
+   /**
+    * Open a new connection to the MySQL server
+    */
+   public function __construct(?string $hostname = NULL, ?string $username = NULL, ?string $password = NULL, ?string $database = NULL, ?int $port = NULL, ?string $socket = NULL) {}
+   /**
+    * 打开或关闭本次数据库连接的自动命令提交事务模式
+    */
+   public function autocommit(bool $enable): bool {}
+   /**
+    * Starts a transaction
+    */
+   public function begin_transaction(int $flags = 0, ?string $name = NULL): bool {}
+   /**
+    * Changes the user of the database connection
+    */
+   public function change_user(string $username, string $password, ?string $database): bool {}
+   /**
+    * 返回当前数据库连接的字符编码
+    */
+   public function character_set_name(): string {}
+   /**
+    * 关闭先前打开的数据库连接
+    */
+   public function close(): true {}
+   /**
+    * 提交当前事务
+    */
+   public function commit(int $flags = 0, ?string $name = NULL): bool {}
+   public function connect(?string $hostname = NULL, ?string $username = NULL, ?string $password = NULL, ?string $database = NULL, ?int $port = NULL, ?string $socket = NULL): bool {}
+   /**
+    * Performs debugging operations
+    */
+   public function debug(string $options): true {}
+   /**
+    * 将调试信息输出到日志
+    */
+   public function dump_debug_info(): bool {}
+   /**
+    * 别名 mysqli_real_escape_string
+    */
+   public function escape_string(string $string): string {}
+   /**
+    * Prepares, binds parameters, and executes SQL statement (PHP 8 >= 8.2.0)
+    */
+   public function execute_query(string $query, ?array $params = NULL): \mysqli_result|bool {}
+   /**
+    * Returns a character set object
+    */
+   public function get_charset(): ?object {}
+   /**
+    * 获取 MySQL 客户端信息
+    */
+   public function get_client_info(): string {}
+   /**
+    * 返回客户端连接的统计数据
+    */
+   public function get_connection_stats(): array {}
+   /**
+    * 返回 MySQL 服务器的版本号
+    */
+   public function get_server_info(): string {}
+   /**
+    * Get result of SHOW WARNINGS
+    */
+   public function get_warnings(): \mysqli_warning|false {}
+   /**
+    * 初始化 MySQLi 并返回用于 mysqli_real_connect() 的对象
+    */
+   public function init() {}
+   /**
+    * 让服务器杀死一个 MySQL 线程
+    */
+   public function kill(int $process_id): bool {}
+   /**
+    * 检查批量查询中是否还有查询结果
+    */
+   public function more_results(): bool {}
+   /**
+    * 在数据库上执行一个或多个查询
+    */
+   public function multi_query(string $query): bool {}
+   /**
+    * 为读取 multi_query 执行之后的下一个结果集做准备
+    */
+   public function next_result(): bool {}
+   /**
+    * 设置选项
+    */
+   public function options(int $option, mixed $value): bool {}
+   /**
+    * ping 一个连接，或者如果连接处于断开状态，重新连接
+    */
+   public function ping(): bool {}
+   /**
+    * 轮询连接
+    */
+   public static function poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
+   /**
+    * 预处理执行 SQL
+    */
+   public function prepare(string $query): \mysqli_stmt|false {}
+   /**
+    * 对数据库执行查询
+    */
+   public function query(string $query, int $result_mode = MYSQLI_STORE_RESULT): \mysqli_result|bool {}
+   /**
+    * 建立一个 MySQL 服务器连接
+    */
+   public function real_connect(?string $hostname = NULL, ?string $username = NULL, ?string $password = NULL, ?string $database = NULL, ?int $port = NULL, ?string $socket = NULL, int $flags = 0): bool {}
+   /**
+    * 根据当前连接的字符集，对于 SQL 语句中的特殊字符进行转义
+    */
+   public function real_escape_string(string $string): string {}
+   /**
+    * 执行一个mysql查询
+    */
+   public function real_query(string $query): bool {}
+   /**
+    * 获取异步查询的结果
+    */
+   public function reap_async_query(): \mysqli_result|bool {}
+   /**
+    * 刷新
+    */
+   public function refresh(int $flags): bool {}
+   /**
+    * 从当前事务的保存点中移除一个命名保存点
+    */
+   public function release_savepoint(string $name): bool {}
+   /**
+    * 回滚当前事务
+    */
+   public function rollback(int $flags = 0, ?string $name = NULL): bool {}
+   /**
+    * 在当前事务中设置命名保存点
+    */
+   public function savepoint(string $name): bool {}
+   /**
+    * 选择用于数据库查询的默认数据库
+    */
+   public function select_db(string $database): bool {}
+   /**
+    * 设置客户端字符集
+    */
+   public function set_charset(string $charset): bool {}
+   /**
+    * 别名 mysqli_options
+    */
+   public function set_opt(int $option, mixed $value): bool {}
+   /**
+    * 用于使用 SSL 建立安全连接
+    */
+   public function ssl_set(?string $key, ?string $certificate, ?string $ca_certificate, ?string $ca_path, ?string $cipher_algos): true {}
+   /**
+    * 获取当前系统状态信息
+    */
+   public function stat(): string|false {}
+   /**
+    * 初始化语句并返回用于 mysqli_stmt_prepare（调用）的对象
+    */
+   public function stmt_init(): \mysqli_stmt|false {}
+   /**
+    * 传输上次查询的结果集
+    */
+   public function store_result(int $mode = 0): \mysqli_result|false {}
+   /**
+    * 返回是否线程安全
+    */
+   public function thread_safe(): bool {}
+   /**
+    * Initiate a result set retrieval
+    */
+   public function use_result(): \mysqli_result|false {}
 }
 
 /**
  * mysqli_driver 类
  */
- final class mysqli_driver {
-    public string $client_info;
-    public int $client_version;
-    public int $driver_version;
-    public int $report_mode;
+final class mysqli_driver
+{
+   public string $client_info;
+   public int $client_version;
+   public int $driver_version;
+   public int $report_mode;
 }
 
 /**
  * mysqli_result 类
  */
- class mysqli_result implements \IteratorAggregate, \Traversable {
-    public int $current_field;
-    public int $field_count;
-    public ?array $lengths;
-    public string|int $num_rows;
-    public int $type;
-    /**
-     * Constructs a mysqli_result object
-     */
-     public function __construct(\mysqli $mysql, int $result_mode = MYSQLI_STORE_RESULT) {}
-    public function close(): void {}
-    /**
-     * Adjusts the result pointer to an arbitrary row in the result
-     */
-     public function data_seek(int $offset): bool {}
-    /**
-     * Fetch all result rows as an associative array, a numeric array, or both
-     */
-     public function fetch_all(int $mode = MYSQLI_NUM): array {}
-    /**
-     * Fetch the next row of a result set as an associative, a numeric array, or both
-     */
-     public function fetch_array(int $mode = MYSQLI_BOTH): array|false|null {}
-    /**
-     * Fetch the next row of a result set as an associative array
-     */
-     public function fetch_assoc(): array|false|null {}
-    /**
-     * Fetch a single column from the next row of a result set (PHP 8 >= 8.1.0)
-     */
-     public function fetch_column(int $column = 0): string|int|float|false|null {}
-    /**
-     * Returns the next field in the result set
-     */
-     public function fetch_field(): object|false {}
-    /**
-     * Fetch meta-data for a single field
-     */
-     public function fetch_field_direct(int $index): object|false {}
-    /**
-     * Returns an array of objects representing the fields in a result set
-     */
-     public function fetch_fields(): array {}
-    /**
-     * Fetch the next row of a result set as an object
-     */
-     public function fetch_object(string $class = "stdClass", array $constructor_args = []): object|false|null {}
-    /**
-     * Fetch the next row of a result set as an enumerated array
-     */
-     public function fetch_row(): array|false|null {}
-    /**
-     * Set result pointer to a specified field offset
-     */
-     public function field_seek(int $index): true {}
-    /**
-     * Frees the memory associated with a result
-     */
-     public function free(): void {}
-    public function free_result(): void {}
-    /**
-     * Retrieve an external iterator
-     */
-     public function getIterator(): \Iterator {}
+class mysqli_result implements \IteratorAggregate, \Traversable
+{
+   public int $current_field;
+   public int $field_count;
+   public ?array $lengths;
+   public string|int $num_rows;
+   public int $type;
+   /**
+    * Constructs a mysqli_result object
+    */
+   public function __construct(\mysqli $mysql, int $result_mode = MYSQLI_STORE_RESULT) {}
+   public function close(): void {}
+   /**
+    * Adjusts the result pointer to an arbitrary row in the result
+    */
+   public function data_seek(int $offset): bool {}
+   /**
+    * Fetch all result rows as an associative array, a numeric array, or both
+    */
+   public function fetch_all(int $mode = MYSQLI_NUM): array {}
+   /**
+    * Fetch the next row of a result set as an associative, a numeric array, or both
+    */
+   public function fetch_array(int $mode = MYSQLI_BOTH): array|false|null {}
+   /**
+    * Fetch the next row of a result set as an associative array
+    */
+   public function fetch_assoc(): array|false|null {}
+   /**
+    * Fetch a single column from the next row of a result set (PHP 8 >= 8.1.0)
+    */
+   public function fetch_column(int $column = 0): string|int|float|false|null {}
+   /**
+    * Returns the next field in the result set
+    */
+   public function fetch_field(): object|false {}
+   /**
+    * Fetch meta-data for a single field
+    */
+   public function fetch_field_direct(int $index): object|false {}
+   /**
+    * Returns an array of objects representing the fields in a result set
+    */
+   public function fetch_fields(): array {}
+   /**
+    * Fetch the next row of a result set as an object
+    */
+   public function fetch_object(string $class = "stdClass", array $constructor_args = []): object|false|null {}
+   /**
+    * Fetch the next row of a result set as an enumerated array
+    */
+   public function fetch_row(): array|false|null {}
+   /**
+    * Set result pointer to a specified field offset
+    */
+   public function field_seek(int $index): true {}
+   /**
+    * Frees the memory associated with a result
+    */
+   public function free(): void {}
+   public function free_result(): void {}
+   /**
+    * Retrieve an external iterator
+    */
+   public function getIterator(): \Iterator {}
 }
 
 /**
  * mysqli_sql_exception 类
  */
- final class mysqli_sql_exception extends \RuntimeException implements \Stringable, \Throwable {
-    protected string $sqlstate;
-    /**
-     * Returns the SQLSTATE error code (PHP 8 >= 8.1.2)
-     */
-     public function getSqlState(): string {}
+final class mysqli_sql_exception extends \RuntimeException implements \Stringable, \Throwable
+{
+   protected string $sqlstate;
+   /**
+    * Returns the SQLSTATE error code (PHP 8 >= 8.1.2)
+    */
+   public function getSqlState(): string {}
 }
 
 /**
  * mysqli_stmt 类
  */
- class mysqli_stmt {
-    public string|int $affected_rows;
-    public int $errno;
-    public string $error;
-    public array $error_list;
-    public int $field_count;
-    public int $id;
-    public string|int $insert_id;
-    public string|int $num_rows;
-    public int $param_count;
-    public string $sqlstate;
-    /**
-     * Constructs a new mysqli_stmt object
-     */
-     public function __construct(\mysqli $mysql, ?string $query = NULL) {}
-    /**
-     * Used to get the current value of a statement attribute
-     */
-     public function attr_get(int $attribute): int {}
-    /**
-     * Used to modify the behavior of a prepared statement
-     */
-     public function attr_set(int $attribute, int $value): bool {}
-    /**
-     * Binds variables to a prepared statement as parameters
-     */
-     public function bind_param(string $types, mixed &...$vars): bool {}
-    /**
-     * Binds variables to a prepared statement for result storage
-     */
-     public function bind_result(mixed &...$vars): bool {}
-    /**
-     * Closes a prepared statement
-     */
-     public function close(): true {}
-    /**
-     * Adjusts the result pointer to an arbitrary row in the buffered result
-     */
-     public function data_seek(int $offset): void {}
-    /**
-     * Executes a prepared statement
-     */
-     public function execute(?array $params = NULL): bool {}
-    /**
-     * Fetch results from a prepared statement into the bound variables
-     */
-     public function fetch(): ?bool {}
-    /**
-     * Frees stored result memory for the given statement handle
-     */
-     public function free_result(): void {}
-    /**
-     * Gets a result set from a prepared statement as a mysqli_result object
-     */
-     public function get_result(): \mysqli_result|false {}
-    /**
-     * Get result of SHOW WARNINGS
-     */
-     public function get_warnings(): \mysqli_warning|false {}
-    /**
-     * Check if there are more query results from a multiple query
-     */
-     public function more_results(): bool {}
-    /**
-     * Reads the next result from a multiple query
-     */
-     public function next_result(): bool {}
-    /**
-     * Returns the number of rows fetched from the server
-     */
-     public function num_rows(): string|int {}
-    /**
-     * Prepares an SQL statement for execution
-     */
-     public function prepare(string $query): bool {}
-    /**
-     * Resets a prepared statement
-     */
-     public function reset(): bool {}
-    /**
-     * Returns result set metadata from a prepared statement
-     */
-     public function result_metadata(): \mysqli_result|false {}
-    /**
-     * Send data in blocks
-     */
-     public function send_long_data(int $param_num, string $data): bool {}
-    /**
-     * Stores a result set in an internal buffer
-     */
-     public function store_result(): bool {}
+class mysqli_stmt
+{
+   public string|int $affected_rows;
+   public int $errno;
+   public string $error;
+   public array $error_list;
+   public int $field_count;
+   public int $id;
+   public string|int $insert_id;
+   public string|int $num_rows;
+   public int $param_count;
+   public string $sqlstate;
+   /**
+    * Constructs a new mysqli_stmt object
+    */
+   public function __construct(\mysqli $mysql, ?string $query = NULL) {}
+   /**
+    * Used to get the current value of a statement attribute
+    */
+   public function attr_get(int $attribute): int {}
+   /**
+    * Used to modify the behavior of a prepared statement
+    */
+   public function attr_set(int $attribute, int $value): bool {}
+   /**
+    * Binds variables to a prepared statement as parameters
+    */
+   public function bind_param(string $types, mixed &...$vars): bool {}
+   /**
+    * Binds variables to a prepared statement for result storage
+    */
+   public function bind_result(mixed &...$vars): bool {}
+   /**
+    * Closes a prepared statement
+    */
+   public function close(): true {}
+   /**
+    * Adjusts the result pointer to an arbitrary row in the buffered result
+    */
+   public function data_seek(int $offset): void {}
+   /**
+    * Executes a prepared statement
+    */
+   public function execute(?array $params = NULL): bool {}
+   /**
+    * Fetch results from a prepared statement into the bound variables
+    */
+   public function fetch(): ?bool {}
+   /**
+    * Frees stored result memory for the given statement handle
+    */
+   public function free_result(): void {}
+   /**
+    * Gets a result set from a prepared statement as a mysqli_result object
+    */
+   public function get_result(): \mysqli_result|false {}
+   /**
+    * Get result of SHOW WARNINGS
+    */
+   public function get_warnings(): \mysqli_warning|false {}
+   /**
+    * Check if there are more query results from a multiple query
+    */
+   public function more_results(): bool {}
+   /**
+    * Reads the next result from a multiple query
+    */
+   public function next_result(): bool {}
+   /**
+    * Returns the number of rows fetched from the server
+    */
+   public function num_rows(): string|int {}
+   /**
+    * Prepares an SQL statement for execution
+    */
+   public function prepare(string $query): bool {}
+   /**
+    * Resets a prepared statement
+    */
+   public function reset(): bool {}
+   /**
+    * Returns result set metadata from a prepared statement
+    */
+   public function result_metadata(): \mysqli_result|false {}
+   /**
+    * Send data in blocks
+    */
+   public function send_long_data(int $param_num, string $data): bool {}
+   /**
+    * Stores a result set in an internal buffer
+    */
+   public function store_result(): bool {}
 }
 
 /**
  * mysqli_warning 类
  */
- final class mysqli_warning {
-    public int $errno;
-    public string $message;
-    public string $sqlstate;
-    /**
-     * Private constructor to disallow direct instantiation
-     */
-     private function __construct() {}
-    /**
-     * Fetch next warning
-     */
-     public function next(): bool {}
+final class mysqli_warning
+{
+   public int $errno;
+   public string $message;
+   public string $sqlstate;
+   /**
+    * Private constructor to disallow direct instantiation
+    */
+   private function __construct() {}
+   /**
+    * Fetch next warning
+    */
+   public function next(): bool {}
 }
 
 /**
  * The php_user_filter class
  */
- class php_user_filter {
-    public string $filtername;
-    public mixed $params;
-    public $stream;
-    /**
-     * Called when applying the filter
-     */
-     public function filter(mixed $in, mixed $out, mixed &$consumed, bool $closing): int {}
-    /**
-     * Called when closing the filter
-     */
-     public function onClose(): void {}
-    /**
-     * Called when creating the filter
-     */
-     public function onCreate(): bool {}
+class php_user_filter
+{
+   public string $filtername;
+   public mixed $params;
+   public $stream;
+   /**
+    * Called when applying the filter
+    */
+   public function filter(mixed $in, mixed $out, mixed &$consumed, bool $closing): int {}
+   /**
+    * Called when closing the filter
+    */
+   public function onClose(): void {}
+   /**
+    * Called when creating the filter
+    */
+   public function onCreate(): bool {}
 }
 
 /**
  * stdClass 类
  */
- class stdClass {
-}
+class stdClass {}
 
 /**
  * The tidy class
  */
- class tidy {
-    public ?string $errorBuffer;
-    public ?string $value;
-    /**
-     * Constructs a new tidy object
-     */
-     public function __construct(?string $filename = NULL, array|string|null $config = NULL, ?string $encoding = NULL, bool $useIncludePath = false) {}
-    /**
-     * Returns a tidyNode object starting from the &lt;body&gt; tag of the tidy parse tree
-     */
-     public function body(): ?\tidyNode {}
-    /**
-     * Execute configured cleanup and repair operations on parsed markup
-     */
-     public function cleanRepair(): bool {}
-    /**
-     * Run configured diagnostics on parsed and repaired markup
-     */
-     public function diagnose(): bool {}
-    /**
-     * Get current Tidy configuration
-     */
-     public function getConfig(): array {}
-    /**
-     * Get the Detected HTML version for the specified document
-     */
-     public function getHtmlVer(): int {}
-    /**
-     * Returns the value of the specified configuration option for the tidy document
-     */
-     public function getOpt(string $option): string|int|bool {}
-    /**
-     * Returns the documentation for the given option name
-     */
-     public function getOptDoc(string $option): string|false {}
-    /**
-     * Get release date (version) for Tidy library
-     */
-     public function getRelease(): string {}
-    /**
-     * Get status of specified document
-     */
-     public function getStatus(): int {}
-    /**
-     * Returns a tidyNode object starting from the &lt;head&gt; tag of the tidy parse tree
-     */
-     public function head(): ?\tidyNode {}
-    /**
-     * Returns a tidyNode object starting from the &lt;html&gt; tag of the tidy parse tree
-     */
-     public function html(): ?\tidyNode {}
-    /**
-     * Indicates if the document is a XHTML document
-     */
-     public function isXhtml(): bool {}
-    /**
-     * Indicates if the document is a generic (non HTML/XHTML) XML document
-     */
-     public function isXml(): bool {}
-    /**
-     * Parse markup in file or URI
-     */
-     public function parseFile(string $filename, array|string|null $config = NULL, ?string $encoding = NULL, bool $useIncludePath = false): bool {}
-    /**
-     * Parse a document stored in a string
-     */
-     public function parseString(string $string, array|string|null $config = NULL, ?string $encoding = NULL): bool {}
-    /**
-     * Repair a file and return it as a string
-     */
-     public static function repairFile(string $filename, array|string|null $config = NULL, ?string $encoding = NULL, bool $useIncludePath = false): string|false {}
-    /**
-     * Repair a string using an optionally provided configuration file
-     */
-     public static function repairString(string $string, array|string|null $config = NULL, ?string $encoding = NULL): string|false {}
-    /**
-     * Returns a tidyNode object representing the root of the tidy parse tree
-     */
-     public function root(): ?\tidyNode {}
+class tidy
+{
+   public ?string $errorBuffer;
+   public ?string $value;
+   /**
+    * Constructs a new tidy object
+    */
+   public function __construct(?string $filename = NULL, array|string|null $config = NULL, ?string $encoding = NULL, bool $useIncludePath = false) {}
+   /**
+    * Returns a tidyNode object starting from the &lt;body&gt; tag of the tidy parse tree
+    */
+   public function body(): ?\tidyNode {}
+   /**
+    * Execute configured cleanup and repair operations on parsed markup
+    */
+   public function cleanRepair(): bool {}
+   /**
+    * Run configured diagnostics on parsed and repaired markup
+    */
+   public function diagnose(): bool {}
+   /**
+    * Get current Tidy configuration
+    */
+   public function getConfig(): array {}
+   /**
+    * Get the Detected HTML version for the specified document
+    */
+   public function getHtmlVer(): int {}
+   /**
+    * Returns the value of the specified configuration option for the tidy document
+    */
+   public function getOpt(string $option): string|int|bool {}
+   /**
+    * Returns the documentation for the given option name
+    */
+   public function getOptDoc(string $option): string|false {}
+   /**
+    * Get release date (version) for Tidy library
+    */
+   public function getRelease(): string {}
+   /**
+    * Get status of specified document
+    */
+   public function getStatus(): int {}
+   /**
+    * Returns a tidyNode object starting from the &lt;head&gt; tag of the tidy parse tree
+    */
+   public function head(): ?\tidyNode {}
+   /**
+    * Returns a tidyNode object starting from the &lt;html&gt; tag of the tidy parse tree
+    */
+   public function html(): ?\tidyNode {}
+   /**
+    * Indicates if the document is a XHTML document
+    */
+   public function isXhtml(): bool {}
+   /**
+    * Indicates if the document is a generic (non HTML/XHTML) XML document
+    */
+   public function isXml(): bool {}
+   /**
+    * Parse markup in file or URI
+    */
+   public function parseFile(string $filename, array|string|null $config = NULL, ?string $encoding = NULL, bool $useIncludePath = false): bool {}
+   /**
+    * Parse a document stored in a string
+    */
+   public function parseString(string $string, array|string|null $config = NULL, ?string $encoding = NULL): bool {}
+   /**
+    * Repair a file and return it as a string
+    */
+   public static function repairFile(string $filename, array|string|null $config = NULL, ?string $encoding = NULL, bool $useIncludePath = false): string|false {}
+   /**
+    * Repair a string using an optionally provided configuration file
+    */
+   public static function repairString(string $string, array|string|null $config = NULL, ?string $encoding = NULL): string|false {}
+   /**
+    * Returns a tidyNode object representing the root of the tidy parse tree
+    */
+   public function root(): ?\tidyNode {}
 }
 
 /**
  * The tidyNode class
  */
- final class tidyNode {
-    public readonly ?array $attribute;
-    public readonly ?array $child;
-    public readonly int $column;
-    public readonly ?int $id;
-    public readonly int $line;
-    public readonly string $name;
-    public readonly bool $proprietary;
-    public readonly int $type;
-    public readonly string $value;
-    /**
-     * Private constructor to disallow direct instantiation
-     */
-     private function __construct() {}
-    /**
-     * Returns the next sibling node of the current node (PHP 8 >= 8.4.0)
-     */
-     public function getNextSibling(): ?\tidyNode {}
-    /**
-     * Returns the parent node of the current node
-     */
-     public function getParent(): ?\tidyNode {}
-    /**
-     * Returns the previous sibling node of the current node (PHP 8 >= 8.4.0)
-     */
-     public function getPreviousSibling(): ?\tidyNode {}
-    /**
-     * Checks if a node has children
-     */
-     public function hasChildren(): bool {}
-    /**
-     * Checks if a node has siblings
-     */
-     public function hasSiblings(): bool {}
-    /**
-     * Checks if this node is ASP
-     */
-     public function isAsp(): bool {}
-    /**
-     * Checks if a node represents a comment
-     */
-     public function isComment(): bool {}
-    /**
-     * Checks if a node is an element node
-     */
-     public function isHtml(): bool {}
-    /**
-     * Checks if this node is JSTE
-     */
-     public function isJste(): bool {}
-    /**
-     * Checks if a node is PHP
-     */
-     public function isPhp(): bool {}
-    /**
-     * Checks if a node represents text (no markup)
-     */
-     public function isText(): bool {}
+final class tidyNode
+{
+   public readonly ?array $attribute;
+   public readonly ?array $child;
+   public readonly int $column;
+   public readonly ?int $id;
+   public readonly int $line;
+   public readonly string $name;
+   public readonly bool $proprietary;
+   public readonly int $type;
+   public readonly string $value;
+   /**
+    * Private constructor to disallow direct instantiation
+    */
+   private function __construct() {}
+   /**
+    * Returns the next sibling node of the current node (PHP 8 >= 8.4.0)
+    */
+   public function getNextSibling(): ?\tidyNode {}
+   /**
+    * Returns the parent node of the current node
+    */
+   public function getParent(): ?\tidyNode {}
+   /**
+    * Returns the previous sibling node of the current node (PHP 8 >= 8.4.0)
+    */
+   public function getPreviousSibling(): ?\tidyNode {}
+   /**
+    * Checks if a node has children
+    */
+   public function hasChildren(): bool {}
+   /**
+    * Checks if a node has siblings
+    */
+   public function hasSiblings(): bool {}
+   /**
+    * Checks if this node is ASP
+    */
+   public function isAsp(): bool {}
+   /**
+    * Checks if a node represents a comment
+    */
+   public function isComment(): bool {}
+   /**
+    * Checks if a node is an element node
+    */
+   public function isHtml(): bool {}
+   /**
+    * Checks if this node is JSTE
+    */
+   public function isJste(): bool {}
+   /**
+    * Checks if a node is PHP
+    */
+   public function isPhp(): bool {}
+   /**
+    * Checks if a node represents text (no markup)
+    */
+   public function isText(): bool {}
 }
 const E_ERROR = 1;
 const E_WARNING = 2;
@@ -19803,7 +19933,7 @@ const PHP_EOL = '
 ';
 const PHP_MAXPATHLEN = 2048;
 const PHP_INT_MAX = 9223372036854775807;
-const PHP_INT_MIN = -9223372036854775807-1;
+const PHP_INT_MIN = -9223372036854775807 - 1;
 const PHP_INT_SIZE = 8;
 const PHP_FD_SETSIZE = 256;
 const PHP_FLOAT_DIG = 15;
@@ -22567,382 +22697,403 @@ const LIBXSLT_VERSION = 10143;
 const LIBXSLT_DOTTED_VERSION = '1.1.43';
 const LIBEXSLT_VERSION = 824;
 const LIBEXSLT_DOTTED_VERSION = '0.8.24';
+
 namespace Dom {
-	const INDEX_SIZE_ERR = 1;
-	const STRING_SIZE_ERR = 2;
-	const HIERARCHY_REQUEST_ERR = 3;
-	const WRONG_DOCUMENT_ERR = 4;
-	const INVALID_CHARACTER_ERR = 5;
-	const NO_DATA_ALLOWED_ERR = 6;
-	const NO_MODIFICATION_ALLOWED_ERR = 7;
-	const NOT_FOUND_ERR = 8;
-	const NOT_SUPPORTED_ERR = 9;
-	const INUSE_ATTRIBUTE_ERR = 10;
-	const INVALID_STATE_ERR = 11;
-	const SYNTAX_ERR = 12;
-	const INVALID_MODIFICATION_ERR = 13;
-	const NAMESPACE_ERR = 14;
-	const VALIDATION_ERR = 16;
-	const HTML_NO_DEFAULT_NS = 2147483648;
+   const INDEX_SIZE_ERR = 1;
+   const STRING_SIZE_ERR = 2;
+   const HIERARCHY_REQUEST_ERR = 3;
+   const WRONG_DOCUMENT_ERR = 4;
+   const INVALID_CHARACTER_ERR = 5;
+   const NO_DATA_ALLOWED_ERR = 6;
+   const NO_MODIFICATION_ALLOWED_ERR = 7;
+   const NOT_FOUND_ERR = 8;
+   const NOT_SUPPORTED_ERR = 9;
+   const INUSE_ATTRIBUTE_ERR = 10;
+   const INVALID_STATE_ERR = 11;
+   const SYNTAX_ERR = 12;
+   const INVALID_MODIFICATION_ERR = 13;
+   const NAMESPACE_ERR = 14;
+   const VALIDATION_ERR = 16;
+   const HTML_NO_DEFAULT_NS = 2147483648;
 
-enum AdjacentPosition: string {
-    case BeforeBegin;
-    case AfterBegin;
-    case BeforeEnd;
-    case AfterEnd;
-    public readonly string $name;
-    public readonly string $value;
-    public static function cases(): array {}
-    public static function from(string|int $value): static {}
-    public static function tryFrom(string|int $value): ?static {}
-}
+   enum AdjacentPosition: string
+   {
+      case BeforeBegin;
+      case AfterBegin;
+      case BeforeEnd;
+      case AfterEnd;
+      public readonly string $name;
+      public readonly string $value;
+      public static function cases(): array {}
+      public static function from(string|int $value): static {}
+      public static function tryFrom(string|int $value): ?static {}
+   }
 
-class Implementation {
-    public function createDocumentType(string $qualifiedName, string $publicId, string $systemId): Dom\DocumentType {}
-    public function createDocument(?string $namespace, string $qualifiedName, ?Dom\DocumentType $doctype = null): Dom\XMLDocument {}
-    public function createHTMLDocument(?string $title = null): Dom\HTMLDocument {}
-}
+   class Implementation
+   {
+      public function createDocumentType(string $qualifiedName, string $publicId, string $systemId): Dom\DocumentType {}
+      public function createDocument(?string $namespace, string $qualifiedName, ?Dom\DocumentType $doctype = null): Dom\XMLDocument {}
+      public function createHTMLDocument(?string $title = null): Dom\HTMLDocument {}
+   }
 
-class Node {
-    public const int DOCUMENT_POSITION_DISCONNECTED = 1;
-    public const int DOCUMENT_POSITION_PRECEDING = 2;
-    public const int DOCUMENT_POSITION_FOLLOWING = 4;
-    public const int DOCUMENT_POSITION_CONTAINS = 8;
-    public const int DOCUMENT_POSITION_CONTAINED_BY = 16;
-    public const int DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
-    public int $nodeType;
-    public string $nodeName;
-    public string $baseURI;
-    public bool $isConnected;
-    public ?Dom\Document $ownerDocument;
-    public ?Dom\Node $parentNode;
-    public ?Dom\Element $parentElement;
-    public Dom\NodeList $childNodes;
-    public ?Dom\Node $firstChild;
-    public ?Dom\Node $lastChild;
-    public ?Dom\Node $previousSibling;
-    public ?Dom\Node $nextSibling;
-    public ?string $nodeValue;
-    public ?string $textContent;
-    private final function __construct() {}
-    public function getRootNode(array $options = []): Dom\Node {}
-    public function hasChildNodes(): bool {}
-    public function normalize(): void {}
-    public function cloneNode(bool $deep = false): Dom\Node {}
-    public function isEqualNode(?Dom\Node $otherNode): bool {}
-    public function isSameNode(?Dom\Node $otherNode): bool {}
-    public function compareDocumentPosition(Dom\Node $other): int {}
-    public function contains(?Dom\Node $other): bool {}
-    public function lookupPrefix(?string $namespace): ?string {}
-    public function lookupNamespaceURI(?string $prefix): ?string {}
-    public function isDefaultNamespace(?string $namespace): bool {}
-    public function insertBefore(Dom\Node $node, ?Dom\Node $child): Dom\Node {}
-    public function appendChild(Dom\Node $node): Dom\Node {}
-    public function replaceChild(Dom\Node $node, Dom\Node $child): Dom\Node {}
-    public function removeChild(Dom\Node $child): Dom\Node {}
-    public function getLineNo(): int {}
-    public function getNodePath(): string {}
-    public function C14N(bool $exclusive = false, bool $withComments = false, ?array $xpath = null, ?array $nsPrefixes = null): string|false {}
-    public function C14NFile(string $uri, bool $exclusive = false, bool $withComments = false, ?array $xpath = null, ?array $nsPrefixes = null): int|false {}
-    public function __sleep(): array {}
-    public function __wakeup(): void {}
-}
+   class Node
+   {
+      public const int DOCUMENT_POSITION_DISCONNECTED = 1;
+      public const int DOCUMENT_POSITION_PRECEDING = 2;
+      public const int DOCUMENT_POSITION_FOLLOWING = 4;
+      public const int DOCUMENT_POSITION_CONTAINS = 8;
+      public const int DOCUMENT_POSITION_CONTAINED_BY = 16;
+      public const int DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
+      public int $nodeType;
+      public string $nodeName;
+      public string $baseURI;
+      public bool $isConnected;
+      public ?Document $ownerDocument;
+      public ?Node $parentNode;
+      public ?Element $parentElement;
+      public NodeList $childNodes;
+      public ?Node $firstChild;
+      public ?Node $lastChild;
+      public ?Node $previousSibling;
+      public ?Node $nextSibling;
+      public ?string $nodeValue;
+      public ?string $textContent;
+      private final function __construct() {}
+      public function getRootNode(array $options = []): Node {}
+      public function hasChildNodes(): bool {}
+      public function normalize(): void {}
+      public function cloneNode(bool $deep = false): Node {}
+      public function isEqualNode(?Node $otherNode): bool {}
+      public function isSameNode(?Node $otherNode): bool {}
+      public function compareDocumentPosition(Node $other): int {}
+      public function contains(?Node $other): bool {}
+      public function lookupPrefix(?string $namespace): ?string {}
+      public function lookupNamespaceURI(?string $prefix): ?string {}
+      public function isDefaultNamespace(?string $namespace): bool {}
+      public function insertBefore(Node $node, ?Node $child): Node {}
+      public function appendChild(Node $node): Node {}
+      public function replaceChild(Node $node, Node $child): Node {}
+      public function removeChild(Node $child): Node {}
+      public function getLineNo(): int {}
+      public function getNodePath(): string {}
+      public function C14N(bool $exclusive = false, bool $withComments = false, ?array $xpath = null, ?array $nsPrefixes = null): string|false {}
+      public function C14NFile(string $uri, bool $exclusive = false, bool $withComments = false, ?array $xpath = null, ?array $nsPrefixes = null): int|false {}
+      public function __sleep(): array {}
+      public function __wakeup(): void {}
+   }
 
-final class NamespaceInfo {
-    public readonly ?string $prefix;
-    public readonly ?string $namespaceURI;
-    public readonly Dom\Element $element;
-    private function __construct() {}
-}
+   final class NamespaceInfo
+   {
+      public readonly ?string $prefix;
+      public readonly ?string $namespaceURI;
+      public readonly Element $element;
+      private function __construct() {}
+   }
 
-class DocumentFragment extends Node implements ParentNode {
-    public Dom\HTMLCollection $children;
-    public ?Dom\Element $firstElementChild;
-    public ?Dom\Element $lastElementChild;
-    public int $childElementCount;
-    public function appendXml(string $data): bool {}
-    public function append(Dom\Node|string ...$nodes): void {}
-    public function prepend(Dom\Node|string ...$nodes): void {}
-    public function replaceChildren(Dom\Node|string ...$nodes): void {}
-    public function querySelector(string $selectors): ?Dom\Element {}
-    public function querySelectorAll(string $selectors): Dom\NodeList {}
-}
+   class DocumentFragment extends Node implements ParentNode
+   {
+      public HTMLCollection $children;
+      public ?Element $firstElementChild;
+      public ?Element $lastElementChild;
+      public int $childElementCount;
+      public function appendXml(string $data): bool {}
+      public function append(Node|string ...$nodes): void {}
+      public function prepend(Node|string ...$nodes): void {}
+      public function replaceChildren(Node|string ...$nodes): void {}
+      public function querySelector(string $selectors): ?Element {}
+      public function querySelectorAll(string $selectors): NodeList {}
+   }
 
-abstract class Document extends Node implements ParentNode {
-    public Dom\HTMLCollection $children;
-    public ?Dom\Element $firstElementChild;
-    public ?Dom\Element $lastElementChild;
-    public int $childElementCount;
-    public Dom\Implementation $implementation;
-    public string $URL;
-    public string $documentURI;
-    public string $characterSet;
-    public string $charset;
-    public string $inputEncoding;
-    public ?Dom\DocumentType $doctype;
-    public ?Dom\Element $documentElement;
-    public ?Dom\HTMLElement $body;
-    public ?Dom\HTMLElement $head;
-    public string $title;
-    public function getElementsByTagName(string $qualifiedName): Dom\HTMLCollection {}
-    public function getElementsByTagNameNS(?string $namespace, string $localName): Dom\HTMLCollection {}
-    public function getElementsByClassName(string $classNames): Dom\HTMLCollection {}
-    public function createElement(string $localName): Dom\Element {}
-    public function createElementNS(?string $namespace, string $qualifiedName): Dom\Element {}
-    public function createDocumentFragment(): Dom\DocumentFragment {}
-    public function createTextNode(string $data): Dom\Text {}
-    public function createCDATASection(string $data): Dom\CDATASection {}
-    public function createComment(string $data): Dom\Comment {}
-    public function createProcessingInstruction(string $target, string $data): Dom\ProcessingInstruction {}
-    public function importNode(?Dom\Node $node, bool $deep = false): Dom\Node {}
-    public function adoptNode(Dom\Node $node): Dom\Node {}
-    public function createAttribute(string $localName): Dom\Attr {}
-    public function createAttributeNS(?string $namespace, string $qualifiedName): Dom\Attr {}
-    public function getElementById(string $elementId): ?Dom\Element {}
-    public function registerNodeClass(string $baseClass, ?string $extendedClass): void {}
-    public function schemaValidate(string $filename, int $flags = 0): bool {}
-    public function schemaValidateSource(string $source, int $flags = 0): bool {}
-    public function relaxNgValidate(string $filename): bool {}
-    public function relaxNgValidateSource(string $source): bool {}
-    public function append(Dom\Node|string ...$nodes): void {}
-    public function prepend(Dom\Node|string ...$nodes): void {}
-    public function replaceChildren(Dom\Node|string ...$nodes): void {}
-    public function importLegacyNode(DOMNode $node, bool $deep = false): Dom\Node {}
-    public function querySelector(string $selectors): ?Dom\Element {}
-    public function querySelectorAll(string $selectors): Dom\NodeList {}
-}
+   abstract class Document extends Node implements ParentNode
+   {
+      public HTMLCollection $children;
+      public ?Element $firstElementChild;
+      public ?Element $lastElementChild;
+      public int $childElementCount;
+      public Implementation $implementation;
+      public string $URL;
+      public string $documentURI;
+      public string $characterSet;
+      public string $charset;
+      public string $inputEncoding;
+      public ?DocumentType $doctype;
+      public ?Element $documentElement;
+      public ?HTMLElement $body;
+      public ?HTMLElement $head;
+      public string $title;
+      public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
+      public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
+      public function getElementsByClassName(string $classNames): HTMLCollection {}
+      public function createElement(string $localName): Element {}
+      public function createElementNS(?string $namespace, string $qualifiedName): Element {}
+      public function createDocumentFragment(): DocumentFragment {}
+      public function createTextNode(string $data): Text {}
+      public function createCDATASection(string $data): CDATASection {}
+      public function createComment(string $data): Comment {}
+      public function createProcessingInstruction(string $target, string $data): ProcessingInstruction {}
+      public function importNode(?Node $node, bool $deep = false): Node {}
+      public function adoptNode(Node $node): Node {}
+      public function createAttribute(string $localName): Attr {}
+      public function createAttributeNS(?string $namespace, string $qualifiedName): Attr {}
+      public function getElementById(string $elementId): ?Element {}
+      public function registerNodeClass(string $baseClass, ?string $extendedClass): void {}
+      public function schemaValidate(string $filename, int $flags = 0): bool {}
+      public function schemaValidateSource(string $source, int $flags = 0): bool {}
+      public function relaxNgValidate(string $filename): bool {}
+      public function relaxNgValidateSource(string $source): bool {}
+      public function append(Node|string ...$nodes): void {}
+      public function prepend(Node|string ...$nodes): void {}
+      public function replaceChildren(Node|string ...$nodes): void {}
+      public function importLegacyNode(DOMNode $node, bool $deep = false): Node {}
+      public function querySelector(string $selectors): ?Element {}
+      public function querySelectorAll(string $selectors): NodeList {}
+   }
 
-final class HTMLDocument extends Document implements ParentNode {
-    public static function createEmpty(string $encoding = "UTF-8"): Dom\HTMLDocument {}
-    public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): Dom\HTMLDocument {}
-    public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): Dom\HTMLDocument {}
-    public function saveXml(?Dom\Node $node = null, int $options = 0): string|false {}
-    public function saveXmlFile(string $filename, int $options = 0): int|false {}
-    public function saveHtml(?Dom\Node $node = null): string {}
-    public function saveHtmlFile(string $filename): int|false {}
-}
+   final class HTMLDocument extends Document implements ParentNode
+   {
+      public static function createEmpty(string $encoding = "UTF-8"): HTMLDocument {}
+      public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
+      public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
+      public function saveXml(?Node $node = null, int $options = 0): string|false {}
+      public function saveXmlFile(string $filename, int $options = 0): int|false {}
+      public function saveHtml(?Node $node = null): string {}
+      public function saveHtmlFile(string $filename): int|false {}
+   }
 
-final class XMLDocument extends Document implements ParentNode {
-    public string $xmlEncoding;
-    public bool $xmlStandalone;
-    public string $xmlVersion;
-    public bool $formatOutput;
-    public static function createEmpty(string $version = "1.0", string $encoding = "UTF-8"): Dom\XMLDocument {}
-    public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): Dom\XMLDocument {}
-    public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): Dom\XMLDocument {}
-    public function createEntityReference(string $name): Dom\EntityReference {}
-    public function validate(): bool {}
-    public function xinclude(int $options = 0): int {}
-    public function saveXml(?Dom\Node $node = null, int $options = 0): string|false {}
-    public function saveXmlFile(string $filename, int $options = 0): int|false {}
-}
+   final class XMLDocument extends Document implements ParentNode
+   {
+      public string $xmlEncoding;
+      public bool $xmlStandalone;
+      public string $xmlVersion;
+      public bool $formatOutput;
+      public static function createEmpty(string $version = "1.0", string $encoding = "UTF-8"): XMLDocument {}
+      public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
+      public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
+      public function createEntityReference(string $name): EntityReference {}
+      public function validate(): bool {}
+      public function xinclude(int $options = 0): int {}
+      public function saveXml(?Node $node = null, int $options = 0): string|false {}
+      public function saveXmlFile(string $filename, int $options = 0): int|false {}
+   }
 
-class NodeList implements IteratorAggregate, Traversable, Countable {
-    public int $length;
-    public function count(): int {}
-    public function getIterator(): Iterator {}
-    public function item(int $index): ?Dom\Node {}
-}
+   class NodeList implements IteratorAggregate, Traversable, Countable
+   {
+      public int $length;
+      public function count(): int {}
+      public function getIterator(): Iterator {}
+      public function item(int $index): ?Node {}
+   }
 
-class NamedNodeMap implements IteratorAggregate, Traversable, Countable {
-    public int $length;
-    public function item(int $index): ?Dom\Attr {}
-    public function getNamedItem(string $qualifiedName): ?Dom\Attr {}
-    public function getNamedItemNS(?string $namespace, string $localName): ?Dom\Attr {}
-    public function count(): int {}
-    public function getIterator(): Iterator {}
-}
+   class NamedNodeMap implements IteratorAggregate, Traversable, Countable
+   {
+      public int $length;
+      public function item(int $index): ?Attr {}
+      public function getNamedItem(string $qualifiedName): ?Attr {}
+      public function getNamedItemNS(?string $namespace, string $localName): ?Attr {}
+      public function count(): int {}
+      public function getIterator(): Iterator {}
+   }
 
-class DtdNamedNodeMap implements IteratorAggregate, Traversable, Countable {
-    public int $length;
-    public function item(int $index): Dom\Entity|Dom\Notation|null {}
-    public function getNamedItem(string $qualifiedName): Dom\Entity|Dom\Notation|null {}
-    public function getNamedItemNS(?string $namespace, string $localName): Dom\Entity|Dom\Notation|null {}
-    public function count(): int {}
-    public function getIterator(): Iterator {}
-}
+   class DtdNamedNodeMap implements IteratorAggregate, Traversable, Countable
+   {
+      public int $length;
+      public function item(int $index): Entity|Notation|null {}
+      public function getNamedItem(string $qualifiedName): Entity|Notation|null {}
+      public function getNamedItemNS(?string $namespace, string $localName): Entity|Notation|null {}
+      public function count(): int {}
+      public function getIterator(): Iterator {}
+   }
 
-class HTMLCollection implements IteratorAggregate, Traversable, Countable {
-    public int $length;
-    public function item(int $index): ?Dom\Element {}
-    public function namedItem(string $key): ?Dom\Element {}
-    public function count(): int {}
-    public function getIterator(): Iterator {}
-}
+   class HTMLCollection implements IteratorAggregate, Traversable, Countable
+   {
+      public int $length;
+      public function item(int $index): ?Element {}
+      public function namedItem(string $key): ?Element {}
+      public function count(): int {}
+      public function getIterator(): Iterator {}
+   }
 
-class CharacterData extends Node implements ChildNode {
-    public ?Dom\Element $previousElementSibling;
-    public ?Dom\Element $nextElementSibling;
-    public string $data;
-    public int $length;
-    public function substringData(int $offset, int $count): string {}
-    public function appendData(string $data): void {}
-    public function insertData(int $offset, string $data): void {}
-    public function deleteData(int $offset, int $count): void {}
-    public function replaceData(int $offset, int $count, string $data): void {}
-    public function remove(): void {}
-    public function before(Dom\Node|string ...$nodes): void {}
-    public function after(Dom\Node|string ...$nodes): void {}
-    public function replaceWith(Dom\Node|string ...$nodes): void {}
-}
+   class CharacterData extends Node implements ChildNode
+   {
+      public ?Element $previousElementSibling;
+      public ?Element $nextElementSibling;
+      public string $data;
+      public int $length;
+      public function substringData(int $offset, int $count): string {}
+      public function appendData(string $data): void {}
+      public function insertData(int $offset, string $data): void {}
+      public function deleteData(int $offset, int $count): void {}
+      public function replaceData(int $offset, int $count, string $data): void {}
+      public function remove(): void {}
+      public function before(Node|string ...$nodes): void {}
+      public function after(Node|string ...$nodes): void {}
+      public function replaceWith(Node|string ...$nodes): void {}
+   }
 
-class Attr extends Node {
-    public ?string $namespaceURI;
-    public ?string $prefix;
-    public string $localName;
-    public string $name;
-    public string $value;
-    public ?Dom\Element $ownerElement;
-    public bool $specified;
-    public function isId(): bool {}
-    public function rename(?string $namespaceURI, string $qualifiedName): void {}
-}
+   class Attr extends Node
+   {
+      public ?string $namespaceURI;
+      public ?string $prefix;
+      public string $localName;
+      public string $name;
+      public string $value;
+      public ?Element $ownerElement;
+      public bool $specified;
+      public function isId(): bool {}
+      public function rename(?string $namespaceURI, string $qualifiedName): void {}
+   }
 
-class Element extends Node implements ParentNode, ChildNode {
-    public ?string $namespaceURI;
-    public ?string $prefix;
-    public string $localName;
-    public string $tagName;
-    public Dom\HTMLCollection $children;
-    public ?Dom\Element $firstElementChild;
-    public ?Dom\Element $lastElementChild;
-    public int $childElementCount;
-    public ?Dom\Element $previousElementSibling;
-    public ?Dom\Element $nextElementSibling;
-    public string $id;
-    public string $className;
-    public Dom\TokenList $classList;
-    public Dom\NamedNodeMap $attributes;
-    public string $innerHTML;
-    public string $outerHTML;
-    public string $substitutedNodeValue;
-    public function hasAttributes(): bool {}
-    public function getAttributeNames(): array {}
-    public function getAttribute(string $qualifiedName): ?string {}
-    public function getAttributeNS(?string $namespace, string $localName): ?string {}
-    public function setAttribute(string $qualifiedName, string $value): void {}
-    public function setAttributeNS(?string $namespace, string $qualifiedName, string $value): void {}
-    public function removeAttribute(string $qualifiedName): void {}
-    public function removeAttributeNS(?string $namespace, string $localName): void {}
-    public function toggleAttribute(string $qualifiedName, ?bool $force = null): bool {}
-    public function hasAttribute(string $qualifiedName): bool {}
-    public function hasAttributeNS(?string $namespace, string $localName): bool {}
-    public function getAttributeNode(string $qualifiedName): ?Dom\Attr {}
-    public function getAttributeNodeNS(?string $namespace, string $localName): ?Dom\Attr {}
-    public function setAttributeNode(Dom\Attr $attr): ?Dom\Attr {}
-    public function setAttributeNodeNS(Dom\Attr $attr): ?Dom\Attr {}
-    public function removeAttributeNode(Dom\Attr $attr): Dom\Attr {}
-    public function getElementsByTagName(string $qualifiedName): Dom\HTMLCollection {}
-    public function getElementsByTagNameNS(?string $namespace, string $localName): Dom\HTMLCollection {}
-    public function getElementsByClassName(string $classNames): Dom\HTMLCollection {}
-    public function insertAdjacentElement(Dom\AdjacentPosition $where, Dom\Element $element): ?Dom\Element {}
-    public function insertAdjacentText(Dom\AdjacentPosition $where, string $data): void {}
-    public function insertAdjacentHTML(Dom\AdjacentPosition $where, string $string): void {}
-    public function setIdAttribute(string $qualifiedName, bool $isId): void {}
-    public function setIdAttributeNS(?string $namespace, string $qualifiedName, bool $isId): void {}
-    public function setIdAttributeNode(Dom\Attr $attr, bool $isId): void {}
-    public function remove(): void {}
-    public function before(Dom\Node|string ...$nodes): void {}
-    public function after(Dom\Node|string ...$nodes): void {}
-    public function replaceWith(Dom\Node|string ...$nodes): void {}
-    public function append(Dom\Node|string ...$nodes): void {}
-    public function prepend(Dom\Node|string ...$nodes): void {}
-    public function replaceChildren(Dom\Node|string ...$nodes): void {}
-    public function querySelector(string $selectors): ?Dom\Element {}
-    public function querySelectorAll(string $selectors): Dom\NodeList {}
-    public function closest(string $selectors): ?Dom\Element {}
-    public function matches(string $selectors): bool {}
-    public function getInScopeNamespaces(): array {}
-    public function getDescendantNamespaces(): array {}
-    public function rename(?string $namespaceURI, string $qualifiedName): void {}
-}
+   class Element extends Node implements ParentNode, ChildNode
+   {
+      public ?string $namespaceURI;
+      public ?string $prefix;
+      public string $localName;
+      public string $tagName;
+      public HTMLCollection $children;
+      public ?Element $firstElementChild;
+      public ?Element $lastElementChild;
+      public int $childElementCount;
+      public ?Element $previousElementSibling;
+      public ?Element $nextElementSibling;
+      public string $id;
+      public string $className;
+      public TokenList $classList;
+      public NamedNodeMap $attributes;
+      public string $innerHTML;
+      public string $outerHTML;
+      public string $substitutedNodeValue;
+      public function hasAttributes(): bool {}
+      public function getAttributeNames(): array {}
+      public function getAttribute(string $qualifiedName): ?string {}
+      public function getAttributeNS(?string $namespace, string $localName): ?string {}
+      public function setAttribute(string $qualifiedName, string $value): void {}
+      public function setAttributeNS(?string $namespace, string $qualifiedName, string $value): void {}
+      public function removeAttribute(string $qualifiedName): void {}
+      public function removeAttributeNS(?string $namespace, string $localName): void {}
+      public function toggleAttribute(string $qualifiedName, ?bool $force = null): bool {}
+      public function hasAttribute(string $qualifiedName): bool {}
+      public function hasAttributeNS(?string $namespace, string $localName): bool {}
+      public function getAttributeNode(string $qualifiedName): ?Attr {}
+      public function getAttributeNodeNS(?string $namespace, string $localName): ?Attr {}
+      public function setAttributeNode(Attr $attr): ?Attr {}
+      public function setAttributeNodeNS(Attr $attr): ?Attr {}
+      public function removeAttributeNode(Attr $attr): Attr {}
+      public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
+      public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
+      public function getElementsByClassName(string $classNames): HTMLCollection {}
+      public function insertAdjacentElement(AdjacentPosition $where, Element $element): ?Element {}
+      public function insertAdjacentText(AdjacentPosition $where, string $data): void {}
+      public function insertAdjacentHTML(AdjacentPosition $where, string $string): void {}
+      public function setIdAttribute(string $qualifiedName, bool $isId): void {}
+      public function setIdAttributeNS(?string $namespace, string $qualifiedName, bool $isId): void {}
+      public function setIdAttributeNode(Attr $attr, bool $isId): void {}
+      public function remove(): void {}
+      public function before(Node|string ...$nodes): void {}
+      public function after(Node|string ...$nodes): void {}
+      public function replaceWith(Node|string ...$nodes): void {}
+      public function append(Node|string ...$nodes): void {}
+      public function prepend(Node|string ...$nodes): void {}
+      public function replaceChildren(Node|string ...$nodes): void {}
+      public function querySelector(string $selectors): ?Element {}
+      public function querySelectorAll(string $selectors): NodeList {}
+      public function closest(string $selectors): ?Element {}
+      public function matches(string $selectors): bool {}
+      public function getInScopeNamespaces(): array {}
+      public function getDescendantNamespaces(): array {}
+      public function rename(?string $namespaceURI, string $qualifiedName): void {}
+   }
 
-class HTMLElement extends Element implements ChildNode, ParentNode {
-}
+   class HTMLElement extends Element implements ChildNode, ParentNode {}
 
-class Text extends CharacterData implements ChildNode {
-    public string $wholeText;
-    public function splitText(int $offset): Dom\Text {}
-}
+   class Text extends CharacterData implements ChildNode
+   {
+      public string $wholeText;
+      public function splitText(int $offset): Text {}
+   }
 
-class Comment extends CharacterData implements ChildNode {
-}
+   class Comment extends CharacterData implements ChildNode {}
 
-class CDATASection extends Text implements ChildNode {
-}
+   class CDATASection extends Text implements ChildNode {}
 
-class DocumentType extends Node implements ChildNode {
-    public string $name;
-    public Dom\DtdNamedNodeMap $entities;
-    public Dom\DtdNamedNodeMap $notations;
-    public string $publicId;
-    public string $systemId;
-    public ?string $internalSubset;
-    public function remove(): void {}
-    public function before(Dom\Node|string ...$nodes): void {}
-    public function after(Dom\Node|string ...$nodes): void {}
-    public function replaceWith(Dom\Node|string ...$nodes): void {}
-}
+   class DocumentType extends Node implements ChildNode
+   {
+      public string $name;
+      public DtdNamedNodeMap $entities;
+      public DtdNamedNodeMap $notations;
+      public string $publicId;
+      public string $systemId;
+      public ?string $internalSubset;
+      public function remove(): void {}
+      public function before(Node|string ...$nodes): void {}
+      public function after(Node|string ...$nodes): void {}
+      public function replaceWith(Node|string ...$nodes): void {}
+   }
 
-class Notation extends Node {
-    public string $publicId;
-    public string $systemId;
-}
+   class Notation extends Node
+   {
+      public string $publicId;
+      public string $systemId;
+   }
 
-class Entity extends Node {
-    public ?string $publicId;
-    public ?string $systemId;
-    public ?string $notationName;
-}
+   class Entity extends Node
+   {
+      public ?string $publicId;
+      public ?string $systemId;
+      public ?string $notationName;
+   }
 
-class EntityReference extends Node {
-}
+   class EntityReference extends Node {}
 
-class ProcessingInstruction extends CharacterData implements ChildNode {
-    public string $target;
-}
+   class ProcessingInstruction extends CharacterData implements ChildNode
+   {
+      public string $target;
+   }
 
-final class XPath {
-    public Dom\Document $document;
-    public bool $registerNodeNamespaces;
-    public function __construct(Dom\Document $document, bool $registerNodeNS = true) {}
-    public function evaluate(string $expression, ?Dom\Node $contextNode = null, bool $registerNodeNS = true): Dom\NodeList|string|float|bool|null {}
-    public function query(string $expression, ?Dom\Node $contextNode = null, bool $registerNodeNS = true): Dom\NodeList {}
-    public function registerNamespace(string $prefix, string $namespace): bool {}
-    public function registerPhpFunctions(array|string|null $restrict = null): void {}
-    public function registerPhpFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
-    public static function quote(string $str): string {}
-}
+   final class XPath
+   {
+      public Document $document;
+      public bool $registerNodeNamespaces;
+      public function __construct(Document $document, bool $registerNodeNS = true) {}
+      public function evaluate(string $expression, ?Node $contextNode = null, bool $registerNodeNS = true): NodeList|string|float|bool|null {}
+      public function query(string $expression, ?Node $contextNode = null, bool $registerNodeNS = true): NodeList {}
+      public function registerNamespace(string $prefix, string $namespace): bool {}
+      public function registerPhpFunctions(array|string|null $restrict = null): void {}
+      public function registerPhpFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
+      public static function quote(string $str): string {}
+   }
 
-final class TokenList implements IteratorAggregate, Traversable, Countable {
-    public int $length;
-    public string $value;
-    private function __construct() {}
-    public function item(int $index): ?string {}
-    public function contains(string $token): bool {}
-    public function add(string ...$tokens): void {}
-    public function remove(string ...$tokens): void {}
-    public function toggle(string $token, ?bool $force = null): bool {}
-    public function replace(string $token, string $newToken): bool {}
-    public function supports(string $token): bool {}
-    public function count(): int {}
-    public function getIterator(): Iterator {}
-}
+   final class TokenList implements IteratorAggregate, Traversable, Countable
+   {
+      public int $length;
+      public string $value;
+      private function __construct() {}
+      public function item(int $index): ?string {}
+      public function contains(string $token): bool {}
+      public function add(string ...$tokens): void {}
+      public function remove(string ...$tokens): void {}
+      public function toggle(string $token, ?bool $force = null): bool {}
+      public function replace(string $token, string $newToken): bool {}
+      public function supports(string $token): bool {}
+      public function count(): int {}
+      public function getIterator(): Iterator {}
+   }
 
-interface ParentNode {
-    public abstract function append(Dom\Node|string ...$nodes): void;
-    public abstract function prepend(Dom\Node|string ...$nodes): void;
-    public abstract function replaceChildren(Dom\Node|string ...$nodes): void;
-    public abstract function querySelector(string $selectors): ?Dom\Element;
-    public abstract function querySelectorAll(string $selectors): Dom\NodeList;
-}
+   interface ParentNode
+   {
+      public abstract function append(Node|string ...$nodes): void;
+      public abstract function prepend(Node|string ...$nodes): void;
+      public abstract function replaceChildren(Node|string ...$nodes): void;
+      public abstract function querySelector(string $selectors): ?Element;
+      public abstract function querySelectorAll(string $selectors): NodeList;
+   }
 
-interface ChildNode {
-    public abstract function remove(): void;
-    public abstract function before(Dom\Node|string ...$nodes): void;
-    public abstract function after(Dom\Node|string ...$nodes): void;
-    public abstract function replaceWith(Dom\Node|string ...$nodes): void;
-}
+   interface ChildNode
+   {
+      public abstract function remove(): void;
+      public abstract function before(Node|string ...$nodes): void;
+      public abstract function after(Node|string ...$nodes): void;
+      public abstract function replaceWith(Node|string ...$nodes): void;
+   }
 
-function import_simplexml(object $node): Dom\Attr|Dom\Element {}
+   function import_simplexml(object $node): Attr|Element {}
 }

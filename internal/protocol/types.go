@@ -277,12 +277,59 @@ type InitializeParams struct {
 				} `json:"completionItem"`
 			} `json:"completion"`
 		} `json:"textDocument"`
+		General struct {
+			PositionEncodings []string `json:"positionEncodings"`
+		} `json:"general"`
 		Window struct {
 			ShowDocument struct {
 				Support bool `json:"support"`
 			} `json:"showDocument"`
 		} `json:"window"`
+		Workspace struct {
+			DidChangeWatchedFiles struct {
+				DynamicRegistration bool `json:"dynamicRegistration"`
+			} `json:"didChangeWatchedFiles"`
+		} `json:"workspace"`
 	} `json:"capabilities"`
+}
+
+type RegistrationParams struct {
+	Registrations []Registration `json:"registrations"`
+}
+
+type Registration struct {
+	ID              string `json:"id"`
+	Method          string `json:"method"`
+	RegisterOptions any    `json:"registerOptions,omitempty"`
+}
+
+type DidChangeWatchedFilesRegistrationOptions struct {
+	Watchers []FileSystemWatcher `json:"watchers"`
+}
+
+type WatchKind int
+
+const (
+	WatchCreate WatchKind = 1
+	WatchChange WatchKind = 2
+	WatchDelete WatchKind = 4
+)
+
+type FileSystemWatcher struct {
+	GlobPattern string    `json:"globPattern"`
+	Kind        WatchKind `json:"kind,omitempty"`
+}
+
+type DidChangeWatchedFilesParams struct {
+	Changes []FileEvent `json:"changes"`
+}
+
+type FileEvent struct {
+	URI string `json:"uri"`
+}
+
+type DidChangeConfigurationParams struct {
+	Settings json.RawMessage `json:"settings"`
 }
 
 // InitializationOptions sent by the client during initialization.
@@ -478,6 +525,7 @@ type SemanticTokensParams struct {
 
 // ServerCapabilities declares server capabilities.
 type ServerCapabilities struct {
+	PositionEncoding          string                    `json:"positionEncoding"`
 	TextDocumentSync          TextDocumentSyncOptions   `json:"textDocumentSync"`
 	CompletionProvider        *CompletionOptions        `json:"completionProvider,omitempty"`
 	HoverProvider             bool                      `json:"hoverProvider"`

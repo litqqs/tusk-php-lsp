@@ -111,15 +111,10 @@ func newExtractSelection(source string, result *parser.ParseResult, rng protocol
 		return extractSelection{}, false
 	}
 
-	statementStart := findStatementStart(result.Tokens, first)
-	if statementStart < 0 {
-		return extractSelection{}, false
-	}
-
 	return extractSelection{
 		rng:            rng,
 		text:           selected,
-		statementStart: tokenRange(result.Tokens[statementStart]).Start,
+		statementStart: tokenRange(result.Tokens[parser.StatementStart(result.Tokens, first)]).Start,
 	}, true
 }
 
@@ -127,7 +122,7 @@ func selectionTokenBounds(tokens []parser.Token, rng protocol.Range) (int, int) 
 	first := -1
 	last := -1
 	for i, tok := range tokens {
-		if isTriviaToken(tok.Kind) {
+		if tok.Kind.IsComment() {
 			continue
 		}
 		tokRange := tokenRange(tok)
@@ -176,40 +171,6 @@ func extractSelectionIsSafe(tokens []parser.Token, first, last int) bool {
 	return depthParen == 0 && depthBracket == 0
 }
 
-func findStatementStart(tokens []parser.Token, first int) int {
-	depthParen := 0
-	depthBracket := 0
-	for i := first - 1; i >= 0; i-- {
-		tok := tokens[i]
-		if isTriviaToken(tok.Kind) {
-			continue
-		}
-		switch tok.Kind {
-		case parser.TokenCloseParen:
-			depthParen++
-		case parser.TokenOpenParen:
-			if depthParen > 0 {
-				depthParen--
-				continue
-			}
-		case parser.TokenCloseBracket:
-			depthBracket++
-		case parser.TokenOpenBracket:
-			if depthBracket > 0 {
-				depthBracket--
-				continue
-			}
-		}
-		if depthParen == 0 && depthBracket == 0 {
-			switch tok.Kind {
-			case parser.TokenSemicolon, parser.TokenOpenBrace, parser.TokenCloseBrace:
-				return nextSignificantToken(tokens, i+1)
-			}
-		}
-	}
-	return nextSignificantToken(tokens, 0)
-}
-
 func nextExtractVariableName(targetScope *scope.Scope) string {
 	base := "$extracted"
 	for idx := 0; idx < 1000; idx++ {
@@ -233,19 +194,6 @@ func scopeHasVisibleBinding(targetScope *scope.Scope, name string) bool {
 		}
 	}
 	return false
-}
-
-func nextSignificantToken(tokens []parser.Token, start int) int {
-	for i := start; i < len(tokens); i++ {
-		if !isTriviaToken(tokens[i].Kind) {
-			return i
-		}
-	}
-	return -1
-}
-
-func isTriviaToken(kind parser.TokenKind) bool {
-	return kind == parser.TokenWhitespace || kind == parser.TokenComment || kind == parser.TokenDocComment
 }
 
 func positionToOffset(source string, pos protocol.Position) (int, bool) {

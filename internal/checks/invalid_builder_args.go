@@ -5,8 +5,10 @@ import (
 	"regexp"
 	"strings"
 
+	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
 	"github.com/Tusk-PHP/lsp/internal/parser"
 	"github.com/Tusk-PHP/lsp/internal/rule"
+	"github.com/Tusk-PHP/lsp/internal/scope"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 )
 
@@ -38,11 +40,10 @@ var builderRelationMethods = map[string]bool{
 	"load": true, "loadMissing": true, "loadCount": true,
 }
 
-// ModelResolverFunc resolves the Eloquent model FQN from a builder chain
-// expression. prefix is the line up to and including the call's opening
-// parenthesis (`Post::query()->where(`). Returns "" if the model cannot be
-// determined.
-type ModelResolverFunc func(prefix string, method string, source string, line int, file *parser.FileNode) string
+// ModelResolverFunc resolves the Eloquent model a builder call is made on.
+// prefix is the line up to and including the call's opening parenthesis
+// (`Post::query()->where(`). Its FQN is "" if the model cannot be determined.
+type ModelResolverFunc func(prefix string, method string, source string, line int, file *parser.FileNode) frameworklaravel.QueriedModel
 
 // MemberChecker provides methods to verify columns and relations on a model.
 type MemberChecker interface {
@@ -94,14 +95,29 @@ func (r *InvalidBuilderArgRule) Check(file *parser.FileNode, source string, _ *s
 	var findings []Finding
 
 	mask := newMaskState(source)
+	joins := &builderJoins{source: source}
 	for i, line := range lines {
 		code := maskPHPLine(line, &mask)
 		if !strings.Contains(code, "->") && !strings.Contains(code, "::") {
 			continue
 		}
-		findings = append(findings, r.checkLine(line, code, i, source, file)...)
+		findings = append(findings, r.checkLine(line, code, i, source, file, joins)...)
 	}
 	return findings
+}
+
+type builderJoins struct {
+	source string
+	tokens []parser.Token
+	doc    *scope.Document
+}
+
+func (j *builderJoins) mayBeJoined(line, col int) bool {
+	if j.tokens == nil {
+		j.tokens = parser.Tokenize(j.source)
+		j.doc = scope.Collect(j.source)
+	}
+	return frameworklaravel.BuilderMayBeJoined(j.tokens, j.doc, line, col)
 }
 
 // callPrefix returns the line up to and including the opening parenthesis of
@@ -154,7 +170,7 @@ var doubleQuotedRe = regexp.MustCompile(`"([^"]*)"`)
 var twoArgSingleRe = regexp.MustCompile(`(?:->|::)(\w+)\s*\(\s*'([^']*)'\s*,\s*'([^']*)'`)
 var twoArgDoubleRe = regexp.MustCompile(`(?:->|::)(\w+)\s*\(\s*"([^"]*)"\s*,\s*"([^"]*)"`)
 
-func (r *InvalidBuilderArgRule) checkLine(line, code string, lineNum int, source string, file *parser.FileNode) []Finding {
+func (r *InvalidBuilderArgRule) checkLine(line, code string, lineNum int, source string, file *parser.FileNode, joins *builderJoins) []Finding {
 	var findings []Finding
 
 	// Check aggregate two-arg methods first: ->withSum('relation', 'column')
@@ -191,7 +207,7 @@ func (r *InvalidBuilderArgRule) checkLine(line, code string, lineNum int, source
 				continue
 			}
 
-			if f := r.validateArg(method, argValue, lineNum, argStart, argEnd, prefix, source, file); f != nil {
+			if f := r.validateArg(method, argValue, builderCall{lineNum, match[0], prefix}, argStart, argEnd, source, file, joins); f != nil {
 				findings = append(findings, *f)
 			}
 		}
@@ -214,7 +230,7 @@ func (r *InvalidBuilderArgRule) checkLine(line, code string, lineNum int, source
 				absEnd := match[4] + strMatch[3]
 
 				cleaned := stripAlias(argValue)
-				if f := r.validateArg(method, cleaned, lineNum, absStart, absEnd, prefix, source, file); f != nil {
+				if f := r.validateArg(method, cleaned, builderCall{lineNum, match[0], prefix}, absStart, absEnd, source, file, joins); f != nil {
 					findings = append(findings, *f)
 				}
 			}
@@ -231,7 +247,7 @@ func (r *InvalidBuilderArgRule) validateAggregateSecondArg(method, relationName,
 		return nil
 	}
 
-	modelFQN := r.ModelResolver(prefix, method, source, lineNum, file)
+	modelFQN := r.ModelResolver(prefix, method, source, lineNum, file).FQN
 	if modelFQN == "" {
 		return nil
 	}
@@ -256,7 +272,13 @@ func (r *InvalidBuilderArgRule) validateAggregateSecondArg(method, relationName,
 	return nil
 }
 
-func (r *InvalidBuilderArgRule) validateArg(method, argValue string, lineNum, startCol, endCol int, prefix, source string, file *parser.FileNode) *Finding {
+type builderCall struct {
+	line     int
+	operator int
+	prefix   string
+}
+
+func (r *InvalidBuilderArgRule) validateArg(method, argValue string, call builderCall, startCol, endCol int, source string, file *parser.FileNode, joins *builderJoins) *Finding {
 	if argValue == "" {
 		return nil
 	}
@@ -300,7 +322,8 @@ func (r *InvalidBuilderArgRule) validateArg(method, argValue string, lineNum, st
 	}
 
 	// Resolve the model from the line up to the method call
-	modelFQN := r.ModelResolver(prefix, method, source, lineNum, file)
+	model := r.ModelResolver(call.prefix, method, source, call.line, file)
+	modelFQN := model.FQN
 	if modelFQN == "" {
 		return nil
 	}
@@ -329,6 +352,9 @@ func (r *InvalidBuilderArgRule) validateArg(method, argValue string, lineNum, st
 	if msg == "" {
 		return nil
 	}
+	if !isRelMethod && (model.OtherTables || joins.mayBeJoined(call.line, call.operator)) {
+		return nil
+	}
 
 	code := rule.UnknownColumn
 	if isRelMethod {
@@ -336,9 +362,9 @@ func (r *InvalidBuilderArgRule) validateArg(method, argValue string, lineNum, st
 	}
 
 	return &Finding{
-		StartLine: lineNum,
+		StartLine: call.line,
 		StartCol:  startCol,
-		EndLine:   lineNum,
+		EndLine:   call.line,
 		EndCol:    endCol,
 		Severity:  rule.SeverityWarning,
 		Code:      code,

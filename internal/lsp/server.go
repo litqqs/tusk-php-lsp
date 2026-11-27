@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime/debug"
 	"sync"
+	"sync/atomic"
 
 	"github.com/Tusk-PHP/lsp/internal/analyzer"
 	"github.com/Tusk-PHP/lsp/internal/completion"
@@ -16,12 +17,14 @@ import (
 	"github.com/Tusk-PHP/lsp/internal/container"
 	"github.com/Tusk-PHP/lsp/internal/coverage"
 	"github.com/Tusk-PHP/lsp/internal/diagnostics"
+	"github.com/Tusk-PHP/lsp/internal/document"
 	"github.com/Tusk-PHP/lsp/internal/formatter"
 	frameworklaravel "github.com/Tusk-PHP/lsp/internal/framework/laravel"
 	"github.com/Tusk-PHP/lsp/internal/framework/laravel/blade"
 	"github.com/Tusk-PHP/lsp/internal/hover"
 	"github.com/Tusk-PHP/lsp/internal/inlayhint"
 	"github.com/Tusk-PHP/lsp/internal/models"
+	"github.com/Tusk-PHP/lsp/internal/protocol"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 	"github.com/Tusk-PHP/lsp/internal/workspace"
 )
@@ -55,6 +58,8 @@ type Server struct {
 	schemaCache   *models.SchemaCache
 	docMu         sync.RWMutex
 	documents     map[string]string
+	openPaths     map[string]string
+	unsaved       map[string]bool
 	// blade keeps the compiled PHP of open Blade views (see blade.go).
 	blade bladeViews
 	// viewTypes types the variables Blade views receive (see blade_vars.go).
@@ -76,6 +81,7 @@ type Server struct {
 	docIndex docIndexQueue
 	// diagDebounce delays diagnostics after edits (see scheduleDiagnostics).
 	diagDebounce diagDebouncer
+	encoding     document.Encoding
 	rootPath     string
 	framework    string
 	reader       *bufio.Reader
@@ -85,10 +91,14 @@ type Server struct {
 	strict       bool      // when true, recovered panics are re-raised after logging
 	exitFunc     func(int) // called by the "exit" notification handler; defaults to os.Exit
 
-	builtinPHPVersion string
-	builtinPHPSource  string // "composer" | "local" | "fallback"
-
 	clientSupportsShowDocument bool
+	clientWatchesFiles         bool
+	initOptions                *protocol.InitializationOptions
+	clientSettings             atomic.Pointer[protocol.InitializationOptions]
+	fileConfig                 atomic.Pointer[config.Config]
+	configProblems             reportedProblems
+	indexed                    chan struct{}
+	watch                      watchedFiles
 	coverageNotifications      bool
 
 	// requestIDCounter generates unique IDs for server-to-client requests.
@@ -106,7 +116,7 @@ type Server struct {
 }
 
 func NewServer(reader io.Reader, writer io.Writer, logger *log.Logger) *Server {
-	return &Server{cfg: config.DefaultConfig(), index: symbols.NewIndex(), schemaCache: models.NewSchemaCache(), documents: make(map[string]string), reader: bufio.NewReader(reader), writer: writer, logger: logger, exitFunc: os.Exit}
+	return &Server{cfg: config.DefaultConfig(), index: symbols.NewIndex(), schemaCache: models.NewSchemaCache(), documents: make(map[string]string), openPaths: make(map[string]string), unsaved: make(map[string]bool), indexed: make(chan struct{}), reader: bufio.NewReader(reader), writer: writer, logger: logger, exitFunc: os.Exit}
 }
 
 // SetStrict enables or disables strict panic mode.

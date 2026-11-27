@@ -21,13 +21,14 @@ import (
 	"github.com/Tusk-PHP/lsp/internal/introspect"
 	"github.com/Tusk-PHP/lsp/internal/lsp"
 	"github.com/Tusk-PHP/lsp/internal/parser"
+	"github.com/Tusk-PHP/lsp/internal/strict"
 	"github.com/Tusk-PHP/lsp/internal/symbols"
 	"github.com/Tusk-PHP/lsp/internal/unuseddeps"
 	"github.com/Tusk-PHP/lsp/internal/workspace"
 )
 
 var (
-	version    = "0.16.0"
+	version    = "0.17.0"
 	showVer    = flag.Bool("version", false, "Print version and exit")
 	logFile    = flag.String("log", "", "Log file path (default: stderr)")
 	transport  = flag.String("transport", "stdio", "Transport: stdio")
@@ -85,8 +86,12 @@ func main() {
 		}
 		os.Exit(0)
 	}
-	// Strict mode is enabled via flag OR the TUSK_STRICT environment variable.
-	strict := *strictMode || isTruthy(os.Getenv("TUSK_STRICT"))
+	if *strictMode {
+		if err := os.Setenv(strict.EnvVar, "1"); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to enable strict mode: %v\n", err)
+			os.Exit(1)
+		}
+	}
 	var logger *log.Logger
 	if *logFile != "" {
 		f, err := os.OpenFile(*logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -102,20 +107,10 @@ func main() {
 	logger.Printf("Starting tusk-php %s", version)
 	lsp.ServerVersion = version
 	server := lsp.NewServer(serverStdin(), os.Stdout, logger)
-	server.SetStrict(strict)
+	server.SetStrict(strict.Enabled())
 	if err := server.Run(); err != nil {
 		logger.Fatalf("Server error: %v", err)
 	}
-}
-
-// isTruthy returns true when s is one of the common truthy env-var values
-// ("1", "true", "yes", "on"), case-insensitively.
-func isTruthy(s string) bool {
-	switch s {
-	case "1", "true", "True", "TRUE", "yes", "Yes", "YES", "on", "On", "ON":
-		return true
-	}
-	return false
 }
 
 // loadProjectMetadata loads config and detects the PHP builtin profile for a
@@ -123,7 +118,7 @@ func isTruthy(s string) bool {
 // config.LoadFromFile returns a default-merged config on missing file, so no
 // special not-exist handling is needed here.
 func loadProjectMetadata(rootPath string, stderr io.Writer) (*config.Config, string, symbols.BuiltinProfile, error) {
-	cfgPath := filepath.Join(rootPath, ".tusk-php.json")
+	cfgPath := filepath.Join(rootPath, config.FileName)
 	cfg, err := config.LoadFromFile(cfgPath)
 	if err != nil {
 		return nil, "", symbols.BuiltinProfile{}, err
@@ -138,7 +133,7 @@ func loadProjectMetadata(rootPath string, stderr io.Writer) (*config.Config, str
 	}
 
 	timeout := time.Duration(cfg.PHPDetectTimeoutMs) * time.Millisecond
-	profile, _ := workspace.ResolveBuiltinProfile(rootPath, cfg.PHPBinary, timeout, nil)
+	profile, _ := workspace.ResolveBuiltinProfileWithConfig(rootPath, cfg.PHPBinary, timeout, cfg, nil)
 	return cfg, framework, profile, nil
 }
 
@@ -252,7 +247,7 @@ func runIntrospect(args []string) error {
 		Container:     ws.Container,
 		Framework:     framework,
 		ServerVersion: version,
-		Profile:       introspect.FormatProfile(ws.BuiltinProfile.PHPVersion, ws.BuiltinProfile.Extensions),
+		Profile:       introspect.FormatProfile(ws.Profile().PHPVersion, ws.Profile().Extensions),
 		BufferState:   "disk",
 		Diagnostics:   findings,
 		Verbosity:     v,

@@ -64,12 +64,15 @@ above it in this list**, never from a later one:
 
 1. **Wire types and identifiers:** `protocol` (LSP types, no logic), `rule`
    (diagnostic codes, severities and sources: every code a finding carries is a
-   `rule.Code` constant listed in `rule.All`).
-2. **Language core:** `php/token` and `php/lexer` (lossless lexer that matches
-   the tokenizer of PHP 7.4 and 8.0 to 8.6 with `short_open_tag` off, so `<?` is
-   inline HTML; see issue #140; it leaves out the empty `T_ENCAPSED_AND_WHITESPACE`
-   PHP emits for a space in an unquoted string offset like `"$a[ b]"`), `parser` (own tokenizer and
-   lightweight AST, fault-tolerant),
+   `rule.Code` constant listed in `rule.All`), `strict` (whether a recovered
+   panic is raised again: `-strict` or `TUSK_STRICT`).
+2. **Language core:** `php/token`, `php/lexer`, `php/ast` and `php/parser` (a
+   lossless lexer and a full fault-tolerant parser that match the tokenizer and
+   parser of PHP 7.4 and 8.0 to 8.6, with `short_open_tag` off, so `<?` is
+   inline HTML; see issue #140; the lexer leaves out the empty
+   `T_ENCAPSED_AND_WHITESPACE` PHP emits for a space in an unquoted string offset
+   like `"$a[ b]"`), `parser` (the older tokenizer and lightweight AST the
+   features still use),
    `types`, `phparray`, `stubs` (embedded builtin stubs by PHP version and
    extension), `phpdetect`.
 3. **Index and resolution:** `symbols` (the central index), `scope` (variables,
@@ -102,10 +105,10 @@ internal/
 ├── lsp/              LSP transport: read, schedule, write, translate to/from protocol
 ├── mcpserver/        MCP transport: tools and resources only
 ├── session/          builds and connects the analysis providers once, for every transport
-├── document/         open documents: versions, immutable snapshots, edits, UTF-16 positions
+├── document/         open documents: versions, immutable snapshots, edits, column conversion
 ├── indexing/         when and what to (re)index: scheduling, invalidation, caches
 ├── workspace/        roots, Composer discovery, project profile
-├── php/              token, lexer: PHP's own grammar, version by version (issue #140)
+├── php/              token, lexer, ast, parser: PHP's own grammar, version by version (issue #140)
 ├── parser/ types/ symbols/ scope/ resolve/ source/      language core (no transport types over time)
 ├── completion/ hover/ analyzer/ inlayhint/ checks/ diagnostics/   features
 ├── framework/
@@ -122,7 +125,8 @@ What each piece owns once it exists:
   `lsp/initialize.go` (`handleInitialize`) and `mcpserver/server.go` (`buildRuntime`).
 - **`document`** owns the latest text of each open file and its version. Analysis
   runs on an immutable snapshot and its result is dropped if a newer version
-  arrived meanwhile.
+  arrived meanwhile. It also converts columns between the byte offsets the core
+  uses and the position encoding negotiated with the client (UTF-8 or UTF-16).
 - **`indexing`** owns scheduling and invalidation; `symbols` keeps the data and the
   queries.
 - **`lsp`** owns the single output writer and request scheduling (bounded workers,
@@ -229,7 +233,8 @@ cross-file answer on a 9,700-file Laravel app. Every change must keep it.
   each one, then run `make field-baseline-update` and commit the result.
 - The parser must stay fault-tolerant: bail-out conditions, progress guards,
   partial results on panic. Message handlers and goroutines recover panics
-  (`recoverPanic`, `goSafe`); `-strict` / `TUSK_STRICT` re-panics in development.
+  (`recoverPanic`, `goSafe`, and the parser's own guard); `-strict` / `TUSK_STRICT`
+  re-panics in development, read through `strict.Enabled()`.
 
 ## Before opening a pull request
 
@@ -241,6 +246,22 @@ opening a pull request. This file covers the code's principles.
 
 Pull requests don't edit `CHANGELOG.md`: put a **Release note** in the pull request
 description instead, and the maintainers write the changelog from it when they release.
+
+## Opening an issue
+
+Follow [CONTRIBUTING.md › Issues, goals and milestones](CONTRIBUTING.md#issues-goals-and-milestones).
+An issue you open is a sub-issue of one goal on the
+[Roadmap](https://github.com/Tusk-PHP/lsp/issues/39) (the Roadmap's sub-issues are the
+goals), has a type (Bug, Feature or Task) and an `area:` label where one fits. Link it
+to its goal after creating it:
+
+```bash
+gh api -X POST repos/Tusk-PHP/lsp/issues/<goal>/sub_issues \
+  -F sub_issue_id="$(gh api repos/Tusk-PHP/lsp/issues/<new> --jq .id)"
+```
+
+Never set a milestone: milestones are versions, and the maintainers decide what goes in
+a release.
 
 ## Direction
 

@@ -3,12 +3,13 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/Tusk-PHP/lsp/internal/composer"
 	"github.com/Tusk-PHP/lsp/internal/config"
@@ -29,11 +30,10 @@ type Options struct {
 }
 
 type Bootstrapped struct {
-	RootPath       string
-	Framework      string
-	Config         *config.Config
-	Logger         *log.Logger
-	BuiltinProfile symbols.BuiltinProfile
+	RootPath  string
+	Framework string
+	Config    *config.Config
+	Logger    *log.Logger
 
 	Index      *symbols.Index
 	Container  *container.ContainerAnalyzer
@@ -51,8 +51,13 @@ type Bootstrapped struct {
 	SchemaCache     *models.SchemaCache
 	Schema          *models.Schema
 
-	exclude         excludeRules
-	autoloadOnce    sync.Once
+	exclude excludeRules
+
+	profileMu sync.Mutex
+	profile   atomic.Pointer[symbols.BuiltinProfile]
+
+	autoloadMu      sync.Mutex
+	autoloadRead    bool
 	autoloadEntries []composer.AutoloadEntry
 	projectFiles    *projectFiles
 
@@ -92,12 +97,11 @@ func New(opts Options) *Bootstrapped {
 		index.SetClassGenerator(aliases)
 	}
 
-	return &Bootstrapped{
+	ws := &Bootstrapped{
 		RootPath:        opts.RootPath,
 		Framework:       opts.Framework,
 		Config:          cfg,
 		Logger:          opts.Logger,
-		BuiltinProfile:  opts.BuiltinProfile,
 		Index:           index,
 		Container:       container.NewContainerAnalyzer(index, opts.RootPath, opts.Framework),
 		RouteIndex:      routeIndex,
@@ -108,6 +112,9 @@ func New(opts Options) *Bootstrapped {
 		exclude:         newExcludeRules(cfg.ExcludePaths),
 		projectFiles:    newProjectFiles(cfg.MaxIndexFiles),
 	}
+	profile := opts.BuiltinProfile
+	ws.profile.Store(&profile)
+	return ws
 }
 
 func Build(ctx context.Context, opts Options) (*Bootstrapped, error) {
@@ -116,32 +123,39 @@ func Build(ctx context.Context, opts Options) (*Bootstrapped, error) {
 	}
 
 	ws := New(opts)
-	if err := ctx.Err(); err != nil {
+	if err := ws.Load(ctx); err != nil {
 		return nil, err
+	}
+	return ws, nil
+}
+
+func (ws *Bootstrapped) Load(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
 	}
 	ws.IndexWorkspace()
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return err
 	}
 	ws.IndexComposerDependencies()
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return err
 	}
 	ws.Container.Analyze()
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return err
 	}
 	if err := ws.ScanRoutes(); err != nil {
-		return nil, err
+		return err
 	}
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return err
 	}
 	ws.AnalyzeModels()
 	ws.ScanSymfonyCommands()
 	ws.Index.WarmSearchIndexes()
 	ws.Index.MarkReady()
-	return ws, nil
+	return nil
 }
 
 type IndexedFiles struct {
@@ -165,16 +179,10 @@ func (ws *Bootstrapped) IndexWorkspace() IndexedFiles {
 	var ideHelperFiles []string
 	var fn filepath.WalkFunc
 	deep := 0
-	uriPre := "file://"
-	if runtime.GOOS == "windows" {
-		uriPre = "file:///"
-	}
+	// 不使用 WalkSources, 是为了处理目录联接/软链
 	fn = func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
-		}
-		if runtime.GOOS == "windows" {
-			path = strings.ReplaceAll(path, "\\", "/")
 		}
 		if info.IsDir() {
 			if ws.excludedDir(path) {
@@ -208,10 +216,10 @@ func (ws *Bootstrapped) IndexWorkspace() IndexedFiles {
 		// Blade views declare no symbols; only their place is kept, for
 		// references and rename, and their PHP is read when it's needed.
 		if IsBlade(path) {
-			ws.Index.AddTemplateFile(uriPre + path)
+			ws.Index.AddTemplateFile(symbols.PathToURI(path))
 			if ws.ViewData != nil {
 				if content, err := os.ReadFile(path); err == nil {
-					ws.ViewData.IndexFile(uriPre+path, string(content))
+					ws.ViewData.IndexFile(symbols.PathToURI(path), string(content))
 				}
 			}
 			return nil
@@ -226,8 +234,8 @@ func (ws *Bootstrapped) IndexWorkspace() IndexedFiles {
 			return nil
 		}
 		if content, err := os.ReadFile(path); err == nil {
-			ws.Index.IndexFileWithSource(uriPre+path, string(content), symbols.SourceProject)
-			ws.ViewData.IndexFile(uriPre+path, string(content))
+			ws.Index.IndexFileWithSource(symbols.PathToURI(path), string(content), symbols.SourceProject)
+			ws.ViewData.IndexFile(symbols.PathToURI(path), string(content))
 		}
 		return nil
 	}
@@ -235,7 +243,7 @@ func (ws *Bootstrapped) IndexWorkspace() IndexedFiles {
 
 	for _, path := range ideHelperFiles {
 		if content, err := os.ReadFile(path); err == nil {
-			ws.Index.IndexIDEHelperFile(uriPre+path, string(content))
+			ws.Index.IndexIDEHelperFile(symbols.PathToURI(path), string(content))
 			ws.logf("Indexed IDE helper: %s", filepath.Base(path))
 		}
 	}
@@ -243,6 +251,24 @@ func (ws *Bootstrapped) IndexWorkspace() IndexedFiles {
 	count := ws.projectFiles.finish()
 	ws.logf("Indexed %d PHP files", count)
 	return IndexedFiles{Count: count, Truncated: truncated}
+}
+
+func (ws *Bootstrapped) WalkSources(dir string, visit func(path string, info fs.FileInfo) error) {
+	_ = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if info.IsDir() {
+			if ws.excludedDir(path) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !IsPHPSource(path) {
+			return nil
+		}
+		return visit(path, info)
+	})
 }
 
 func (ws *Bootstrapped) excludedDir(path string) bool {
@@ -266,10 +292,6 @@ func (ws *Bootstrapped) IndexComposerDependencies() int {
 	if len(entries) == 0 {
 		return 0
 	}
-	uriPre := "file://"
-	if runtime.GOOS == "windows" {
-		uriPre = "file:///"
-	}
 	vendorCount := 0
 	for _, entry := range entries {
 		src := symbols.SourceProject
@@ -279,7 +301,7 @@ func (ws *Bootstrapped) IndexComposerDependencies() int {
 
 		if entry.IsFile {
 			if content, err := os.ReadFile(entry.Path); err == nil {
-				ws.Index.IndexFileWithSource(uriPre+strings.ReplaceAll(entry.Path, "\\", "/"), string(content), src)
+				ws.Index.IndexFileWithSource(symbols.PathToURI(entry.Path), string(content), src)
 				if entry.IsVendor {
 					vendorCount++
 				}
@@ -302,7 +324,7 @@ func (ws *Bootstrapped) IndexComposerDependencies() int {
 				return nil
 			}
 			if content, err := os.ReadFile(path); err == nil {
-				ws.Index.IndexFileWithSource(uriPre+strings.ReplaceAll(path, "\\", "/"), string(content), symbols.SourceVendor)
+				ws.Index.IndexFileWithSource(symbols.PathToURI(path), string(content), symbols.SourceVendor)
 				vendorCount++
 			}
 			return nil

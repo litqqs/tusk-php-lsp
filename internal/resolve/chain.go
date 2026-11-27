@@ -16,7 +16,7 @@ import (
 // another one through TypedChainResolver asks that one.
 func (r *Resolver) ChainType(expr, source string, pos protocol.Position, file *parser.FileNode) ResolvedType {
 	if r.TypedChainResolver != nil {
-		return r.TypedChainResolver(expr, source, pos, file)
+		return r.TypedChainResolver(r, expr, source, pos, file)
 	}
 	return r.chainType(expr, source, pos, file)
 }
@@ -52,7 +52,7 @@ func (r *Resolver) AccessOwnerType(line string, wordStart int, source string, po
 	default:
 		return ResolvedType{}
 	}
-	return r.TypedChainResolver(line[:i], source, pos, file)
+	return r.TypedChainResolver(r, line[:i], source, pos, file)
 }
 
 // resolveChainWithContext is the generic-aware chain resolver. It walks backward
@@ -106,7 +106,7 @@ func (r *Resolver) accessOwnerType(line string, wordStart int, source string, po
 
 		if op == "->" && r.ContainerCall != nil {
 			callExpr := strings.TrimSpace(line[:parenEnd])
-			if concrete := r.ContainerCall(callExpr, source, file); concrete != "" {
+			if concrete := r.ContainerCall(r, callExpr, source, file); concrete != "" {
 				if concrete == "-" {
 					return ResolvedType{}
 				}
@@ -210,14 +210,15 @@ func (r *Resolver) accessOwnerType(line string, wordStart int, source string, po
 
 	// Try as class name — this is the chain origin (e.g., Category::). A word
 	// after -> or :: is a member (UserRole::Client, $x->Client), never a class.
-	if fqn := r.ChainOriginClassName(line, i, target, file); fqn != "" {
-		if sym := r.Index.Lookup(fqn); sym != nil {
-			switch sym.Kind {
-			case symbols.KindClass, symbols.KindInterface, symbols.KindEnum, symbols.KindTrait:
+	if parenEnd == 0 {
+		if fqn := r.ChainOriginClassName(line, i, target, file); fqn != "" {
+			if sym := r.Index.Lookup(fqn); sym != nil {
+				if sym.IsClassLike() {
+					return ResolvedType{FQN: fqn}
+				}
+			} else if fqn != target && !strings.Contains(fqn, "::") {
 				return ResolvedType{FQN: fqn}
 			}
-		} else if fqn != target && !strings.Contains(fqn, "::") {
-			return ResolvedType{FQN: fqn}
 		}
 	}
 
@@ -244,13 +245,15 @@ func (r *Resolver) accessOwnerType(line string, wordStart int, source string, po
 		}
 	}
 	ownerFQN := ownerResolved.BaseFQN()
-	if strings.HasSuffix(strings.TrimRight(line[:i], " \t"), "::") {
+	static := strings.HasSuffix(strings.TrimRight(line[:i], " \t"), "::")
+	if static {
 		ownerResolved = ClassStringTarget(ownerResolved) // $class::create()
 	}
-	if fwd, ok := r.ForwardedReceiver(ownerResolved, target, parenEnd > 0); ok {
+	access := MemberAccessOf(parenEnd > 0, static, target)
+	if fwd, ok := r.ForwardedReceiver(ownerResolved, target, access); ok {
 		ownerResolved = fwd // Category::where() runs on Builder<Category>
 	}
-	member, foundOn := r.FindMemberOn(ownerResolved, target, parenEnd > 0)
+	member, foundOn := r.FindMemberOn(ownerResolved, target, access)
 	firstClass := parenEnd > 0 && IsCallableArgs(callArgStr)
 	if member != nil && foundOn.FQN != ownerResolved.FQN {
 		// A member a @mixin brings in. A fluent one gives back the object it
@@ -387,10 +390,8 @@ func (r *Resolver) ResolveClassNameLoose(name string, file *parser.FileNode) str
 	}
 
 	if file == nil {
-		// Try direct lookup by name
-		syms := r.Index.LookupByName(name)
-		if best := symbols.PickBestStandalone(syms, name); best != nil {
-			return best.FQN
+		if cls := r.classNamed(name); cls != nil {
+			return cls.FQN
 		}
 		return name
 	}
@@ -416,12 +417,20 @@ func (r *Resolver) ResolveClassNameLoose(name string, file *parser.FileNode) str
 	if r.Index.Lookup(name) != nil {
 		return name
 	}
-	// Fallback: search by short name
-	syms := r.Index.LookupByName(name)
-	if best := symbols.PickBestStandalone(syms, name); best != nil {
-		return best.FQN
+	if cls := r.classNamed(name); cls != nil {
+		return cls.FQN
 	}
 	return name
+}
+
+func (r *Resolver) classNamed(name string) *symbols.Symbol {
+	var classes []*symbols.Symbol
+	for _, sym := range r.Index.LookupByName(name) {
+		if sym.IsClassLike() {
+			classes = append(classes, sym)
+		}
+	}
+	return symbols.PickBestStandalone(classes, name)
 }
 
 // ExtractNewClass extracts the class name from patterns like:

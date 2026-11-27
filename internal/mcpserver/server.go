@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/Tusk-PHP/lsp/internal/analyzer"
-	"github.com/Tusk-PHP/lsp/internal/checks"
 	"github.com/Tusk-PHP/lsp/internal/completion"
 	"github.com/Tusk-PHP/lsp/internal/config"
 	"github.com/Tusk-PHP/lsp/internal/coverage"
@@ -45,12 +44,15 @@ var ServerVersion = "0.5.0"
 // Increment when tool schemas or output shapes change incompatibly.
 const ContractVersion = 1
 
+const reindexTool = "tusk_reindex"
+
 type Service struct {
-	RootPath         string
-	Framework        string
-	Config           *config.Config
-	BuiltinProfile   symbols.BuiltinProfile
-	BuiltinPHPSource string
+	RootPath      string
+	Framework     string
+	Config        *config.Config
+	logger        *slog.Logger
+	profileSource atomic.Pointer[string]
+	disk          diskState
 
 	// Workspace is kept for tests and compatibility, but serving reads go
 	// through runtime() so reindex can atomically swap the full immutable state.
@@ -317,7 +319,12 @@ type SymfonyRouteInput struct {
 	Name string `json:"name" jsonschema:"Symfony route name"`
 }
 
+const rangeUnits = " Ranges are zero-based; a character counts UTF-8 bytes from the start of the line."
+
 func New(ctx context.Context, rootPath string, logger *slog.Logger) (*Service, error) {
+	if logger == nil {
+		logger = slog.New(slog.DiscardHandler)
+	}
 	if rootPath == "" {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -334,7 +341,7 @@ func New(ctx context.Context, rootPath string, logger *slog.Logger) (*Service, e
 	if err != nil {
 		return nil, err
 	}
-	ws, err := workspace.Build(ctx, workspace.Options{
+	ws, files, err := buildWorkspace(ctx, workspace.Options{
 		RootPath:       rootPath,
 		Framework:      framework,
 		Config:         cfg,
@@ -349,8 +356,7 @@ func New(ctx context.Context, rootPath string, logger *slog.Logger) (*Service, e
 		RootPath:          rootPath,
 		Framework:         framework,
 		Config:            cfg,
-		BuiltinProfile:    profile,
-		BuiltinPHPSource:  source,
+		logger:            logger,
 		Workspace:         ws,
 		projectSummaryURI: "tusk://project/summary",
 		dbSchemaURI:       "tusk://db/schema/compact",
@@ -360,11 +366,14 @@ func New(ctx context.Context, rootPath string, logger *slog.Logger) (*Service, e
 		symfonyRoutesURI:  "tusk://symfony/routes",
 		coverage:          coverage.NewStore(rootPath, cfg.CoverageReportPath, newStdLogger(logger)),
 	}
+	svc.profileSource.Store(&source)
 	svc.installRuntime(svc.buildRuntime(ws))
+	svc.disk.files = files
 
 	svc.Server = mcp.NewServer(&mcp.Implementation{Name: ServerName, Version: ServerVersion}, &mcp.ServerOptions{
 		Logger: logger,
 	})
+	svc.Server.AddReceivingMiddleware(svc.syncBeforeReads)
 	svc.registerTools()
 	svc.registerResources()
 
@@ -446,7 +455,7 @@ func (s *Service) registerTools() {
 
 	mcp.AddTool(s.Server, &mcp.Tool{
 		Name:        "php_find_references",
-		Description: "Find references for a PHP symbol by FQN.",
+		Description: "Find references for a PHP symbol by FQN." + rangeUnits,
 	}, func(_ context.Context, _ *mcp.CallToolRequest, in FindReferencesInput) (*mcp.CallToolResult, FindReferencesOutput, error) {
 		refs, err := s.findReferences(in.FQN)
 		if err != nil {
@@ -457,7 +466,7 @@ func (s *Service) registerTools() {
 
 	mcp.AddTool(s.Server, &mcp.Tool{
 		Name:        "php_diagnostics",
-		Description: "Run native in-process diagnostics for one PHP file or the indexed project. Excludes external tools like PHPStan and Pint.",
+		Description: "Run native in-process diagnostics for one PHP file or the indexed project. Excludes external tools like PHPStan and Pint." + rangeUnits,
 	}, func(_ context.Context, _ *mcp.CallToolRequest, in DiagnosticsInput) (*mcp.CallToolResult, DiagnosticsOutput, error) {
 		out, err := s.projectDiagnostics(in.Path)
 		if err != nil {
@@ -467,7 +476,7 @@ func (s *Service) registerTools() {
 	})
 
 	mcp.AddTool(s.Server, &mcp.Tool{
-		Name:        "tusk_reindex",
+		Name:        reindexTool,
 		Description: "Rebuild the MCP workspace snapshot and atomically swap it into service.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, ReindexOutput, error) {
 		out, err := s.Reindex(ctx)
@@ -528,14 +537,14 @@ func (s *Service) registerTools() {
 	if s.Framework == "laravel" {
 		mcp.AddTool(s.Server, &mcp.Tool{
 			Name:        "laravel_routes",
-			Description: "List known Laravel route names and their definition locations.",
+			Description: "List known Laravel route names and their definition locations." + rangeUnits,
 		}, func(_ context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, LaravelRoutesOutput, error) {
 			return nil, LaravelRoutesOutput{Routes: s.laravelRoutes()}, nil
 		})
 
 		mcp.AddTool(s.Server, &mcp.Tool{
 			Name:        "laravel_route_to_controller",
-			Description: "Best-effort Laravel route definition lookup by route name. Returns the route definition location; controller extraction is not available in the current index.",
+			Description: "Best-effort Laravel route definition lookup by route name. Returns the route definition location; controller extraction is not available in the current index." + rangeUnits,
 		}, func(_ context.Context, _ *mcp.CallToolRequest, in LaravelRouteInput) (*mcp.CallToolResult, *LaravelRouteRecord, error) {
 			record := s.findLaravelRoute(in.Name)
 			if record == nil {
@@ -575,14 +584,14 @@ func (s *Service) registerTools() {
 	if s.Framework == "symfony" {
 		mcp.AddTool(s.Server, &mcp.Tool{
 			Name:        "symfony_routes",
-			Description: "List known Symfony route names, paths, and declaration file locations.",
+			Description: "List known Symfony route names, paths, and declaration file locations." + rangeUnits,
 		}, func(_ context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, SymfonyRoutesOutput, error) {
 			return nil, SymfonyRoutesOutput{Routes: s.symfonyRoutes()}, nil
 		})
 
 		mcp.AddTool(s.Server, &mcp.Tool{
 			Name:        "symfony_route_to_controller",
-			Description: "Look up a Symfony route by name and return its declaration location.",
+			Description: "Look up a Symfony route by name and return its declaration location." + rangeUnits,
 		}, func(_ context.Context, _ *mcp.CallToolRequest, in SymfonyRouteInput) (*mcp.CallToolResult, *SymfonyRouteRecord, error) {
 			record := s.findSymfonyRoute(in.Name)
 			if record == nil {
@@ -671,8 +680,8 @@ func (s *Service) projectSummary() ProjectSummary {
 	return ProjectSummary{
 		RootPath:         s.RootPath,
 		Framework:        s.Framework,
-		PHPVersion:       s.BuiltinProfile.PHPVersion,
-		PHPVersionSource: s.BuiltinPHPSource,
+		PHPVersion:       ws.Profile().PHPVersion,
+		PHPVersionSource: *s.profileSource.Load(),
 		IndexedFiles:     len(ws.Index.GetAllFileURIs()),
 		RouteCount:       rc,
 		SchemaSource:     schemaSource(ws.Schema),
@@ -709,9 +718,7 @@ func (s *Service) buildRuntime(ws *workspace.Bootstrapped) *serviceRuntime {
 
 	rt.Completion = completion.NewProvider(ws.Index, ws.Container, s.Framework)
 	rt.Completion.SetArrayResolver(arrayResolver)
-	if s.Config != nil {
-		rt.Completion.SetAutoImportAliasStyle(s.Config.AutoImport.AliasStyle)
-	}
+	rt.Completion.SetAutoImportAliasStyle(ws.Config.AutoImport.AliasStyle)
 	if ws.RouteIndex != nil {
 		rt.Completion.SetLaravelRouteIndex(ws.RouteIndex)
 	}
@@ -727,7 +734,7 @@ func (s *Service) buildRuntime(ws *workspace.Bootstrapped) *serviceRuntime {
 
 	rt.Hover = hover.NewProvider(ws.Index, ws.Container, s.Framework)
 	rt.Hover.SetArrayResolver(arrayResolver)
-	rt.Hover.SetConfig(s.Config)
+	rt.Hover.SetConfig(ws.Config)
 	rt.Hover.SetTypedChainResolver(func(expr, source string, pos protocol.Position, file *parser.FileNode) resolve.ResolvedType {
 		return rt.Completion.ResolveExpressionTypeTyped(expr, source, pos, file)
 	})
@@ -743,16 +750,13 @@ func (s *Service) buildRuntime(ws *workspace.Bootstrapped) *serviceRuntime {
 	rt.Analyzer.SetSymfonyTranslationResolver(symfonyTranslations)
 	rt.Analyzer.SetSymfonyCommands(ws.SymfonyCommands)
 
-	rt.Diagnostics = diagnostics.NewProvider(ws.Index, s.Framework, s.RootPath, newStdLogger(nil), s.Config)
+	rt.Diagnostics = diagnostics.NewProvider(ws.Index, s.Framework, s.RootPath, newStdLogger(nil), ws.Config)
 	rt.Diagnostics.TypeResolver = func(expr, source string, line, col int, file *parser.FileNode) string {
 		return rt.Completion.ResolveDiagnosticType(expr, source, protocol.Position{Line: line, Character: col}, file)
 	}
 	rt.Diagnostics.BuilderModelResolver = rt.Completion.ResolveBuilderModel
 	rt.Diagnostics.BuilderMemberChecker = diagnostics.NewIndexMemberChecker(ws.Index, ws.SchemaIsLive)
-	rt.Diagnostics.BuiltinUnavailableRule = &checks.BuiltinUnavailableRule{
-		PHPVersion: s.BuiltinProfile.PHPVersion,
-		Extensions: s.BuiltinProfile.Extensions,
-	}
+	rt.Diagnostics.Profile = ws.Profile
 	if ws.ViewData != nil {
 		rt.Diagnostics.ViewTypes = &frameworklaravel.ViewTypes{
 			Data:  ws.ViewData,
@@ -793,20 +797,32 @@ func (s *Service) runtime() *serviceRuntime {
 }
 
 func (s *Service) Reindex(ctx context.Context) (ReindexOutput, error) {
+	s.disk.mu.Lock()
+	defer s.disk.mu.Unlock()
+	return s.rebuildLocked(ctx)
+}
+
+func (s *Service) rebuildLocked(ctx context.Context) (ReindexOutput, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	ws, err := workspace.Build(ctx, workspace.Options{
+	cfg, _, profile, source, err := loadProjectMetadata(s.RootPath, s.logger)
+	if err != nil {
+		return ReindexOutput{}, err
+	}
+	ws, files, err := buildWorkspace(ctx, workspace.Options{
 		RootPath:       s.RootPath,
 		Framework:      s.Framework,
-		Config:         s.Config,
+		Config:         cfg,
 		Logger:         newStdLogger(nil),
-		BuiltinProfile: s.BuiltinProfile,
+		BuiltinProfile: profile,
 	})
 	if err != nil {
 		return ReindexOutput{}, err
 	}
+	s.profileSource.Store(&source)
 	s.installRuntime(s.buildRuntime(ws))
+	s.disk.files = files
 	return ReindexOutput{
 		RootPath:       s.RootPath,
 		Framework:      s.Framework,
@@ -814,8 +830,8 @@ func (s *Service) Reindex(ctx context.Context) (ReindexOutput, error) {
 		RouteCount:     routeCount(ws.RouteIndex),
 		SchemaSource:   schemaSource(ws.Schema),
 		SchemaTables:   sortedStrings(compactSchemaTableNames(ws.Schema)),
-		PHPVersion:     s.BuiltinProfile.PHPVersion,
-		PHPVersionFrom: s.BuiltinPHPSource,
+		PHPVersion:     profile.PHPVersion,
+		PHPVersionFrom: source,
 	}, nil
 }
 
@@ -1199,7 +1215,7 @@ func (s *Service) symbolCatalog() []SymbolMatch {
 
 func (s *Service) laravelModels() []map[string]any {
 	ws := s.runtime().Workspace
-	modelsList := ws.Index.GetDescendants("Illuminate\\Database\\Eloquent\\Model")
+	modelsList := ws.Index.GetDescendants(frameworklaravel.EloquentModel)
 	sort.Slice(modelsList, func(i, j int) bool { return modelsList[i].FQN < modelsList[j].FQN })
 	out := make([]map[string]any, 0, len(modelsList))
 	for _, model := range modelsList {
@@ -1212,16 +1228,21 @@ func (s *Service) laravelModels() []map[string]any {
 	return out
 }
 
-func loadProjectMetadata(rootPath string, logger *slog.Logger) (*config.Config, string, symbols.BuiltinProfile, string, error) {
-	cfg := config.DefaultConfig()
-	cfgPath := filepath.Join(rootPath, ".tusk-php.json")
-	loaded, err := config.LoadFromFile(cfgPath)
+func loadConfig(rootPath string, logger *slog.Logger) (*config.Config, error) {
+	cfg, err := config.LoadFromFile(filepath.Join(rootPath, config.FileName))
 	if err != nil {
-		return nil, "", symbols.BuiltinProfile{}, "", err
+		return nil, err
 	}
-	cfg = loaded
 	for _, problem := range cfg.Problems() {
 		logger.Warn("skipped part of the configuration", "problem", problem)
+	}
+	return cfg, nil
+}
+
+func loadProjectMetadata(rootPath string, logger *slog.Logger) (*config.Config, string, symbols.BuiltinProfile, string, error) {
+	cfg, err := loadConfig(rootPath, logger)
+	if err != nil {
+		return nil, "", symbols.BuiltinProfile{}, "", err
 	}
 
 	framework := cfg.Framework
@@ -1230,10 +1251,8 @@ func loadProjectMetadata(rootPath string, logger *slog.Logger) (*config.Config, 
 	}
 
 	timeout := time.Duration(cfg.PHPDetectTimeoutMs) * time.Millisecond
-	profile, source := workspace.ResolveBuiltinProfile(rootPath, cfg.PHPBinary, timeout, func(msg string) {
-		if logger != nil {
-			logger.Info(msg)
-		}
+	profile, source := workspace.ResolveBuiltinProfileWithConfig(rootPath, cfg.PHPBinary, timeout, cfg, func(msg string) {
+		logger.Info(msg)
 	})
 
 	return cfg, framework, profile, source, nil

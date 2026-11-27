@@ -67,6 +67,12 @@ Create `.tusk-php.json` in your project root for settings everyone who opens the
 
 All diagnostic rules are enabled by default. Set a rule to `false` (or `"off"`) to disable it, or to `"error"`, `"warning"`, `"info"` or `"hint"` to change its severity. A rule name or severity that doesn't exist is an error: the editor shows it, and `tusk-php check` stops with it. Every rule, and how to turn off PHPStan and Pint, is in [Diagnostics](diagnostics.md). Framework is auto-detected from `artisan` (Laravel), `bin/console` (Symfony), `bin/magento` (Magento 2), or `composer.json`.
 
+### What applies without a restart
+
+The PHP version and extensions follow `composer.json` and `.tusk-php.json` while the server runs: save either file and builtins, completion, hover and `builtin-unavailable` use the new profile, and open files are checked again. The same happens when the client sends `workspace/didChangeConfiguration` with settings shaped like `initializationOptions` (Zed and Neovim send their `settings` this way). Those settings apply over `initializationOptions` instead of replacing them, and settings with no Tusk PHP option in them, such as the empty object Zed sends when its `settings` are unset, change nothing; a client that sends no settings still makes the server read both files again. A `.tusk-php.json` that can't be read, such as a half-edited save with a syntax error, is reported and the last version that could be read stays in use. Every other option is read once, at startup, and needs a restart.
+
+PHP files created, changed or deleted outside the editor (a branch switch, a code generator, `rm`) reach the index too, except in directories under `excludePaths`. The server asks the client to watch them when the client lets servers register file watchers, as VS Code, Zed and Neovim do. Deleting or renaming a directory counts too: its files leave the index, or are indexed at the new place. A file open in the editor keeps the editor's text until it is closed; closing it without saving brings back the text on disk.
+
 ## Auto-import
 
 Completing a class from another namespace adds its `use` statement. When the class's short name is already in use in the file (by another import, a class declared in the file, or a class in the file's own namespace, ignoring case), the new import gets an alias instead, so the file never ends up with two `use … User;` lines. Imports already in the file are never renamed.

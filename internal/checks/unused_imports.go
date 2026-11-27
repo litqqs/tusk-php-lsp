@@ -111,8 +111,8 @@ func containsWordBoundary(line, name string) bool {
 		before := absIdx - 1
 		after := absIdx + len(name)
 
-		leftOk := before < 0 || !isIdentChar(line[before])
-		rightOk := after >= len(line) || !isIdentChar(line[after])
+		leftOk := before < 0 || !parser.IsIdentByte(line[before])
+		rightOk := after >= len(line) || !parser.IsIdentByte(line[after])
 
 		if leftOk && rightOk {
 			return true

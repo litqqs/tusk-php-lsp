@@ -103,7 +103,7 @@ func collectConstantReads(tokens []parser.Token, end int, used map[string]bool) 
 				}
 			}
 		case parser.TokenDoubleColon:
-			next := tokens[nextSignificantTokenIdx(tokens, i+1)]
+			next := tokens[parser.NextSignificant(tokens, i+1)]
 			switch next.Kind {
 			case parser.TokenOpenBrace:
 				return true
@@ -124,11 +124,11 @@ const (
 )
 
 func constantLookupArgument(tokens []parser.Token, from int) (string, constantLookup) {
-	open := nextSignificantTokenIdx(tokens, from)
+	open := parser.NextSignificant(tokens, from)
 	if tokens[open].Kind != parser.TokenOpenParen {
 		return "", lookupNotACall
 	}
-	arg := nextSignificantTokenIdx(tokens, open+1)
+	arg := parser.NextSignificant(tokens, open+1)
 	if tokens[arg].Kind != parser.TokenStringLiteral {
 		return "", lookupComputed
 	}
@@ -136,7 +136,7 @@ func constantLookupArgument(tokens []parser.Token, from int) (string, constantLo
 	if !ok {
 		return "", lookupComputed
 	}
-	after := nextSignificantTokenIdx(tokens, arg+1)
+	after := parser.NextSignificant(tokens, arg+1)
 	if tokens[after].Kind != parser.TokenCloseParen && tokens[after].Kind != parser.TokenComma {
 		return "", lookupComputed
 	}
@@ -169,7 +169,7 @@ func containsWord(src, word string) bool {
 			return false
 		}
 		after := i + len(word)
-		if after >= len(rest) || !isIdentChar(rest[after]) {
+		if after >= len(rest) || !parser.IsIdentByte(rest[after]) {
 			return true
 		}
 		rest = rest[after:]

@@ -321,7 +321,7 @@ func (r *Resolver) statementCalleeWith(stmt string, lines []string, pos protocol
 		if origin.kind != 'f' {
 			return callee, "", nil, false
 		}
-		fn := r.lookupFunction(origin.text, file)
+		fn := r.CalledFunction(origin.text, file)
 		if fn == nil {
 			return callee, "", nil, false
 		}
@@ -343,7 +343,7 @@ func (r *Resolver) statementCalleeWith(stmt string, lines []string, pos protocol
 	if last.op == "::" {
 		recvType = ClassStringTarget(recvType)
 	}
-	m, owner := r.FindMemberOn(recvType, last.name, true)
+	m, owner := r.FindMemberOn(recvType, last.name, CallAccess)
 	if m == nil {
 		return callee, "", nil, false
 	}

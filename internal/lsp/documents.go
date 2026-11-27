@@ -15,8 +15,12 @@ func (s *Server) handleDidOpen(msg *jsonRPCMessage) {
 	}
 	uri := params.TextDocument.URI
 	text := params.TextDocument.Text
+	path := symbols.URIToPath(uri)
+	unsaved := s.index.GetFileSource(symbols.PathToURI(path)) != text
 	s.docMu.Lock()
 	s.documents[uri] = text
+	s.openPaths[path] = uri
+	s.unsaved[uri] = unsaved
 	s.docMu.Unlock()
 	if !isPHPDocument(uri) {
 		// Non-PHP documents (composer.json, tsconfig.json, …) are only
@@ -24,6 +28,7 @@ func (s *Server) handleDidOpen(msg *jsonRPCMessage) {
 		// can serve them. We never PHP-parse or diagnose them.
 		return
 	}
+	s.docIndex.reopened(uri)
 	s.indexDocumentMaybeAsync(uri, text)
 	if s.cfg.DiagnosticsEnabled {
 		s.publishDiagnostics(uri, text)
@@ -40,6 +45,7 @@ func (s *Server) handleDidChange(msg *jsonRPCMessage) {
 		uri := params.TextDocument.URI
 		s.docMu.Lock()
 		s.documents[uri] = source
+		s.unsaved[uri] = true
 		s.docMu.Unlock()
 		if !isPHPDocument(uri) {
 			return
@@ -64,12 +70,30 @@ func (s *Server) handleDidClose(msg *jsonRPCMessage) {
 	if !ok {
 		return
 	}
+	uri := params.TextDocument.URI
+	path := symbols.URIToPath(uri)
 	s.docMu.Lock()
-	delete(s.documents, params.TextDocument.URI)
+	delete(s.documents, uri)
+	if s.openPaths[path] == uri {
+		delete(s.openPaths, path)
+	}
+	unsaved := s.unsaved[uri]
+	delete(s.unsaved, uri)
 	s.docMu.Unlock()
-	s.blade.forget(params.TextDocument.URI)
-	s.cancelDiagnostics(params.TextDocument.URI)
-	s.diag.ClearCache(params.TextDocument.URI)
+	s.blade.forget(uri)
+	s.cancelDiagnostics(uri)
+	s.diag.ClearCache(uri)
+	if s.workspace == nil || !isPHPDocument(uri) {
+		return
+	}
+	s.docIndex.afterClose(uri, func() {
+		if symbols.PathToURI(path) != uri {
+			s.workspace.RemoveFile(uri)
+		}
+		if unsaved {
+			s.queueRefresh([]string{path}, false)
+		}
+	})
 }
 
 func (s *Server) handleDidSave(msg *jsonRPCMessage) {
@@ -78,13 +102,16 @@ func (s *Server) handleDidSave(msg *jsonRPCMessage) {
 		return
 	}
 	uri := params.TextDocument.URI
+	s.docMu.Lock()
+	if _, open := s.documents[uri]; open {
+		s.unsaved[uri] = false
+	}
 	if params.Text != nil {
-		s.docMu.Lock()
 		s.documents[uri] = *params.Text
-		s.docMu.Unlock()
-		if isPHPDocument(uri) {
-			s.indexDocumentMaybeAsync(uri, *params.Text)
-		}
+	}
+	s.docMu.Unlock()
+	if params.Text != nil && isPHPDocument(uri) {
+		s.indexDocumentMaybeAsync(uri, *params.Text)
 	}
 	if !isPHPDocument(uri) {
 		return
@@ -155,31 +182,5 @@ func (s *Server) republishOpenDocuments() {
 
 	for _, p := range pairs {
 		s.publishDiagnostics(p[0], p[1])
-	}
-}
-
-// indexFileByURI indexes a file, using the IDE helper merge strategy for known IDE helper files.
-func (s *Server) indexFileByURI(uri string, source string) {
-	// What the file passes to views, or the views a Blade view includes.
-	if s.workspace != nil {
-		s.workspace.ViewData.IndexFile(uri, source)
-	}
-	// Blade views declare no symbols, and reading one as PHP would index the
-	// HTML around its PHP.
-	if workspace.IsBlade(uri) {
-		s.index.AddTemplateFile(uri)
-		return
-	}
-	path := symbols.URIToPath(uri)
-	if workspace.IsIDEHelperFile(path) {
-		s.index.IndexIDEHelperFile(uri, source)
-	} else {
-		s.index.IndexFile(uri, source)
-		// Re-indexing replaced the file's classes, and with them the
-		// relations and columns model analysis gave its models.
-		s.workspace.UpdateFile(uri, source)
-	}
-	if s.routeIndex != nil {
-		s.routeIndex.IndexFile(uri, source)
 	}
 }

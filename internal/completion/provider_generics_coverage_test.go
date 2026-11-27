@@ -60,7 +60,7 @@ func TestProviderGenericCoverageHelpers(t *testing.T) {
 	p, idx, source, file := setupTemplateProviderCoverage(t)
 
 	// Completion types chains with its own resolver, never through a callback.
-	if p.resolver.TypedChainResolver != nil {
+	if p.engine.TypedChainResolver != nil {
 		t.Fatal("expected NewProvider to leave TypedChainResolver unset")
 	}
 
@@ -68,7 +68,7 @@ func TestProviderGenericCoverageHelpers(t *testing.T) {
 		t.Fatalf("expected empty expression type, got %#v", got)
 	}
 
-	if got := p.ResolveChainTypeTyped(source, "$rows", "->", protocol.Position{}, file); !got.IsEmpty() {
+	if got := p.resolveChainTypeTyped(p.engine.Resolver(), source, "$rows", "->", protocol.Position{}, file); !got.IsEmpty() {
 		t.Fatalf("expected empty chain type, got %#v", got)
 	}
 
@@ -81,7 +81,7 @@ func TestProviderGenericCoverageHelpers(t *testing.T) {
 
 	ctx := resolve.ExprContext{Lines: resolve.SplitLines(source), Pos: pos, File: file}
 	call := func(args string) resolve.ResolvedType {
-		return p.resolver.MemberTypeForCall(member, file, "", nil, p.resolver.CallSiteFor(args, ctx))
+		return p.engine.Resolver().MemberTypeForCall(member, file, "", nil, p.engine.Resolver().CallSiteFor(args, ctx))
 	}
 
 	if rt := call("[1, 2, 3]"); rt.String() != "?int" {
@@ -132,4 +132,16 @@ $container->
 	}
 
 	t.Fatal("expected get completion item")
+}
+
+func TestStaticAccessOnAClassStringVariableCompletesTheClass(t *testing.T) {
+	idx := symbols.NewIndex()
+	idx.IndexFile("file:///widget.php", "<?php\nnamespace App;\nclass Widget {\n    public static function make(): static { return new static(); }\n}\n")
+	p := NewProvider(idx, nil, "none")
+
+	source := "<?php\nnamespace App;\n/** @param class-string<Widget> $cls */\nfunction build(string $cls) {\n    $cls::\n}\n"
+	labels := collectLabels(p.GetCompletions("file:///build.php", source, protocol.Position{Line: 4, Character: 10}))
+	if !labels["make"] {
+		t.Errorf("$cls:: for a class-string<Widget> offers Widget's static methods, got %v", labels)
+	}
 }

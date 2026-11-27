@@ -1,6 +1,7 @@
 package scope
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/Tusk-PHP/lsp/internal/parser"
@@ -480,5 +481,47 @@ func TestIsWordToken(t *testing.T) {
 	}
 	if isWordToken(parser.Token{Kind: parser.TokenVariable, Value: "x"}) {
 		t.Error("a variable is not a word")
+	}
+}
+
+func TestScopesLeftOpenRunToTheEndOfTheFile(t *testing.T) {
+	head := "<?php\nfunction other() {\n    /** @var array{id: int} $post */\n    $post = load();\n}\n\n"
+	for name, tail := range map[string]string{
+		"unterminated string":           "class Box {\n    public function test($post) {\n        $post['",
+		"unterminated string over code": "class Box {\n    public function test($post) {\n        $post['\n    }\n}\n",
+		"unclosed brace":                "class Box {\n    public function test($post) {\n        $post[",
+	} {
+		t.Run(name, func(t *testing.T) {
+			doc := Collect(head + tail)
+			cursor := protocol.Position{Line: 8, Character: 14}
+			s := doc.ScopeAt(cursor)
+			if s == nil || s.Kind != ScopeMethod || s.Name != "test" {
+				t.Fatalf("scope at the cursor = %+v, want method test", s)
+			}
+			if s.Range.End != doc.root.Range.End {
+				t.Errorf("test() ends at %v, want the end of the file %v", s.Range.End, doc.root.Range.End)
+			}
+			b := doc.BindingAt(protocol.Position{Line: 8, Character: 10})
+			if b == nil || b.Kind != BindingParameter || b.Scope != s {
+				t.Errorf("$post at the cursor = %+v, want test()'s parameter", b)
+			}
+		})
+	}
+}
+
+func TestFirstStatementStartsAfterTheOpenTag(t *testing.T) {
+	for _, source := range []string{"<?php $total = 40 + 2;", "<?php\n$total = 40 + 2;"} {
+		doc := Collect(source)
+		lines := strings.Split(source, "\n")
+		line := len(lines) - 1
+		at := protocol.Position{Line: line, Character: strings.Index(lines[line], "$total")}
+		b := doc.BindingAt(at)
+		if b == nil || len(b.Assignments) != 1 {
+			t.Fatalf("%q: $total = %+v, want one assignment", source, b)
+		}
+		a := b.Assignments[0]
+		if a.Statement.Start != at || !a.DirectStatement {
+			t.Errorf("%q: statement starts at %+v (direct %v), want %+v and a direct statement", source, a.Statement.Start, a.DirectStatement, at)
+		}
 	}
 }

@@ -11,10 +11,19 @@ import (
 )
 
 func (ws *Bootstrapped) autoload() []composer.AutoloadEntry {
-	ws.autoloadOnce.Do(func() {
+	ws.autoloadMu.Lock()
+	defer ws.autoloadMu.Unlock()
+	if !ws.autoloadRead {
 		ws.autoloadEntries = composer.GetAutoloadPaths(ws.RootPath)
-	})
+		ws.autoloadRead = true
+	}
 	return ws.autoloadEntries
+}
+
+func (ws *Bootstrapped) rereadAutoload() {
+	ws.autoloadMu.Lock()
+	defer ws.autoloadMu.Unlock()
+	ws.autoloadRead = false
 }
 
 func (ws *Bootstrapped) ClassLoader() symbols.ClassLoader {
@@ -45,7 +54,7 @@ func (l autoloader) Load(fqn string) (symbols.LoadedClass, bool) {
 			}
 			from = symbols.SourceProject
 		}
-		return symbols.LoadedClass{URI: "file://" + path, Source: string(content), From: from}, true
+		return symbols.LoadedClass{URI: symbols.PathToURI(path), Source: string(content), From: from}, true
 	}
 	return symbols.LoadedClass{}, false
 }
